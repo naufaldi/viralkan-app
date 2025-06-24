@@ -133,3 +133,97 @@ Learn more about the power of Turborepo:
 - [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
 - [Configuration Options](https://turborepo.com/docs/reference/configuration)
 - [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+
+# Viralkan App
+
+A monorepo for the Viralkan road damage reporting platform.
+
+## Quick Start
+
+1. **Install dependencies**:
+   ```bash
+   bun install
+   ```
+
+2. **Set up environment variables**:
+   ```bash
+   cp .env.example .env
+   # Edit .env with your database credentials
+   ```
+
+3. **Set up PostgreSQL with PostGIS**:
+   ```bash
+   # Using Docker
+   docker run --name postgres-viralkan \
+     -e POSTGRES_PASSWORD=password \
+     -e POSTGRES_DB=viralkan \
+     -p 5432:5432 \
+     -d postgis/postgis:15
+   ```
+
+4. **Run database migrations**:
+   ```bash
+   bun run db:migrate
+   ```
+
+5. **Start development servers**:
+   ```bash
+   bun run dev
+   ```
+
+This will start:
+- API server on `http://localhost:3000`
+- Web app on `http://localhost:5173` (if configured)
+
+## Project Structure
+
+```
+viralkan-app/
+├─ apps/
+│  ├─ api/              # Hono API server
+│  ├─ web/              # React frontend
+│  └─ docs/             # Documentation
+├─ packages/
+│  ├─ ui/               # Shared UI components
+│  ├─ eslint-config/    # ESLint configurations
+│  └─ typescript-config/ # TypeScript configurations
+└─ docs/                # Project documentation
+```
+
+## API Endpoints
+
+- `GET /` - Health check
+- `GET /health` - Database health check
+- `GET /api/reports` - List all reports (paginated)
+- `GET /api/reports/:id` - Get specific report
+- `POST /api/reports` - Create new report
+- `GET /api/me/reports` - Get current user's reports
+- `GET /api/me/profile` - Get current user profile
+
+## Tech Stack
+
+- **Runtime**: Bun
+- **API Framework**: Hono
+- **Frontend**: React + Vite + Tailwind
+- **Database**: PostgreSQL + PostGIS
+- **Monorepo**: Turborepo
+- **Validation**: Zod
+
+## Development Commands
+
+- `bun run dev` - Start all development servers
+- `bun run build` - Build all apps
+- `bun run lint` - Lint all packages
+- `bun run db:migrate` - Run database migrations
+- `bun run db:reset` - Reset database
+
+## What's Next
+
+1. Install dependencies and start the development servers
+2. Set up Google OAuth credentials
+3. Configure Cloudflare R2 for image uploads
+4. Implement the web frontend
+5. Add authentication middleware
+6. Deploy using Docker + Traefik
+
+See the [RFC](docs/rfc.md) for the complete project roadmap.
