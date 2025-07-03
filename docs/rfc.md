@@ -207,7 +207,7 @@ GET  /api/me/reports   -> 200 OK | 401
 | 2         | Cloudflare R2 bucket & DNS token              | 0.5     |
 | 3         | Turbo monorepo scaffold                       | 0.5     |
 | 4         | Tailwind v4 baseline & UI kit                 | 0.5     |
-| 5         | Google OAuth in Hono                          | 1       |
+| 5         | Google OAuth in Hono with Firebase                          | 1       |
 | 6         | Postgres migrations via Sqitch                | 1       |
 | 7         | Signed‑URL upload service                     | 1       |
 | 8         | Upload form + preview                         | 1       |

@@ -19,7 +19,7 @@
     "@hono/node-server": "^1.13.7",
     "@google-cloud/storage": "^7.14.0",
     "jsonwebtoken": "^9.0.2",
-    "google-auth-library": "^9.20.0"
+    "google-auth-library": "^9.14.0"
   },
   "devDependencies": {
     "@types/jsonwebtoken": "^9.0.7",
