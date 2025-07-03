@@ -1,6 +1,26 @@
-import { AuthVerificationResponseSchema, CreateUserSchema, ErrorResponseSchema, FirebaseTokenSchema, LogoutResponseSchema, UserResponseSchema } from "@/schema"
+import { 
+  AuthVerificationResponseSchema, 
+  CreateUserSchema, 
+  ErrorResponseSchema, 
+  FirebaseTokenSchema, 
+  LogoutResponseSchema, 
+  UserResponseSchema,
+  TokenVerificationRequestSchema,
+  UserStatsResponseSchema
+} from "@/schema/auth"
 import { z } from "zod"
 
+// Re-export schemas for easy access
+export { 
+  AuthVerificationResponseSchema, 
+  CreateUserSchema, 
+  ErrorResponseSchema, 
+  FirebaseTokenSchema, 
+  LogoutResponseSchema, 
+  UserResponseSchema,
+  TokenVerificationRequestSchema,
+  UserStatsResponseSchema
+};
 
 // TypeScript types from Zod schemas (specific to auth)
 export type FirebaseToken = z.infer<typeof FirebaseTokenSchema>

@@ -1,6 +1,24 @@
-import { CreateReportSchema, ReportParamsSchema, ReportQuerySchema } from "@/schema";
+import { 
+  CreateReportSchema, 
+  ReportParamsSchema, 
+  ReportQuerySchema,
+  ReportResponseSchema,
+  ReportWithUserResponseSchema,
+  PaginatedReportsResponseSchema,
+  ErrorResponseSchema
+} from "@/schema/reports";
 import { z } from "zod";
 
+// Re-export schemas for easy access
+export { 
+  CreateReportSchema, 
+  ReportQuerySchema, 
+  ReportParamsSchema,
+  ReportResponseSchema,
+  ReportWithUserResponseSchema,
+  PaginatedReportsResponseSchema,
+  ErrorResponseSchema
+};
 
 // TypeScript Types (derived from Zod schemas)
 export type CreateReportInput = z.infer<typeof CreateReportSchema>;
