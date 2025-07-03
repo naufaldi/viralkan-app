@@ -6,6 +6,8 @@
     "dev": "bun run --hot src/index.ts",
     "build": "bun build src/index.ts --outdir dist --target bun",
     "start": "bun run dist/index.js",
+    "test": "bun test",
+    "test:watch": "bun test --watch",
     "lint": "eslint src --ext .ts,.tsx",
     "check-types": "tsc --noEmit",
     "db:migrate": "bun run src/db/migrate.ts",
@@ -15,6 +17,7 @@
   "dependencies": {
     "@google-cloud/storage": "^7.14.0",
     "@hono/node-server": "^1.13.7",
+    "dotenv": "^17.0.1",
     "firebase-admin": "^13.4.0",
     "google-auth-library": "^9.14.0",
     "hono": "^4.6.12",

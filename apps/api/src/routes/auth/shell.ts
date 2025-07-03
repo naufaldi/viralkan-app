@@ -4,7 +4,6 @@ import { getFirebaseAuth } from '../../config/firebase'
 import * as core from './core'
 import * as data from './data'
 import type { 
-  AppResult, 
   CreateUser, 
   UserResponse, 
   AuthVerificationResponse,
@@ -13,10 +12,8 @@ import type {
 import { 
   createSuccess, 
   createError, 
-  UnauthorizedError, 
-  ValidationError,
-  NotFoundError 
-} from './types'
+} from '@/types'
+import type { AppResult } from '@/types'
 
 /**
  * Verifies Firebase ID token and returns user data

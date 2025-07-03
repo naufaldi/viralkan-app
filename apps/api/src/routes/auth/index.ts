@@ -13,7 +13,6 @@ export {
 
 // Type exports
 export type {
-  AppResult,
   CreateUser,
   UserResponse,
   AuthVerificationResponse,
@@ -23,16 +22,7 @@ export type {
   FirebaseToken
 } from './types'
 
-// Error class exports
-export {
-  AppError,
-  ValidationError,
-  UnauthorizedError,
-  NotFoundError,
-  ConflictError,
-  createSuccess,
-  createError
-} from './types'
+
 
 // Shell layer exports (for use by other features)
 export * as authShell from './shell'
