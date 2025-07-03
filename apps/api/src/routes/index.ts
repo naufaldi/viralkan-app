@@ -4,7 +4,6 @@
 // Router exports
 export { authRouter } from './auth'
 export { reportsRouter } from './reports'
-export { meRouter } from './me'
 
 // Middleware exports (for convenience)
 export { 
@@ -20,7 +19,8 @@ export type {
   UserResponse,
   AuthVerificationResponse,
   LogoutResponse,
-  ErrorResponse
+  ErrorResponse,
+  UserStatsResponse
 } from './auth'
 
 export type {

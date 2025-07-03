@@ -15,57 +15,165 @@ This TODO follows a **true MVP approach** aligned with the RFC, organizing all t
 ## 🚀 **V1 - Core MVP TODO (2-3 weeks)**
 *Goal: Ship working app to validate core concept*
 
+### 🔧 **BACKEND API STATUS - 85% COMPLETE**
+
 ### ✅ **DATABASE & SCHEMA - COMPLETED**
 - [x] Database schema with PostGIS extension
 - [x] Users and reports tables with proper indexes
 - [x] API route structure (/reports, /auth, /me)
-- [ ] Basic CRUD operations for reports
+- [x] Basic CRUD operations for reports
+- [x] Database migration and reset scripts
+- [x] Database connection with Postgres
 
-### 🔐 **AUTHENTICATION**
-- [ ] Google OAuth implementation using Firebase Auth
-- [ ] JWT session management
-- [ ] **Cookie Security**: HTTP-only, secure, sameSite settings
-- [ ] **Session Expiry**: 7-day rolling sessions
-- [ ] **Logout Endpoint**: Clear cookies and invalidate tokens
+### ✅ **AUTHENTICATION - COMPLETED**
+- [x] Firebase Authentication implementation using Admin SDK
+- [x] Bearer token session management
+- [x] **Token Verification**: Firebase ID token verification
+- [x] **User Management**: User creation/update with upsert functionality
+- [x] **Authorization Middleware**: Bearer token validation
+- [x] **Logout Endpoint**: Server-side logout confirmation
+- [x] **User Profile**: GET /api/auth/me endpoint
+- [x] **User Statistics**: GET /api/auth/me/stats endpoint
 
-### 📤 **FILE UPLOAD & STORAGE**
-- [ ] Cloudflare R2 integration
-- [ ] Pre-signed URL generation
+### 📤 **FILE UPLOAD & STORAGE - PARTIALLY COMPLETED**
+- [x] Cloudflare R2 configuration setup
+- [x] Environment variable configuration for R2
+- [ ] Pre-signed URL generation implementation
 - [ ] **File Validation**: MIME type checking (images only)
-- [ ] **File Size Limits**: Max 10MB per image
+- [ ] **File Size Limits**: Max 10MB per image validation
 - [ ] **Image Processing**: Basic resize/compress for web display
 - [ ] **Error Handling**: Upload failures and retries
 
-### 📝 **REPORT CREATION (Core)**
-- [x] Manual form with required fields
-- [ ] **Category Dropdown**: berlubang, retak, lainnya (RFC v1 Indonesian categories)
-- [ ] **Street Address Input**: Text field with basic validation
-- [ ] **Location Description**: Basic text field for location context
-- [ ] **GPS Coordinates**: Optional lat/lng fields (basic)
-- [ ] **Form Validation**: Client-side and server-side
-- [ ] **Submit Flow**: Save report → upload image → success page
+### ✅ **REPORT CREATION (Core) - COMPLETED**
+- [x] Complete reports API with CRUD operations
+- [x] **Category Support**: berlubang, retak, lainnya (Indonesian categories)
+- [x] **Street Address Input**: Text field validation
+- [x] **Location Description**: Text field for location context
+- [x] **GPS Coordinates**: Optional lat/lng fields
+- [x] **Form Validation**: Zod schema validation (client & server)
+- [x] **Submit Flow**: Create report endpoint with proper authentication
+- [x] **Ownership Validation**: Users can only edit/delete their own reports
 
-### 📋 **PUBLIC LISTING (Basic)**
-- [x] Public reports API endpoint
-- [ ] **Simple List View**: Card layout with image, title, location
-- [ ] **Basic Pagination**: 20 reports per page
-- [ ] **Sort Options**: Newest first, oldest first
-- [ ] **No Authentication Required**: Public access only
-- [ ] **Responsive Design**: Mobile-friendly layout
+### ✅ **PUBLIC LISTING (Basic) - COMPLETED**
+- [x] Public reports API endpoint with pagination
+- [x] **Pagination**: Configurable page size (default 20, max 100)
+- [x] **Sort Options**: Created date DESC by default
+- [x] **Category Filtering**: Filter by damage type
+- [x] **User Filtering**: Filter reports by user ID
+- [x] **No Authentication Required**: Public access for listing
+- [x] **Report Details**: GET /api/reports/:id endpoint
 
-### 🛡️ **SECURITY & VALIDATION (Basic)**
-- [ ] **Rate Limiting**: 10 reports per user per day
-- [ ] **Input Sanitization**: XSS protection
-- [ ] **CORS Setup**: Proper origin restrictions
-- [ ] **Environment Variables**: Secure config management
-- [ ] **Basic Error Pages**: 404, 500 error handling
+### ✅ **SECURITY & VALIDATION (Basic) - COMPLETED**
+- [x] **Input Sanitization**: Zod validation for all endpoints
+- [x] **CORS Setup**: Proper origin restrictions configured
+- [x] **Environment Variables**: Secure config management with validation
+- [x] **Authorization**: Bearer token middleware
+- [x] **Data Validation**: Comprehensive schema validation
+- [ ] **Rate Limiting**: 10 reports per user per day (needs implementation)
+- [x] **Error Handling**: Structured error responses
 
-### 🚀 **DEPLOYMENT (Simple)**
-- [ ] **Docker Setup**: Single container deployment
-- [ ] **Environment Config**: Production .env template
-- [ ] **Database Migration**: Production schema deployment
-- [ ] **Basic Health Check**: /health endpoint
-- [ ] **VPS Deployment**: Docker + Traefik setup (RFC v1 includes Traefik)
+### ✅ **API DOCUMENTATION - COMPLETED**
+- [x] **OpenAPI Specification**: Complete API documentation
+- [x] **Swagger UI**: Available at /docs endpoint
+- [x] **Schema Documentation**: All endpoints documented with examples
+- [x] **Security Documentation**: Bearer token authentication documented
+
+### 🚀 **DEPLOYMENT (Simple) - PARTIALLY COMPLETED**
+- [x] **Environment Config**: Production .env template provided
+- [x] **Database Migration**: Production schema deployment scripts
+- [x] **Health Check**: / endpoint with status information
+- [x] **Build Configuration**: Bun build setup
+- [ ] **Docker Setup**: Single container deployment (needs Dockerfile)
+- [ ] **VPS Deployment**: Docker + Traefik setup (needs implementation)
+
+### 🎨 **FRONTEND UI STATUS - 0% COMPLETE**
+*Focus: Essential MVP features only - fast development*
+
+### 🔐 **AUTHENTICATION UI (Essential)**
+- [ ] **Login Page**: Simple Google Sign-In button with Firebase
+- [ ] **Authentication State**: Basic React context for logged-in user
+- [ ] **Protected Routes**: Simple route guard for authenticated pages
+- [ ] **Logout Button**: Clear auth and redirect to home
+
+### 📝 **REPORT CREATION UI (Core)**
+- [ ] **Create Report Page**: Simple form at `/create`
+- [ ] **Basic Form**: Category dropdown + Address + Description + Image upload
+- [ ] **Image Upload**: Simple file picker (no preview needed)
+- [ ] **Submit**: Loading button + success message
+- [ ] **Validation**: Basic required field validation
+
+### 📋 **PUBLIC REPORTS LISTING UI (Core)**
+- [ ] **Home Page**: Simple list of reports at `/`
+- [ ] **Report Cards**: Basic card with image + title + date
+- [ ] **Simple Pagination**: Next/Previous buttons only
+- [ ] **Basic Loading**: Simple spinner while loading
+
+### 🔍 **REPORT DETAIL UI (Basic)**
+- [ ] **Detail Page**: `/reports/[id]` with image + info
+- [ ] **Edit/Delete**: Only for report owner (simple buttons)
+
+### 👤 **USER DASHBOARD UI (Minimal)**
+- [ ] **Dashboard**: `/dashboard` with user stats + "My Reports" list
+- [ ] **My Reports**: Simple table with edit/delete buttons
+
+### 🎨 **LAYOUT (Minimal)**
+- [ ] **Header**: Logo + Login/Logout button
+- [ ] **Navigation**: Home, Create Report, Dashboard (if logged in)
+- [ ] **Mobile Responsive**: Basic responsive design
+
+### ⚙️ **SETUP (Essential)**
+- [ ] **Next.js App**: Basic Next.js 14 setup
+- [ ] **TailwindCSS**: For quick styling
+- [ ] **Firebase Config**: Client-side auth setup
+- [ ] **API Client**: Simple fetch calls to backend
+- [ ] **Environment**: API URL configuration
+
+### 🔗 **API INTEGRATION (Essential)**
+- [ ] **Auth Service**: Login with Firebase + API token calls
+- [ ] **Reports API**: Fetch, create, update, delete reports
+- [ ] **Error Handling**: Basic try/catch with user-friendly messages
+- [ ] **Loading States**: Simple loading indicators
+
+---
+
+## 🔧 **V1 API STATUS SUMMARY**
+
+### **✅ COMPLETED ENDPOINTS:**
+- `GET /` - Health check
+- `GET /api/auth/health` - Auth service health
+- `POST /api/auth/verify` - Firebase token verification
+- `GET /api/auth/me` - Get user profile
+- `GET /api/auth/me/stats` - Get user statistics
+- `POST /api/auth/logout` - Logout confirmation
+- `GET /api/reports` - List all reports (paginated, filterable)
+- `GET /api/reports/enriched` - Reports with user data
+- `GET /api/reports/:id` - Get specific report
+- `POST /api/reports` - Create new report (authenticated)
+- `PUT /api/reports/:id` - Update report (authenticated, owner only)
+- `DELETE /api/reports/:id` - Delete report (authenticated, owner only)
+- `GET /api/reports/me` - Get current user's reports
+- `GET /api/reports/:id/ownership` - Validate report ownership
+- `GET /docs` - Swagger UI documentation
+- `GET /openapi` - OpenAPI specification
+
+### **✅ COMPLETED FEATURES:**
+- Firebase Authentication with Admin SDK
+- PostgreSQL database with PostGIS spatial extension
+- Complete reports CRUD with authorization
+- User management and statistics
+- Input validation with Zod schemas
+- Error handling with structured responses
+- CORS configuration
+- Environment variable management
+- API documentation with OpenAPI/Swagger
+- Database migration system
+- Test suite for core functionality
+
+### **⚠️ MISSING FOR V1 MVP:**
+- File upload integration with Cloudflare R2
+- Rate limiting middleware
+- Docker containerization
+- Production deployment setup
 
 ---
 
@@ -117,7 +225,7 @@ This TODO follows a **true MVP approach** aligned with the RFC, organizing all t
 - [ ] **SSL Certificates**: Let's Encrypt integration
 
 ### 🧪 **COMPREHENSIVE TESTING**
-- [ ] **Unit Tests**: Core business logic coverage
+- [x] **Unit Tests**: Core business logic coverage (basic tests implemented)
 - [ ] **Integration Tests**: API endpoint testing
 - [ ] **E2E Tests**: Playwright/Cypress test suite
 - [ ] **Performance Tests**: Load testing and optimization
@@ -187,8 +295,8 @@ This TODO follows a **true MVP approach** aligned with the RFC, organizing all t
 - [ ] **Auto-scaling**: Container orchestration setup
 
 ### 🔌 **API & INTEGRATIONS**
-- [ ] **Public API**: RESTful API for third-party access
-- [ ] **API Documentation**: OpenAPI/Swagger docs
+- [x] **Public API**: RESTful API implemented
+- [x] **API Documentation**: OpenAPI/Swagger docs completed
 - [ ] **Webhooks**: External system notifications
 - [ ] **Government Integration**: Connect with city systems
 - [ ] **Social Sharing**: Share reports on social media
@@ -206,42 +314,49 @@ This TODO follows a **true MVP approach** aligned with the RFC, organizing all t
 ## 📅 **Sprint Timeline**
 
 ### **Sprint 1-2 (Weeks 1-2): V1 Core**
-- Complete authentication and file upload
-- Finish basic report creation flow
-- Deploy simple version for testing
+- ✅ Complete authentication and database setup
+- ✅ Complete basic report CRUD operations
+- ✅ Complete public API endpoints
 
 ### **Sprint 3-4 (Weeks 3-4): V1 Polish**
-- Complete public listing
-- Security hardening
-- Simple deployment and testing
+- ⚠️ Complete file upload integration (R2)
+- ⚠️ Implement rate limiting
+- ⚠️ Simple deployment and testing
 
 ### **Sprint 5-7 (Weeks 5-7): V2 Production**
-- Enhanced UX and mobile support
-- Production infrastructure setup
-- Comprehensive testing suite
+- [ ] Enhanced UX and mobile support
+- [ ] Production infrastructure setup
+- [ ] Comprehensive testing suite
 
 ### **Sprint 8-11 (Weeks 8-11): V2 Advanced**
-- Search and filtering
-- Performance optimization
-- Security hardening
+- [ ] Search and filtering
+- [ ] Performance optimization
+- [ ] Security hardening
 
 ### **Sprint 12-15 (Weeks 12-15): V3 Maps**
-- Map integration and geocoding
-- Advanced location features
+- [ ] Map integration and geocoding
+- [ ] Advanced location features
 
 ### **Sprint 16-18 (Weeks 16-18): V3 Admin**
-- Admin dashboard and moderation
-- Analytics and workflow automation
+- [ ] Admin dashboard and moderation
+- [ ] Analytics and workflow automation
 
 ---
 
 ## ⚡ **Development Notes**
 
-### **V1 Focus Areas:**
-- Keep it simple - manual processes are okay
-- Focus on core user journey: login → create report → view reports
-- Basic deployment without complex infrastructure
-- Validate concept before adding complexity
+### **V1 Current Status:**
+- **API Backend**: ~85% complete - Core functionality implemented
+- **Authentication**: 100% complete - Firebase integration working
+- **Database**: 100% complete - Schema and operations ready
+- **Reports CRUD**: 100% complete - Full functionality with authorization
+- **Missing**: File uploads, rate limiting, deployment setup
+
+### **V1 Remaining Work:**
+- File upload integration with Cloudflare R2
+- Rate limiting middleware implementation
+- Docker containerization
+- Production deployment setup
 
 ### **V2 Focus Areas:**
 - Production-ready deployment and monitoring
@@ -254,11 +369,29 @@ This TODO follows a **true MVP approach** aligned with the RFC, organizing all t
 - Scalability and performance optimization
 
 ### **Key Dependencies:**
-- V2 cannot start until V1 is fully deployed and tested
+- V2 cannot start until V1 file uploads and deployment are complete
 - V3 map features require V2 geocoding foundation
 - Admin dashboard requires stable V2 infrastructure
 
 ### **Success Metrics:**
-- **V1**: App deployed, users can create and view reports
+- **V1**: API fully functional, file uploads working, basic deployment ready
 - **V2**: Production-ready, mobile-optimized, tested
 - **V3**: Full-featured platform with maps and admin tools
+
+## 🎯 **V1 FRONTEND SUMMARY**
+**Total Tasks: ~25 essential items** (vs 80+ in full version)
+
+**Core User Journey:**
+1. **Login** → Google OAuth
+2. **View Reports** → Simple list with pagination
+3. **Create Report** → Basic form with image upload
+4. **Manage Reports** → Edit/delete own reports
+
+**Tech Stack:**
+- **Framework**: Next.js 14 (App Router)
+- **Styling**: TailwindCSS (fast styling)
+- **Auth**: Firebase Auth (client-side)
+- **API**: Simple fetch calls to existing backend
+- **State**: React Context (no complex state management)
+
+**Development Time: ~1 week** with existing API backend

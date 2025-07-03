@@ -19,7 +19,8 @@ export type {
   LogoutResponse,
   ErrorResponse,
   DbUser,
-  FirebaseToken
+  FirebaseToken,
+  UserStatsResponse
 } from './types'
 
 

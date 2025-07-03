@@ -4,7 +4,7 @@ import { logger } from 'hono/logger'
 import { serve } from '@hono/node-server'
 import { swaggerUI } from '@hono/swagger-ui'
 import { openAPISpecs } from 'hono-openapi'
-import { reportsRouter, authRouter, meRouter } from '@/routes'
+import { reportsRouter, authRouter } from '@/routes'
 import { env, validateEnv } from '@/config/env'
 import { testConnection } from '@/db/connection'
 import { initializeFirebase } from '@/config/firebase'
@@ -52,7 +52,6 @@ app.get('/health', async (c) => {
 // API Routes
 app.route('/api/reports', reportsRouter)
 app.route('/api/auth', authRouter)
-app.route('/api/me', meRouter)
 
 // OpenAPI Specification Endpoint
 app.get(
@@ -109,7 +108,8 @@ app.get(
 
 // Swagger UI Documentation
 app.get('/docs', swaggerUI({ 
-  url: '/openapi'
+  url: '/openapi',
+  defaultModelsExpandDepth: -1  // Hide the schemas section completely
 }))
 
 app.notFound((c) => {

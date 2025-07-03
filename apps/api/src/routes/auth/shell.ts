@@ -276,7 +276,12 @@ export const getUserStats = async (
   sql: Sql,
   userId: number,
   requestingUserId: number
-): Promise<AppResult<{ user: UserResponse; stats: { reportCount: number; joinDate: string } }>> => {
+): Promise<AppResult<{
+  total_reports: number;
+  reports_by_category: { berlubang: number; retak: number; lainnya: number };
+  last_report_date: string | null;
+  account_age_days: number;
+}>> => {
   try {
     // Input validation
     if (!userId || userId <= 0) {
@@ -292,16 +297,13 @@ export const getUserStats = async (
       return createError('Access denied: can only access own user stats', 403)
     }
 
-    // Get user data and stats in parallel for better performance
-    let user, stats
+    // Verify user exists first
+    let user
     try {
-      [user, stats] = await Promise.all([
-        data.findUserById(sql, userId),
-        data.getUserStats(sql, userId)
-      ])
+      user = await data.findUserById(sql, userId)
     } catch (dbError: any) {
-      console.error('Database error during stats retrieval:', dbError)
-      return createError('Failed to retrieve user stats', 500)
+      console.error('Database error during user verification:', dbError)
+      return createError('Failed to verify user', 500)
     }
 
     if (!user) {
@@ -313,17 +315,24 @@ export const getUserStats = async (
       return createError('User authorization failed', 403)
     }
 
-    // Transform data for response
-    const userResponse = core.transformDbUserToResponse(user)
-    const formattedStats = {
-      reportCount: stats.reportCount,
-      joinDate: stats.joinDate.toISOString()
+    // Get user statistics
+    let stats
+    try {
+      stats = await data.getUserStats(sql, userId)
+    } catch (dbError: any) {
+      console.error('Database error during stats retrieval:', dbError)
+      return createError('Failed to retrieve user stats', 500)
     }
 
-    return createSuccess({
-      user: userResponse,
-      stats: formattedStats
-    })
+    // Transform data for response (convert Date to ISO string)
+    const responseStats = {
+      total_reports: stats.total_reports,
+      reports_by_category: stats.reports_by_category,
+      last_report_date: stats.last_report_date ? stats.last_report_date.toISOString() : null,
+      account_age_days: stats.account_age_days
+    }
+
+    return createSuccess(responseStats)
 
   } catch (error: any) {
     console.error('Get user stats error:', error)

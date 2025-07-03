@@ -29,6 +29,7 @@ export type UserResponse = z.infer<typeof UserResponseSchema>
 export type AuthVerificationResponse = z.infer<typeof AuthVerificationResponseSchema>
 export type LogoutResponse = z.infer<typeof LogoutResponseSchema>
 export type ErrorResponse = z.infer<typeof ErrorResponseSchema>
+export type UserStatsResponse = z.infer<typeof UserStatsResponseSchema>
 
 // Database user interface (specific to auth)
 export interface DbUser {

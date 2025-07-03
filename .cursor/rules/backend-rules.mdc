@@ -1,7 +1,3 @@
----
-description: backend, hono, api
-alwaysApply: false
----
 # Backend Development Rules for Hono API
 
 ## Architecture & Structure
@@ -57,6 +53,87 @@ Data Layer (data.ts)   ← Database operations, external APIs
 - ❌ NO business logic
 - ❌ NO HTTP concerns
 - ❌ NO business rule validation
+
+## Type Organization (CRITICAL RULES)
+
+### General Types (`src/types/index.ts`)
+**ONLY include types used by 2+ features:**
+- ✅ `AppResult<T>` pattern
+- ✅ Common error classes (`AppError`, `ValidationError`, etc.)
+- ✅ Helper functions (`createSuccess`, `createError`)
+- ✅ Base utility types used across features
+- ❌ NO feature-specific types
+- ❌ NO single-use types
+
+### Route-Specific Types (`routes/{feature}/types.ts`)
+**Keep ALL feature-specific types here:**
+- ✅ Zod schemas for validation
+- ✅ TypeScript types derived from schemas
+- ✅ Database entity interfaces
+- ✅ Feature-specific result types
+- ✅ Import common types from `@/types` for internal use
+- ❌ NO re-exports of common types
+- ❌ NO duplicate type definitions
+
+### Import Rules (ENFORCE STRICTLY)
+```typescript
+// GOOD: Explicit imports
+import { AppResult, createSuccess } from '@/types'        // Common types
+import { CreateUserInput } from './types'                 // Feature types
+
+// BAD: Confusing re-exports
+export { AppResult } from '@/types'                       // Don't re-export!
+import { createSuccess } from './types'                   // Unclear origin!
+```
+
+### Decision Matrix for Type Placement
+```
+Question: Where should this type go?
+
+1. Is it used by 2+ features? 
+   → YES: Put in `@/types`
+   → NO: Continue to question 2
+
+2. Is it a common pattern (errors, results, utilities)?
+   → YES: Put in `@/types` 
+   → NO: Put in route-specific `types.ts`
+
+3. Is it feature-specific (schemas, entities, responses)?
+   → Always put in route-specific `types.ts`
+```
+
+### Examples of Type Organization
+
+**General Types (`@/types`):**
+```typescript
+// Used everywhere
+export type AppResult<T> = { success: true; data: T } | { success: false; error: string }
+
+// Used by all features
+export class ValidationError extends AppError { ... }
+```
+
+**Route-Specific Types (`routes/auth/types.ts`):**
+```typescript
+// Auth-specific only
+export const CreateUserSchema = z.object({ ... })
+export type CreateUser = z.infer<typeof CreateUserSchema>
+export interface DbUser { ... }
+```
+
+### Anti-Patterns to Avoid
+```typescript
+// BAD: Re-exporting common types
+export type { AppResult } from '@/types'  // Confusing!
+
+// BAD: Feature types in general types
+// @/types/index.ts
+export interface User { ... }             // This is auth-specific!
+
+// BAD: Duplicating common types
+// routes/auth/types.ts
+export type AppResult<T> = { ... }        // Already in @/types!
+```
 
 ## Code Patterns & Standards
 
@@ -139,29 +216,65 @@ const hasPermission = checkUserPermission();
 
 ## Database Patterns
 
-### Kysely ORM Usage
-- Use Kysely for all database operations
+### postgres.js Usage
+- Use postgres.js client for all database operations
+- Import `sql` from `@/db/connection`
+- Use tagged template literals for queries
 - Implement proper transaction handling
-- Use soft delete pattern where appropriate
-- Implement pagination helpers
 - Include proper error handling
 
 ### Query Patterns
 ```typescript
-// Good: Proper typing and error handling
-export const findUserById = async (
-  db: Database,
-  userId: string
-): Promise<User | null> => {
-  const user = await db
-    .selectFrom('users')
-    .where('id', '=', userId)
-    .where('deleted_at', 'is', null)
-    .selectAll()
-    .executeTakeFirst();
+// Good: Proper parameterized queries with postgres.js
+export const findUserById = async (userId: string): Promise<User | null> => {
+  const users = await sql`
+    SELECT * FROM users 
+    WHERE id = ${userId} 
+    AND deleted_at IS NULL
+  `
+  
+  return users[0] || null
+}
 
-  return user || null;
-};
+// Good: Complex queries with joins
+export const getReportsWithUsers = async (): Promise<ReportWithUser[]> => {
+  const reports = await sql`
+    SELECT 
+      r.id,
+      r.image_url,
+      r.category,
+      r.street_name,
+      r.location_text,
+      r.lat,
+      r.lon,
+      r.created_at,
+      u.name as user_name,
+      u.avatar_url as user_avatar
+    FROM reports r
+    LEFT JOIN users u ON r.user_id = u.id
+    ORDER BY r.created_at DESC
+  `
+  
+  return reports as unknown as ReportWithUser[]
+}
+
+// Good: Transactions
+export const createUserWithProfile = async (userData: CreateUser) => {
+  return await sql.begin(async (sql) => {
+    const [user] = await sql`
+      INSERT INTO users (email, name) 
+      VALUES (${userData.email}, ${userData.name})
+      RETURNING *
+    `
+    
+    await sql`
+      INSERT INTO user_profiles (user_id, bio)
+      VALUES (${user.id}, ${userData.bio})
+    `
+    
+    return user
+  })
+}
 ```
 
 ## Route Implementation
@@ -282,17 +395,23 @@ Before submitting code, ensure:
 - [ ] No business logic in wrong layers
 - [ ] Pure functions in core layer
 - [ ] Proper TypeScript typing
+- [ ] Correct type organization (general vs route-specific)
+- [ ] No unnecessary re-exports of common types
 
 ## File Structure Template
 
 ```
-features/{feature-name}/
-├── index.ts       # Public exports
-├── api.ts         # HTTP routes and handlers  
-├── shell.ts       # Business logic orchestration
-├── core.ts        # Pure business logic
-├── data.ts        # Database operations
-└── types.ts       # Feature-specific types
+src/
+├── types/
+│   └── index.ts       # Common types only (AppResult, errors, etc.)
+└── routes/
+    └── {feature-name}/
+        ├── index.ts   # Public exports
+        ├── api.ts     # HTTP routes and handlers  
+        ├── shell.ts   # Business logic orchestration
+        ├── core.ts    # Pure business logic
+        ├── data.ts    # Database operations
+        └── types.ts   # Feature-specific types only
 ```
 
 ## Environment Variables

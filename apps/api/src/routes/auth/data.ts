@@ -214,13 +214,24 @@ export const userExistsByEmail = async (
 export const getUserStats = async (
   sql: Sql,
   userId: number
-): Promise<{ reportCount: number; joinDate: Date }> => {
+): Promise<{
+  total_reports: number;
+  reports_by_category: { berlubang: number; retak: number; lainnya: number };
+  last_report_date: Date | null;
+  account_age_days: number;
+}> => {
   const getStats = `
     SELECT 
-      (SELECT COUNT(*) FROM reports WHERE user_id = $1) as report_count,
+      COUNT(r.id) as total_reports,
+      COUNT(CASE WHEN r.category = 'berlubang' THEN 1 END) as berlubang_count,
+      COUNT(CASE WHEN r.category = 'retak' THEN 1 END) as retak_count,
+      COUNT(CASE WHEN r.category = 'lainnya' THEN 1 END) as lainnya_count,
+      MAX(r.created_at) as last_report_date,
       u.created_at as join_date
     FROM users u 
-    WHERE u.id = $1;
+    LEFT JOIN reports r ON r.user_id = u.id
+    WHERE u.id = $1
+    GROUP BY u.id, u.created_at;
   `
   
   const result = await sql.unsafe(getStats, [userId])
@@ -229,8 +240,19 @@ export const getUserStats = async (
     throw new Error('User not found')
   }
 
+  const row = result[0] as any
+  const joinDate = new Date(row.join_date)
+  const now = new Date()
+  const accountAgeDays = Math.floor((now.getTime() - joinDate.getTime()) / (1000 * 60 * 60 * 24))
+
   return {
-    reportCount: parseInt(result[0].report_count as string) || 0,
-    joinDate: result[0].join_date as Date
+    total_reports: parseInt(row.total_reports) || 0,
+    reports_by_category: {
+      berlubang: parseInt(row.berlubang_count) || 0,
+      retak: parseInt(row.retak_count) || 0,
+      lainnya: parseInt(row.lainnya_count) || 0
+    },
+    last_report_date: row.last_report_date ? new Date(row.last_report_date) : null,
+    account_age_days: accountAgeDays
   }
 } 
