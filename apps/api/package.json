@@ -13,19 +13,20 @@
     "db:seed": "bun run src/db/seed.ts"
   },
   "dependencies": {
-    "hono": "^4.6.12",
-    "postgres": "^3.4.5",
-    "zod": "^3.24.1",
-    "@hono/node-server": "^1.13.7",
     "@google-cloud/storage": "^7.14.0",
+    "@hono/node-server": "^1.13.7",
+    "firebase-admin": "^13.4.0",
+    "google-auth-library": "^9.14.0",
+    "hono": "^4.6.12",
     "jsonwebtoken": "^9.0.2",
-    "google-auth-library": "^9.14.0"
+    "postgres": "^3.4.5",
+    "zod": "^3.24.1"
   },
   "devDependencies": {
-    "@types/jsonwebtoken": "^9.0.7",
     "@types/bun": "^1.1.17",
-    "@types/node": "^22.10.2",
+    "@types/jsonwebtoken": "^9.0.7",
+    "@types/node": "^24.0.10",
     "eslint": "^9.18.0",
     "typescript": "5.8.2"
   }
-} 
+}

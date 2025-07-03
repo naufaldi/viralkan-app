@@ -2,6 +2,7 @@ import { Hono } from 'hono'
 import type { Context } from 'hono'
 import { z } from 'zod'
 import { sql } from '@/db/connection'
+import { firebaseAuthMiddleware } from '../middleware/auth'
 
 const reportsRouter = new Hono()
 
@@ -117,19 +118,29 @@ reportsRouter.get('/:id', async (c: Context) => {
   }
 })
 
-reportsRouter.post('/', async (c: Context) => {
+reportsRouter.post('/', firebaseAuthMiddleware, async (c: Context) => {
   try {
     const body = await c.req.json()
     const data = createReportSchema.parse(body)
     
-    // TODO: Get user_id from JWT token in middleware
-    const user_id = 1 // Placeholder for now
+    // Get user_id from Firebase auth middleware
+    const user_id = c.get('user_id')
 
-    const result = await sql`
-      INSERT INTO reports (user_id, image_url, category, street_name, location_text, lat, lon)
-      VALUES (${user_id}, ${data.image_url}, ${data.category}, ${data.street_name}, ${data.location_text}, ${data.lat || null}, ${data.lon || null})
-      RETURNING id
+    const insertReportQuery = `
+      INSERT INTO reports(user_id, image_url, category, street_name, location_text, lat, lon)
+        VALUES($1, $2, $3, $4, $5, $6, $7)
+        RETURNING id;
     `
+    
+    const result = await sql.unsafe(insertReportQuery, [
+      user_id,
+      data.image_url,
+      data.category,
+      data.street_name,
+      data.location_text,
+      data.lat || null,
+      data.lon || null
+    ])
 
     return c.json({ id: result[0].id }, 201)
   } catch (error) {

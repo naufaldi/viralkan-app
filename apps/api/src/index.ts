@@ -2,16 +2,25 @@ import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { logger } from 'hono/logger'
 import { serve } from '@hono/node-server'
-import { reportsRouter } from '@/routes/reports'
-import { authRouter } from '@/routes/auth'
-import { meRouter } from '@/routes/me'
+import { reportsRouter, authRouter, meRouter } from '@/routes'
 import { env, validateEnv } from '@/config/env'
 import { testConnection } from '@/db/connection'
+import { initializeFirebase } from '@/config/firebase'
 
 const app = new Hono()
 
 // Validate environment variables
 validateEnv()
+
+// Initialize Firebase Admin SDK
+try {
+  initializeFirebase()
+} catch (error) {
+  console.error('Failed to initialize Firebase:', error)
+  if (env.NODE_ENV === 'production') {
+    process.exit(1)
+  }
+}
 
 app.use('*', logger())
 app.use('*', cors({
