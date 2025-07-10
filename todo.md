@@ -1,124 +1,220 @@
-# Viralkan Landing Page Implementation Plan
+# Viralkan Implementation Progress
 
 ## Community-Powered Road Damage Awareness Platform
 
 ---
 
-## 🎯 **Landing Page Strategy & Design**
+## ✅ **COMPLETED TASKS**
 
-### **Project Context:**
+### **Phase 1: UI Foundation (DONE)**
 
-- **Platform Pivot:** From a direct reporting tool to a community-powered awareness platform.
-- **Core Value Proposition:**
-  1.  Show people the extent of road damage.
-  2.  Empower users to make issues viral on social media, leveraging "viral-based policy".
-  3.  Help drivers identify and avoid damaged roads.
-- **Tech Stack:** Next.js 15, Tailwind CSS v4, shadcn/ui, TypeScript.
-- **Explicit Limitations:** The platform does NOT forward reports to government agencies and does NOT track repair progress. This must be clearly communicated.
+#### **Task 1.1: Landing Page Implementation ✅**
+- ✅ Complete landing page redesign with Streamline-inspired design
+- ✅ Fixed government claims - now clearly community-focused
+- ✅ Hero section with proper messaging ("Jalan Rusak? Jangan Diam, Viralkan!")
+- ✅ Statistics showing community impact
+- ✅ How it works section explaining viral approach
+- ✅ Community testimonials section
+- ✅ Professional footer with proper links
+- ✅ Mobile responsive design
 
-### **Styling Approach (Tailwind CSS Only):**
+#### **Task 1.2: Reports Listing Page (/laporan) ✅**
+- ✅ Created comprehensive `/laporan` page with proper UI
+- ✅ Mock data system matching API schema (ReportWithUserResponseSchema)
+- ✅ Report cards with images, categories, user info, timestamps
+- ✅ Filtering by category (berlubang, retak, lainnya)
+- ✅ Search functionality
+- ✅ Pagination system
+- ✅ Loading states and empty states
+- ✅ Statistics dashboard showing report counts
 
-- **No Custom CSS Classes:** All styling will be implemented using Tailwind's utility classes directly in the JSX.
-- **Arbitrary Values:** For specific design needs, Tailwind's arbitrary value syntax will be used (e.g., `text-[clamp(2.5rem,5vw,4rem)]`).
-- **Theme Configuration:** Colors and theming will continue to be managed via CSS variables in `apps/web/app/globals.css` as it integrates with Tailwind's `@theme` directive.
+#### **Task 1.3: Navigation & Authentication ✅**
+- ✅ Added "Laporan" menu item to main navigation
+- ✅ Updated landing page CTAs to link to reports page
+- ✅ Created login page with Google OAuth UI
+- ✅ Mock authentication system using localStorage
+- ✅ Professional login form with demo notice
+- ✅ Auth state management with React hooks
+
+**Files Created:**
+- `/apps/web/app/laporan/page.tsx` - Reports listing page
+- `/apps/web/components/reports/report-card.tsx` - Individual report display
+- `/apps/web/components/reports/report-filters.tsx` - Category/search filters
+- `/apps/web/components/reports/reports-grid.tsx` - Grid layout
+- `/apps/web/components/ui/pagination.tsx` - Page navigation
+- `/apps/web/app/login/page.tsx` - Login page
+- `/apps/web/components/auth/login-form.tsx` - Login UI
+- `/apps/web/lib/mock-data.ts` - Sample reports data
+- `/apps/web/lib/mock-auth.ts` - Mock authentication
+- `/apps/web/hooks/use-mock-auth.ts` - Auth React hook
 
 ---
 
-## 📋 **Task 1.1: Component Architecture (Rule-Compliant)**
+## 🎯 **NEXT PRIORITIES**
 
-### **File Structure to Create/Update:**
+### **Task 2.1: User Dashboard & Authentication Integration**
+
+**Status:** 🔴 Not Started (HIGH PRIORITY)
+**Estimated:** 3 hours
+
+**Requirements:**
+- User dashboard with personal statistics
+- Update navigation to show authenticated state
+- Logout functionality
+- Protected routes for authenticated users
+- User profile display
+- Personal reports list
+
+**Files to Create:**
+- `/apps/web/app/dashboard/page.tsx`
+- `/apps/web/components/auth/auth-guard.tsx`
+- `/apps/web/components/layout/user-menu.tsx`
+- Update navigation components with auth state
+
+### **Task 2.2: Report Creation Form**
+
+**Status:** 🔴 Not Started
+**Estimated:** 4 hours
+
+**Requirements:**
+- Multi-step form for creating reports
+- Image upload with preview
+- Category selection
+- Location input (street name, description)
+- Form validation
+- Success page after submission
+- Connect "Mulai Lapor" buttons to auth-protected route
+
+**Files to Create:**
+- `/apps/web/app/laporan/buat/page.tsx`
+- `/apps/web/components/reports/create-report-form.tsx`
+- `/apps/web/components/forms/image-upload.tsx`
+- `/apps/web/components/forms/location-input.tsx`
+
+### **Task 2.3: Report Detail Pages**
+
+**Status:** 🔴 Not Started
+**Estimated:** 2 hours
+
+**Requirements:**
+- Individual report detail view
+- Image gallery with zoom
+- Full report information
+- User information
+- Share functionality
+- Related reports suggestions
+
+**Files to Create:**
+- `/apps/web/app/laporan/[id]/page.tsx`
+- `/apps/web/components/reports/report-detail-view.tsx`
+- `/apps/web/components/ui/image-viewer.tsx`
+
+---
+
+## 📋 **DEVELOPMENT NOTES**
+
+### **Current Architecture:**
 
 ```
 apps/web/
+├── app/
+│   ├── page.tsx                    # ✅ Landing page (completed)
+│   ├── laporan/
+│   │   ├── page.tsx               # ✅ Reports listing (completed)
+│   │   ├── [id]/page.tsx          # 🔴 Report detail (pending)
+│   │   └── buat/page.tsx          # 🔴 Create report (pending)
+│   ├── login/
+│   │   └── page.tsx               # ✅ Login page (completed)
+│   └── dashboard/
+│       └── page.tsx               # 🔴 User dashboard (pending)
 ├── components/
-│   ├── common/
-│   │   ├── section-container.tsx   # Reusable section wrapper with consistent padding
-│   │   ├── feature-card.tsx        # Card for showcasing features
-│   │   └── stat-card.tsx           # Statistics display card
-│   ├─── landing/
-│   │       ├── hero-section.tsx        # Hero with new messaging and CTAs
-│   │       ├── value-prop-section.tsx  # Highlights the "why" (viral, awareness)
-│   │       ├── how-it-works-section.tsx# 3-step user journey (Report, Viral, Avoid)
-│   │       ├── disclaimer-section.tsx  # Explicitly states platform limitations
-│   │       └── stats-section.tsx       # Impact numbers (reports, shares)
-│   │
-│   └── layout/
-│       ├── header.tsx              # Site navigation
-│       └── footer.tsx              # Site footer
-└── app/
-    ├── page.tsx                    # Landing page entry point
-    └── layout.tsx                  # Root layout (update metadata)
+│   ├── auth/
+│   │   ├── login-form.tsx         # ✅ Login form (completed)
+│   │   └── auth-guard.tsx         # 🔴 Route protection (pending)
+│   ├── reports/
+│   │   ├── report-card.tsx        # ✅ Report cards (completed)
+│   │   ├── report-filters.tsx     # ✅ Filtering (completed)
+│   │   ├── reports-grid.tsx       # ✅ Grid layout (completed)
+│   │   └── create-report-form.tsx # 🔴 Creation form (pending)
+│   └── ui/
+│       └── pagination.tsx         # ✅ Pagination (completed)
+├── lib/
+│   ├── mock-data.ts              # ✅ Sample data (completed)
+│   └── mock-auth.ts              # ✅ Auth system (completed)
+└── hooks/
+    └── use-mock-auth.ts          # ✅ Auth hook (completed)
 ```
 
----
+### **Technical Implementation Notes:**
 
-## 📋 **Task 1.2: Content Strategy (Viral & Awareness Focus)**
+**API Schema Integration:**
+- ✅ Mock data matches `ReportWithUserResponseSchema`
+- ✅ Categories: "berlubang", "retak", "lainnya"
+- ✅ Pagination follows `PaginatedReportsResponseSchema`
+- ✅ User authentication ready for Firebase integration
 
-### **Hero Section:**
+**Design System:**
+- ✅ Streamline-inspired clean design
+- ✅ Consistent color palette (primary-600: #2563eb)
+- ✅ Typography-first approach
+- ✅ Mobile-responsive throughout
 
-- **Headline:** "Jalan Rusak? Jangan Diam, Viralkan!" (Damaged Road? Don't Stay Silent, Make it Viral!)
-- **Subheadline:** "Petakan, bagikan, dan hindari jalan rusak di seluruh Indonesia. Jadikan suaramu terdengar lewat kekuatan media sosial." (Map, share, and avoid damaged roads across Indonesia. Make your voice heard through the power of social media.)
-- **CTAs:**
-  - Primary: "Lihat Peta Laporan" (View Reports Map)
-  - Secondary: "Cara Kerja" (How it Works)
-
-### **Value Proposition Section (Why Viralkan?):**
-
-1.  **Kebijakan Berbasis Viral (Viral-Based Policy):** "Di Indonesia, suara netizen punya kekuatan. Laporan yang viral lebih cepat mendapat perhatian." (In Indonesia, the voice of netizens has power. Viral reports get attention faster.)
-2.  **Informasi Untuk Keselamatan (Information for Safety):** "Ketahui rute mana yang harus dihindari. Rencanakan perjalanan Anda dengan lebih aman." (Know which routes to avoid. Plan your trip more safely.)
-3.  **Kekuatan Komunitas (Community Power):** "Data dari masyarakat, oleh masyarakat. Bersama kita ciptakan transparansi infrastruktur." (Data from the community, for the community. Together we create infrastructure transparency.)
-
-### **How It Works Section (3 Simple Steps):**
-
-1.  **Laporkan (Report):** "Ambil foto, tandai lokasi, dan unggah dalam hitungan detik." (Take a photo, mark the location, and upload in seconds.)
-2.  **Viralkan (Make it Viral):** "Bagikan laporanmu langsung ke Twitter, Facebook & Instagram dengan satu klik." (Share your report directly to Twitter, Facebook & Instagram with one click.)
-3.  **Waspada (Be Aware):** "Gunakan peta interaktif kami untuk melihat kondisi jalan dan merencanakan perjalanan." (Use our interactive map to see road conditions and plan your journey.)
-
-### **Statistics Section (Focus on Community Impact):**
-
-- Total Laporan: "1,247 Laporan Terkumpul"
-- Total Dibagikan: "5,890 Kali Dibagikan"
-- Wilayah Terpetakan: "23 Kota di Indonesia"
-
-### **Disclaimer Section (Crucial for Transparency):**
-
-- **Headline:** "Peran Kami & Batasan Platform" (Our Role & Platform Limitations)
-- **Content:** "Viralkan adalah platform independen yang digerakkan oleh komunitas. Kami **tidak berafiliasi** dengan instansi pemerintah dan **tidak dapat menjamin** perbaikan jalan. Tujuan kami adalah murni untuk meningkatkan kesadaran publik dan keselamatan berkendara melalui kekuatan viral media sosial." (Viralkan is an independent, community-driven platform. We are **not affiliated** with government agencies and **cannot guarantee** road repairs. Our purpose is purely to increase public awareness and driver safety through the viral power of social media.)
+**Mock Data & Auth:**
+- ✅ 15 realistic Indonesian road damage reports
+- ✅ localStorage-based auth for development
+- ✅ Proper category distribution and timestamps
+- ✅ User avatars and realistic location descriptions
 
 ---
 
-## 📋 **Task 1.3: Implementation Sequence**
+## 🚀 **NEXT SESSION TASKS**
 
-### **Phase 1: Foundation (1.5 hours)**
+### **Priority 1: Complete User Flow (4-6 hours)**
+1. **User Dashboard** - Personal stats, recent reports, quick actions
+2. **Report Creation Form** - Multi-step form with image upload
+3. **Report Detail Pages** - Individual report view with sharing
+4. **Auth Integration** - Connect "Mulai Lapor" buttons to protected routes
 
-1.  **Create Directory Structure:** Set up the `common` and `features/landing` directories.
-2.  **Create Layout Components:** Build `Header` and `Footer`.
-3.  **Update `app/layout.tsx`:** Set new metadata (title, description).
-4.  **Build `SectionContainer`:** A reusable `div` with consistent Tailwind padding classes (`py-16 sm:py-24`, `px-4 sm:px-6 lg:px-8`).
+### **Priority 2: Polish & Enhancement (2-3 hours)**
+1. **Error Handling** - Loading states, error boundaries
+2. **Mobile Optimization** - Touch interactions, responsive improvements
+3. **Performance** - Image loading, component optimization
 
-### **Phase 2: Content Sections (2.5 hours)**
+### **Success Metrics So Far:**
 
-1.  **Build `HeroSection`:** Implement with new copy and CTAs using Tailwind classes for typography and layout.
-2.  **Build `ValuePropSection`:** Create the 3-column section highlighting the new value propositions.
-3.  **Build `HowItWorksSection`:** Create the 3-step process section.
-4.  **Build `StatsSection`:** Display the community impact numbers.
-5.  **Build `DisclaimerSection`:** Add the critical transparency statement with emphasis.
+**Phase 1 Complete:**
+- ✅ Complete user journey clickable in browser
+- ✅ Professional landing page with clear messaging
+- ✅ Reports listing with proper filtering and pagination
+- ✅ Mock authentication system working
+- ✅ Mobile-responsive design throughout
+- ✅ Ready for stakeholder feedback
 
-### **Phase 3: Assembly & Polish (1 hour)**
+**Ready for Phase 2:**
+- User dashboard and personal features
+- Report creation functionality
+- Enhanced user experience with details pages
+- Real API integration preparation
 
-1.  **Assemble `app/page.tsx`:** Import and arrange all the landing page sections.
-2.  **Mobile Optimization:** Thoroughly test and refine responsive styles on all breakpoints using Tailwind's screen variants.
-3.  **Final Review:** Check spacing, typography, and accessibility.
+**Current Status:** 
+- **Landing Page:** ✅ Professional and community-focused
+- **Reports System:** ✅ Listing with filtering and search
+- **Authentication:** ✅ Mock system with localStorage
+- **Navigation:** ✅ Complete with "Laporan" menu
+- **Design System:** ✅ Streamline-inspired and consistent
 
----
+**What's Working:**
+- Users can browse reports anonymously
+- Filtering by category and search works
+- Mock login/logout functionality
+- Mobile responsive across all pages
+- Clear community messaging (no false government claims)
 
-## 📋 **Task 1.4: Success Criteria**
+**Next Steps:**
+1. Build user dashboard for authenticated users
+2. Create report submission form
+3. Add report detail pages
+4. Connect all "Mulai Lapor" buttons to auth flow
+5. Prepare for real API integration
 
-- [ ] **No Custom CSS:** The entire page is built using only Tailwind CSS utility classes.
-- [ ] **Clear Messaging:** The user immediately understands the platform is for awareness and virality, not official reporting.
-- [ ] **Disclaimer is Prominent:** The platform's limitations are clearly and honestly stated.
-- [ ] **File Structure is Compliant:** All components are organized according to the `frontend-rule`.
-- [ ] **Fully Responsive:** The layout is flawless on devices from mobile to desktop.
-- [ ] **SEO Ready:** Page has proper `<title>` and `<meta name="description">`.
 
-**Ready for execution once approved! 🚀**

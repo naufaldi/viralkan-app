@@ -32,7 +32,7 @@ Building a **civic-focused road damage reporting platform** with **UI-FIRST appr
 
 ### **Task 1.1: Landing Page & Navigation Structure**
 
-**Status:** 🔴 Not Started  
+**Status:** ✅ Completed
 **Dependencies:** None
 **Estimated:** 2 hours
 
@@ -61,15 +61,24 @@ Building a **civic-focused road damage reporting platform** with **UI-FIRST appr
 
 **Success Criteria:**
 
-- Landing page loads and looks professional
-- Navigation works between pages
-- Mobile responsive
-- Clear user action paths
+- ✅ Landing page loads and looks professional
+- ✅ Navigation works between pages
+- ✅ Mobile responsive
+- ✅ Clear user action paths
+
+**Completed Implementation:**
+- Complete landing page redesign with Streamline-inspired design
+- Fixed government claims - now clearly community-focused
+- Hero section with proper messaging
+- Statistics showing community impact
+- How it works section explaining viral approach
+- Community testimonials section
+- Professional footer with proper links
 
 ### **Task 1.2: Public Reports List Page (Mock Data)**
 
-**Status:** 🔴 Not Started
-**Dependencies:** Task 1.1
+**Status:** 🔴 Not Started (NEXT PRIORITY)
+**Dependencies:** Task 1.1 ✅
 **Estimated:** 3 hours
 
 **Objective:** Create engaging reports listing that shows the platform's value with realistic mock data.
@@ -83,22 +92,48 @@ Building a **civic-focused road damage reporting platform** with **UI-FIRST appr
 - Report cards showing images, location, date
 - "Login to create report" prompts for anonymous users
 
+**Updated Requirements based on API Schema Analysis:**
+
+**API Schema Integration:**
+- Use `ReportWithUserResponseSchema` for individual reports
+- Use `PaginatedReportsResponseSchema` for listing
+- Categories: "berlubang", "retak", "lainnya"
+- Include user information (name, avatar) from joined data
+
 **Files to Create:**
 
-- [ ] `apps/web/app/reports/page.tsx` - Reports listing page
+- [ ] `apps/web/app/laporan/page.tsx` - Reports listing page (renamed from /reports)
 - [ ] `apps/web/components/reports/reports-grid.tsx` - Grid layout
 - [ ] `apps/web/components/reports/report-card.tsx` - Individual report display
 - [ ] `apps/web/components/reports/report-filters.tsx` - Category/search filters
 - [ ] `apps/web/components/ui/pagination.tsx` - Page navigation
-- [ ] `apps/web/lib/mock-data.ts` - Sample reports data
+- [ ] `apps/web/lib/mock-data.ts` - Sample reports data matching API schema
+- [ ] Update navigation header to include "Laporan" menu item
 
-**Mock Data Structure:**
+**Mock Data Structure (Based on API Schema):**
+
+```typescript
+// ReportWithUserResponseSchema format
+{
+  id: number,
+  user_id: number,
+  image_url: string,
+  category: "berlubang" | "retak" | "lainnya",
+  street_name: string,
+  location_text: string,
+  lat: number | null,
+  lon: number | null,
+  created_at: string, // ISO datetime
+  user_name: string | null,
+  user_avatar: string | null
+}
+```
 
 - 20-30 sample reports with realistic Indonesian addresses
 - Mix of categories (berlubang, retak, lainnya)
-- Sample images (can use placeholder images)
-- Realistic dates and descriptions
-- Sample user names
+- Sample images (placeholder images)
+- Realistic dates in ISO format
+- User information included
 
 **Success Criteria:**
 

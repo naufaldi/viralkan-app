@@ -1,3 +1,4 @@
+"use client";
 import { Button } from "@repo/ui/components/ui/button";
 import { Badge } from "@repo/ui/components/ui/badge";
 import {
@@ -37,6 +38,12 @@ export default function Home() {
               </span>
             </div>
             <nav className="hidden md:flex items-center gap-8">
+              <a
+                href="/laporan"
+                className="text-neutral-600 hover:text-neutral-900 font-medium transition-colors"
+              >
+                Laporan
+              </a>
               <a
                 href="#how-it-works"
                 className="text-neutral-600 hover:text-neutral-900 font-medium transition-colors"
@@ -104,6 +111,7 @@ export default function Home() {
                     variant="outline"
                     size="lg"
                     className="border-neutral-300"
+                    onClick={() => window.location.href = '/laporan'}
                   >
                     <MessageSquare className="mr-2 h-4 w-4" />
                     Lihat Laporan
