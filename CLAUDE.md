@@ -9,6 +9,7 @@ We're building production-quality code together. Your role is to create maintain
 When you seem stuck or overly complex, I'll redirect you - my guidance helps you stay on track.
 
 ## 🚨 AUTOMATED CHECKS ARE MANDATORY
+
 **ALL lint/test issues are BLOCKING - EVERYTHING must be ✅ GREEN!**  
 No errors. No formatting issues. No linting problems. Zero tolerance.  
 These are not suggestions. Fix ALL issues before continuing.
@@ -16,9 +17,11 @@ These are not suggestions. Fix ALL issues before continuing.
 ## CRITICAL WORKFLOW - ALWAYS FOLLOW THIS!
 
 ### Research → Plan → Implement
+
 **NEVER JUMP STRAIGHT TO CODING!** Always follow this sequence:
+
 1. **Research**: Explore the codebase, understand existing patterns
-2. **Plan**: Create a detailed implementation plan and verify it with me  
+2. **Plan**: Create a detailed implementation plan and verify it with me
 3. **Implement**: Execute the plan with validation checkpoints
 
 When asked to implement any feature, you'll first say: "Let me research the codebase and create a plan before implementing."
@@ -26,19 +29,22 @@ When asked to implement any feature, you'll first say: "Let me research the code
 For complex architectural decisions or challenging problems, use **"ultrathink"** to engage maximum reasoning capacity. Say: "Let me ultrathink about this architecture before proposing a solution."
 
 ### USE MULTIPLE AGENTS!
-*Leverage subagents aggressively* for better results:
 
-* Spawn agents to explore different parts of the codebase in parallel
-* Use one agent to write tests while another implements features
-* Delegate research tasks: "I'll have an agent investigate the database schema while I analyze the API structure"
-* For complex refactors: One agent identifies changes, another implements them
+_Leverage subagents aggressively_ for better results:
+
+- Spawn agents to explore different parts of the codebase in parallel
+- Use one agent to write tests while another implements features
+- Delegate research tasks: "I'll have an agent investigate the database schema while I analyze the API structure"
+- For complex refactors: One agent identifies changes, another implements them
 
 Say: "I'll spawn agents to tackle different aspects of this problem" whenever a task has multiple independent parts.
 
 ### Reality Checkpoints
+
 **Stop and validate** at these moments:
+
 - After implementing a complete feature
-- Before starting a new major component  
+- Before starting a new major component
 - When something feels wrong
 - Before declaring "done"
 - **WHEN LINTING/TESTS FAIL WITH ERRORS** ❌
@@ -48,7 +54,9 @@ Run: `bun run format && bun test && bun run lint`
 > Why: You can lose track of what's actually working. These checkpoints prevent cascading failures.
 
 ### 🚨 CRITICAL: Lint/Test Failures Are BLOCKING
+
 **When linting or tests report ANY issues, you MUST:**
+
 1. **STOP IMMEDIATELY** - Do not continue with other tasks
 2. **FIX ALL ISSUES** - Address every ❌ issue until everything is ✅ GREEN
 3. **VERIFY THE FIX** - Re-run the failed command to confirm it's fixed
@@ -56,6 +64,7 @@ Run: `bun run format && bun test && bun run lint`
 5. **NEVER IGNORE** - There are NO warnings, only requirements
 
 This includes:
+
 - Formatting issues (prettier, eslint --fix)
 - Linting violations (eslint, typescript compiler)
 - Test failures (bun test)
@@ -65,6 +74,7 @@ This includes:
 Your code must be 100% clean. No exceptions.
 
 **Recovery Protocol:**
+
 - When interrupted by a lint/test failure, maintain awareness of your original task
 - After fixing all issues and verifying the fix, continue where you left off
 - Use the todo list to track both the fix and your original task
@@ -72,16 +82,18 @@ Your code must be 100% clean. No exceptions.
 ## Working Memory Management
 
 ### When context gets long:
+
 - Re-read this CLAUDE.md file
 - Summarize progress in a PROGRESS.md file
 - Document current state before major changes
 
 ### Maintain TODO.md:
+
 ```
 ## Current Task
 - [ ] What we're doing RIGHT NOW
 
-## Completed  
+## Completed
 - [x] What's actually done and tested
 
 ## Next Steps
@@ -91,6 +103,7 @@ Your code must be 100% clean. No exceptions.
 ## JavaScript/TypeScript-Specific Rules
 
 ### FORBIDDEN - NEVER DO THESE:
+
 - **NO `any` types** - use proper TypeScript types!
 - **NO `setTimeout()` for synchronization** - use Promises and async/await!
 - **NO** keeping old and new code together
@@ -101,6 +114,7 @@ Your code must be 100% clean. No exceptions.
 - **NO** `console.log` in production code - use proper logging
 
 ### Required Standards:
+
 - **Delete** old code when replacing it
 - **Meaningful names**: `userId` not `id`
 - **Early returns** to reduce nesting
@@ -129,6 +143,7 @@ Your code must be 100% clean. No exceptions.
 ## Essential Commands
 
 ### Development
+
 ```bash
 # Start all development servers (API on :3000, web on :3000, docs on :3001)
 bun run dev
@@ -144,6 +159,7 @@ turbo dev --filter=docs
 ```
 
 ### Building & Testing
+
 ```bash
 # Build all apps and packages
 bun run build
@@ -165,6 +181,7 @@ bun run format
 ```
 
 ### Database Management
+
 ```bash
 # Run database migrations
 bun run db:migrate
@@ -179,6 +196,7 @@ cd apps/api && bun run db:seed
 ## Architecture Overview
 
 ### Monorepo Structure
+
 ```
 viralkan-app/
 ├── apps/
@@ -202,6 +220,7 @@ The API follows a 4-layer architecture:
 4. **Data Layer** (`src/data/`): Database operations, external APIs
 
 Key directories:
+
 - `src/routes/`: API endpoints and HTTP handlers
 - `src/db/`: Database schemas, migrations, and connection
 - `src/core/`: Business logic and domain models
@@ -238,6 +257,7 @@ PostGIS is enabled for spatial queries and future GIS features.
 ## Environment Setup
 
 ### Required Environment Variables
+
 ```bash
 DATABASE_URL=postgresql://user:password@localhost:5432/viralkan
 JWT_SECRET=your-jwt-secret
@@ -245,6 +265,7 @@ FIREBASE_SERVICE_ACCOUNT_JSON={"type": "service_account", ...}
 ```
 
 ### Optional (for full functionality)
+
 ```bash
 GOOGLE_CLIENT_ID=your-google-client-id
 GOOGLE_CLIENT_SECRET=your-google-client-secret
@@ -255,6 +276,7 @@ R2_ENDPOINT=your-r2-endpoint
 ```
 
 ### Database Setup
+
 ```bash
 # Using Docker
 docker run --name postgres-viralkan \
@@ -267,14 +289,16 @@ docker run --name postgres-viralkan \
 ## Implementation Standards
 
 ### Our code is complete when:
+
 - ✅ All linters pass with zero issues
-- ✅ All tests pass  
+- ✅ All tests pass
 - ✅ Feature works end-to-end
 - ✅ Old code is deleted
 - ✅ TypeScript types are properly defined
 - ✅ JSDoc on all exported functions
 
 ### Testing Strategy
+
 - Complex business logic → Write tests first
 - Simple CRUD → Write tests after
 - Hot paths → Add performance tests
@@ -283,18 +307,21 @@ docker run --name postgres-viralkan \
 ## Development Guidelines
 
 ### API Development
+
 - All endpoints use Zod validation schemas
 - Authentication middleware protects user-specific routes
 - Database queries use prepared statements for security
 - Error responses follow consistent structure with proper HTTP codes
 
 ### Frontend Development
+
 - Components are built with the shared UI library (`@repo/ui`)
 - Tailwind CSS v4 for styling
 - React Hook Form for form handling
 - Next.js 15 with Turbopack for fast development
 
 ### Testing
+
 - API tests are located in `apps/api/src/routes/**/__tests__/`
 - Use `bun test` for running tests (Bun's built-in test runner)
 - Tests cover authentication, validation, and API endpoints
@@ -302,6 +329,7 @@ docker run --name postgres-viralkan \
 ## Problem-Solving Together
 
 When you're stuck or confused:
+
 1. **Stop** - Don't spiral into complex solutions
 2. **Delegate** - Consider spawning agents for parallel investigation
 3. **Ultrathink** - For complex problems, say "I need to ultrathink through this challenge" to engage deeper reasoning
@@ -314,11 +342,13 @@ My insights on better approaches are valued - please ask for them!
 ## Performance & Security
 
 ### **Measure First**:
+
 - No premature optimization
 - Benchmark before claiming something is faster
 - Use performance profiling for real bottlenecks
 
 ### **Security Always**:
+
 - Validate all inputs with Zod
 - Use crypto.randomUUID() for random IDs
 - Prepared statements for SQL (never concatenate!)
@@ -327,19 +357,22 @@ My insights on better approaches are valued - please ask for them!
 ## Communication Protocol
 
 ### Progress Updates:
+
 ```
 ✓ Implemented authentication (all tests passing)
-✓ Added rate limiting  
+✓ Added rate limiting
 ✗ Found issue with token expiration - investigating
 ```
 
 ### Suggesting Improvements:
+
 "The current approach works, but I notice [observation].
 Would you like me to [specific improvement]?"
 
 ## Common Patterns
 
 ### Adding New API Endpoints
+
 1. Create route handler in `src/routes/`
 2. Add Zod validation schema
 3. Implement business logic in `src/core/`
@@ -347,11 +380,13 @@ Would you like me to [specific improvement]?"
 5. Update OpenAPI documentation
 
 ### Database Migrations
+
 - Migrations are in `apps/api/src/db/migrations/`
 - Use `bun run db:migrate` to apply migrations
 - Always test migrations with `bun run db:reset` first
 
 ### Adding UI Components
+
 - Components go in `packages/ui/src/`
 - Follow existing patterns with Radix UI primitives
 - Export from `packages/ui/src/index.ts`

@@ -2,14 +2,14 @@
 // Following the 4-layer clean architecture pattern
 
 // API Layer exports
-export { authRouter } from './api'
+export { authRouter } from "./api";
 
 // Middleware exports
-export { 
-  firebaseAuthMiddleware, 
-  optionalAuthMiddleware, 
-  requireRole 
-} from './middleware'
+export {
+  firebaseAuthMiddleware,
+  optionalAuthMiddleware,
+  requireRole,
+} from "./middleware";
 
 // Type exports
 export type {
@@ -20,13 +20,11 @@ export type {
   ErrorResponse,
   DbUser,
   FirebaseToken,
-  UserStatsResponse
-} from './types'
-
-
+  UserStatsResponse,
+} from "./types";
 
 // Shell layer exports (for use by other features)
-export * as authShell from './shell'
+export * as authShell from "./shell";
 
 // Core layer exports (for use by other features)
-export * as authCore from './core' 
+export * as authCore from "./core";

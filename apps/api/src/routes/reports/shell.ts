@@ -1,23 +1,26 @@
-import { createSuccess, createError } from '@/types';
-import type { 
+import { createSuccess, createError } from "@/types";
+import type {
   CreateReportInput,
-  ReportWithUser, 
+  ReportWithUser,
   ReportQuery,
   ReportParams,
-  PaginatedReports
-} from './types';
-import type { AppResult } from '@/types';
-import * as data from './data';
-import * as core from './core';
+  PaginatedReports,
+} from "./types";
+import type { AppResult } from "@/types";
+import * as data from "./data";
+import * as core from "./core";
 
 // Shell layer: Business logic orchestration (coordinates between core and data layers)
 
 export const getReportsWithPagination = async (
-  query: ReportQuery
+  query: ReportQuery,
 ): Promise<AppResult<PaginatedReports>> => {
   try {
     // Validate pagination parameters using core business logic
-    const paginationValidation = core.validatePaginationParams(query.page, query.limit);
+    const paginationValidation = core.validatePaginationParams(
+      query.page,
+      query.limit,
+    );
     if (!paginationValidation.success) {
       return paginationValidation;
     }
@@ -31,18 +34,20 @@ export const getReportsWithPagination = async (
     // Apply business logic formatting to each report
     const formattedReports = {
       ...result.data,
-      items: result.data.items.map(report => core.formatReportForDisplay(report))
+      items: result.data.items.map((report) =>
+        core.formatReportForDisplay(report),
+      ),
     };
 
     return createSuccess(formattedReports);
   } catch (error) {
-    console.error('Error in getReportsWithPagination shell:', error);
-    return createError('Failed to fetch reports', 500);
+    console.error("Error in getReportsWithPagination shell:", error);
+    return createError("Failed to fetch reports", 500);
   }
 };
 
 export const getReportById = async (
-  params: ReportParams
+  params: ReportParams,
 ): Promise<AppResult<ReportWithUser>> => {
   try {
     // Fetch report from data layer
@@ -56,14 +61,14 @@ export const getReportById = async (
 
     return createSuccess(formattedReport);
   } catch (error) {
-    console.error('Error in getReportById shell:', error);
-    return createError('Failed to fetch report', 500);
+    console.error("Error in getReportById shell:", error);
+    return createError("Failed to fetch report", 500);
   }
 };
 
 export const createNewReport = async (
   userId: number,
-  reportInput: CreateReportInput
+  reportInput: CreateReportInput,
 ): Promise<AppResult<{ id: number }>> => {
   try {
     // Sanitize input data using core business logic
@@ -83,15 +88,15 @@ export const createNewReport = async (
 
     return createSuccess(result.data);
   } catch (error) {
-    console.error('Error in createNewReport shell:', error);
-    return createError('Failed to create report', 500);
+    console.error("Error in createNewReport shell:", error);
+    return createError("Failed to create report", 500);
   }
 };
 
 export const updateExistingReport = async (
   reportId: number,
   userId: number,
-  updateData: Partial<CreateReportInput>
+  updateData: Partial<CreateReportInput>,
 ): Promise<AppResult<ReportWithUser>> => {
   try {
     // First get the existing report to validate permissions
@@ -104,7 +109,7 @@ export const updateExistingReport = async (
     const updateValidation = core.validateReportUpdate(
       existingReportResult.data,
       updateData,
-      userId
+      userId,
     );
     if (!updateValidation.success) {
       return updateValidation;
@@ -132,7 +137,11 @@ export const updateExistingReport = async (
     }
 
     // Update report in data layer
-    const updateResult = await data.updateReport(reportId, userId, sanitizedUpdateData);
+    const updateResult = await data.updateReport(
+      reportId,
+      userId,
+      sanitizedUpdateData,
+    );
     if (!updateResult.success) {
       return updateResult;
     }
@@ -144,18 +153,20 @@ export const updateExistingReport = async (
     }
 
     // Apply business logic formatting
-    const formattedReport = core.formatReportForDisplay(updatedReportResult.data);
+    const formattedReport = core.formatReportForDisplay(
+      updatedReportResult.data,
+    );
 
     return createSuccess(formattedReport);
   } catch (error) {
-    console.error('Error in updateExistingReport shell:', error);
-    return createError('Failed to update report', 500);
+    console.error("Error in updateExistingReport shell:", error);
+    return createError("Failed to update report", 500);
   }
 };
 
 export const deleteExistingReport = async (
   reportId: number,
-  userId: number
+  userId: number,
 ): Promise<AppResult<boolean>> => {
   try {
     // First get the existing report to validate permissions
@@ -165,9 +176,12 @@ export const deleteExistingReport = async (
     }
 
     // Check if user can delete using core business logic
-    const canDelete = core.canUserDeleteReport(existingReportResult.data, userId);
+    const canDelete = core.canUserDeleteReport(
+      existingReportResult.data,
+      userId,
+    );
     if (!canDelete) {
-      return createError('User not authorized to delete this report', 403);
+      return createError("User not authorized to delete this report", 403);
     }
 
     // Delete report in data layer
@@ -178,18 +192,21 @@ export const deleteExistingReport = async (
 
     return createSuccess(true);
   } catch (error) {
-    console.error('Error in deleteExistingReport shell:', error);
-    return createError('Failed to delete report', 500);
+    console.error("Error in deleteExistingReport shell:", error);
+    return createError("Failed to delete report", 500);
   }
 };
 
 export const getUserReports = async (
   userId: number,
-  query: Pick<ReportQuery, 'page' | 'limit' | 'category'>
+  query: Pick<ReportQuery, "page" | "limit" | "category">,
 ): Promise<AppResult<PaginatedReports>> => {
   try {
     // Validate pagination parameters using core business logic
-    const paginationValidation = core.validatePaginationParams(query.page, query.limit);
+    const paginationValidation = core.validatePaginationParams(
+      query.page,
+      query.limit,
+    );
     if (!paginationValidation.success) {
       return paginationValidation;
     }
@@ -203,25 +220,33 @@ export const getUserReports = async (
     // Apply business logic formatting to each report
     const formattedReports = {
       ...result.data,
-      items: result.data.items.map(report => core.formatReportForDisplay(report))
+      items: result.data.items.map((report) =>
+        core.formatReportForDisplay(report),
+      ),
     };
 
     return createSuccess(formattedReports);
   } catch (error) {
-    console.error('Error in getUserReports shell:', error);
-    return createError('Failed to fetch user reports', 500);
+    console.error("Error in getUserReports shell:", error);
+    return createError("Failed to fetch user reports", 500);
   }
 };
 
 export const getReportsWithEnrichedData = async (
-  query: ReportQuery
-): Promise<AppResult<PaginatedReports & { 
-  items: Array<ReportWithUser & { 
-    priority: 'high' | 'medium' | 'low';
-    isStale: boolean;
-    formattedAddress: string;
-  }> 
-}>> => {
+  query: ReportQuery,
+): Promise<
+  AppResult<
+    PaginatedReports & {
+      items: Array<
+        ReportWithUser & {
+          priority: "high" | "medium" | "low";
+          isStale: boolean;
+          formattedAddress: string;
+        }
+      >;
+    }
+  >
+> => {
   try {
     // Get reports using existing shell function
     const result = await getReportsWithPagination(query);
@@ -230,26 +255,28 @@ export const getReportsWithEnrichedData = async (
     }
 
     // Enrich each report with additional business data
-    const enrichedItems = result.data.items.map(report => core.enrichReportData(report));
+    const enrichedItems = result.data.items.map((report) =>
+      core.enrichReportData(report),
+    );
 
     // Sort by priority if needed
     const sortedItems = core.sortReportsByPriority(enrichedItems);
 
     const enrichedResult = {
       ...result.data,
-      items: sortedItems
+      items: sortedItems,
     };
 
     return createSuccess(enrichedResult) as any;
   } catch (error) {
-    console.error('Error in getReportsWithEnrichedData shell:', error);
-    return createError('Failed to fetch enriched reports', 500);
+    console.error("Error in getReportsWithEnrichedData shell:", error);
+    return createError("Failed to fetch enriched reports", 500);
   }
 };
 
 export const validateReportOwnership = async (
   reportId: number,
-  userId: number
+  userId: number,
 ): Promise<AppResult<ReportWithUser>> => {
   try {
     // Get the report from data layer
@@ -261,12 +288,12 @@ export const validateReportOwnership = async (
     // Check ownership using core business logic
     const canEdit = core.canUserEditReport(result.data, userId);
     if (!canEdit) {
-      return createError('User not authorized to access this report', 403);
+      return createError("User not authorized to access this report", 403);
     }
 
     return createSuccess(result.data);
   } catch (error) {
-    console.error('Error in validateReportOwnership shell:', error);
-    return createError('Failed to validate report ownership', 500);
+    console.error("Error in validateReportOwnership shell:", error);
+    return createError("Failed to validate report ownership", 500);
   }
-}; 
+};

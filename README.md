@@ -141,17 +141,20 @@ A monorepo for the Viralkan road damage reporting platform.
 ## Quick Start
 
 1. **Install dependencies**:
+
    ```bash
    bun install
    ```
 
 2. **Set up environment variables**:
+
    ```bash
    cp .env.example .env
    # Edit .env with your database credentials
    ```
 
 3. **Set up PostgreSQL with PostGIS**:
+
    ```bash
    # Using Docker
    docker run --name postgres-viralkan \
@@ -162,6 +165,7 @@ A monorepo for the Viralkan road damage reporting platform.
    ```
 
 4. **Run database migrations**:
+
    ```bash
    bun run db:migrate
    ```
@@ -172,6 +176,7 @@ A monorepo for the Viralkan road damage reporting platform.
    ```
 
 This will start:
+
 - API server on `http://localhost:3000`
 - Web app on `http://localhost:5173` (if configured)
 

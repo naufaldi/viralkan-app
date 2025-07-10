@@ -1,23 +1,23 @@
-import { 
-  CreateReportSchema, 
-  ReportParamsSchema, 
+import {
+  CreateReportSchema,
+  ReportParamsSchema,
   ReportQuerySchema,
   ReportResponseSchema,
   ReportWithUserResponseSchema,
   PaginatedReportsResponseSchema,
-  ErrorResponseSchema
+  ErrorResponseSchema,
 } from "@/schema/reports";
 import { z } from "zod";
 
 // Re-export schemas for easy access
-export { 
-  CreateReportSchema, 
-  ReportQuerySchema, 
+export {
+  CreateReportSchema,
+  ReportQuerySchema,
   ReportParamsSchema,
   ReportResponseSchema,
   ReportWithUserResponseSchema,
   PaginatedReportsResponseSchema,
-  ErrorResponseSchema
+  ErrorResponseSchema,
 };
 
 // TypeScript Types (derived from Zod schemas)
@@ -30,7 +30,7 @@ export interface Report {
   id: number;
   user_id: number;
   image_url: string;
-  category: 'berlubang' | 'retak' | 'lainnya';
+  category: "berlubang" | "retak" | "lainnya";
   street_name: string;
   location_text: string;
   lat: number | null;
@@ -50,4 +50,4 @@ export interface PaginatedReports {
   page: number;
   limit: number;
   pages: number;
-} 
+}

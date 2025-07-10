@@ -12,7 +12,7 @@ const StatsSection = () => {
       description: "Dokumentasi kerusakan dari seluruh Indonesia",
       color: "from-blue-500 to-cyan-500",
       bgColor: "from-blue-50 to-cyan-50",
-      accentColor: "text-blue-600"
+      accentColor: "text-blue-600",
     },
     {
       icon: TrendingUp,
@@ -22,7 +22,7 @@ const StatsSection = () => {
       description: "Viral di Twitter, Facebook, dan Instagram",
       color: "from-purple-500 to-pink-500",
       bgColor: "from-purple-50 to-pink-50",
-      accentColor: "text-purple-600"
+      accentColor: "text-purple-600",
     },
     {
       icon: Users,
@@ -32,7 +32,7 @@ const StatsSection = () => {
       description: "Dari Sabang sampai Merauke",
       color: "from-green-500 to-emerald-500",
       bgColor: "from-green-50 to-emerald-50",
-      accentColor: "text-green-600"
+      accentColor: "text-green-600",
     },
     {
       icon: Target,
@@ -42,8 +42,8 @@ const StatsSection = () => {
       description: "Pengguna merasa terbantu dengan platform ini",
       color: "from-orange-500 to-red-500",
       bgColor: "from-orange-50 to-red-50",
-      accentColor: "text-orange-600"
-    }
+      accentColor: "text-orange-600",
+    },
   ];
 
   return (
@@ -51,19 +51,23 @@ const StatsSection = () => {
       <div className="container mx-auto px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-16 space-y-6">
-          <Badge variant="secondary" className="bg-slate-100 text-slate-700 px-4 py-2">
+          <Badge
+            variant="secondary"
+            className="bg-slate-100 text-slate-700 px-4 py-2"
+          >
             Dampak Platform
           </Badge>
-          
+
           <h2 className="text-4xl lg:text-5xl font-bold text-slate-900 leading-tight">
             Angka yang{" "}
             <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               berbicara sendiri
             </span>
           </h2>
-          
+
           <p className="text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
-            Lihat bagaimana platform kami telah memberdayakan masyarakat Indonesia untuk menciptakan perubahan nyata
+            Lihat bagaimana platform kami telah memberdayakan masyarakat
+            Indonesia untuk menciptakan perubahan nyata
           </p>
         </div>
 
@@ -72,23 +76,29 @@ const StatsSection = () => {
           {stats.map((stat, index) => {
             const IconComponent = stat.icon;
             return (
-              <Card 
+              <Card
                 key={index}
                 className={`group relative overflow-hidden bg-gradient-to-br ${stat.bgColor} border-0 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:-translate-y-2`}
               >
                 <CardContent className="p-8 text-center relative z-10">
                   {/* Icon */}
-                  <div className={`inline-flex w-14 h-14 rounded-2xl bg-gradient-to-r ${stat.color} p-3 shadow-lg mb-6 group-hover:scale-110 transition-transform duration-300`}>
+                  <div
+                    className={`inline-flex w-14 h-14 rounded-2xl bg-gradient-to-r ${stat.color} p-3 shadow-lg mb-6 group-hover:scale-110 transition-transform duration-300`}
+                  >
                     <IconComponent className="h-8 w-8 text-white" />
                   </div>
 
                   {/* Number */}
                   <div className="space-y-2 mb-4">
                     <div className="flex items-center justify-center">
-                      <span className={`text-4xl lg:text-5xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+                      <span
+                        className={`text-4xl lg:text-5xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}
+                      >
                         {stat.number}
                       </span>
-                      <span className={`text-2xl lg:text-3xl font-bold ${stat.accentColor} ml-1`}>
+                      <span
+                        className={`text-2xl lg:text-3xl font-bold ${stat.accentColor} ml-1`}
+                      >
                         {stat.suffix}
                       </span>
                     </div>
@@ -107,9 +117,11 @@ const StatsSection = () => {
                   {/* Progress Bar */}
                   <div className="mt-6">
                     <div className="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
-                      <div 
+                      <div
                         className={`h-full bg-gradient-to-r ${stat.color} rounded-full transition-all duration-1000 group-hover:scale-x-110 origin-left`}
-                        style={{ width: `${Math.min(100, parseInt(stat.number) / 20)}%` }}
+                        style={{
+                          width: `${Math.min(100, parseInt(stat.number) / 20)}%`,
+                        }}
                       ></div>
                     </div>
                     <div className="text-xs text-slate-500 mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -119,11 +131,17 @@ const StatsSection = () => {
                 </CardContent>
 
                 {/* Decorative Elements */}
-                <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${stat.color} opacity-5 rounded-full -translate-y-12 translate-x-12 group-hover:scale-150 transition-transform duration-700`}></div>
-                <div className={`absolute bottom-0 left-0 w-16 h-16 bg-gradient-to-br ${stat.color} opacity-5 rounded-full translate-y-8 -translate-x-8 group-hover:scale-125 transition-transform duration-500`}></div>
-                
+                <div
+                  className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${stat.color} opacity-5 rounded-full -translate-y-12 translate-x-12 group-hover:scale-150 transition-transform duration-700`}
+                ></div>
+                <div
+                  className={`absolute bottom-0 left-0 w-16 h-16 bg-gradient-to-br ${stat.color} opacity-5 rounded-full translate-y-8 -translate-x-8 group-hover:scale-125 transition-transform duration-500`}
+                ></div>
+
                 {/* Hover Glow Effect */}
-                <div className={`absolute inset-0 bg-gradient-to-br ${stat.color} opacity-0 group-hover:opacity-5 transition-opacity duration-500`}></div>
+                <div
+                  className={`absolute inset-0 bg-gradient-to-br ${stat.color} opacity-0 group-hover:opacity-5 transition-opacity duration-500`}
+                ></div>
               </Card>
             );
           })}
@@ -135,7 +153,9 @@ const StatsSection = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-center gap-3 mb-3">
                 <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-sm font-medium text-slate-700">Update Real-time</span>
+                <span className="text-sm font-medium text-slate-700">
+                  Update Real-time
+                </span>
               </div>
               <p className="text-sm text-slate-600">
                 Data diperbarui setiap jam untuk memberikan informasi terkini
@@ -148,4 +168,4 @@ const StatsSection = () => {
   );
 };
 
-export default StatsSection; 
+export default StatsSection;

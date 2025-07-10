@@ -1,13 +1,19 @@
 "use client";
 
 import { Button } from "@repo/ui/components/ui/button";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@repo/ui/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@repo/ui/components/ui/card";
 
 export default function ShadcnDemo() {
   return (
     <div className="container mx-auto p-8 space-y-8">
       <h1 className="text-4xl font-bold text-center mb-8">shadcn/ui Demo</h1>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
@@ -41,8 +47,8 @@ export default function ShadcnDemo() {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              Cards are perfect for displaying content in a clean, organized way.
-              They support headers, content, and footers.
+              Cards are perfect for displaying content in a clean, organized
+              way. They support headers, content, and footers.
             </p>
             <Button className="mt-4" variant="outline">
               Learn More
@@ -65,11 +71,9 @@ export default function ShadcnDemo() {
             <li>✅ Utility functions available</li>
             <li>✅ Monorepo exports configured</li>
           </ul>
-          <Button className="w-full mt-4">
-            Start Building
-          </Button>
+          <Button className="w-full mt-4">Start Building</Button>
         </CardContent>
       </Card>
     </div>
   );
-} 
+}

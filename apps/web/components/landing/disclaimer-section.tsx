@@ -8,21 +8,24 @@ const DisclaimerSection = () => {
     {
       icon: AlertTriangle,
       title: "Platform Independen",
-      description: "Viralkan adalah platform independen yang tidak berafiliasi dengan pemerintah manapun.",
-      type: "warning"
+      description:
+        "Viralkan adalah platform independen yang tidak berafiliasi dengan pemerintah manapun.",
+      type: "warning",
     },
     {
       icon: Info,
       title: "Tidak Menjamin Perbaikan",
-      description: "Kami tidak dapat menjamin bahwa laporan akan langsung diperbaiki oleh pihak berwenang.",
-      type: "info"
+      description:
+        "Kami tidak dapat menjamin bahwa laporan akan langsung diperbaiki oleh pihak berwenang.",
+      type: "info",
     },
     {
       icon: Target,
       title: "Tujuan Platform",
-      description: "Tujuan utama adalah membangun kesadaran publik dan memberikan informasi rute yang aman.",
-      type: "success"
-    }
+      description:
+        "Tujuan utama adalah membangun kesadaran publik dan memberikan informasi rute yang aman.",
+      type: "success",
+    },
   ];
 
   return (
@@ -30,20 +33,24 @@ const DisclaimerSection = () => {
       <div className="container mx-auto px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-16 space-y-6">
-          <Badge variant="outline" className="border-orange-200 bg-orange-50 text-orange-700 px-4 py-2">
+          <Badge
+            variant="outline"
+            className="border-orange-200 bg-orange-50 text-orange-700 px-4 py-2"
+          >
             <AlertTriangle className="w-4 h-4 mr-2" />
             Informasi Penting
           </Badge>
-          
+
           <h2 className="text-4xl lg:text-5xl font-bold text-slate-900 leading-tight">
             Harap{" "}
             <span className="bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
               diperhatikan
             </span>
           </h2>
-          
+
           <p className="text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
-            Transparansi dan kejujuran adalah kunci kepercayaan. Berikut adalah hal-hal penting yang perlu Anda ketahui.
+            Transparansi dan kejujuran adalah kunci kepercayaan. Berikut adalah
+            hal-hal penting yang perlu Anda ketahui.
           </p>
         </div>
 
@@ -52,8 +59,10 @@ const DisclaimerSection = () => {
           <Alert className="border-orange-200 bg-gradient-to-r from-orange-50 to-yellow-50 shadow-lg">
             <AlertTriangle className="h-5 w-5 text-orange-600" />
             <AlertDescription className="text-lg text-slate-700 leading-relaxed">
-              <strong className="text-orange-800">Perhatian:</strong> Platform ini dirancang untuk meningkatkan kesadaran publik tentang kondisi infrastruktur jalan. 
-              Kami berkomitmen untuk transparansi penuh dalam operasional dan tujuan platform.
+              <strong className="text-orange-800">Perhatian:</strong> Platform
+              ini dirancang untuk meningkatkan kesadaran publik tentang kondisi
+              infrastruktur jalan. Kami berkomitmen untuk transparansi penuh
+              dalam operasional dan tujuan platform.
             </AlertDescription>
           </Alert>
         </div>
@@ -67,34 +76,37 @@ const DisclaimerSection = () => {
                 icon: "from-orange-500 to-red-500",
                 bg: "from-orange-50 to-red-50",
                 border: "border-orange-200",
-                text: "text-orange-800"
+                text: "text-orange-800",
               },
               info: {
                 icon: "from-blue-500 to-cyan-500",
                 bg: "from-blue-50 to-cyan-50",
                 border: "border-blue-200",
-                text: "text-blue-800"
+                text: "text-blue-800",
               },
               success: {
                 icon: "from-green-500 to-emerald-500",
                 bg: "from-green-50 to-emerald-50",
                 border: "border-green-200",
-                text: "text-green-800"
-              }
+                text: "text-green-800",
+              },
             };
-            
-            const colors = colorClasses[point.type as keyof typeof colorClasses];
-            
+
+            const colors =
+              colorClasses[point.type as keyof typeof colorClasses];
+
             return (
-              <Card 
+              <Card
                 key={index}
                 className={`bg-gradient-to-br ${colors.bg} border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 ${colors.border}`}
               >
                 <CardHeader className="pb-4">
-                  <div className={`inline-flex w-12 h-12 rounded-2xl bg-gradient-to-r ${colors.icon} p-3 shadow-lg mb-4`}>
+                  <div
+                    className={`inline-flex w-12 h-12 rounded-2xl bg-gradient-to-r ${colors.icon} p-3 shadow-lg mb-4`}
+                  >
                     <IconComponent className="h-6 w-6 text-white" />
                   </div>
-                  
+
                   <h3 className={`text-xl font-bold ${colors.text}`}>
                     {point.title}
                   </h3>
@@ -118,15 +130,16 @@ const DisclaimerSection = () => {
                 <div className="inline-flex w-16 h-16 rounded-3xl bg-white/20 backdrop-blur-sm p-4 shadow-lg mb-6">
                   <Heart className="h-8 w-8 text-white" />
                 </div>
-                
+
                 <h3 className="text-3xl font-bold leading-tight">
                   Dibuat dengan ❤️ untuk Indonesia
                 </h3>
-                
+
                 <p className="text-xl text-blue-100 leading-relaxed max-w-2xl mx-auto">
-                  Platform ini lahir dari kepedulian terhadap kondisi infrastruktur Indonesia. 
-                  Kami percaya bahwa dengan transparansi dan partisipasi masyarakat, 
-                  kita bisa menciptakan perubahan positif.
+                  Platform ini lahir dari kepedulian terhadap kondisi
+                  infrastruktur Indonesia. Kami percaya bahwa dengan
+                  transparansi dan partisipasi masyarakat, kita bisa menciptakan
+                  perubahan positif.
                 </p>
 
                 {/* Mission Points */}
@@ -135,7 +148,7 @@ const DisclaimerSection = () => {
                     "Memberikan informasi rute aman untuk pengguna jalan",
                     "Membangun kesadaran publik tentang kondisi infrastruktur",
                     "Menciptakan platform partisipasi masyarakat yang konstruktif",
-                    "Mendorong transparansi dalam pengelolaan infrastruktur"
+                    "Mendorong transparansi dalam pengelolaan infrastruktur",
                   ].map((mission, index) => (
                     <div key={index} className="flex items-start gap-3">
                       <div className="w-2 h-2 bg-white rounded-full mt-2 flex-shrink-0"></div>
@@ -148,7 +161,10 @@ const DisclaimerSection = () => {
                 <div className="pt-8 border-t border-white/20">
                   <p className="text-sm text-blue-200">
                     Ada pertanyaan atau masukan? Hubungi kami di{" "}
-                    <a href="mailto:info@viralkan.id" className="text-white underline hover:no-underline">
+                    <a
+                      href="mailto:info@viralkan.id"
+                      className="text-white underline hover:no-underline"
+                    >
                       info@viralkan.id
                     </a>
                   </p>
@@ -162,4 +178,4 @@ const DisclaimerSection = () => {
   );
 };
 
-export default DisclaimerSection; 
+export default DisclaimerSection;

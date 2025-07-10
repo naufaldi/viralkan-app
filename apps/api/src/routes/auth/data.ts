@@ -1,5 +1,5 @@
-import type { Sql } from 'postgres'
-import type { CreateUser, DbUser } from './types'
+import type { Sql } from "postgres";
+import type { CreateUser, DbUser } from "./types";
 
 /**
  * Creates a new user in the database
@@ -7,28 +7,28 @@ import type { CreateUser, DbUser } from './types'
  */
 export const createUser = async (
   sql: Sql,
-  userData: CreateUser
+  userData: CreateUser,
 ): Promise<DbUser> => {
   const insertUser = `
     INSERT INTO users(firebase_uid, email, name, avatar_url, provider)
     VALUES($1, $2, $3, $4, $5)
     RETURNING id, firebase_uid, email, name, avatar_url, provider, created_at;
-  `
-  
+  `;
+
   const result = await sql.unsafe(insertUser, [
     userData.firebase_uid,
     userData.email,
     userData.name,
     userData.avatar_url || null,
-    userData.provider
-  ])
+    userData.provider,
+  ]);
 
   if (!result[0]) {
-    throw new Error('Failed to create user')
+    throw new Error("Failed to create user");
   }
 
-  return result[0] as unknown as DbUser
-}
+  return result[0] as unknown as DbUser;
+};
 
 /**
  * Finds user by Firebase UID
@@ -36,18 +36,18 @@ export const createUser = async (
  */
 export const findUserByFirebaseUid = async (
   sql: Sql,
-  firebaseUid: string
+  firebaseUid: string,
 ): Promise<DbUser | null> => {
   const findUser = `
     SELECT id, firebase_uid, email, name, avatar_url, provider, created_at
     FROM users 
     WHERE firebase_uid = $1;
-  `
-  
-  const result = await sql.unsafe(findUser, [firebaseUid])
-  
-  return result[0] ? (result[0] as unknown as DbUser) : null
-}
+  `;
+
+  const result = await sql.unsafe(findUser, [firebaseUid]);
+
+  return result[0] ? (result[0] as unknown as DbUser) : null;
+};
 
 /**
  * Finds user by ID
@@ -55,18 +55,18 @@ export const findUserByFirebaseUid = async (
  */
 export const findUserById = async (
   sql: Sql,
-  userId: number
+  userId: number,
 ): Promise<DbUser | null> => {
   const findUser = `
     SELECT id, firebase_uid, email, name, avatar_url, provider, created_at
     FROM users 
     WHERE id = $1;
-  `
-  
-  const result = await sql.unsafe(findUser, [userId])
-  
-  return result[0] ? (result[0] as unknown as DbUser) : null
-}
+  `;
+
+  const result = await sql.unsafe(findUser, [userId]);
+
+  return result[0] ? (result[0] as unknown as DbUser) : null;
+};
 
 /**
  * Finds user by email
@@ -74,18 +74,18 @@ export const findUserById = async (
  */
 export const findUserByEmail = async (
   sql: Sql,
-  email: string
+  email: string,
 ): Promise<DbUser | null> => {
   const findUser = `
     SELECT id, firebase_uid, email, name, avatar_url, provider, created_at
     FROM users 
     WHERE email = $1;
-  `
-  
-  const result = await sql.unsafe(findUser, [email])
-  
-  return result[0] ? (result[0] as unknown as DbUser) : null
-}
+  `;
+
+  const result = await sql.unsafe(findUser, [email]);
+
+  return result[0] ? (result[0] as unknown as DbUser) : null;
+};
 
 /**
  * Updates existing user data
@@ -94,28 +94,28 @@ export const findUserByEmail = async (
 export const updateUser = async (
   sql: Sql,
   firebaseUid: string,
-  updateData: Partial<CreateUser>
+  updateData: Partial<CreateUser>,
 ): Promise<DbUser> => {
   const updateUser = `
     UPDATE users 
     SET email = $2, name = $3, avatar_url = $4
     WHERE firebase_uid = $1
     RETURNING id, firebase_uid, email, name, avatar_url, provider, created_at;
-  `
-  
+  `;
+
   const result = await sql.unsafe(updateUser, [
     firebaseUid,
-    updateData.email || '',
-    updateData.name || '',
-    updateData.avatar_url || null
-  ])
+    updateData.email || "",
+    updateData.name || "",
+    updateData.avatar_url || null,
+  ]);
 
   if (!result[0]) {
-    throw new Error('Failed to update user')
+    throw new Error("Failed to update user");
   }
 
-  return result[0] as unknown as DbUser
-}
+  return result[0] as unknown as DbUser;
+};
 
 /**
  * Upserts user (insert or update)
@@ -123,7 +123,7 @@ export const updateUser = async (
  */
 export const upsertUser = async (
   sql: Sql,
-  userData: CreateUser
+  userData: CreateUser,
 ): Promise<DbUser> => {
   const upsertUser = `
     INSERT INTO users(firebase_uid, email, name, avatar_url, provider)
@@ -133,22 +133,22 @@ export const upsertUser = async (
         name = EXCLUDED.name,
         avatar_url = EXCLUDED.avatar_url
     RETURNING id, firebase_uid, email, name, avatar_url, provider, created_at;
-  `
-  
+  `;
+
   const result = await sql.unsafe(upsertUser, [
     userData.firebase_uid,
     userData.email,
     userData.name,
     userData.avatar_url || null,
-    userData.provider
-  ])
+    userData.provider,
+  ]);
 
   if (!result[0]) {
-    throw new Error('Failed to upsert user')
+    throw new Error("Failed to upsert user");
   }
 
-  return result[0] as unknown as DbUser
-}
+  return result[0] as unknown as DbUser;
+};
 
 /**
  * Soft deletes a user (marks as deleted)
@@ -156,18 +156,18 @@ export const upsertUser = async (
  */
 export const softDeleteUser = async (
   sql: Sql,
-  userId: number
+  userId: number,
 ): Promise<boolean> => {
   const deleteUser = `
     UPDATE users 
     SET deleted_at = NOW()
     WHERE id = $1 AND deleted_at IS NULL;
-  `
-  
-  const result = await sql.unsafe(deleteUser, [userId])
-  
-  return result.count > 0
-}
+  `;
+
+  const result = await sql.unsafe(deleteUser, [userId]);
+
+  return result.count > 0;
+};
 
 /**
  * Checks if user exists by Firebase UID
@@ -175,18 +175,18 @@ export const softDeleteUser = async (
  */
 export const userExistsByFirebaseUid = async (
   sql: Sql,
-  firebaseUid: string
+  firebaseUid: string,
 ): Promise<boolean> => {
   const checkUser = `
     SELECT 1 FROM users 
     WHERE firebase_uid = $1 
     LIMIT 1;
-  `
-  
-  const result = await sql.unsafe(checkUser, [firebaseUid])
-  
-  return result.length > 0
-}
+  `;
+
+  const result = await sql.unsafe(checkUser, [firebaseUid]);
+
+  return result.length > 0;
+};
 
 /**
  * Checks if user exists by email
@@ -194,18 +194,18 @@ export const userExistsByFirebaseUid = async (
  */
 export const userExistsByEmail = async (
   sql: Sql,
-  email: string
+  email: string,
 ): Promise<boolean> => {
   const checkUser = `
     SELECT 1 FROM users 
     WHERE email = $1 
     LIMIT 1;
-  `
-  
-  const result = await sql.unsafe(checkUser, [email])
-  
-  return result.length > 0
-}
+  `;
+
+  const result = await sql.unsafe(checkUser, [email]);
+
+  return result.length > 0;
+};
 
 /**
  * Gets user statistics
@@ -213,7 +213,7 @@ export const userExistsByEmail = async (
  */
 export const getUserStats = async (
   sql: Sql,
-  userId: number
+  userId: number,
 ): Promise<{
   total_reports: number;
   reports_by_category: { berlubang: number; retak: number; lainnya: number };
@@ -232,27 +232,31 @@ export const getUserStats = async (
     LEFT JOIN reports r ON r.user_id = u.id
     WHERE u.id = $1
     GROUP BY u.id, u.created_at;
-  `
-  
-  const result = await sql.unsafe(getStats, [userId])
-  
+  `;
+
+  const result = await sql.unsafe(getStats, [userId]);
+
   if (!result[0]) {
-    throw new Error('User not found')
+    throw new Error("User not found");
   }
 
-  const row = result[0] as any
-  const joinDate = new Date(row.join_date)
-  const now = new Date()
-  const accountAgeDays = Math.floor((now.getTime() - joinDate.getTime()) / (1000 * 60 * 60 * 24))
+  const row = result[0] as any;
+  const joinDate = new Date(row.join_date);
+  const now = new Date();
+  const accountAgeDays = Math.floor(
+    (now.getTime() - joinDate.getTime()) / (1000 * 60 * 60 * 24),
+  );
 
   return {
     total_reports: parseInt(row.total_reports) || 0,
     reports_by_category: {
       berlubang: parseInt(row.berlubang_count) || 0,
       retak: parseInt(row.retak_count) || 0,
-      lainnya: parseInt(row.lainnya_count) || 0
+      lainnya: parseInt(row.lainnya_count) || 0,
     },
-    last_report_date: row.last_report_date ? new Date(row.last_report_date) : null,
-    account_age_days: accountAgeDays
-  }
-} 
+    last_report_date: row.last_report_date
+      ? new Date(row.last_report_date)
+      : null,
+    account_age_days: accountAgeDays,
+  };
+};

@@ -1,5 +1,5 @@
 // Public exports for the reports feature
-export { reportsRouter } from './api';
+export { reportsRouter } from "./api";
 export type {
   Report,
   ReportWithUser,
@@ -7,7 +7,7 @@ export type {
   ReportQuery,
   ReportParams,
   PaginatedReports,
-} from './types';
+} from "./types";
 
 // Export key business logic functions that might be needed elsewhere
 export {
@@ -17,5 +17,5 @@ export {
   canUserEditReport,
   canUserDeleteReport,
   isReportStale,
-  formatReportForDisplay
-} from './core'; 
+  formatReportForDisplay,
+} from "./core";

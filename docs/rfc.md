@@ -14,8 +14,8 @@
 
 ## 1 · Scope
 
-* **IN** — Google OAuth, image upload to Cloudflare R2, public list page, Postgres schema with GIS columns, multi-step form, pagination, reCAPTCHA, PWA capabilities.
-* **OUT** — EXIF parsing, map view, admin dashboard (future V2+).
+- **IN** — Google OAuth, image upload to Cloudflare R2, public list page, Postgres schema with GIS columns, multi-step form, pagination, reCAPTCHA, PWA capabilities.
+- **OUT** — EXIF parsing, map view, admin dashboard (future V2+).
 
 ---
 
@@ -77,48 +77,51 @@ viralkan/
 // turbo.json
 {
   "pipeline": {
-    "dev":    { "cache": false, "dependsOn": ["^dev"], "outputs": [] },
-    "build":  { "outputs": ["dist/**"] },
-    "lint":   {},
-    "test":   {}
-  }
+    "dev": { "cache": false, "dependsOn": ["^dev"], "outputs": [] },
+    "build": { "outputs": ["dist/**"] },
+    "lint": {},
+    "test": {},
+  },
 }
 ```
 
-*`bunx turbo run dev`* spins up API (port 3000) & Web (5173) with watch mode.
+_`bunx turbo run dev`_ spins up API (port 3000) & Web (5173) with watch mode.
 
 ---
 
 ## 4 · Page Architecture & Routes
 
-| Route | Purpose | Auth Required | API Endpoints | Key Components |
-|-------|---------|---------------|---------------|----------------|
-| `/` | Landing page | No | None | Hero, CTA buttons |
-| `/reports` | Public reports list | No | `GET /api/reports` | DataTable, pagination |
-| `/reports/[id]` | Report detail | No | `GET /api/reports/:id` | ImageViewer, metadata |
-| `/login` | Authentication | No | Google OAuth | LoginForm |
-| `/auth/callback` | OAuth callback | No | Token exchange | LoadingSpinner |
-| `/dashboard` | User dashboard | Yes | `GET /api/me/*` | Stats, ReportCard |
-| `/dashboard/reports` | User reports list | Yes | `GET /api/me/reports` | DataTable |
-| `/reports/create` | Create report form | Yes | `POST /api/reports` | ImageUpload, Form |
-| `/reports/create/success` | Success confirmation | Yes | None | SuccessMessage |
-| `/404` | Not found | No | None | ErrorPage |
-| `/500` | Server error | No | None | ErrorPage |
-| `/offline` | Offline state | No | None | OfflinePage |
+| Route                     | Purpose              | Auth Required | API Endpoints          | Key Components        |
+| ------------------------- | -------------------- | ------------- | ---------------------- | --------------------- |
+| `/`                       | Landing page         | No            | None                   | Hero, CTA buttons     |
+| `/reports`                | Public reports list  | No            | `GET /api/reports`     | DataTable, pagination |
+| `/reports/[id]`           | Report detail        | No            | `GET /api/reports/:id` | ImageViewer, metadata |
+| `/login`                  | Authentication       | No            | Google OAuth           | LoginForm             |
+| `/auth/callback`          | OAuth callback       | No            | Token exchange         | LoadingSpinner        |
+| `/dashboard`              | User dashboard       | Yes           | `GET /api/me/*`        | Stats, ReportCard     |
+| `/dashboard/reports`      | User reports list    | Yes           | `GET /api/me/reports`  | DataTable             |
+| `/reports/create`         | Create report form   | Yes           | `POST /api/reports`    | ImageUpload, Form     |
+| `/reports/create/success` | Success confirmation | Yes           | None                   | SuccessMessage        |
+| `/404`                    | Not found            | No            | None                   | ErrorPage             |
+| `/500`                    | Server error         | No            | None                   | ErrorPage             |
+| `/offline`                | Offline state        | No            | None                   | OfflinePage           |
 
 ### 4.1 User Flows
 
 **Flow A: Anonymous User Browsing**
+
 ```
 [Landing] → [Public Reports] → [Report Detail] → [Login] → [Dashboard]
 ```
 
 **Flow B: Authenticated User Creating Report**
+
 ```
 [Dashboard] → [Create Report] → [Upload Image] → [Fill Details] → [Review] → [Success]
 ```
 
 **Flow C: Error Handling**
+
 ```
 [Any Page] → [Error] → [Error Page] → [Recovery Action]
 ```
@@ -128,6 +131,7 @@ viralkan/
 ## 5 · API Endpoints (Comprehensive)
 
 ### 5.1 Authentication
+
 ```http
 GET  /api/auth/google     -> 302 Redirect to Google OAuth
 POST /api/auth/callback   -> 200 OK {token} | 400 Error
@@ -136,6 +140,7 @@ GET  /api/auth/me         -> 200 OK {user} | 401 Unauthorized
 ```
 
 ### 5.2 Reports (Public)
+
 ```http
 GET /api/reports?page=1&limit=10&category=berlubang
   -> 200 OK {items: Report[], total: number, page: number}
@@ -145,6 +150,7 @@ GET /api/reports/:id
 ```
 
 ### 5.3 Reports (User-specific)
+
 ```http
 GET /api/me/reports?page=1&limit=10
   -> 200 OK {items: Report[], total: number} | 401
@@ -159,6 +165,7 @@ POST /api/reports
 ```
 
 ### 5.4 File Upload
+
 ```http
 POST /api/upload/signed-url
   -> 200 OK {uploadUrl: string, fileKey: string} | 401
@@ -166,6 +173,7 @@ POST /api/upload/signed-url
 ```
 
 ### 5.5 Error Responses
+
 ```json
 {
   "error": {
@@ -181,6 +189,7 @@ POST /api/upload/signed-url
 ## 6 · Component Library Requirements
 
 ### 6.1 Shared UI Components
+
 ```typescript
 // packages/ui/src/components/
 ├─ Header.tsx         # Navigation with auth state
@@ -200,6 +209,7 @@ POST /api/upload/signed-url
 ```
 
 ### 6.2 shadcn/ui Integration
+
 ```typescript
 // packages/ui/components/ui/ (from shadcn)
 ├─ button.tsx
@@ -276,6 +286,7 @@ CREATE TABLE rate_limits (
 5. **Open** `http://localhost:5173` → upload a test pothole.
 
 ### 8.1 Environment Variables
+
 ```bash
 # API (.env)
 DATABASE_URL=postgres://postgres:password@localhost:5432/viralkan
@@ -371,49 +382,52 @@ volumes:
 ## 10 · Security & Performance
 
 ### 10.1 Rate Limiting
+
 ```typescript
 // Per user limits
 const RATE_LIMITS = {
-  REPORT_CREATION: { max: 10, window: '24h' },
-  IMAGE_UPLOAD: { max: 20, window: '1h' },
-  API_REQUESTS: { max: 1000, window: '1h' }
+  REPORT_CREATION: { max: 10, window: "24h" },
+  IMAGE_UPLOAD: { max: 20, window: "1h" },
+  API_REQUESTS: { max: 1000, window: "1h" },
 };
 ```
 
 ### 10.2 Image Processing
+
 ```typescript
 // Client-side validation
 const IMAGE_CONSTRAINTS = {
   maxSize: 10 * 1024 * 1024, // 10MB
-  allowedTypes: ['image/jpeg', 'image/png'],
-  maxDimensions: { width: 4096, height: 4096 }
+  allowedTypes: ["image/jpeg", "image/png"],
+  maxDimensions: { width: 4096, height: 4096 },
 };
 ```
 
 ### 10.3 PWA Configuration
+
 ```typescript
 // vite.config.ts
-import { VitePWA } from 'vite-plugin-pwa';
+import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig({
   plugins: [
     VitePWA({
-      registerType: 'autoUpdate',
+      registerType: "autoUpdate",
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+        globPatterns: ["**/*.{js,css,html,ico,png,svg}"],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/api\.viralkan\.app\/api\/reports/,
-            handler: 'NetworkFirst',
+            handler: "NetworkFirst",
             options: {
-              cacheName: 'api-cache',
-              expiration: { maxEntries: 100, maxAgeSeconds: 300 }
-            }
-          }
-        ]
-      }
-    })
-  ]
+              cacheName: "api-cache",
+              expiration: { maxEntries: 100, maxAgeSeconds: 300 },
+            },
+          },
+        ],
+      },
+    }),
+  ],
 });
 ```
 
@@ -421,41 +435,42 @@ export default defineConfig({
 
 ## 11 · Milestone Checklist (Solo‑Dev)
 
-| #  | Deliverable                                    | Est (d) | Dependencies |
-|----|------------------------------------------------|---------|--------------|
-| 1  | VPS ready, Docker + Traefik installed         | 0.5     | -            |
-| 2  | Cloudflare R2 bucket & DNS token               | 0.5     | -            |
-| 3  | Turbo monorepo scaffold                        | 0.5     | -            |
-| 4  | Tailwind v4 + shadcn/ui setup                 | 1       | 3            |
-| 5  | Component library (ui package)                 | 1.5     | 4            |
-| 6  | Google OAuth with Firebase                     | 1.5     | 3            |
-| 7  | Postgres migrations + PostGIS                  | 1       | 3            |
-| 8  | R2 signed-URL upload service                   | 1.5     | 2, 6         |
-| 9  | Multi-step upload form + preview               | 2       | 5, 8         |
-| 10 | Public reports list with pagination            | 1.5     | 5, 7         |
-| 11 | User dashboard with stats                      | 1.5     | 6, 7         |
-| 12 | Report detail pages                            | 1       | 5, 7         |
-| 13 | Error handling + PWA setup                     | 1       | 5            |
-| 14 | reCAPTCHA integration                          | 1       | 9            |
-| 15 | Rate limiting middleware                       | 1       | 6, 7         |
-| 16 | Docker builds + compose.yml                    | 1       | 1            |
-| 17 | GitHub Actions CI/CD                           | 1       | 16           |
-| 18 | QA testing + bug fixes                         | 2       | All          |
-| **Total** | **20 days**                                | **20**  |              |
+| #         | Deliverable                           | Est (d) | Dependencies |
+| --------- | ------------------------------------- | ------- | ------------ |
+| 1         | VPS ready, Docker + Traefik installed | 0.5     | -            |
+| 2         | Cloudflare R2 bucket & DNS token      | 0.5     | -            |
+| 3         | Turbo monorepo scaffold               | 0.5     | -            |
+| 4         | Tailwind v4 + shadcn/ui setup         | 1       | 3            |
+| 5         | Component library (ui package)        | 1.5     | 4            |
+| 6         | Google OAuth with Firebase            | 1.5     | 3            |
+| 7         | Postgres migrations + PostGIS         | 1       | 3            |
+| 8         | R2 signed-URL upload service          | 1.5     | 2, 6         |
+| 9         | Multi-step upload form + preview      | 2       | 5, 8         |
+| 10        | Public reports list with pagination   | 1.5     | 5, 7         |
+| 11        | User dashboard with stats             | 1.5     | 6, 7         |
+| 12        | Report detail pages                   | 1       | 5, 7         |
+| 13        | Error handling + PWA setup            | 1       | 5            |
+| 14        | reCAPTCHA integration                 | 1       | 9            |
+| 15        | Rate limiting middleware              | 1       | 6, 7         |
+| 16        | Docker builds + compose.yml           | 1       | 1            |
+| 17        | GitHub Actions CI/CD                  | 1       | 16           |
+| 18        | QA testing + bug fixes                | 2       | All          |
+| **Total** | **20 days**                           | **20**  |              |
 
 ---
 
 ## 12 · Testing Strategy
 
 ### 12.1 Unit Tests
+
 ```typescript
 // API routes testing
-describe('POST /api/reports', () => {
-  it('creates report with valid data', async () => {
-    const response = await app.request('/api/reports', {
-      method: 'POST',
+describe("POST /api/reports", () => {
+  it("creates report with valid data", async () => {
+    const response = await app.request("/api/reports", {
+      method: "POST",
       headers: { Authorization: `Bearer ${token}` },
-      body: formData
+      body: formData,
     });
     expect(response.status).toBe(201);
   });
@@ -463,10 +478,11 @@ describe('POST /api/reports', () => {
 ```
 
 ### 12.2 Integration Tests
+
 ```typescript
 // Database integration
-describe('Reports CRUD', () => {
-  it('creates and retrieves report', async () => {
+describe("Reports CRUD", () => {
+  it("creates and retrieves report", async () => {
     const report = await createReport(testData);
     const retrieved = await getReport(report.id);
     expect(retrieved.category).toBe(testData.category);
@@ -475,16 +491,17 @@ describe('Reports CRUD', () => {
 ```
 
 ### 12.3 E2E Tests (Playwright)
+
 ```typescript
 // User flow testing
-test('complete report creation flow', async ({ page }) => {
-  await page.goto('/login');
+test("complete report creation flow", async ({ page }) => {
+  await page.goto("/login");
   await page.click('[data-testid="google-login"]');
-  await page.goto('/reports/create');
-  await page.setInputFiles('[data-testid="image-upload"]', 'test-image.jpg');
-  await page.selectOption('[data-testid="category"]', 'berlubang');
-  await page.fill('[data-testid="street"]', 'Jl. Test');
-  await page.fill('[data-testid="location"]', 'Test location');
+  await page.goto("/reports/create");
+  await page.setInputFiles('[data-testid="image-upload"]', "test-image.jpg");
+  await page.selectOption('[data-testid="category"]', "berlubang");
+  await page.fill('[data-testid="street"]', "Jl. Test");
+  await page.fill('[data-testid="location"]', "Test location");
   await page.click('[data-testid="submit"]');
   await expect(page.locator('[data-testid="success-message"]')).toBeVisible();
 });
@@ -495,26 +512,28 @@ test('complete report creation flow', async ({ page }) => {
 ## 13 · Monitoring & Observability
 
 ### 13.1 Metrics Collection
+
 ```typescript
 // Custom metrics
 const metrics = {
-  reportCreations: new Counter('reports_created_total'),
-  uploadDuration: new Histogram('upload_duration_seconds'),
-  authFailures: new Counter('auth_failures_total')
+  reportCreations: new Counter("reports_created_total"),
+  uploadDuration: new Histogram("upload_duration_seconds"),
+  authFailures: new Counter("auth_failures_total"),
 };
 ```
 
 ### 13.2 Health Checks
+
 ```typescript
 // API health endpoint
-app.get('/health', async (c) => {
+app.get("/health", async (c) => {
   const dbHealth = await checkDatabase();
   const r2Health = await checkR2Connection();
-  
+
   return c.json({
-    status: dbHealth && r2Health ? 'healthy' : 'unhealthy',
+    status: dbHealth && r2Health ? "healthy" : "unhealthy",
     timestamp: new Date().toISOString(),
-    services: { database: dbHealth, storage: r2Health }
+    services: { database: dbHealth, storage: r2Health },
   });
 });
 ```
@@ -523,12 +542,12 @@ app.get('/health', async (c) => {
 
 ## 14 · Open Points
 
-* **Avatar URL** — hot‑link Google photo vs cache? (lean = hot‑link)
-* **Image retention** — purge >12 months via nightly job?
-* **Monitoring** — Traefik/Loki log ship later.
-* **CDN** — Cloudflare in front of R2 for faster image delivery?
-* **Backup strategy** — Automated DB backups to R2?
+- **Avatar URL** — hot‑link Google photo vs cache? (lean = hot‑link)
+- **Image retention** — purge >12 months via nightly job?
+- **Monitoring** — Traefik/Loki log ship later.
+- **CDN** — Cloudflare in front of R2 for faster image delivery?
+- **Backup strategy** — Automated DB backups to R2?
 
 ---
 
-*This comprehensive RFC incorporates all PRD requirements while maintaining implementation focus. Ready for development sprint planning.*
+_This comprehensive RFC incorporates all PRD requirements while maintaining implementation focus. Ready for development sprint planning._

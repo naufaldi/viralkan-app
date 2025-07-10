@@ -1,10 +1,10 @@
-import postgres from 'postgres'
+import postgres from "postgres";
 
 // Secure connection using only environment variables
-const connectionString = process.env.DATABASE_URL
+const connectionString = process.env.DATABASE_URL;
 
 if (!connectionString) {
-  throw new Error('DATABASE_URL environment variable is required')
+  throw new Error("DATABASE_URL environment variable is required");
 }
 
 export const sql = postgres(connectionString, {
@@ -12,16 +12,16 @@ export const sql = postgres(connectionString, {
   idle_timeout: 20,
   connect_timeout: 30,
   prepare: true,
-  onnotice: () => {}
-})
+  onnotice: () => {},
+});
 
 export const testConnection = async (): Promise<boolean> => {
   try {
-    await sql`SELECT 1`
-    console.log('✅ Database connection successful')
-    return true
+    await sql`SELECT 1`;
+    console.log("✅ Database connection successful");
+    return true;
   } catch (error) {
-    console.error('❌ Database connection failed:', error)
-    return false
+    console.error("❌ Database connection failed:", error);
+    return false;
   }
-} 
+};

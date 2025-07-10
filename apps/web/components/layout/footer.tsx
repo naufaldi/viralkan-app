@@ -2,7 +2,15 @@ import { Button } from "@repo/ui/components/ui/button";
 import { Card, CardContent } from "@repo/ui/components/ui/card";
 import { Separator } from "@repo/ui/components/ui/separator";
 import { Badge } from "@repo/ui/components/ui/badge";
-import { Heart, Twitter, Facebook, Instagram, Mail, MapPin, Phone } from "lucide-react";
+import {
+  Heart,
+  Twitter,
+  Facebook,
+  Instagram,
+  Mail,
+  MapPin,
+  Phone,
+} from "lucide-react";
 
 const Footer = () => {
   const socialLinks = [
@@ -40,15 +48,19 @@ const Footer = () => {
                 </div>
                 <div>
                   <span className="text-2xl font-bold">Viralkan</span>
-                  <Badge variant="secondary" className="ml-3 bg-blue-500/20 text-blue-300 border-blue-500/30">
+                  <Badge
+                    variant="secondary"
+                    className="ml-3 bg-blue-500/20 text-blue-300 border-blue-500/30"
+                  >
                     Platform Komunitas
                   </Badge>
                 </div>
               </div>
-              
+
               <p className="text-slate-300 leading-relaxed max-w-md">
-                Platform komunitas untuk melaporkan dan menghindari jalan rusak di seluruh Indonesia. 
-                Jadikan suaramu terdengar lewat kekuatan media sosial.
+                Platform komunitas untuk melaporkan dan menghindari jalan rusak
+                di seluruh Indonesia. Jadikan suaramu terdengar lewat kekuatan
+                media sosial.
               </p>
 
               {/* Contact Info */}
@@ -137,9 +149,14 @@ const Footer = () => {
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                <span className="text-xs text-slate-400">Semua sistem berjalan normal</span>
+                <span className="text-xs text-slate-400">
+                  Semua sistem berjalan normal
+                </span>
               </div>
-              <Badge variant="outline" className="border-slate-700 text-slate-400 text-xs">
+              <Badge
+                variant="outline"
+                className="border-slate-700 text-slate-400 text-xs"
+              >
                 v1.0.0-beta
               </Badge>
             </div>
@@ -152,7 +169,10 @@ const Footer = () => {
             <CardContent className="p-6 text-center">
               <div className="flex items-center justify-center gap-3 text-sm text-slate-300">
                 <span className="text-red-400 text-lg">🇮🇩</span>
-                <span>Bangga buatan anak negeri untuk kemajuan infrastruktur Indonesia</span>
+                <span>
+                  Bangga buatan anak negeri untuk kemajuan infrastruktur
+                  Indonesia
+                </span>
                 <span className="text-red-400 text-lg">🇮🇩</span>
               </div>
             </CardContent>
@@ -163,4 +183,4 @@ const Footer = () => {
   );
 };
 
-export default Footer; 
+export default Footer;

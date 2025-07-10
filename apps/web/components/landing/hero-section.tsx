@@ -21,7 +21,10 @@ const HeroSection = () => {
           {/* Left Content */}
           <div className="text-center lg:text-left space-y-8">
             {/* Platform Badge */}
-            <Badge variant="secondary" className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm border border-blue-200/50 text-slate-700 text-sm font-medium hover:bg-white/90 transition-colors">
+            <Badge
+              variant="secondary"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm border border-blue-200/50 text-slate-700 text-sm font-medium hover:bg-white/90 transition-colors"
+            >
               <span className="text-red-500">🇮🇩</span>
               Platform Komunitas Indonesia
             </Badge>
@@ -37,9 +40,9 @@ const HeroSection = () => {
                   Viralkan!
                 </span>
               </h1>
-              
+
               <p className="text-xl text-slate-600 max-w-2xl leading-relaxed">
-                Petakan, bagikan, dan hindari jalan rusak di seluruh Indonesia. 
+                Petakan, bagikan, dan hindari jalan rusak di seluruh Indonesia.
                 Jadikan suaramu terdengar lewat kekuatan media sosial.
               </p>
             </div>
@@ -47,16 +50,35 @@ const HeroSection = () => {
             {/* Stats Cards */}
             <div className="flex flex-wrap gap-6 justify-center lg:justify-start">
               {[
-                { number: "1,247+", label: "Laporan", color: "from-blue-500 to-cyan-500" },
-                { number: "5,890+", label: "Dibagikan", color: "from-purple-500 to-pink-500" },
-                { number: "23", label: "Kota", color: "from-indigo-500 to-blue-500" }
+                {
+                  number: "1,247+",
+                  label: "Laporan",
+                  color: "from-blue-500 to-cyan-500",
+                },
+                {
+                  number: "5,890+",
+                  label: "Dibagikan",
+                  color: "from-purple-500 to-pink-500",
+                },
+                {
+                  number: "23",
+                  label: "Kota",
+                  color: "from-indigo-500 to-blue-500",
+                },
               ].map((stat, index) => (
-                <Card key={index} className="bg-white/70 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                <Card
+                  key={index}
+                  className="bg-white/70 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                >
                   <CardContent className="p-4 text-center">
-                    <div className={`text-2xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+                    <div
+                      className={`text-2xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}
+                    >
                       {stat.number}
                     </div>
-                    <div className="text-sm text-slate-600 font-medium">{stat.label}</div>
+                    <div className="text-sm text-slate-600 font-medium">
+                      {stat.label}
+                    </div>
                   </CardContent>
                 </Card>
               ))}
@@ -64,8 +86,8 @@ const HeroSection = () => {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 className="group bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
               >
                 <MapPin className="mr-2 h-5 w-5" />
@@ -74,10 +96,10 @@ const HeroSection = () => {
                   →
                 </div>
               </Button>
-              
-              <Button 
-                variant="outline" 
-                size="lg" 
+
+              <Button
+                variant="outline"
+                size="lg"
                 className="bg-white/80 backdrop-blur-sm border-slate-200 hover:bg-white hover:border-slate-300 text-slate-700 shadow-md hover:shadow-lg transition-all duration-300"
               >
                 <Play className="mr-2 h-4 w-4" />
@@ -95,7 +117,7 @@ const HeroSection = () => {
                 <div className="absolute -top-4 -right-4 bg-gradient-to-br from-blue-500 to-purple-500 rounded-2xl p-3 shadow-lg animate-bounce">
                   <MapPin className="h-6 w-6 text-white" />
                 </div>
-                
+
                 <div className="absolute -bottom-4 -left-4 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl p-3 shadow-lg animate-pulse">
                   <Share2 className="h-6 w-6 text-white" />
                 </div>
@@ -107,10 +129,14 @@ const HeroSection = () => {
                     <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
                     <div className="w-3 h-3 bg-green-500 rounded-full"></div>
                   </div>
-                  
+
                   <div>
-                    <h3 className="text-xl font-semibold text-slate-900 mb-1">Laporan Jalan Rusak</h3>
-                    <p className="text-slate-600 text-sm">Jl. Sudirman, Jakarta Pusat</p>
+                    <h3 className="text-xl font-semibold text-slate-900 mb-1">
+                      Laporan Jalan Rusak
+                    </h3>
+                    <p className="text-slate-600 text-sm">
+                      Jl. Sudirman, Jakarta Pusat
+                    </p>
                   </div>
                 </div>
 
@@ -121,7 +147,9 @@ const HeroSection = () => {
                       <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center mx-auto">
                         <MapPin className="h-8 w-8 text-white" />
                       </div>
-                      <div className="text-sm text-slate-600 font-medium">Lokasi Terdeteksi</div>
+                      <div className="text-sm text-slate-600 font-medium">
+                        Lokasi Terdeteksi
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -132,7 +160,10 @@ const HeroSection = () => {
                     <Share2 className="mr-2 h-4 w-4" />
                     Bagikan
                   </Button>
-                  <Button variant="outline" className="flex-1 border-slate-200 hover:bg-slate-50">
+                  <Button
+                    variant="outline"
+                    className="flex-1 border-slate-200 hover:bg-slate-50"
+                  >
                     <Eye className="mr-2 h-4 w-4" />
                     Detail
                   </Button>
@@ -151,4 +182,4 @@ const HeroSection = () => {
   );
 };
 
-export default HeroSection; 
+export default HeroSection;

@@ -1,14 +1,16 @@
 // Common types shared across all API features
 
 // Application Result Pattern for consistent error handling
-export type AppResult<T> = {
-  success: true;
-  data: T;
-} | {
-  success: false;
-  error: string;
-  statusCode: number;
-};
+export type AppResult<T> =
+  | {
+      success: true;
+      data: T;
+    }
+  | {
+      success: false;
+      error: string;
+      statusCode: number;
+    };
 
 // Helper functions for AppResult
 export const createSuccess = <T>(data: T): AppResult<T> => ({
@@ -16,7 +18,10 @@ export const createSuccess = <T>(data: T): AppResult<T> => ({
   data,
 });
 
-export const createError = (error: string, statusCode: number): AppResult<never> => ({
+export const createError = (
+  error: string,
+  statusCode: number,
+): AppResult<never> => ({
   success: false,
   error,
   statusCode,
@@ -24,43 +29,46 @@ export const createError = (error: string, statusCode: number): AppResult<never>
 
 // Base Custom Error Classes
 export class AppError extends Error {
-  constructor(public message: string, public statusCode: number = 500) {
+  constructor(
+    public message: string,
+    public statusCode: number = 500,
+  ) {
     super(message);
-    this.name = 'AppError';
+    this.name = "AppError";
   }
 }
 
 export class ValidationError extends AppError {
   constructor(message: string) {
     super(message, 400);
-    this.name = 'ValidationError';
+    this.name = "ValidationError";
   }
 }
 
 export class UnauthorizedError extends AppError {
-  constructor(message: string = 'Unauthorized') {
+  constructor(message: string = "Unauthorized") {
     super(message, 401);
-    this.name = 'UnauthorizedError';
+    this.name = "UnauthorizedError";
   }
 }
 
 export class ForbiddenError extends AppError {
-  constructor(message: string = 'Forbidden') {
+  constructor(message: string = "Forbidden") {
     super(message, 403);
-    this.name = 'ForbiddenError';
+    this.name = "ForbiddenError";
   }
 }
 
 export class NotFoundError extends AppError {
-  constructor(message: string = 'Resource not found') {
+  constructor(message: string = "Resource not found") {
     super(message, 404);
-    this.name = 'NotFoundError';
+    this.name = "NotFoundError";
   }
 }
 
 export class ConflictError extends AppError {
-  constructor(message: string = 'Resource conflict') {
+  constructor(message: string = "Resource conflict") {
     super(message, 409);
-    this.name = 'ConflictError';
+    this.name = "ConflictError";
   }
-} 
+}

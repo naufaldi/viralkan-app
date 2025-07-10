@@ -1,18 +1,18 @@
-import { sql } from '@/db/connection';
-import { createSuccess, createError } from '@/types';
-import type { 
-  Report, 
-  ReportWithUser, 
-  CreateReportInput, 
+import { sql } from "@/db/connection";
+import { createSuccess, createError } from "@/types";
+import type {
+  Report,
+  ReportWithUser,
+  CreateReportInput,
   ReportQuery,
-  PaginatedReports
-} from './types';
-import type { AppResult } from '@/types';
+  PaginatedReports,
+} from "./types";
+import type { AppResult } from "@/types";
 
 // Database operations for reports
 
 export const findReportsWithPagination = async (
-  query: ReportQuery
+  query: ReportQuery,
 ): Promise<AppResult<PaginatedReports>> => {
   try {
     const { page, limit, category, user_id } = query;
@@ -34,9 +34,10 @@ export const findReportsWithPagination = async (
       paramIndex++;
     }
 
-    const whereClause = whereConditions.length > 0 
-      ? `WHERE ${whereConditions.join(' AND ')}` 
-      : '';
+    const whereClause =
+      whereConditions.length > 0
+        ? `WHERE ${whereConditions.join(" AND ")}`
+        : "";
 
     // Get reports with user information
     const reportsQuery = `
@@ -70,7 +71,7 @@ export const findReportsWithPagination = async (
 
     const [reports, countResult] = await Promise.all([
       sql.unsafe(reportsQuery, params),
-      sql.unsafe(countQuery, params.slice(0, -2)) // Remove limit and offset for count
+      sql.unsafe(countQuery, params.slice(0, -2)), // Remove limit and offset for count
     ]);
 
     const total = Number((countResult as any)[0]?.total || 0);
@@ -81,17 +82,19 @@ export const findReportsWithPagination = async (
       total,
       page,
       limit,
-      pages
+      pages,
     };
 
     return createSuccess(paginatedResult);
   } catch (error) {
-    console.error('Database error in findReportsWithPagination:', error);
-    return createError('Failed to fetch reports from database', 500);
+    console.error("Database error in findReportsWithPagination:", error);
+    return createError("Failed to fetch reports from database", 500);
   }
 };
 
-export const findReportById = async (id: number): Promise<AppResult<ReportWithUser>> => {
+export const findReportById = async (
+  id: number,
+): Promise<AppResult<ReportWithUser>> => {
   try {
     const query = `
       SELECT 
@@ -114,19 +117,19 @@ export const findReportById = async (id: number): Promise<AppResult<ReportWithUs
     const result = await sql.unsafe(query, [id]);
 
     if (result.length === 0) {
-      return createError('Report not found', 404);
+      return createError("Report not found", 404);
     }
 
     return createSuccess(result[0] as unknown as ReportWithUser);
   } catch (error) {
-    console.error('Database error in findReportById:', error);
-    return createError('Failed to fetch report from database', 500);
+    console.error("Database error in findReportById:", error);
+    return createError("Failed to fetch report from database", 500);
   }
 };
 
 export const createReport = async (
   userId: number,
-  reportData: CreateReportInput
+  reportData: CreateReportInput,
 ): Promise<AppResult<{ id: number }>> => {
   try {
     const query = `
@@ -150,26 +153,26 @@ export const createReport = async (
       reportData.street_name,
       reportData.location_text,
       reportData.lat || null,
-      reportData.lon || null
+      reportData.lon || null,
     ];
 
     const result = await sql.unsafe(query, params);
 
     if (result.length === 0) {
-      return createError('Failed to create report', 500);
+      return createError("Failed to create report", 500);
     }
 
     return createSuccess({ id: result[0].id });
   } catch (error) {
-    console.error('Database error in createReport:', error);
-    return createError('Failed to create report in database', 500);
+    console.error("Database error in createReport:", error);
+    return createError("Failed to create report in database", 500);
   }
 };
 
 export const updateReport = async (
   id: number,
   userId: number,
-  reportData: Partial<CreateReportInput>
+  reportData: Partial<CreateReportInput>,
 ): Promise<AppResult<boolean>> => {
   try {
     // First check if report exists and belongs to user
@@ -181,7 +184,7 @@ export const updateReport = async (
     const existsResult = await sql.unsafe(existsQuery, [id, userId]);
 
     if (existsResult.length === 0) {
-      return createError('Report not found or access denied', 404);
+      return createError("Report not found or access denied", 404);
     }
 
     // Build dynamic update query
@@ -226,12 +229,12 @@ export const updateReport = async (
     }
 
     if (updateFields.length === 0) {
-      return createError('No fields to update', 400);
+      return createError("No fields to update", 400);
     }
 
     const updateQuery = `
       UPDATE reports 
-      SET ${updateFields.join(', ')}
+      SET ${updateFields.join(", ")}
       WHERE id = $${paramIndex} AND user_id = $${paramIndex + 1}
     `;
 
@@ -241,14 +244,14 @@ export const updateReport = async (
 
     return createSuccess(true);
   } catch (error) {
-    console.error('Database error in updateReport:', error);
-    return createError('Failed to update report in database', 500);
+    console.error("Database error in updateReport:", error);
+    return createError("Failed to update report in database", 500);
   }
 };
 
 export const deleteReport = async (
   id: number,
-  userId: number
+  userId: number,
 ): Promise<AppResult<boolean>> => {
   try {
     const query = `
@@ -259,24 +262,24 @@ export const deleteReport = async (
     const result = await sql.unsafe(query, [id, userId]);
 
     if ((result as any).rowCount === 0) {
-      return createError('Report not found or access denied', 404);
+      return createError("Report not found or access denied", 404);
     }
 
     return createSuccess(true);
   } catch (error) {
-    console.error('Database error in deleteReport:', error);
-    return createError('Failed to delete report from database', 500);
+    console.error("Database error in deleteReport:", error);
+    return createError("Failed to delete report from database", 500);
   }
 };
 
 export const findReportsByUserId = async (
   userId: number,
-  query: Pick<ReportQuery, 'page' | 'limit' | 'category'>
+  query: Pick<ReportQuery, "page" | "limit" | "category">,
 ): Promise<AppResult<PaginatedReports>> => {
   const extendedQuery: ReportQuery = {
     ...query,
-    user_id: userId.toString()
+    user_id: userId.toString(),
   };
-  
+
   return findReportsWithPagination(extendedQuery);
-}; 
+};

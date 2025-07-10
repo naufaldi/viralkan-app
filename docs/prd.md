@@ -1,6 +1,6 @@
 # Viralkan Bekasi — Product Requirements v0.3
 
-*(Refined for RFC‑friendly consumption — 24 Jun 2025)*
+_(Refined for RFC‑friendly consumption — 24 Jun 2025)_
 
 ---
 
@@ -16,10 +16,10 @@ We will ship small, vertical slices so each version is usable in production and 
 
 | Version                      | Tagline                   | Core Deliverable                                                          |
 | ---------------------------- | ------------------------- | ------------------------------------------------------------------------- |
-| **V1 – "Manual Core" (MVP)** | *“Report & view — fast.”* | Google‑login, image upload with manual form, public list/table of reports |
-| **V2 – "Smart Metadata"**    | *“Less typing.”*          | Auto‑extract EXIF GPS, reverse‑geocode address, autofill form             |
-| **V3 – "Map Visual"**        | *“See it on a map.”*      | Leaflet map with marker clustering & filters                              |
-| **V4 – "Moderation Suite"**  | *“Keep data clean.”*      | Admin dashboard, status workflow, duplicate merge                         |
+| **V1 – "Manual Core" (MVP)** | _“Report & view — fast.”_ | Google‑login, image upload with manual form, public list/table of reports |
+| **V2 – "Smart Metadata"**    | _“Less typing.”_          | Auto‑extract EXIF GPS, reverse‑geocode address, autofill form             |
+| **V3 – "Map Visual"**        | _“See it on a map.”_      | Leaflet map with marker clustering & filters                              |
+| **V4 – "Moderation Suite"**  | _“Keep data clean.”_      | Admin dashboard, status workflow, duplicate merge                         |
 
 Guiding principles
 
@@ -34,10 +34,10 @@ Guiding principles
 | Feature              | Description                                                                                                 | Acceptance Criteria                                                                  |
 | -------------------- | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
 | **Auth**             | Google OAuth 2.0 (email, name, avatar)                                                                      | Only logged‑in users can access dashboard & upload; token stored in HTTP‑only cookie |
-| **User Dashboard**   | After login, shows “My Reports” and *Laporkan* button                                                       | List paginated, newest first                                                         |
+| **User Dashboard**   | After login, shows “My Reports” and _Laporkan_ button                                                       | List paginated, newest first                                                         |
 | **Upload Form**      | ① Select JPEG/PNG ≤10 MB ② Choose category (Berlubang • Retak • Lainnya) ③ Street name ④ Free‑text location | Server returns 201; redirect to confirmation page                                    |
-| **Public List**      | Anyone (no login) sees table of all reports with thumbnail, category, street, created\_at                   | Table loads <1 s on 3G; clicking row opens detail page                               |
-| **Storage & DB**     | Images in R2; metadata in Postgres (`reports` table)                                                        | Schema includes user\_id FK, category, street, location\_text, lat, lon (nullable)   |
+| **Public List**      | Anyone (no login) sees table of all reports with thumbnail, category, street, created_at                    | Table loads <1 s on 3G; clicking row opens detail page                               |
+| **Storage & DB**     | Images in R2; metadata in Postgres (`reports` table)                                                        | Schema includes user_id FK, category, street, location_text, lat, lon (nullable)     |
 | **Abuse Protection** | reCAPTCHA v3 on upload, 10 reports/user/day limit                                                           | Abuse metrics visible in Grafana                                                     |
 
 ---
@@ -47,11 +47,13 @@ Guiding principles
 ## **Epic 1: Public Report Browsing**
 
 ### **User Story 1.1: Browse Reports as Anonymous Visitor**
+
 **As an** anonymous visitor  
 **I want to** browse all road damage reports without logging in  
-**So that** I can see what issues have been reported in my area  
+**So that** I can see what issues have been reported in my area
 
 **Acceptance Criteria:**
+
 - [ ] Can access public reports without authentication
 - [ ] Can view reports in a paginated table format
 - [ ] Can see basic report information (thumbnail, category, location, date)
@@ -61,17 +63,21 @@ Guiding principles
 **Required Pages:**
 
 #### **Page: Landing/Home (`/`)**
+
 **Purpose:** Entry point that introduces the platform and directs users to reports or login
 **Components:**
+
 - Header with site branding "Viralkan Bekasi"
 - Hero section explaining the platform purpose
 - Call-to-action buttons: "Lihat Laporan" and "Masuk dengan Google"
 - Footer with basic links
-**Navigation:** → `/reports` (public list) or `/login`
+  **Navigation:** → `/reports` (public list) or `/login`
 
 #### **Page: Public Reports List (`/reports`)**
+
 **Purpose:** Display all reports in a searchable, filterable table
 **Components:**
+
 - Header with navigation (Home, Login button)
 - Page title: "Laporan Kerusakan Jalan"
 - Data table with columns:
@@ -83,14 +89,16 @@ Guiding principles
 - Pagination controls (10 items per page)
 - Basic search/filter by category
 - "Buat Laporan" button (redirects to login if not authenticated)
-**Data Requirements:** 
+  **Data Requirements:**
 - API: `GET /api/reports?page=1&limit=10&category=`
 - Response: `{items: Report[], total: number, page: number}`
-**Navigation:** → `/reports/[id]` (detail) or `/login`
+  **Navigation:** → `/reports/[id]` (detail) or `/login`
 
 #### **Page: Report Detail (`/reports/[id]`)**
+
 **Purpose:** Show full details of a specific report
 **Components:**
+
 - Header with navigation and breadcrumb
 - Large image display (with zoom capability)
 - Report metadata card:
@@ -100,21 +108,23 @@ Guiding principles
   - Status (if applicable)
 - Back to list button
 - Share button (copy link)
-**Data Requirements:**
+  **Data Requirements:**
 - API: `GET /api/reports/:id`
 - Response: `Report` object with full details
-**Navigation:** ← `/reports` (back to list)
+  **Navigation:** ← `/reports` (back to list)
 
 ---
 
 ## **Epic 2: User Authentication**
 
 ### **User Story 2.1: Login with Google**
+
 **As a** citizen who wants to report road damage  
 **I want to** login with my Google account  
-**So that** I can create and manage my reports  
+**So that** I can create and manage my reports
 
 **Acceptance Criteria:**
+
 - [ ] Can click "Masuk dengan Google" button
 - [ ] Redirected to Google OAuth consent screen
 - [ ] After successful auth, redirected to dashboard
@@ -124,34 +134,40 @@ Guiding principles
 **Required Pages:**
 
 #### **Page: Login (`/login`)**
+
 **Purpose:** Authenticate users via Google OAuth
 **Components:**
+
 - Centered login card with:
   - Viralkan logo and tagline
   - "Masuk dengan Google" button (with Google icon)
   - Brief explanation: "Masuk untuk melaporkan kerusakan jalan"
 - Loading state during OAuth flow
 - Error message display for failed authentication
-**Navigation:** → `/dashboard` (after successful login)
+  **Navigation:** → `/dashboard` (after successful login)
 
 #### **Page: Auth Callback (`/auth/callback`)**
+
 **Purpose:** Handle OAuth callback and token exchange
 **Components:**
+
 - Loading spinner
 - "Sedang memproses..." message
 - Error handling for failed authentication
-**Navigation:** → `/dashboard` (success) or `/login` (error)
+  **Navigation:** → `/dashboard` (success) or `/login` (error)
 
 ---
 
 ## **Epic 3: Personal Dashboard**
 
 ### **User Story 3.1: View My Reports Dashboard**
+
 **As an** authenticated user  
 **I want to** see my personal dashboard with my reports  
-**So that** I can track my submissions and create new ones  
+**So that** I can track my submissions and create new ones
 
 **Acceptance Criteria:**
+
 - [ ] Shows personalized welcome message with user name
 - [ ] Displays my reports in chronological order
 - [ ] Shows report statistics (total, by category, by status)
@@ -161,8 +177,10 @@ Guiding principles
 **Required Pages:**
 
 #### **Page: Dashboard (`/dashboard`)**
+
 **Purpose:** Personal hub for authenticated users
 **Components:**
+
 - Header with user avatar, name, and logout button
 - Welcome section: "Selamat datang, [Name]"
 - Quick stats cards:
@@ -174,14 +192,16 @@ Guiding principles
   - Mini table/cards of recent reports (5 most recent)
   - "Lihat Semua" link to full list
 - Quick actions sidebar
-**Data Requirements:**
+  **Data Requirements:**
 - API: `GET /api/me/reports?limit=5`
 - API: `GET /api/me/stats`
-**Navigation:** → `/reports/create` or `/dashboard/reports`
+  **Navigation:** → `/reports/create` or `/dashboard/reports`
 
 #### **Page: My Reports List (`/dashboard/reports`)**
+
 **Purpose:** Full list of user's reports with management options
 **Components:**
+
 - Header with breadcrumb
 - Page title: "Laporan Saya"
 - Data table similar to public list but with additional columns:
@@ -189,20 +209,22 @@ Guiding principles
   - Actions (Edit/Delete if allowed)
 - Pagination and filtering
 - "Buat Laporan Baru" button
-**Data Requirements:**
+  **Data Requirements:**
 - API: `GET /api/me/reports?page=1&limit=10`
-**Navigation:** → `/reports/create` or `/reports/[id]`
+  **Navigation:** → `/reports/create` or `/reports/[id]`
 
 ---
 
 ## **Epic 4: Report Creation**
 
 ### **User Story 4.1: Create New Report**
+
 **As an** authenticated user  
 **I want to** create a new road damage report with photo and details  
-**So that** authorities can be notified of the issue  
+**So that** authorities can be notified of the issue
 
 **Acceptance Criteria:**
+
 - [ ] Can upload image (JPEG/PNG, max 10MB)
 - [ ] Can select damage category from dropdown
 - [ ] Can enter street name and location description
@@ -214,25 +236,27 @@ Guiding principles
 **Required Pages:**
 
 #### **Page: Create Report (`/reports/create`)**
+
 **Purpose:** Form to create new road damage report
 **Components:**
+
 - Header with breadcrumb
 - Page title: "Buat Laporan Kerusakan Jalan"
 - Multi-step form:
-  
+
   **Step 1: Upload Image**
   - Drag & drop upload area
   - File picker button
   - Image preview with crop/rotate options
   - File size/type validation
   - Progress bar during upload
-  
+
   **Step 2: Report Details**
   - Kategori dropdown (Berlubang, Retak, Lainnya)
   - Nama Jalan text input
   - Deskripsi Lokasi textarea
   - Severity selector (optional)
-  
+
   **Step 3: Review & Submit**
   - Preview of uploaded image
   - Summary of entered details
@@ -242,14 +266,16 @@ Guiding principles
 - Cancel button (with confirmation dialog)
 - Form validation messages
 - Error handling for API failures
-**Data Requirements:**
+  **Data Requirements:**
 - API: `POST /api/reports` with multipart form data
 - Response: `{id: string, message: string}`
-**Navigation:** → `/reports/create/success` or back to `/dashboard`
+  **Navigation:** → `/reports/create/success` or back to `/dashboard`
 
 #### **Page: Report Success (`/reports/create/success`)**
+
 **Purpose:** Confirmation page after successful report creation
 **Components:**
+
 - Success icon and message
 - "Laporan berhasil dibuat" heading
 - Summary of created report
@@ -257,36 +283,43 @@ Guiding principles
   - "Lihat Laporan" → `/reports/[id]`
   - "Buat Laporan Lain" → `/reports/create`
   - "Kembali ke Dashboard" → `/dashboard`
-**Navigation:** Multiple options as listed above
+    **Navigation:** Multiple options as listed above
 
 ---
 
 ## **Epic 5: Error Handling & Edge Cases**
 
 ### **User Story 5.1: Handle Errors Gracefully**
+
 **As a** user  
 **I want to** see helpful error messages when things go wrong  
-**So that** I understand what happened and what to do next  
+**So that** I understand what happened and what to do next
 
 **Required Pages:**
 
 #### **Page: 404 Not Found (`/404`)**
+
 **Purpose:** Handle invalid routes
 **Components:**
+
 - "Halaman tidak ditemukan" message
 - Helpful links back to main sections
 - Search functionality
 
 #### **Page: 500 Server Error (`/500`)**
+
 **Purpose:** Handle server errors
 **Components:**
+
 - "Terjadi kesalahan server" message
 - Retry button
 - Contact information
 
 #### **Page: Offline (`/offline`)**
+
 **Purpose:** Handle offline state (PWA)
 **Components:**
+
 - "Tidak ada koneksi internet" message
 - Cached content if available
 - Retry connection button
@@ -295,23 +328,24 @@ Guiding principles
 
 ## **Technical Page Requirements Summary**
 
-| Route | Purpose | Auth Required | API Endpoints | Key Components |
-|-------|---------|---------------|---------------|----------------|
-| `/` | Landing page | No | None | Hero, CTA buttons |
-| `/reports` | Public reports list | No | `GET /api/reports` | Data table, pagination |
-| `/reports/[id]` | Report detail | No | `GET /api/reports/:id` | Image viewer, metadata |
-| `/login` | Authentication | No | Google OAuth | Login form |
-| `/auth/callback` | OAuth callback | No | Token exchange | Loading state |
-| `/dashboard` | User dashboard | Yes | `GET /api/me/*` | Stats, recent reports |
-| `/dashboard/reports` | User reports list | Yes | `GET /api/me/reports` | Personal data table |
-| `/reports/create` | Create report form | Yes | `POST /api/reports` | Multi-step form |
-| `/reports/create/success` | Success confirmation | Yes | None | Success message |
+| Route                     | Purpose              | Auth Required | API Endpoints          | Key Components         |
+| ------------------------- | -------------------- | ------------- | ---------------------- | ---------------------- |
+| `/`                       | Landing page         | No            | None                   | Hero, CTA buttons      |
+| `/reports`                | Public reports list  | No            | `GET /api/reports`     | Data table, pagination |
+| `/reports/[id]`           | Report detail        | No            | `GET /api/reports/:id` | Image viewer, metadata |
+| `/login`                  | Authentication       | No            | Google OAuth           | Login form             |
+| `/auth/callback`          | OAuth callback       | No            | Token exchange         | Loading state          |
+| `/dashboard`              | User dashboard       | Yes           | `GET /api/me/*`        | Stats, recent reports  |
+| `/dashboard/reports`      | User reports list    | Yes           | `GET /api/me/reports`  | Personal data table    |
+| `/reports/create`         | Create report form   | Yes           | `POST /api/reports`    | Multi-step form        |
+| `/reports/create/success` | Success confirmation | Yes           | None                   | Success message        |
 
 ---
 
 ## **Component Library Requirements**
 
 **Shared Components Needed:**
+
 - `Header` - Navigation with auth state
 - `DataTable` - Sortable, paginated table
 - `ReportCard` - Report display component
@@ -329,6 +363,7 @@ Guiding principles
 ## **Detailed User Flow Diagrams**
 
 ### **Flow A: Anonymous User Browsing Reports**
+
 ```
 [Landing Page] → [Public Reports List] → [Report Detail]
        ↓                    ↓
@@ -338,6 +373,7 @@ Guiding principles
 ```
 
 ### **Flow B: Authenticated User Creating Report**
+
 ```
 [Dashboard] → [Create Report] → [Upload Image] → [Fill Details] → [Review] → [Success] → [View Report]
      ↑              ↓                                                          ↓
@@ -345,6 +381,7 @@ Guiding principles
 ```
 
 ### **Flow C: Error Handling**
+
 ```
 [Any Page] → [Error Occurs] → [Error Page] → [Recovery Action]
                                    ↓
@@ -358,7 +395,7 @@ Guiding principles
 **A. Authenticated Reporter (Autofill)**
 
 1. **Login** → Google.
-2. **Dashboard** → *Laporkan*.
+2. **Dashboard** → _Laporkan_.
 3. **Upload** image → client parser reads EXIF GPS.
 4. **Form** auto‑populates **Lat/Lon** and reverse‑geocoded **Street** & **Location** fields; user may edit if incorrect.
 5. **Submit** → server saves; confirmation page displayed.
@@ -418,4 +455,35 @@ Same steps as V1; address columns now show precise location when EXIF data exist
 
 ---
 
-> *This document refines PRD v0.2 into RFC‑ready language with explicit user flows and MVP login requirement.*
+> _This document refines PRD v0.2 into RFC‑ready language with explicit user flows and MVP login requirement._
+
+### 1.1 · Platform Purpose & Scope
+
+**⚠️ IMPORTANT CLARIFICATION:**
+
+Viralkan is **NOT** a government service or official reporting system. It is a **community sharing platform** with three core purposes:
+
+1. **Help people avoid damaged roads** by sharing location information
+2. **Get attention from authorities** through social media virality and community pressure
+3. **Raise public awareness** about infrastructure problems affecting daily life
+
+**What Viralkan IS:**
+
+- A community-driven information sharing platform
+- A tool to help citizens avoid road damage (save tires, shock absorbers)
+- A way to amplify citizen voices through social media virality
+- An independent civic engagement initiative
+
+**What Viralkan is NOT:**
+
+- An official government reporting system
+- A direct communication channel with authorities
+- A platform that tracks government repair progress
+- A service that guarantees government response
+
+The platform's success should be measured by:
+
+- Community adoption and active sharing
+- Social media virality of reports
+- Citizens successfully avoiding road damage
+- Increased public awareness leading to organic pressure on authorities
