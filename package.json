@@ -11,10 +11,11 @@
     "db:reset": "cd apps/api && bun run db:reset"
   },
   "devDependencies": {
+    "@types/minimatch": "^6.0.0",
+    "@types/node": "^22.10.2",
     "prettier": "^3.6.0",
     "turbo": "^2.5.4",
-    "typescript": "5.8.2",
-    "@types/node": "^22.10.2"
+    "typescript": "5.8.2"
   },
   "engines": {
     "node": ">=18"
@@ -23,5 +24,8 @@
   "workspaces": [
     "apps/*",
     "packages/*"
-  ]
+  ],
+  "dependencies": {
+    "@hono/zod-openapi": "^0.19.9"
+  }
 }

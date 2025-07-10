@@ -1,5 +1,4 @@
-import { z } from 'zod';
-import 'zod-openapi/extend';
+import { z } from '@hono/zod-openapi';
 
 
 // Zod Schemas for Validation with OpenAPI metadata
@@ -30,9 +29,6 @@ export const CreateReportSchema = z.object({
     example: 112.752088,
     description: 'Longitude coordinate of the damage location'
   })
-}).openapi({
-  ref: 'CreateReportRequest',
-  description: 'Data required to create a new road damage report'
 });
 
 export const ReportQuerySchema = z.object({
@@ -52,9 +48,6 @@ export const ReportQuerySchema = z.object({
     example: '123',
     description: 'Filter reports by user ID'
   })
-}).openapi({
-  ref: 'ReportQuery',
-  description: 'Query parameters for filtering and paginating reports'
 });
 
 export const ReportParamsSchema = z.object({
@@ -68,9 +61,6 @@ export const ReportParamsSchema = z.object({
     example: '123',
     description: 'Unique identifier of the report'
   })
-}).openapi({
-  ref: 'ReportParams',
-  description: 'Path parameters for report operations'
 });
 
 // Response Schemas
@@ -84,17 +74,11 @@ export const ReportResponseSchema = z.object({
   lat: z.number().nullable().openapi({ example: -7.257472 }),
   lon: z.number().nullable().openapi({ example: 112.752088 }),
   created_at: z.string().datetime().openapi({ example: '2024-01-15T10:30:00Z' })
-}).openapi({
-  ref: 'Report',
-  description: 'Road damage report data'
 });
 
 export const ReportWithUserResponseSchema = ReportResponseSchema.extend({
   user_name: z.string().nullable().openapi({ example: 'John Doe' }),
   user_avatar: z.string().nullable().openapi({ example: 'https://example.com/avatar.jpg' })
-}).openapi({
-  ref: 'ReportWithUser',
-  description: 'Road damage report data with user information'
 });
 
 export const PaginatedReportsResponseSchema = z.object({
@@ -103,19 +87,13 @@ export const PaginatedReportsResponseSchema = z.object({
   page: z.number().openapi({ example: 1 }),
   limit: z.number().openapi({ example: 20 }),
   pages: z.number().openapi({ example: 8 })
-}).openapi({
-  ref: 'PaginatedReports',
-  description: 'Paginated list of reports with metadata'
 });
 
-export const ErrorResponseSchema = z.object({
+export const ReportsErrorResponseSchema = z.object({
   error: z.object({
     code: z.string().openapi({ example: 'VALIDATION_ERROR' }),
     message: z.string().openapi({ example: 'Invalid request data' }),
     details: z.any().optional(),
     timestamp: z.string().datetime().openapi({ example: '2024-01-15T10:30:00Z' })
   })
-}).openapi({
-  ref: 'ErrorResponse',
-  description: 'Standard error response format'
 });

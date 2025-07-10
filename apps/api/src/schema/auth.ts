@@ -1,5 +1,5 @@
-import { z } from 'zod'
-import 'zod-openapi/extend'
+import { z } from '@hono/zod-openapi'
+
 
 // Zod Schemas for Validation with OpenAPI metadata (specific to auth)
 export const FirebaseTokenSchema = z.object({
@@ -23,9 +23,6 @@ export const FirebaseTokenSchema = z.object({
     example: true,
     description: 'Whether the email has been verified'
   })
-}).openapi({
-  ref: 'FirebaseToken',
-  description: 'Firebase token payload data'
 })
 
 export const CreateUserSchema = z.object({
@@ -49,9 +46,6 @@ export const CreateUserSchema = z.object({
     example: 'google',
     description: 'Authentication provider used'
   })
-}).openapi({
-  ref: 'CreateUserRequest',
-  description: 'Data required to create a new user account'
 })
 
 export const UserResponseSchema = z.object({
@@ -83,9 +77,6 @@ export const UserResponseSchema = z.object({
     example: '2024-01-15T10:30:00Z',
     description: 'Account creation timestamp'
   })
-}).openapi({
-  ref: 'UserResponse',
-  description: 'User account information'
 })
 
 export const AuthVerificationResponseSchema = z.object({
@@ -98,9 +89,6 @@ export const AuthVerificationResponseSchema = z.object({
     description: 'Unique user ID in our system'
   }),
   user: UserResponseSchema
-}).openapi({
-  ref: 'AuthVerificationResponse',
-  description: 'Successful authentication response'
 })
 
 export const LogoutResponseSchema = z.object({
@@ -112,12 +100,9 @@ export const LogoutResponseSchema = z.object({
     example: 'Please clear Firebase token on client side',
     description: 'Additional information about logout process'
   })
-}).openapi({
-  ref: 'LogoutResponse',
-  description: 'Successful logout response'
 })
 
-export const ErrorResponseSchema = z.object({
+export const AuthErrorResponseSchema = z.object({
   error: z.string().openapi({
     example: 'Authentication failed',
     description: 'Error message'
@@ -130,9 +115,6 @@ export const ErrorResponseSchema = z.object({
     example: '2024-01-15T10:30:00Z',
     description: 'Error timestamp'
   })
-}).openapi({
-  ref: 'AuthErrorResponse',
-  description: 'Authentication error response'
 })
 
 // Request schemas for API endpoints
@@ -141,9 +123,6 @@ export const TokenVerificationRequestSchema = z.object({
     example: 'eyJhbGciOiJSUzI1NiIs...',
     description: 'Firebase ID token to verify'
   })
-}).openapi({
-  ref: 'TokenVerificationRequest',
-  description: 'Request body for token verification'
 })
 
 export const UserStatsResponseSchema = z.object({
@@ -166,7 +145,4 @@ export const UserStatsResponseSchema = z.object({
     example: 45,
     description: 'Number of days since account creation'
   })
-}).openapi({
-  ref: 'UserStatsResponse',
-  description: 'User statistics and activity summary'
 })
