@@ -3,533 +3,464 @@
 
 ---
 
-## 📋 **Project Overview**
-Building a **civic-focused road damage reporting platform** using:
-- **Next.js 15** with App Router
-- **Firebase Authentication** (Google Sign-In)
-- **Tailwind CSS v4** with Shadcn UI components
-- **Monorepo** structure with `@repo/ui` package
-- **Design System** from `ui-concept.md`
+## �� **Project Overview & Strategy**
+Building a **civic-focused road damage reporting platform** with **UI-FIRST approach** for fast iteration and user flow validation.
+
+**Current Status:**
+- **✅ Backend API**: Fully implemented with all endpoints ready
+- **✅ UI Components**: 25+ shadcn/ui components installed  
+- **✅ Framework**: Next.js 15, Tailwind CSS v4, TypeScript, Bun configured
+- **✅ Database**: PostgreSQL + PostGIS schema ready
+
+**Strategy Decision: UI-First Development**
+- Build complete user interface with mock data first
+- Validate user flow and design before integration complexity
+- Enable stakeholder feedback on working prototype immediately
+- Faster iteration on UX/UI decisions without backend concerns
 
 ---
 
-## 🎯 **Phase 1: Foundation & Authentication (Priority 1)**
+## 🎯 **Phase 1: UI & User Flow Creation (Priority 1)**
+**Goal:** Build complete clickable prototype with mock data
+**Duration:** Week 1 (8-10 hours)
+**Result:** Working user journey for stakeholder feedback
 
-### **Task 1.1: UI Foundation Setup**
-**Status:** 🟡 In Progress
+### **Task 1.1: Landing Page & Navigation Structure**
+**Status:** 🔴 Not Started  
 **Dependencies:** None
 **Estimated:** 2 hours
 
-**Implementation:**
-```bash
-# Add missing shadcn/ui components
-npx shadcn@latest add input
-npx shadcn@latest add button  # Already exists
-npx shadcn@latest add table
-npx shadcn@latest add form
-npx shadcn@latest add card    # Already exists
-```
+**Objective:** Create welcoming landing page that clearly explains Viralkan's purpose and guides users to key actions.
 
-**Files to Create/Update:**
-- [ ] `packages/ui/src/components/ui/input.tsx`
-- [ ] `packages/ui/src/components/ui/table.tsx`
-- [ ] `packages/ui/src/components/ui/form.tsx`
-- [ ] Update `packages/ui/src/index.ts` exports
-- [ ] Apply Viralkan design tokens to components
+**Requirements:**
+- Hero section explaining road damage reporting
+- Clear call-to-action buttons (View Reports, Create Report)
+- Navigation header with logo and menu
+- Footer with basic information
+- Mobile-responsive design
 
-### **Task 1.2: Firebase Auth Client Setup**
+**Files to Create:**
+- [ ] Replace `apps/web/app/page.tsx` with landing page
+- [ ] `apps/web/components/layout/header.tsx` - Site navigation
+- [ ] `apps/web/components/layout/footer.tsx` - Site footer
+- [ ] `apps/web/components/layout/nav-menu.tsx` - Navigation menu
+
+**Mock Data Needed:**
+- Static hero content
+- Navigation menu items
+- Footer links
+
+**Success Criteria:**
+- Landing page loads and looks professional
+- Navigation works between pages
+- Mobile responsive
+- Clear user action paths
+
+### **Task 1.2: Public Reports List Page (Mock Data)**
 **Status:** 🔴 Not Started
 **Dependencies:** Task 1.1
 **Estimated:** 3 hours
 
-**Implementation:**
-```typescript
-// apps/web/lib/firebase.ts
-import { initializeApp } from 'firebase/app'
-import { getAuth, GoogleAuthProvider } from 'firebase/auth'
+**Objective:** Create engaging reports listing that shows the platform's value with realistic mock data.
 
-const firebaseConfig = {
-  // From environment variables
-}
-
-export const app = initializeApp(firebaseConfig)
-export const auth = getAuth(app)
-export const googleProvider = new GoogleAuthProvider()
-```
+**Requirements:**
+- Grid/table view of road damage reports
+- Filtering by category (berlubang, retak, lainnya)
+- Pagination controls
+- Search functionality (UI only)
+- Report cards showing images, location, date
+- "Login to create report" prompts for anonymous users
 
 **Files to Create:**
-- [ ] `apps/web/lib/firebase.ts`
-- [ ] `apps/web/.env.local` (from .env.local.example)
-- [ ] `apps/web/lib/auth-utils.ts`
+- [ ] `apps/web/app/reports/page.tsx` - Reports listing page
+- [ ] `apps/web/components/reports/reports-grid.tsx` - Grid layout
+- [ ] `apps/web/components/reports/report-card.tsx` - Individual report display
+- [ ] `apps/web/components/reports/report-filters.tsx` - Category/search filters
+- [ ] `apps/web/components/ui/pagination.tsx` - Page navigation
+- [ ] `apps/web/lib/mock-data.ts` - Sample reports data
 
-### **Task 1.3: Authentication Context Provider**
+**Mock Data Structure:**
+- 20-30 sample reports with realistic Indonesian addresses
+- Mix of categories (berlubang, retak, lainnya)
+- Sample images (can use placeholder images)
+- Realistic dates and descriptions
+- Sample user names
+
+**Success Criteria:**
+- Reports display in attractive grid/list format
+- Filtering works with mock data
+- Pagination functions properly
+- Responsive design works on mobile
+- Clear path to login for creating reports
+
+### **Task 1.3: Mock Login & User States**
 **Status:** 🔴 Not Started
 **Dependencies:** Task 1.2
-**Estimated:** 4 hours
+**Estimated:** 2 hours
 
-**Implementation:**
-```typescript
-// apps/web/contexts/auth-context.tsx
-'use client'
-import { createContext, useContext, useEffect, useState } from 'react'
-import { onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth'
-import { auth, googleProvider } from '@/lib/firebase'
+**Objective:** Create login interface and simulate authenticated vs unauthenticated states for testing user flow.
 
-interface AuthContextType {
-  user: User | null
-  loading: boolean
-  signInWithGoogle: () => Promise<void>
-  logout: () => Promise<void>
-}
-
-export const AuthContext = createContext<AuthContextType>({})
-export const useAuth = () => useContext(AuthContext)
-```
+**Requirements:**
+- Login page with Google OAuth button (UI only)
+- Fake authentication using localStorage
+- Show different navigation for logged in users
+- Logout functionality (removes localStorage)
+- Protected route behavior simulation
 
 **Files to Create:**
-- [ ] `apps/web/contexts/auth-context.tsx`
-- [ ] `apps/web/hooks/use-auth.ts`
-- [ ] Update `apps/web/app/layout.tsx` with provider
+- [ ] `apps/web/app/login/page.tsx` - Login page
+- [ ] `apps/web/components/auth/login-form.tsx` - Login UI
+- [ ] `apps/web/lib/mock-auth.ts` - Fake auth using localStorage
+- [ ] `apps/web/components/auth/auth-guard.tsx` - Route protection simulation
+- [ ] `apps/web/hooks/use-mock-auth.ts` - Mock authentication hook
 
----
+**Mock Authentication Logic:**
+- Store fake user data in localStorage
+- Toggle between authenticated/unauthenticated states
+- Simulate user profile data
+- Mock user permissions
 
-## 🎯 **Phase 2: Core UI Components (Priority 2)**
+**Success Criteria:**
+- Login page accessible and professional
+- Can "fake login" and see authenticated state
+- Navigation changes based on auth state
+- Logout works and returns to unauthenticated state
+- Protected pages redirect to login when not authenticated
 
-### **Task 2.1: API Client Utilities**
+### **Task 1.4: User Dashboard (Mock Data)**
 **Status:** 🔴 Not Started
 **Dependencies:** Task 1.3
-**Estimated:** 3 hours
-
-**Implementation:**
-```typescript
-// apps/web/lib/api-client.ts
-class ApiClient {
-  constructor(private baseUrl: string) {}
-  
-  async request<T>(endpoint: string, options?: RequestOptions): Promise<T> {
-    const token = await this.getAuthToken()
-    // Implementation with auth headers
-  }
-  
-  // Reports endpoints
-  async getReports(params?: ReportsParams): Promise<Report[]>
-  async createReport(data: CreateReportData): Promise<Report>
-  async updateReport(id: string, data: UpdateReportData): Promise<Report>
-}
-```
-
-**Files to Create:**
-- [ ] `apps/web/lib/api-client.ts`
-- [ ] `apps/web/types/api.ts`
-- [ ] `apps/web/lib/constants.ts`
-
-### **Task 2.2: Main Layout & Navigation**
-**Status:** 🔴 Not Started
-**Dependencies:** Task 1.3, Task 2.1
-**Estimated:** 5 hours
-
-**Implementation:**
-```typescript
-// apps/web/components/layout/main-layout.tsx
-import { useAuth } from '@/contexts/auth-context'
-import { Navigation } from './navigation'
-import { Header } from './header'
-
-export function MainLayout({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth()
-  
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <Header user={user} />
-      <Navigation user={user} />
-      <main className="container mx-auto px-4 py-8">
-        {children}
-      </main>
-    </div>
-  )
-}
-```
-
-**Files to Create:**
-- [ ] `apps/web/components/layout/main-layout.tsx`
-- [ ] `apps/web/components/layout/header.tsx`
-- [ ] `apps/web/components/layout/navigation.tsx`
-- [ ] `apps/web/components/ui/avatar.tsx`
-- [ ] Apply civic blue design theme
-
----
-
-## 🎯 **Phase 3: Authentication Pages (Priority 3)**
-
-### **Task 3.1: Login Page**
-**Status:** 🔴 Not Started
-**Dependencies:** Task 2.2
-**Estimated:** 4 hours
-
-**Implementation:**
-```typescript
-// apps/web/app/login/page.tsx
-'use client'
-import { Button } from '@repo/ui/button'
-import { Card } from '@repo/ui/card'
-import { useAuth } from '@/contexts/auth-context'
-import { useRouter } from 'next/navigation'
-
-export default function LoginPage() {
-  const { signInWithGoogle, loading } = useAuth()
-  const router = useRouter()
-  
-  const handleGoogleSignIn = async () => {
-    try {
-      await signInWithGoogle()
-      router.push('/dashboard')
-    } catch (error) {
-      // Error handling
-    }
-  }
-  
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-civic-blue-50 to-civic-blue-100">
-      <Card className="w-full max-w-md p-8">
-        <div className="text-center space-y-6">
-          <h1 className="text-2xl font-bold text-civic-blue-900">
-            Viralkan - Lapor Kerusakan Jalan
-          </h1>
-          <p className="text-gray-600">
-            Masuk untuk melaporkan kerusakan jalan di sekitar Anda
-          </p>
-          <Button 
-            onClick={handleGoogleSignIn}
-            disabled={loading}
-            className="w-full"
-            size="lg"
-          >
-            {loading ? 'Sedang masuk...' : 'Masuk dengan Google'}
-          </Button>
-        </div>
-      </Card>
-    </div>
-  )
-}
-```
-
-**Files to Create:**
-- [ ] `apps/web/app/login/page.tsx`
-- [ ] `apps/web/components/auth/login-form.tsx`
-- [ ] `apps/web/components/ui/loading-spinner.tsx`
-- [ ] Error handling components
-
-### **Task 3.2: Protected Routes**
-**Status:** 🔴 Not Started
-**Dependencies:** Task 3.1
 **Estimated:** 2 hours
 
-**Implementation:**
-```typescript
-// apps/web/components/auth/protected-route.tsx
-'use client'
-import { useAuth } from '@/contexts/auth-context'
-import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+**Objective:** Create user dashboard showing personal statistics and recent reports with mock data.
 
-export function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth()
-  const router = useRouter()
-  
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push('/login')
-    }
-  }, [user, loading, router])
-  
-  if (loading) return <LoadingScreen />
-  if (!user) return null
-  
-  return <>{children}</>
-}
-```
+**Requirements:**
+- Welcome message with user name
+- Statistics cards (total reports, this month, resolved)
+- Recent reports list
+- Quick action buttons
+- User profile information
+- Dashboard navigation menu
 
 **Files to Create:**
-- [ ] `apps/web/components/auth/protected-route.tsx`
-- [ ] `apps/web/middleware.ts` (route protection)
-- [ ] `apps/web/components/loading-screen.tsx`
+- [ ] `apps/web/app/dashboard/page.tsx` - Main dashboard
+- [ ] `apps/web/app/dashboard/layout.tsx` - Dashboard layout with nav
+- [ ] `apps/web/components/dashboard/stats-cards.tsx` - Statistics display
+- [ ] `apps/web/components/dashboard/recent-reports.tsx` - User's recent reports
+- [ ] `apps/web/components/dashboard/quick-actions.tsx` - Action buttons
+- [ ] `apps/web/components/layout/dashboard-nav.tsx` - Dashboard navigation
+
+**Mock Data Needed:**
+- User profile information
+- Personal statistics
+- User's recent reports
+- Dashboard navigation items
+
+**Success Criteria:**
+- Dashboard loads quickly and looks professional
+- Statistics cards show meaningful data
+- Recent reports display correctly
+- Navigation between dashboard sections works
+- Quick actions are clearly visible
+
+### **Task 1.5: Create Report Form (UI Only)**
+**Status:** 🔴 Not Started
+**Dependencies:** Task 1.4
+**Estimated:** 3 hours
+
+**Objective:** Build complete report creation flow focusing on user experience and form validation.
+
+**Requirements:**
+- Multi-step form (image upload, details, location, review)
+- Image upload with preview (store in localStorage temporarily)
+- Category selection with descriptions
+- Location input field
+- Form validation and error messages
+- Success page after submission
+- Form saves progress in localStorage
+
+**Files to Create:**
+- [ ] `apps/web/app/reports/create/page.tsx` - Create report page
+- [ ] `apps/web/components/reports/create-report-form.tsx` - Main form component
+- [ ] `apps/web/components/forms/image-upload-section.tsx` - Image upload UI
+- [ ] `apps/web/components/forms/report-details-section.tsx` - Details form
+- [ ] `apps/web/components/forms/location-section.tsx` - Location input
+- [ ] `apps/web/components/forms/review-section.tsx` - Review before submit
+- [ ] `apps/web/app/reports/create/success/page.tsx` - Success confirmation
+- [ ] `apps/web/lib/form-storage.ts` - localStorage form persistence
+
+**Form Sections:**
+1. Image upload with preview
+2. Category selection (berlubang, retak, lainnya)
+3. Location details (street name, description)
+4. Additional details and description
+5. Review all information
+6. Submit confirmation
+
+**Success Criteria:**
+- Form flows smoothly through all steps
+- Image preview works properly
+- Form validation provides clear feedback
+- Progress saves in localStorage
+- Success page confirms submission
+- Can navigate back to edit information
+
+### **Task 1.6: Report Detail Pages (Mock Data)**
+**Status:** 🔴 Not Started
+**Dependencies:** Task 1.5
+**Estimated:** 2 hours
+
+**Objective:** Create detailed view of individual reports showing all information clearly.
+
+**Requirements:**
+- Full report information display
+- Image gallery with zoom capability
+- Location information
+- Report metadata (date, category, status)
+- Related reports suggestions
+- Action buttons for report owner
+- Comments section placeholder
+
+**Files to Create:**
+- [ ] `apps/web/app/reports/[id]/page.tsx` - Report detail page
+- [ ] `apps/web/components/reports/report-detail-view.tsx` - Main detail component
+- [ ] `apps/web/components/reports/report-image-gallery.tsx` - Image display
+- [ ] `apps/web/components/reports/report-metadata.tsx` - Report information
+- [ ] `apps/web/components/reports/related-reports.tsx` - Suggestions
+- [ ] `apps/web/components/ui/image-viewer.tsx` - Image zoom modal
+
+**Display Elements:**
+- High-quality image display
+- Complete report information
+- Location details
+- Timestamp and status
+- User information (if public)
+- Suggested related reports
+
+**Success Criteria:**
+- Report details display clearly
+- Images load and zoom properly
+- All metadata is visible
+- Related reports show relevant suggestions
+- Page is mobile-friendly
+- Clear navigation back to reports list
 
 ---
 
-## 🎯 **Phase 4: Reports Management (Priority 4)**
+## 🎯 **Phase 2: Data Integration (Priority 2)**
+**Goal:** Connect UI to real backend API
+**Duration:** Week 2 (6-8 hours)
+**Result:** Working app with real data
 
-### **Task 4.1: Reports Data Types**
+### **Task 2.1: API Client Setup**
+**Status:** 🔴 Not Started
+**Dependencies:** Phase 1 Complete
+**Estimated:** 2 hours
+
+**Objective:** Create API client to communicate with existing Hono backend.
+
+**Requirements:**
+- API client class with all endpoint methods
+- Error handling and response typing
+- Environment configuration
+- Request/response interceptors
+
+**Files to Create:**
+- [ ] `apps/web/lib/api-client.ts` - Main API client
+- [ ] `apps/web/types/api-types.ts` - API response types
+- [ ] `apps/web/lib/api-endpoints.ts` - Endpoint constants
+- [ ] `apps/web/.env.local` - Environment variables
+
+**API Endpoints to Integrate:**
+- `GET /api/reports` - List reports
+- `GET /api/reports/:id` - Get report details
+- `POST /api/reports` - Create report
+- `GET /api/reports/me` - User's reports
+
+### **Task 2.2: Replace Mock Data with Real API**
 **Status:** 🔴 Not Started
 **Dependencies:** Task 2.1
+**Estimated:** 3 hours
+
+**Objective:** Replace all mock data calls with real API integration.
+
+**Requirements:**
+- Update reports list to fetch real data
+- Add loading states during API calls
+- Handle API errors gracefully
+- Update pagination to work with API
+- Cache frequently accessed data
+
+**Files to Update:**
+- [ ] Reports listing components
+- [ ] Dashboard statistics
+- [ ] Report detail pages
+- [ ] Search and filtering
+
+### **Task 2.3: Form Submission Integration**
+**Status:** 🔴 Not Started
+**Dependencies:** Task 2.2
+**Estimated:** 3 hours
+
+**Objective:** Connect create report form to real backend submission.
+
+**Requirements:**
+- Image upload to backend/cloud storage
+- Form validation with backend rules
+- Handle submission errors
+- Success confirmation with real report ID
+- Progress tracking during upload
+
+**Files to Update:**
+- [ ] Create report form components
+- [ ] Image upload functionality
+- [ ] Form validation logic
+- [ ] Success page with real data
+
+---
+
+## 🎯 **Phase 3: Authentication Integration (Priority 3)**
+**Goal:** Add real Firebase authentication
+**Duration:** Week 3 (6-8 hours)
+**Result:** Secure user authentication
+
+### **Task 3.1: Firebase Client Setup**
+**Status:** 🔴 Not Started
+**Dependencies:** Phase 2 Complete
 **Estimated:** 2 hours
 
-**Implementation:**
-```typescript
-// apps/web/types/reports.ts
-export interface Report {
-  id: string
-  title: string
-  description: string
-  category: 'pothole' | 'crack' | 'surface_damage' | 'drainage' | 'other'
-  severity: 'low' | 'medium' | 'high' | 'critical'
-  location: {
-    lat: number
-    lng: number
-    address: string
-  }
-  images: string[]
-  status: 'pending' | 'in_progress' | 'resolved' | 'rejected'
-  userId: string
-  createdAt: string
-  updatedAt: string
-}
+**Objective:** Configure Firebase client for Google OAuth authentication.
 
-export interface CreateReportData {
-  title: string
-  description: string
-  category: Report['category']
-  severity: Report['severity']
-  location: Report['location']
-  images: File[]
-}
-```
+**Requirements:**
+- Firebase project configuration
+- Google OAuth provider setup
+- Environment variables
+- Auth state management
 
 **Files to Create:**
-- [ ] `apps/web/types/reports.ts`
-- [ ] `apps/web/lib/report-utils.ts`
-- [ ] `apps/web/constants/report-categories.ts`
+- [ ] `apps/web/lib/firebase-config.ts` - Firebase setup
+- [ ] `apps/web/contexts/auth-context.tsx` - Auth state management
+- [ ] `apps/web/hooks/use-auth.ts` - Authentication hook
 
-### **Task 4.2: Reports List with Data Table**
+### **Task 3.2: Replace Mock Auth with Firebase**
 **Status:** 🔴 Not Started
-**Dependencies:** Task 4.1
-**Estimated:** 6 hours
-
-**Implementation:**
-```typescript
-// apps/web/components/reports/reports-data-table.tsx
-'use client'
-import { useState, useEffect } from 'react'
-import { DataTable } from '@/components/ui/data-table'
-import { Button } from '@repo/ui/button'
-import { Input } from '@repo/ui/input'
-import { Badge } from '@repo/ui/badge'
-import { useReactTable, ColumnDef } from '@tanstack/react-table'
-
-const columns: ColumnDef<Report>[] = [
-  {
-    accessorKey: 'title',
-    header: 'Judul Laporan',
-  },
-  {
-    accessorKey: 'category',
-    header: 'Kategori',
-    cell: ({ row }) => (
-      <Badge variant={getCategoryVariant(row.original.category)}>
-        {getCategoryLabel(row.original.category)}
-      </Badge>
-    ),
-  },
-  {
-    accessorKey: 'status',
-    header: 'Status',
-    cell: ({ row }) => (
-      <Badge variant={getStatusVariant(row.original.status)}>
-        {getStatusLabel(row.original.status)}
-      </Badge>
-    ),
-  },
-  {
-    accessorKey: 'createdAt',
-    header: 'Tanggal Dibuat',
-    cell: ({ row }) => formatDate(row.original.createdAt),
-  },
-]
-
-export function ReportsDataTable() {
-  const [reports, setReports] = useState<Report[]>([])
-  const [loading, setLoading] = useState(true)
-  const [columnFilters, setColumnFilters] = useState([])
-  
-  // Data fetching and table setup
-}
-```
-
-**Files to Create:**
-- [ ] `apps/web/components/reports/reports-data-table.tsx`
-- [ ] `apps/web/components/ui/data-table.tsx` (from shadcn docs)
-- [ ] `apps/web/components/ui/badge.tsx`
-- [ ] `apps/web/components/reports/report-card.tsx`
-- [ ] `apps/web/app/reports/page.tsx`
-
-### **Task 4.3: Individual Report Detail Page**
-**Status:** 🔴 Not Started
-**Dependencies:** Task 4.2
-**Estimated:** 4 hours
-
-**Implementation:**
-```typescript
-// apps/web/app/reports/[id]/page.tsx
-import { ReportDetail } from '@/components/reports/report-detail'
-import { ProtectedRoute } from '@/components/auth/protected-route'
-
-export default async function ReportDetailPage({ 
-  params 
-}: { 
-  params: { id: string } 
-}) {
-  const report = await getReport(params.id)
-  
-  if (!report) {
-    return <NotFound />
-  }
-  
-  return (
-    <ProtectedRoute>
-      <ReportDetail report={report} />
-    </ProtectedRoute>
-  )
-}
-```
-
-**Files to Create:**
-- [ ] `apps/web/app/reports/[id]/page.tsx`
-- [ ] `apps/web/components/reports/report-detail.tsx`
-- [ ] `apps/web/components/reports/report-actions.tsx`
-- [ ] `apps/web/components/ui/image-gallery.tsx`
-
----
-
-## 🎯 **Phase 5: User Features (Priority 5)**
-
-### **Task 5.1: User Dashboard**
-**Status:** 🔴 Not Started
-**Dependencies:** Task 4.2
-**Estimated:** 5 hours
-
-**Implementation:**
-```typescript
-// apps/web/app/dashboard/page.tsx
-import { DashboardStats } from '@/components/dashboard/stats'
-import { RecentReports } from '@/components/dashboard/recent-reports'
-import { ProtectedRoute } from '@/components/auth/protected-route'
-
-export default function DashboardPage() {
-  return (
-    <ProtectedRoute>
-      <div className="space-y-8">
-        <div>
-          <h1 className="text-3xl font-bold text-civic-blue-900">
-            Dashboard Saya
-          </h1>
-          <p className="text-gray-600">
-            Lihat laporan Anda dan statistik terbaru
-          </p>
-        </div>
-        
-        <DashboardStats />
-        <RecentReports />
-      </div>
-    </ProtectedRoute>
-  )
-}
-```
-
-**Files to Create:**
-- [ ] `apps/web/app/dashboard/page.tsx`
-- [ ] `apps/web/components/dashboard/stats.tsx`
-- [ ] `apps/web/components/dashboard/recent-reports.tsx`
-- [ ] `apps/web/components/dashboard/quick-actions.tsx`
-
-### **Task 5.2: Create Report Form**
-**Status:** 🔴 Not Started
-**Dependencies:** Task 5.1
-**Estimated:** 6 hours
-
-**Implementation:**
-```typescript
-// apps/web/app/reports/create/page.tsx
-'use client'
-import { CreateReportForm } from '@/components/reports/create-report-form'
-import { ProtectedRoute } from '@/components/auth/protected-route'
-
-export default function CreateReportPage() {
-  return (
-    <ProtectedRoute>
-      <div className="max-w-2xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-civic-blue-900">
-            Buat Laporan Baru
-          </h1>
-          <p className="text-gray-600">
-            Laporkan kerusakan jalan yang Anda temukan
-          </p>
-        </div>
-        
-        <CreateReportForm />
-      </div>
-    </ProtectedRoute>
-  )
-}
-```
-
-**Files to Create:**
-- [ ] `apps/web/app/reports/create/page.tsx`
-- [ ] `apps/web/components/reports/create-report-form.tsx`
-- [ ] `apps/web/components/forms/location-picker.tsx`
-- [ ] `apps/web/components/forms/image-upload.tsx`
-- [ ] `apps/web/components/forms/category-selector.tsx`
-
----
-
-## 🎯 **Phase 6: Enhancement & Polish (Priority 6)**
-
-### **Task 6.1: Error Handling & Loading States**
-**Status:** 🔴 Not Started
-**Dependencies:** All previous tasks
+**Dependencies:** Task 3.1
 **Estimated:** 3 hours
+
+**Objective:** Replace localStorage mock auth with real Firebase authentication.
+
+**Requirements:**
+- Update login flow to use Firebase
+- Replace mock user data with real Firebase user
+- Update auth guards for real authentication
+- Handle authentication errors
+
+**Files to Update:**
+- [ ] Login page components
+- [ ] Auth guard components
+- [ ] User profile display
+- [ ] Protected route logic
+
+### **Task 3.3: Backend Auth Integration**
+**Status:** 🔴 Not Started
+**Dependencies:** Task 3.2
+**Estimated:** 3 hours
+
+**Objective:** Connect frontend auth with backend API authentication.
+
+**Requirements:**
+- Send Firebase tokens to backend
+- Handle token refresh
+- Update API client with auth headers
+- Handle authentication failures
+
+**Files to Update:**
+- [ ] API client authentication
+- [ ] Token management
+- [ ] Protected API calls
+- [ ] Logout flow
+
+---
+
+## 🎯 **Phase 4: Polish & Error Handling (Priority 4)**
+**Goal:** Production-ready user experience
+**Duration:** Week 4 (6-8 hours)
+**Result:** Polished, error-free application
+
+### **Task 4.1: Error Handling & Loading States**
+**Status:** 🔴 Not Started
+**Dependencies:** Phase 3 Complete
+**Estimated:** 3 hours
+
+**Objective:** Add comprehensive error handling and loading states throughout the application.
+
+**Requirements:**
+- Global error boundary
+- API error handling
+- Loading spinners and skeletons
+- User-friendly error messages
+- Retry mechanisms
 
 **Files to Create:**
 - [ ] `apps/web/components/ui/error-boundary.tsx`
 - [ ] `apps/web/components/ui/loading-states.tsx`
+- [ ] `apps/web/components/ui/error-messages.tsx`
 - [ ] `apps/web/app/error.tsx`
 - [ ] `apps/web/app/loading.tsx`
-- [ ] `apps/web/app/not-found.tsx`
 
-### **Task 6.2: Mobile Optimization**
+### **Task 4.2: Mobile Optimization**
 **Status:** 🔴 Not Started
-**Dependencies:** Task 6.1
-**Estimated:** 4 hours
+**Dependencies:** Task 4.1
+**Estimated:** 3 hours
 
-**Implementation Focus:**
-- Responsive design improvements
+**Objective:** Optimize entire application for mobile devices.
+
+**Requirements:**
+- Mobile navigation menu
 - Touch-friendly interactions
-- Mobile navigation patterns
+- Responsive image handling
+- Mobile form optimization
 - Performance optimization
 
 **Files to Update:**
-- [ ] All layout components for mobile-first design
-- [ ] Navigation for mobile menu
-- [ ] Forms for mobile usability
-- [ ] Tables for mobile responsiveness
+- [ ] All layout components
+- [ ] Navigation components
+- [ ] Form components
+- [ ] Image components
+
+### **Task 4.3: Final Testing & Bug Fixes**
+**Status:** 🔴 Not Started
+**Dependencies:** Task 4.2
+**Estimated:** 2 hours
+
+**Objective:** Test complete user flows and fix any remaining issues.
+
+**Requirements:**
+- Test all user journeys
+- Fix responsive design issues
+- Verify all links and navigation
+- Test error scenarios
+- Performance optimization
+
+**Testing Checklist:**
+- [ ] Anonymous user can browse reports
+- [ ] User can login with Google
+- [ ] User can create reports with images
+- [ ] User can view their dashboard
+- [ ] All pages work on mobile
+- [ ] Error states work properly
 
 ---
 
-## 📦 **Dependencies & Installation**
+## 📦 **Dependencies & Setup**
 
-### **Package Dependencies:**
+### **Required Package Installations:**
 ```bash
-# Core dependencies (already installed)
-npm install firebase@11.10.0
-npm install @tanstack/react-table
-npm install class-variance-authority
-npm install clsx tailwind-merge
-
-# Form handling
-npm install react-hook-form @hookform/resolvers
-npm install zod
-
-# Additional UI components
-npx shadcn@latest add input table form badge avatar
+# Additional packages needed
+cd apps/web
+bun add react-hook-form @hookform/resolvers zod
+bun add @tanstack/react-query @tanstack/react-query-devtools
+bun add sonner  # Toast notifications
 ```
 
 ### **Environment Variables:**
@@ -538,43 +469,81 @@ npx shadcn@latest add input table form badge avatar
 NEXT_PUBLIC_FIREBASE_API_KEY=""
 NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=""
 NEXT_PUBLIC_FIREBASE_PROJECT_ID=""
-NEXT_PUBLIC_API_BASE_URL="http://localhost:3001"
+NEXT_PUBLIC_API_URL="http://localhost:3000"
 ```
 
 ---
 
-## 🚀 **Implementation Order & Timeline**
+## 🚀 **Development Strategy & Timeline**
 
-**Week 1:** Phase 1 - Foundation & Authentication
-**Week 2:** Phase 2 - Core UI Components + Phase 3 - Authentication Pages  
-**Week 3:** Phase 4 - Reports Management
-**Week 4:** Phase 5 - User Features + Phase 6 - Enhancement & Polish
+### **Week 1: UI-First Prototype**
+- Build complete user interface with mock data
+- Focus on user experience and flow
+- Get stakeholder feedback on design
+- No backend integration complexity
+
+### **Week 2: Data Integration**
+- Connect UI to real backend API
+- Replace mock data with live data
+- Add proper loading and error states
+- Test with real data scenarios
+
+### **Week 3: Authentication**
+- Add Firebase authentication
+- Secure protected routes
+- Connect user accounts to backend
+- Test authentication flows
+
+### **Week 4: Polish & Deploy**
+- Error handling and edge cases
+- Mobile optimization
+- Performance improvements
+- Final testing and deployment
 
 ---
 
-## 📋 **Success Criteria**
+## ✅ **Success Metrics**
 
-### **MVP Completion:**
-- [ ] Users can sign in with Google
-- [ ] Users can view list of reports with filtering/pagination
-- [ ] Users can create new reports with images and location
-- [ ] Users can view their dashboard with personal reports
-- [ ] Mobile-responsive design
-- [ ] Error handling and loading states
-- [ ] Integration with existing backend API
+### **Phase 1 Success (UI-First):**
+- [ ] Complete user journey clickable in browser
+- [ ] Stakeholders can provide feedback on design
+- [ ] All major pages and flows implemented
+- [ ] Mobile-responsive design verified
 
-### **Design System Compliance:**
-- [ ] Civic blue color scheme implementation
-- [ ] Geist font family usage
-- [ ] Consistent spacing (4px base unit)
-- [ ] Accessible components (WCAG 2.1 AA)
-- [ ] Performance optimized for mobile networks
+### **Phase 2 Success (Data Integration):**
+- [ ] Real data displays in all components
+- [ ] API calls work reliably
+- [ ] Loading states provide good UX
+- [ ] Error handling works properly
+
+### **Phase 3 Success (Authentication):**
+- [ ] Users can login with Google
+- [ ] Protected routes work securely
+- [ ] User sessions persist properly
+- [ ] Backend recognizes authenticated users
+
+### **Phase 4 Success (Production Ready):**
+- [ ] No bugs in major user flows
+- [ ] Mobile experience is excellent
+- [ ] Error messages are user-friendly
+- [ ] Performance is acceptable on slow connections
 
 ---
 
-## 🔗 **Key References**
-- **Design System:** `docs/ui-concept.md`
-- **Backend API:** `apps/api/src/routes/`
-- **Next.js Docs:** Context7 `/vercel/next.js`
-- **Firebase Auth:** Context7 `/firebase/firebase-js-sdk`
-- **Shadcn UI:** Context7 `/shadcn-ui/ui`
+## 🎯 **Core Development Philosophy**
+
+**UI-First Benefits:**
+1. **Fast Feedback Loop** - See results immediately
+2. **Design Validation** - Test UX before technical complexity
+3. **Stakeholder Engagement** - Demos work from Day 1
+4. **Reduced Risk** - Validate user flow before integration
+5. **Parallel Development** - UI and backend can be refined simultaneously
+
+**This approach ensures:**
+- Faster time to working prototype
+- Better user experience through iteration
+- Lower risk of rework
+- Clear separation of concerns
+- Ability to demo progress weekly
+
+**Key Principle:** Build what users will see and use first, then make it work with real data and authentication.

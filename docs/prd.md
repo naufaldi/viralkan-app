@@ -42,24 +42,314 @@ Guiding principles
 
 ---
 
-### 3.1 User Flows (V1)
+### 3.1 User Stories & Page Specifications (V1)
 
-**A. Authenticated Reporter**
+## **Epic 1: Public Report Browsing**
 
-1. **Login** → “Masuk dengan Google”.
-2. **Dashboard** → lists *My Reports*; click **Laporkan**.
-3. **Upload** image (client‑side preview).
-4. **Fill Form** → Category, Street, Location (free text).
-5. **Submit** → server saves record; user sees confirmation.
-6. **Public List** refresh → new record visible to all.
+### **User Story 1.1: Browse Reports as Anonymous Visitor**
+**As an** anonymous visitor  
+**I want to** browse all road damage reports without logging in  
+**So that** I can see what issues have been reported in my area  
 
-**B. Public Viewer**
+**Acceptance Criteria:**
+- [ ] Can access public reports without authentication
+- [ ] Can view reports in a paginated table format
+- [ ] Can see basic report information (thumbnail, category, location, date)
+- [ ] Can click on reports to view full details
+- [ ] Page loads in <2 seconds on 3G connection
 
-1. Open `viralkan.app` (no login).
-2. Default route `/list` shows data table (thumbnail, category, street, date).
-3. Click a row → `/report/:id` detail page (image + metadata).
+**Required Pages:**
 
-*(Sequence diagrams omitted; can be generated from this narrative for the RFC.)*
+#### **Page: Landing/Home (`/`)**
+**Purpose:** Entry point that introduces the platform and directs users to reports or login
+**Components:**
+- Header with site branding "Viralkan Bekasi"
+- Hero section explaining the platform purpose
+- Call-to-action buttons: "Lihat Laporan" and "Masuk dengan Google"
+- Footer with basic links
+**Navigation:** → `/reports` (public list) or `/login`
+
+#### **Page: Public Reports List (`/reports`)**
+**Purpose:** Display all reports in a searchable, filterable table
+**Components:**
+- Header with navigation (Home, Login button)
+- Page title: "Laporan Kerusakan Jalan"
+- Data table with columns:
+  - Thumbnail (60x60px)
+  - Kategori (badge: Berlubang/Retak/Lainnya)
+  - Jalan (street name)
+  - Lokasi (location text)
+  - Tanggal (formatted date)
+- Pagination controls (10 items per page)
+- Basic search/filter by category
+- "Buat Laporan" button (redirects to login if not authenticated)
+**Data Requirements:** 
+- API: `GET /api/reports?page=1&limit=10&category=`
+- Response: `{items: Report[], total: number, page: number}`
+**Navigation:** → `/reports/[id]` (detail) or `/login`
+
+#### **Page: Report Detail (`/reports/[id]`)**
+**Purpose:** Show full details of a specific report
+**Components:**
+- Header with navigation and breadcrumb
+- Large image display (with zoom capability)
+- Report metadata card:
+  - Kategori (colored badge)
+  - Jalan dan Lokasi
+  - Tanggal dibuat
+  - Status (if applicable)
+- Back to list button
+- Share button (copy link)
+**Data Requirements:**
+- API: `GET /api/reports/:id`
+- Response: `Report` object with full details
+**Navigation:** ← `/reports` (back to list)
+
+---
+
+## **Epic 2: User Authentication**
+
+### **User Story 2.1: Login with Google**
+**As a** citizen who wants to report road damage  
+**I want to** login with my Google account  
+**So that** I can create and manage my reports  
+
+**Acceptance Criteria:**
+- [ ] Can click "Masuk dengan Google" button
+- [ ] Redirected to Google OAuth consent screen
+- [ ] After successful auth, redirected to dashboard
+- [ ] User session persists across browser sessions
+- [ ] Can logout and clear session
+
+**Required Pages:**
+
+#### **Page: Login (`/login`)**
+**Purpose:** Authenticate users via Google OAuth
+**Components:**
+- Centered login card with:
+  - Viralkan logo and tagline
+  - "Masuk dengan Google" button (with Google icon)
+  - Brief explanation: "Masuk untuk melaporkan kerusakan jalan"
+- Loading state during OAuth flow
+- Error message display for failed authentication
+**Navigation:** → `/dashboard` (after successful login)
+
+#### **Page: Auth Callback (`/auth/callback`)**
+**Purpose:** Handle OAuth callback and token exchange
+**Components:**
+- Loading spinner
+- "Sedang memproses..." message
+- Error handling for failed authentication
+**Navigation:** → `/dashboard` (success) or `/login` (error)
+
+---
+
+## **Epic 3: Personal Dashboard**
+
+### **User Story 3.1: View My Reports Dashboard**
+**As an** authenticated user  
+**I want to** see my personal dashboard with my reports  
+**So that** I can track my submissions and create new ones  
+
+**Acceptance Criteria:**
+- [ ] Shows personalized welcome message with user name
+- [ ] Displays my reports in chronological order
+- [ ] Shows report statistics (total, by category, by status)
+- [ ] Prominent "Buat Laporan Baru" button
+- [ ] Can access account settings and logout
+
+**Required Pages:**
+
+#### **Page: Dashboard (`/dashboard`)**
+**Purpose:** Personal hub for authenticated users
+**Components:**
+- Header with user avatar, name, and logout button
+- Welcome section: "Selamat datang, [Name]"
+- Quick stats cards:
+  - Total laporan saya
+  - Laporan bulan ini
+  - Status terbaru
+- "Buat Laporan Baru" prominent button
+- "Laporan Saya" section:
+  - Mini table/cards of recent reports (5 most recent)
+  - "Lihat Semua" link to full list
+- Quick actions sidebar
+**Data Requirements:**
+- API: `GET /api/me/reports?limit=5`
+- API: `GET /api/me/stats`
+**Navigation:** → `/reports/create` or `/dashboard/reports`
+
+#### **Page: My Reports List (`/dashboard/reports`)**
+**Purpose:** Full list of user's reports with management options
+**Components:**
+- Header with breadcrumb
+- Page title: "Laporan Saya"
+- Data table similar to public list but with additional columns:
+  - Status (Pending/In Progress/Resolved)
+  - Actions (Edit/Delete if allowed)
+- Pagination and filtering
+- "Buat Laporan Baru" button
+**Data Requirements:**
+- API: `GET /api/me/reports?page=1&limit=10`
+**Navigation:** → `/reports/create` or `/reports/[id]`
+
+---
+
+## **Epic 4: Report Creation**
+
+### **User Story 4.1: Create New Report**
+**As an** authenticated user  
+**I want to** create a new road damage report with photo and details  
+**So that** authorities can be notified of the issue  
+
+**Acceptance Criteria:**
+- [ ] Can upload image (JPEG/PNG, max 10MB)
+- [ ] Can select damage category from dropdown
+- [ ] Can enter street name and location description
+- [ ] Form validates all required fields
+- [ ] Shows preview before submission
+- [ ] Receives confirmation after successful submission
+- [ ] Handles upload errors gracefully
+
+**Required Pages:**
+
+#### **Page: Create Report (`/reports/create`)**
+**Purpose:** Form to create new road damage report
+**Components:**
+- Header with breadcrumb
+- Page title: "Buat Laporan Kerusakan Jalan"
+- Multi-step form:
+  
+  **Step 1: Upload Image**
+  - Drag & drop upload area
+  - File picker button
+  - Image preview with crop/rotate options
+  - File size/type validation
+  - Progress bar during upload
+  
+  **Step 2: Report Details**
+  - Kategori dropdown (Berlubang, Retak, Lainnya)
+  - Nama Jalan text input
+  - Deskripsi Lokasi textarea
+  - Severity selector (optional)
+  
+  **Step 3: Review & Submit**
+  - Preview of uploaded image
+  - Summary of entered details
+  - reCAPTCHA verification
+  - Submit button with loading state
+
+- Cancel button (with confirmation dialog)
+- Form validation messages
+- Error handling for API failures
+**Data Requirements:**
+- API: `POST /api/reports` with multipart form data
+- Response: `{id: string, message: string}`
+**Navigation:** → `/reports/create/success` or back to `/dashboard`
+
+#### **Page: Report Success (`/reports/create/success`)**
+**Purpose:** Confirmation page after successful report creation
+**Components:**
+- Success icon and message
+- "Laporan berhasil dibuat" heading
+- Summary of created report
+- Action buttons:
+  - "Lihat Laporan" → `/reports/[id]`
+  - "Buat Laporan Lain" → `/reports/create`
+  - "Kembali ke Dashboard" → `/dashboard`
+**Navigation:** Multiple options as listed above
+
+---
+
+## **Epic 5: Error Handling & Edge Cases**
+
+### **User Story 5.1: Handle Errors Gracefully**
+**As a** user  
+**I want to** see helpful error messages when things go wrong  
+**So that** I understand what happened and what to do next  
+
+**Required Pages:**
+
+#### **Page: 404 Not Found (`/404`)**
+**Purpose:** Handle invalid routes
+**Components:**
+- "Halaman tidak ditemukan" message
+- Helpful links back to main sections
+- Search functionality
+
+#### **Page: 500 Server Error (`/500`)**
+**Purpose:** Handle server errors
+**Components:**
+- "Terjadi kesalahan server" message
+- Retry button
+- Contact information
+
+#### **Page: Offline (`/offline`)**
+**Purpose:** Handle offline state (PWA)
+**Components:**
+- "Tidak ada koneksi internet" message
+- Cached content if available
+- Retry connection button
+
+---
+
+## **Technical Page Requirements Summary**
+
+| Route | Purpose | Auth Required | API Endpoints | Key Components |
+|-------|---------|---------------|---------------|----------------|
+| `/` | Landing page | No | None | Hero, CTA buttons |
+| `/reports` | Public reports list | No | `GET /api/reports` | Data table, pagination |
+| `/reports/[id]` | Report detail | No | `GET /api/reports/:id` | Image viewer, metadata |
+| `/login` | Authentication | No | Google OAuth | Login form |
+| `/auth/callback` | OAuth callback | No | Token exchange | Loading state |
+| `/dashboard` | User dashboard | Yes | `GET /api/me/*` | Stats, recent reports |
+| `/dashboard/reports` | User reports list | Yes | `GET /api/me/reports` | Personal data table |
+| `/reports/create` | Create report form | Yes | `POST /api/reports` | Multi-step form |
+| `/reports/create/success` | Success confirmation | Yes | None | Success message |
+
+---
+
+## **Component Library Requirements**
+
+**Shared Components Needed:**
+- `Header` - Navigation with auth state
+- `DataTable` - Sortable, paginated table
+- `ReportCard` - Report display component
+- `ImageUpload` - Drag & drop file upload
+- `LoadingSpinner` - Loading states
+- `ErrorBoundary` - Error handling
+- `Badge` - Category/status indicators
+- `Button` - Various button styles
+- `Form` - Form components with validation
+- `Modal` - Confirmation dialogs
+- `Breadcrumb` - Navigation breadcrumbs
+
+---
+
+## **Detailed User Flow Diagrams**
+
+### **Flow A: Anonymous User Browsing Reports**
+```
+[Landing Page] → [Public Reports List] → [Report Detail]
+       ↓                    ↓
+   [Login Page]        [Login Page]
+       ↓                    ↓
+  [Dashboard]          [Dashboard]
+```
+
+### **Flow B: Authenticated User Creating Report**
+```
+[Dashboard] → [Create Report] → [Upload Image] → [Fill Details] → [Review] → [Success] → [View Report]
+     ↑              ↓                                                          ↓
+[My Reports]    [Cancel/Back]                                           [Create Another]
+```
+
+### **Flow C: Error Handling**
+```
+[Any Page] → [Error Occurs] → [Error Page] → [Recovery Action]
+                                   ↓
+                            [Contact Support]
+```
 
 ---
 
