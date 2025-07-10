@@ -3,11 +3,14 @@
   "version": "0.0.0",
   "private": true,
   "exports": {
-    ".": "./src/index.ts",
-    "./styles": "./src/globals.css",
-    "./button": "./src/components/ui/button.tsx",
-    "./card": "./src/components/ui/card.tsx",
-    "./utils": "./src/lib/utils.ts"
+    "./postcss.config": "./postcss.config.mjs",
+    "./components/*": "./src/components/*.tsx",
+    "./lib/*": "./src/lib/*.ts",
+    "./styles/*": "./src/styles/*",
+    "./hooks/*": [
+      "./src/hooks/*.ts",
+      "./src/hooks/*.tsx"
+    ]
   },
   "scripts": {
     "lint": "eslint . --max-warnings 0",
@@ -55,7 +58,8 @@
     "react-hook-form": "^7.59.0",
     "sonner": "^2.0.5",
     "tailwind-merge": "^3.3.1",
-    "zod": "^3.25.71"
+    "zod": "^3.25.71",
+    "tw-animate-css": "^1.2.4"
   },
   "peerDependencies": {
     "react": "^18.0.0"

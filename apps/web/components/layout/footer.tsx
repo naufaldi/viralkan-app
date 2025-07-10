@@ -1,107 +1,162 @@
-import Link from "next/link";
-import { Twitter, Facebook, Instagram, Mail } from "lucide-react";
+import { Button } from "@repo/ui/components/ui/button";
+import { Card, CardContent } from "@repo/ui/components/ui/card";
+import { Separator } from "@repo/ui/components/ui/separator";
+import { Badge } from "@repo/ui/components/ui/badge";
+import { Heart, Twitter, Facebook, Instagram, Mail, MapPin, Phone } from "lucide-react";
 
 const Footer = () => {
+  const socialLinks = [
+    { icon: Twitter, href: "#", label: "Twitter" },
+    { icon: Facebook, href: "#", label: "Facebook" },
+    { icon: Instagram, href: "#", label: "Instagram" },
+    { icon: Mail, href: "mailto:info@viralkan.id", label: "Email" },
+  ];
+
+  const platformLinks = [
+    { label: "Cara Kerja", href: "#how-it-works" },
+    { label: "Statistik", href: "#statistics" },
+    { label: "Peta Interaktif", href: "#" },
+    { label: "API Documentation", href: "#" },
+  ];
+
+  const legalLinks = [
+    { label: "Disclaimer", href: "#disclaimer" },
+    { label: "Kebijakan Privasi", href: "#" },
+    { label: "Syarat & Ketentuan", href: "#" },
+    { label: "FAQ", href: "#" },
+  ];
+
   return (
-    <footer className="bg-gray-900 text-white">
-      <div className="container mx-auto px-6 py-12 lg:px-8">
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
-          {/* Brand Section */}
-          <div className="lg:col-span-2">
-            <div className="flex items-center space-x-2 mb-4">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white">
-                <span className="text-lg font-bold text-gray-900">V</span>
+    <footer className="bg-gradient-to-b from-slate-900 to-slate-950 text-white">
+      <div className="container mx-auto px-6 lg:px-8">
+        {/* Main Footer Content */}
+        <div className="py-16">
+          <div className="grid lg:grid-cols-4 gap-12">
+            {/* Brand Section */}
+            <div className="lg:col-span-2 space-y-6">
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-purple-500 shadow-lg">
+                  <span className="text-xl font-bold text-white">V</span>
+                </div>
+                <div>
+                  <span className="text-2xl font-bold">Viralkan</span>
+                  <Badge variant="secondary" className="ml-3 bg-blue-500/20 text-blue-300 border-blue-500/30">
+                    Platform Komunitas
+                  </Badge>
+                </div>
               </div>
-              <span className="text-xl font-bold">Viralkan</span>
-            </div>
-            <p className="text-gray-400 max-w-md">
-              Platform komunitas untuk melaporkan, membagikan, dan menghindari jalan rusak 
-              di seluruh Indonesia. Bersama kita ciptakan kesadaran infrastruktur.
-            </p>
-            <div className="flex space-x-4 mt-6">
-              <Link 
-                href="#" 
-                className="text-gray-400 hover:text-white transition-colors"
-                aria-label="Twitter"
-              >
-                <Twitter className="h-5 w-5" />
-              </Link>
-              <Link 
-                href="#" 
-                className="text-gray-400 hover:text-white transition-colors"
-                aria-label="Facebook"
-              >
-                <Facebook className="h-5 w-5" />
-              </Link>
-              <Link 
-                href="#" 
-                className="text-gray-400 hover:text-white transition-colors"
-                aria-label="Instagram"
-              >
-                <Instagram className="h-5 w-5" />
-              </Link>
-              <Link 
-                href="#" 
-                className="text-gray-400 hover:text-white transition-colors"
-                aria-label="Email"
-              >
-                <Mail className="h-5 w-5" />
-              </Link>
-            </div>
-          </div>
+              
+              <p className="text-slate-300 leading-relaxed max-w-md">
+                Platform komunitas untuk melaporkan dan menghindari jalan rusak di seluruh Indonesia. 
+                Jadikan suaramu terdengar lewat kekuatan media sosial.
+              </p>
 
-          {/* Quick Links */}
-          <div>
-            <h3 className="text-sm font-semibold mb-4">Platform</h3>
-            <ul className="space-y-3">
-              <li>
-                <Link href="#how-it-works" className="text-gray-400 hover:text-white transition-colors">
-                  Cara Kerja
-                </Link>
-              </li>
-              <li>
-                <Link href="#statistics" className="text-gray-400 hover:text-white transition-colors">
-                  Statistik
-                </Link>
-              </li>
-              <li>
-                <Link href="#disclaimer" className="text-gray-400 hover:text-white transition-colors">
-                  Disclaimer
-                </Link>
-              </li>
-            </ul>
-          </div>
+              {/* Contact Info */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-3 text-slate-300">
+                  <Mail className="h-4 w-4 text-blue-400" />
+                  <span className="text-sm">info@viralkan.id</span>
+                </div>
+                <div className="flex items-center gap-3 text-slate-300">
+                  <MapPin className="h-4 w-4 text-blue-400" />
+                  <span className="text-sm">Indonesia</span>
+                </div>
+              </div>
 
-          {/* Legal */}
-          <div>
-            <h3 className="text-sm font-semibold mb-4">Legal</h3>
-            <ul className="space-y-3">
-              <li>
-                <Link href="#" className="text-gray-400 hover:text-white transition-colors">
-                  Terms of Service
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="text-gray-400 hover:text-white transition-colors">
-                  Privacy Policy
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="text-gray-400 hover:text-white transition-colors">
-                  Cookie Policy
-                </Link>
-              </li>
-            </ul>
+              {/* Social Media */}
+              <div className="flex items-center gap-4">
+                {socialLinks.map((social) => {
+                  const IconComponent = social.icon;
+                  return (
+                    <Button
+                      key={social.label}
+                      variant="ghost"
+                      size="icon"
+                      className="h-10 w-10 rounded-xl bg-slate-800/50 hover:bg-slate-700/50 text-slate-400 hover:text-white transition-all duration-300 hover:scale-110"
+                      asChild
+                    >
+                      <a href={social.href} aria-label={social.label}>
+                        <IconComponent className="h-4 w-4" />
+                      </a>
+                    </Button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Platform Links */}
+            <div className="space-y-6">
+              <h3 className="text-lg font-semibold text-white">Platform</h3>
+              <ul className="space-y-3">
+                {platformLinks.map((link) => (
+                  <li key={link.label}>
+                    <a
+                      href={link.href}
+                      className="text-slate-300 hover:text-white transition-colors duration-200 text-sm hover:underline hover:underline-offset-4"
+                    >
+                      {link.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Legal Links */}
+            <div className="space-y-6">
+              <h3 className="text-lg font-semibold text-white">Legal</h3>
+              <ul className="space-y-3">
+                {legalLinks.map((link) => (
+                  <li key={link.label}>
+                    <a
+                      href={link.href}
+                      className="text-slate-300 hover:text-white transition-colors duration-200 text-sm hover:underline hover:underline-offset-4"
+                    >
+                      {link.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
 
-        <div className="border-t border-gray-800 mt-12 pt-8 flex flex-col sm:flex-row justify-between items-center">
-          <p className="text-gray-400 text-sm">
-            © {new Date().getFullYear()} Viralkan. Seluruh hak cipta dilindungi.
-          </p>
-          <p className="text-gray-400 text-sm mt-4 sm:mt-0">
-            Dibuat dengan ❤️ untuk Indonesia
-          </p>
+        {/* Separator */}
+        <Separator className="bg-slate-800" />
+
+        {/* Bottom Section */}
+        <div className="py-8">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
+            {/* Copyright */}
+            <div className="flex items-center gap-2 text-slate-400 text-sm">
+              <span>© 2024 Viralkan. Dibuat dengan</span>
+              <Heart className="h-4 w-4 text-red-400 fill-current" />
+              <span>untuk Indonesia</span>
+            </div>
+
+            {/* Status & Version */}
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                <span className="text-xs text-slate-400">Semua sistem berjalan normal</span>
+              </div>
+              <Badge variant="outline" className="border-slate-700 text-slate-400 text-xs">
+                v1.0.0-beta
+              </Badge>
+            </div>
+          </div>
+        </div>
+
+        {/* Indonesia Pride */}
+        <div className="pb-8">
+          <Card className="bg-gradient-to-r from-red-500/10 via-white/5 to-red-500/10 border-red-500/20">
+            <CardContent className="p-6 text-center">
+              <div className="flex items-center justify-center gap-3 text-sm text-slate-300">
+                <span className="text-red-400 text-lg">🇮🇩</span>
+                <span>Bangga buatan anak negeri untuk kemajuan infrastruktur Indonesia</span>
+                <span className="text-red-400 text-lg">🇮🇩</span>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </footer>

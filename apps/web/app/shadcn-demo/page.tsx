@@ -1,7 +1,7 @@
 "use client";
 
-import { Button } from "@repo/ui";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@repo/ui";
+import { Button } from "@repo/ui/components/ui/button";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@repo/ui/components/ui/card";
 
 export default function ShadcnDemo() {
   return (
