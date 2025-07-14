@@ -1,8 +1,16 @@
 import { Badge } from "@repo/ui/components/ui/badge";
 import { Card, CardContent } from "@repo/ui/components/ui/card";
-import { Avatar, AvatarImage, AvatarFallback } from "@repo/ui/components/ui/avatar";
+import {
+  Avatar,
+  AvatarImage,
+  AvatarFallback,
+} from "@repo/ui/components/ui/avatar";
 import { MapPin, Calendar, User } from "lucide-react";
-import { MockReportWithUser, categoryConfig, getTimeAgo } from "../../lib/mock-data";
+import {
+  MockReportWithUser,
+  categoryConfig,
+  getTimeAgo,
+} from "../../lib/mock-data";
 
 interface ReportCardProps {
   report: MockReportWithUser;
@@ -13,15 +21,15 @@ export function ReportCard({ report, onClick }: ReportCardProps) {
   const categoryInfo = categoryConfig[report.category];
 
   return (
-    <Card 
+    <Card
       className="hover:shadow-md transition-shadow cursor-pointer border border-neutral-200"
       onClick={onClick}
     >
       <CardContent className="p-0">
         {/* Report Image */}
         <div className="relative">
-          <img 
-            src={report.image_url} 
+          <img
+            src={report.image_url}
             alt={`Kerusakan jalan di ${report.street_name}`}
             className="w-full h-48 object-cover rounded-t-lg"
           />
@@ -54,14 +62,17 @@ export function ReportCard({ report, onClick }: ReportCardProps) {
               <Avatar className="h-6 w-6">
                 <AvatarImage src={report.user_avatar || undefined} />
                 <AvatarFallback className="text-xs bg-primary-100 text-primary-700">
-                  {report.user_name?.split(' ').map(n => n[0]).join('') || <User className="h-3 w-3" />}
+                  {report.user_name
+                    ?.split(" ")
+                    .map((n) => n[0])
+                    .join("") || <User className="h-3 w-3" />}
                 </AvatarFallback>
               </Avatar>
               <span className="text-xs text-neutral-600 font-medium">
-                {report.user_name || 'Anonymous'}
+                {report.user_name || "Anonymous"}
               </span>
             </div>
-            
+
             <div className="flex items-center gap-1 text-xs text-neutral-500">
               <Calendar className="h-3 w-3" />
               {getTimeAgo(report.created_at)}

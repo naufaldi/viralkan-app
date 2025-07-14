@@ -18,7 +18,8 @@ const mockUserData: MockUser = {
   firebase_uid: "mock_firebase_uid_123",
   email: "user@example.com",
   name: "John Doe",
-  avatar_url: "https://ui-avatars.com/api/?name=John+Doe&background=2563eb&color=fff",
+  avatar_url:
+    "https://ui-avatars.com/api/?name=John+Doe&background=2563eb&color=fff",
   provider: "google",
   created_at: new Date().toISOString(),
 };
@@ -65,19 +66,21 @@ export class MockAuth {
   }
 
   private notifyListeners() {
-    this.listeners.forEach(listener => listener(this.user));
+    this.listeners.forEach((listener) => listener(this.user));
   }
 
   // Subscribe to auth state changes
   onAuthStateChanged(callback: (user: MockUser | null) => void) {
     this.listeners.push(callback);
-    
+
     // Call immediately with current state
     callback(this.user);
-    
+
     // Return unsubscribe function
     return () => {
-      this.listeners = this.listeners.filter(listener => listener !== callback);
+      this.listeners = this.listeners.filter(
+        (listener) => listener !== callback,
+      );
     };
   }
 
@@ -90,7 +93,7 @@ export class MockAuth {
           ...mockUserData,
           created_at: new Date().toISOString(),
         };
-        
+
         this.saveUserToStorage(this.user);
         this.notifyListeners();
         resolve(this.user);
@@ -123,7 +126,7 @@ export class MockAuth {
   // Get mock Firebase token (for API calls)
   async getIdToken(): Promise<string | null> {
     if (!this.user) return null;
-    
+
     // Return a mock JWT token
     return `mock_firebase_token_${this.user.firebase_uid}_${Date.now()}`;
   }

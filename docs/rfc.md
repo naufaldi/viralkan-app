@@ -130,13 +130,54 @@ _`bunx turbo run dev`_ spins up API (port 3000) & Web (5173) with watch mode.
 
 ## 5 · API Endpoints (Comprehensive)
 
-### 5.1 Authentication
+### 5.1 Authentication (Firebase + PostgreSQL)
+
+**Recommended Architecture: Firebase Tokens + Backend Verification**
 
 ```http
-GET  /api/auth/google     -> 302 Redirect to Google OAuth
-POST /api/auth/callback   -> 200 OK {token} | 400 Error
-POST /api/auth/logout     -> 200 OK
+POST /api/auth/verify     -> 200 OK {user_id, user} | 401 Invalid Token
 GET  /api/auth/me         -> 200 OK {user} | 401 Unauthorized
+GET  /api/auth/me/stats   -> 200 OK {stats} | 401 Unauthorized
+POST /api/auth/logout     -> 200 OK | 401 Unauthorized
+GET  /api/auth/health     -> 200 OK {status, timestamp}
+```
+
+**Authentication Flow:**
+
+```
+1. Frontend: User clicks "Login with Google"
+2. Frontend: Firebase handles Google OAuth → returns Firebase JWT
+3. Frontend: Send Firebase JWT to POST /api/auth/verify
+4. Backend: Verify Firebase JWT + upsert user to PostgreSQL
+5. Frontend: Store Firebase JWT for future API calls
+6. All API calls: Send Firebase JWT in Authorization header
+7. Backend: Verify Firebase JWT via middleware on each request
+```
+
+**Request/Response Examples:**
+
+```typescript
+// Step 3: Verify Firebase token + save user
+POST /api/auth/verify
+Authorization: Bearer <firebase-jwt-token>
+→ 200 OK {
+  message: "Authentication verified",
+  user_id: 123,
+  user: {
+    id: 123,
+    firebase_uid: "firebase_uid_1234",
+    email: "user@example.com",
+    name: "John Doe",
+    avatar_url: "https://lh3.googleusercontent.com/...",
+    provider: "google",
+    created_at: "2024-01-15T10:30:00Z"
+  }
+}
+
+// Step 6: All subsequent API calls
+GET /api/reports
+Authorization: Bearer <firebase-jwt-token>
+→ 200 OK {items: [...], total: 50}
 ```
 
 ### 5.2 Reports (Public)
@@ -186,7 +227,299 @@ POST /api/upload/signed-url
 
 ---
 
-## 6 · Component Library Requirements
+## 6 · Authentication Architecture (Firebase + PostgreSQL)
+
+### 6.1 Why Firebase Tokens (Not Backend JWT Generation)
+
+**Chosen Approach: Direct Firebase Token Verification**
+
+```
+Frontend Firebase Auth → Firebase JWT → Backend Verification → PostgreSQL Storage
+```
+
+**Rejected Approach: Backend JWT Generation**
+
+```
+Frontend Firebase Auth → Firebase JWT → Backend → Generate Backend JWT → Store Backend JWT
+```
+
+**Decision Rationale:**
+
+| Aspect                 | Firebase Tokens ✅                       | Backend JWT ❌                      |
+| ---------------------- | ---------------------------------------- | ----------------------------------- |
+| **Complexity**         | Simple, Firebase handles token lifecycle | Complex, need JWT secret management |
+| **Security**           | Firebase security expertise              | Manual JWT security implementation  |
+| **Token Refresh**      | Automatic via Firebase SDK               | Manual refresh logic needed         |
+| **Session Management** | Firebase handles expiration              | Manual expiration handling          |
+| **Implementation**     | Already implemented ✅                   | Additional development needed       |
+| **Error Handling**     | Firebase provides rich error types       | Manual error type management        |
+| **Development Speed**  | Fast (leverage Firebase)                 | Slow (build custom auth)            |
+
+### 6.2 Frontend Integration Pattern
+
+**File Structure:**
+
+```typescript
+apps/web/
+├── lib/firebase/config.ts          // ✅ Firebase client config
+├── hooks/useFirebaseAuth.ts        // ✅ Firebase auth hook
+├── hooks/useAuth.ts                // 🔄 Backend integration hook
+├── contexts/AuthContext.tsx        // 🔄 Auth state management
+└── components/auth/login-form.tsx  // ✅ Login UI component
+```
+
+**Implementation Pattern:**
+
+```typescript
+// apps/web/hooks/useAuth.ts
+export function useAuth() {
+  const { user, signInWithGoogle, signOut, getIdToken } = useFirebaseAuth();
+  const [backendUser, setBackendUser] = useState(null);
+  const [isVerifying, setIsVerifying] = useState(false);
+
+  const verifyWithBackend = async () => {
+    if (!user) return;
+
+    setIsVerifying(true);
+    try {
+      const firebaseToken = await getIdToken();
+      const response = await fetch("/api/auth/verify", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${firebaseToken}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setBackendUser(data.user);
+      }
+    } catch (error) {
+      console.error("Backend verification failed:", error);
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  // Auto-verify when Firebase user changes
+  useEffect(() => {
+    if (user) {
+      verifyWithBackend();
+    } else {
+      setBackendUser(null);
+    }
+  }, [user]);
+
+  const apiCall = async (url: string, options: RequestInit = {}) => {
+    const firebaseToken = await getIdToken();
+    return fetch(url, {
+      ...options,
+      headers: {
+        ...options.headers,
+        Authorization: `Bearer ${firebaseToken}`,
+        "Content-Type": "application/json",
+      },
+    });
+  };
+
+  return {
+    // Firebase state
+    firebaseUser: user,
+    isFirebaseAuthenticated: !!user,
+
+    // Backend state
+    backendUser,
+    isBackendVerified: !!backendUser,
+    isVerifying,
+
+    // Actions
+    signIn: signInWithGoogle,
+    signOut: async () => {
+      await signOut();
+      setBackendUser(null);
+    },
+
+    // API helper
+    apiCall,
+  };
+}
+```
+
+### 6.3 Backend Implementation (Already Complete)
+
+**Middleware Architecture:**
+
+```typescript
+// apps/api/src/routes/auth/middleware.ts
+export const firebaseAuthMiddleware = async (c, next) => {
+  // 1. Extract Bearer token from Authorization header
+  const authHeader = c.req.header("Authorization");
+  const idToken = authHeader?.substring(7); // Remove 'Bearer '
+
+  // 2. Verify Firebase token with Admin SDK
+  const result = await shell.verifyTokenAndGetUser(sql, idToken);
+
+  // 3. Set user_id in context for route handlers
+  c.set("user_id", result.data.user_id);
+
+  await next();
+};
+```
+
+**Database Integration:**
+
+```typescript
+// apps/api/src/routes/auth/data.ts
+export const upsertUser = async (sql, userData) => {
+  return await sql`
+    INSERT INTO users(firebase_uid, email, name, avatar_url, provider)
+    VALUES(${userData.firebase_uid}, ${userData.email}, ${userData.name}, ${userData.avatar_url}, ${userData.provider})
+    ON CONFLICT (firebase_uid) DO UPDATE
+    SET email = EXCLUDED.email,
+        name = EXCLUDED.name, 
+        avatar_url = EXCLUDED.avatar_url
+    RETURNING *
+  `;
+};
+```
+
+### 6.4 Error Handling Strategy
+
+**Frontend Error Types:**
+
+```typescript
+type AuthError =
+  | "firebase-auth-failed" // Google OAuth failed
+  | "firebase-token-invalid" // Firebase token expired/invalid
+  | "backend-verification-failed" // Backend /auth/verify failed
+  | "network-error" // Request failed
+  | "unknown-error"; // Unexpected error
+
+const handleAuthError = (error: AuthError) => {
+  switch (error) {
+    case "firebase-auth-failed":
+      return "Gagal masuk dengan Google. Silakan coba lagi.";
+    case "firebase-token-invalid":
+      return "Sesi telah berakhir. Silakan masuk kembali.";
+    case "backend-verification-failed":
+      return "Gagal verifikasi dengan server. Silakan coba lagi.";
+    case "network-error":
+      return "Tidak ada koneksi internet. Silakan coba lagi.";
+    default:
+      return "Terjadi kesalahan. Silakan coba lagi.";
+  }
+};
+```
+
+**Backend Error Responses:**
+
+```typescript
+// Consistent error format
+type ErrorResponse = {
+  error: string;
+  statusCode: number;
+  timestamp: string;
+};
+
+// Firebase token verification errors
+const AUTH_ERRORS = {
+  MISSING_TOKEN: {
+    code: 401,
+    message: "Missing or invalid Authorization header",
+  },
+  INVALID_TOKEN: { code: 401, message: "Invalid or expired Firebase token" },
+  USER_CREATION_FAILED: { code: 500, message: "Failed to create/update user" },
+  FIREBASE_UNAVAILABLE: { code: 503, message: "Firebase service unavailable" },
+};
+```
+
+### 6.5 Security Considerations
+
+**Token Security:**
+
+- ✅ Firebase tokens are short-lived (1 hour default)
+- ✅ Automatic refresh handled by Firebase SDK
+- ✅ HTTPS-only token transmission
+- ✅ Firebase Admin SDK validates token signature
+
+**Database Security:**
+
+- ✅ Prepared statements prevent SQL injection
+- ✅ User data validation with Zod schemas
+- ✅ Rate limiting on authentication endpoints
+- ✅ CORS configured for frontend origin only
+
+**Session Management:**
+
+- ✅ No server-side session storage needed
+- ✅ Stateless authentication via Firebase tokens
+- ✅ Token revocation handled by Firebase
+- ✅ Logout clears frontend Firebase session
+
+### 6.6 Testing Strategy
+
+**Frontend Tests:**
+
+```typescript
+// Test Firebase auth integration
+describe("useAuth hook", () => {
+  it("verifies user with backend after Firebase login", async () => {
+    const { result } = renderHook(() => useAuth());
+
+    // Mock Firebase login
+    act(() => {
+      mockFirebaseAuth.signIn();
+    });
+
+    await waitFor(() => {
+      expect(result.current.isBackendVerified).toBe(true);
+      expect(result.current.backendUser).toBeTruthy();
+    });
+  });
+});
+```
+
+**Backend Tests:**
+
+```typescript
+// Test middleware authentication
+describe("firebaseAuthMiddleware", () => {
+  it("sets user_id for valid Firebase token", async () => {
+    const validToken = await generateTestFirebaseToken();
+    const response = await app.request("/api/auth/me", {
+      headers: { Authorization: `Bearer ${validToken}` },
+    });
+
+    expect(response.status).toBe(200);
+  });
+});
+```
+
+### 6.7 Performance Considerations
+
+**Token Caching:**
+
+- Firebase SDK automatically caches valid tokens
+- Tokens refreshed in background before expiration
+- No manual token refresh needed in application code
+
+**Database Optimization:**
+
+- Indexed lookups on `firebase_uid` field
+- Connection pooling for PostgreSQL
+- Prepared statement caching
+
+**Request Flow:**
+
+```
+1. Frontend: Check cached Firebase token (0ms)
+2. Backend: Verify token with Firebase (50-100ms first time, cached after)
+3. Backend: Database user lookup (1-5ms with index)
+4. Backend: Process request with user context
+```
+
+## 7 · Component Library Requirements
 
 ### 6.1 Shared UI Components
 
@@ -233,12 +566,12 @@ CREATE EXTENSION IF NOT EXISTS postgis;
 
 CREATE TABLE users (
   id BIGSERIAL PRIMARY KEY,
-  google_id TEXT UNIQUE NOT NULL,
+  firebase_uid TEXT UNIQUE NOT NULL,
   email TEXT UNIQUE NOT NULL,
   name TEXT NOT NULL,
   avatar_url TEXT,
-  created_at TIMESTAMPTZ DEFAULT now(),
-  updated_at TIMESTAMPTZ DEFAULT now()
+  provider TEXT NOT NULL DEFAULT 'google',
+  created_at TIMESTAMPTZ DEFAULT now()
 );
 
 CREATE TABLE reports (
@@ -290,19 +623,23 @@ CREATE TABLE rate_limits (
 ```bash
 # API (.env)
 DATABASE_URL=postgres://postgres:password@localhost:5432/viralkan
-GOOGLE_CLIENT_ID=your_google_client_id
-GOOGLE_CLIENT_SECRET=your_google_client_secret
+FIREBASE_SERVICE_ACCOUNT_JSON={"type":"service_account",...}
+JWT_SECRET=your_jwt_secret
 R2_ACCESS_KEY=your_r2_access_key
 R2_SECRET_KEY=your_r2_secret_key
 R2_BUCKET=viralkan-images
 R2_ENDPOINT=https://your-account.r2.cloudflarestorage.com
 RECAPTCHA_SECRET_KEY=your_recaptcha_secret
-JWT_SECRET=your_jwt_secret
 
 # Web (.env)
+NEXT_PUBLIC_FIREBASE_API_KEY=your_firebase_api_key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_bucket.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
 VITE_API_URL=http://localhost:3000
 VITE_RECAPTCHA_SITE_KEY=your_recaptcha_site_key
-VITE_GOOGLE_CLIENT_ID=your_google_client_id
 ```
 
 ---

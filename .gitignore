@@ -4,8 +4,10 @@
 node_modules
 .pnp
 .pnp.js
+#AI
 .cursor/
 .cursor/rules/
+.mcp.json
 
 # Local env files
 .env

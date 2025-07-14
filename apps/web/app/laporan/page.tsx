@@ -7,17 +7,16 @@ import { MapPin, Plus, FileText } from "lucide-react";
 import { ReportsGrid } from "../../components/reports/reports-grid";
 import { ReportFilters } from "../../components/reports/report-filters";
 import { Pagination } from "../../components/ui/pagination";
-import { 
-  MockReportWithUser,
-  mockReports 
-} from "../../lib/mock-data";
+import { MockReportWithUser, mockReports } from "../../lib/mock-data";
 
 export default function LaporanPage() {
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedCategory, setSelectedCategory] = useState<"berlubang" | "retak" | "lainnya" | undefined>();
+  const [selectedCategory, setSelectedCategory] = useState<
+    "berlubang" | "retak" | "lainnya" | undefined
+  >();
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading] = useState(false); // Will be used with real API
-  
+
   const reportsPerPage = 9;
 
   // Filter and paginate reports
@@ -27,16 +26,19 @@ export default function LaporanPage() {
     // Apply search filter
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(report => 
-        report.street_name.toLowerCase().includes(query) ||
-        report.location_text.toLowerCase().includes(query) ||
-        report.user_name?.toLowerCase().includes(query)
+      filtered = filtered.filter(
+        (report) =>
+          report.street_name.toLowerCase().includes(query) ||
+          report.location_text.toLowerCase().includes(query) ||
+          report.user_name?.toLowerCase().includes(query),
       );
     }
 
     // Apply category filter
     if (selectedCategory) {
-      filtered = filtered.filter(report => report.category === selectedCategory);
+      filtered = filtered.filter(
+        (report) => report.category === selectedCategory,
+      );
     }
 
     // Paginate
@@ -51,7 +53,7 @@ export default function LaporanPage() {
       total,
       page: currentPage,
       limit: reportsPerPage,
-      pages: totalPages
+      pages: totalPages,
     };
   }, [currentPage, selectedCategory, searchQuery]);
 
@@ -62,10 +64,12 @@ export default function LaporanPage() {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const handleCategoryChange = (category?: "berlubang" | "retak" | "lainnya") => {
+  const handleCategoryChange = (
+    category?: "berlubang" | "retak" | "lainnya",
+  ) => {
     setSelectedCategory(category);
     setCurrentPage(1); // Reset to first page when filtering
   };
@@ -96,10 +100,7 @@ export default function LaporanPage() {
               >
                 Beranda
               </a>
-              <a
-                href="/laporan"
-                className="text-primary-600 font-medium"
-              >
+              <a href="/laporan" className="text-primary-600 font-medium">
                 Laporan
               </a>
               <a
@@ -120,22 +121,26 @@ export default function LaporanPage() {
         {/* Page Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-4">
-            <Badge variant="secondary" className="bg-primary-100 text-primary-700 border-0">
+            <Badge
+              variant="secondary"
+              className="bg-primary-100 text-primary-700 border-0"
+            >
               <FileText className="mr-1 h-3 w-3" />
               Daftar Laporan
             </Badge>
           </div>
-          
+
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
               <h1 className="text-3xl font-bold text-neutral-900 mb-2">
                 Laporan Jalan Rusak
               </h1>
               <p className="text-lg text-neutral-600">
-                Lihat laporan kerusakan jalan dari komunitas di seluruh Indonesia
+                Lihat laporan kerusakan jalan dari komunitas di seluruh
+                Indonesia
               </p>
             </div>
-            
+
             <Button className="bg-primary-600 hover:bg-primary-700 w-fit">
               <Plus className="mr-2 h-4 w-4" />
               Buat Laporan Baru
@@ -153,13 +158,13 @@ export default function LaporanPage() {
           </div>
           <div className="bg-neutral-50 rounded-lg p-4 text-center">
             <div className="text-2xl font-bold text-warning mb-1">
-              {mockReports.filter(r => r.category === "berlubang").length}
+              {mockReports.filter((r) => r.category === "berlubang").length}
             </div>
             <div className="text-sm text-neutral-600">Jalan Berlubang</div>
           </div>
           <div className="bg-neutral-50 rounded-lg p-4 text-center">
             <div className="text-2xl font-bold text-info mb-1">
-              {mockReports.filter(r => r.category === "retak").length}
+              {mockReports.filter((r) => r.category === "retak").length}
             </div>
             <div className="text-sm text-neutral-600">Jalan Retak</div>
           </div>
@@ -178,7 +183,8 @@ export default function LaporanPage() {
         {/* Results Summary */}
         <div className="flex items-center justify-between mb-6">
           <div className="text-sm text-neutral-600">
-            Menampilkan {filteredAndPaginatedReports.items.length} dari {filteredAndPaginatedReports.total} laporan
+            Menampilkan {filteredAndPaginatedReports.items.length} dari{" "}
+            {filteredAndPaginatedReports.total} laporan
             {selectedCategory && ` untuk kategori "${selectedCategory}"`}
             {searchQuery && ` dengan kata kunci "${searchQuery}"`}
           </div>

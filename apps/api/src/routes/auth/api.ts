@@ -8,7 +8,7 @@ import {
   LogoutResponseSchema,
   UserResponseSchema,
   UserStatsResponseSchema,
-} from "./types";
+} from "@/schema/auth";
 import { firebaseAuthMiddleware } from "./middleware";
 
 type Env = {

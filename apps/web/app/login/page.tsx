@@ -43,10 +43,10 @@ export default function LoginPage() {
                 Viralkan
               </span>
             </div>
-            
+
             <Button
               variant="ghost"
-              onClick={() => window.location.href = "/"}
+              onClick={() => (window.location.href = "/")}
               className="text-neutral-600 hover:text-neutral-900"
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
@@ -65,7 +65,7 @@ export default function LoginPage() {
                 Bergabung dengan{" "}
                 <span className="text-primary-600">komunitas</span>
               </h1>
-              
+
               <p className="text-xl text-neutral-600 leading-relaxed">
                 Masuk untuk mulai melaporkan kerusakan jalan, berbagi informasi
                 dengan komunitas, dan membantu membangun infrastruktur yang
@@ -77,29 +77,33 @@ export default function LoginPage() {
               <h2 className="text-lg font-semibold text-neutral-900">
                 Dengan masuk, Anda bisa:
               </h2>
-              
+
               <div className="space-y-4">
                 {[
                   {
                     icon: "📷",
                     title: "Laporkan Kerusakan Jalan",
-                    description: "Ambil foto dan tandai lokasi jalan rusak di sekitar Anda"
+                    description:
+                      "Ambil foto dan tandai lokasi jalan rusak di sekitar Anda",
                   },
                   {
                     icon: "📱",
-                    title: "Bagikan ke Media Sosial", 
-                    description: "Viralkan laporan Anda langsung ke WhatsApp, Twitter, Instagram"
+                    title: "Bagikan ke Media Sosial",
+                    description:
+                      "Viralkan laporan Anda langsung ke WhatsApp, Twitter, Instagram",
                   },
                   {
                     icon: "👥",
                     title: "Bergabung dengan Komunitas",
-                    description: "Terhubung dengan ribuan warga Indonesia yang peduli infrastruktur"
+                    description:
+                      "Terhubung dengan ribuan warga Indonesia yang peduli infrastruktur",
                   },
                   {
                     icon: "📊",
                     title: "Lihat Dashboard Pribadi",
-                    description: "Pantau laporan Anda dan lihat dampak kontribusi pada komunitas"
-                  }
+                    description:
+                      "Pantau laporan Anda dan lihat dampak kontribusi pada komunitas",
+                  },
                 ].map((feature, index) => (
                   <div key={index} className="flex gap-4">
                     <div className="text-2xl">{feature.icon}</div>
@@ -121,10 +125,10 @@ export default function LoginPage() {
                 💡 Catatan Penting
               </h3>
               <p className="text-sm text-primary-700 leading-relaxed">
-                Viralkan adalah platform <strong>komunitas independen</strong>. 
-                Kami tidak berafiliasi dengan pemerintah dan tidak dapat menjamin 
-                perbaikan jalan. Tujuan kami murni untuk meningkatkan kesadaran publik 
-                melalui kekuatan viral media sosial.
+                Viralkan adalah platform <strong>komunitas independen</strong>.
+                Kami tidak berafiliasi dengan pemerintah dan tidak dapat
+                menjamin perbaikan jalan. Tujuan kami murni untuk meningkatkan
+                kesadaran publik melalui kekuatan viral media sosial.
               </p>
             </div>
           </div>

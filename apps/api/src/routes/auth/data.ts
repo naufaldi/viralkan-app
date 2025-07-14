@@ -125,29 +125,67 @@ export const upsertUser = async (
   sql: Sql,
   userData: CreateUser,
 ): Promise<DbUser> => {
-  const upsertUser = `
-    INSERT INTO users(firebase_uid, email, name, avatar_url, provider)
-    VALUES($1, $2, $3, $4, $5)
-    ON CONFLICT (firebase_uid) DO UPDATE
-    SET email = EXCLUDED.email,
-        name = EXCLUDED.name,
-        avatar_url = EXCLUDED.avatar_url
-    RETURNING id, firebase_uid, email, name, avatar_url, provider, created_at;
+  // First, try to find existing user by firebase_uid or email
+  const findExisting = `
+    SELECT id, firebase_uid, email, name, avatar_url, provider, created_at
+    FROM users 
+    WHERE firebase_uid = $1 OR email = $2;
   `;
 
-  const result = await sql.unsafe(upsertUser, [
+  const existingResult = await sql.unsafe(findExisting, [
     userData.firebase_uid,
     userData.email,
-    userData.name,
-    userData.avatar_url || null,
-    userData.provider,
   ]);
 
-  if (!result[0]) {
-    throw new Error("Failed to upsert user");
-  }
+  if (existingResult[0]) {
+    // Update existing user
+    const updateUser = `
+      UPDATE users 
+      SET firebase_uid = $1,
+          email = $2,
+          name = $3,
+          avatar_url = $4,
+          provider = $5
+      WHERE id = $6
+      RETURNING id, firebase_uid, email, name, avatar_url, provider, created_at;
+    `;
 
-  return result[0] as unknown as DbUser;
+    const result = await sql.unsafe(updateUser, [
+      userData.firebase_uid,
+      userData.email,
+      userData.name,
+      userData.avatar_url || null,
+      userData.provider,
+      existingResult[0].id,
+    ]);
+
+    if (!result[0]) {
+      throw new Error("Failed to update existing user");
+    }
+
+    return result[0] as unknown as DbUser;
+  } else {
+    // Create new user
+    const insertUser = `
+      INSERT INTO users(firebase_uid, email, name, avatar_url, provider)
+      VALUES($1, $2, $3, $4, $5)
+      RETURNING id, firebase_uid, email, name, avatar_url, provider, created_at;
+    `;
+
+    const result = await sql.unsafe(insertUser, [
+      userData.firebase_uid,
+      userData.email,
+      userData.name,
+      userData.avatar_url || null,
+      userData.provider,
+    ]);
+
+    if (!result[0]) {
+      throw new Error("Failed to create new user");
+    }
+
+    return result[0] as unknown as DbUser;
+  }
 };
 
 /**

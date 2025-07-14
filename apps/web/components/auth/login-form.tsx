@@ -1,8 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@repo/ui/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@repo/ui/components/ui/card";
-import { Loader2 } from "lucide-react";
-import { useMockAuth } from "../../hooks/use-mock-auth";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@repo/ui/components/ui/card";
+import { Loader2, CheckCircle2 } from "lucide-react";
+import { useAuth } from "../../hooks/useAuth";
 
 interface LoginFormProps {
   onSuccess?: () => void;
@@ -10,28 +16,74 @@ interface LoginFormProps {
 }
 
 export function LoginForm({ onSuccess, redirectUrl }: LoginFormProps) {
-  const { signInWithGoogle } = useMockAuth();
+  const {
+    signIn,
+    isAuthenticated,
+    isVerifying,
+    authError,
+    clearError,
+    isFirebaseAuthenticated,
+    isBackendVerified,
+  } = useAuth();
   const [isSigningIn, setIsSigningIn] = useState(false);
 
   const handleGoogleSignIn = async () => {
     setIsSigningIn(true);
+    clearError();
+
     try {
-      await signInWithGoogle();
-      
-      // Redirect or call success callback
-      if (redirectUrl) {
-        window.location.href = redirectUrl;
-      } else if (onSuccess) {
-        onSuccess();
-      } else {
-        window.location.href = "/";
-      }
+      await signIn();
+
+      // Wait for backend verification to complete
+      // The useAuth hook will handle backend verification automatically
     } catch (error) {
       console.error("Login failed:", error);
-      // In a real app, you'd show an error message
+      // Error is handled by useAuth hook
     } finally {
       setIsSigningIn(false);
     }
+  };
+
+  // Handle success after both Firebase and backend verification complete
+  useEffect(() => {
+    if (isAuthenticated && !isSigningIn && !isVerifying) {
+      // Both Firebase and backend verification successful
+      setTimeout(() => {
+        if (redirectUrl) {
+          window.location.href = redirectUrl;
+        } else if (onSuccess) {
+          onSuccess();
+        } else {
+          window.location.href = "/";
+        }
+      }, 1000); // Small delay to show success state
+    }
+  }, [isAuthenticated, isSigningIn, isVerifying, redirectUrl, onSuccess]);
+
+  const isLoading = isSigningIn || isVerifying;
+  const showError = authError && !isLoading;
+
+  const getButtonText = () => {
+    if (isAuthenticated) {
+      return "Berhasil masuk!";
+    }
+    if (isSigningIn) {
+      return "Sedang masuk...";
+    }
+    if (isVerifying) {
+      return "Memverifikasi...";
+    }
+    return "Masuk dengan Google";
+  };
+
+  const getStatusMessage = () => {
+    if (isFirebaseAuthenticated && !isBackendVerified && isVerifying) {
+      return "Menyimpan data pengguna...";
+    }
+    if (isAuthenticated) {
+      return "Login berhasil! Mengalihkan...";
+    }
+    return null;
   };
 
   return (
@@ -44,16 +96,18 @@ export function LoginForm({ onSuccess, redirectUrl }: LoginFormProps) {
           Bergabung dengan komunitas peduli infrastruktur jalan Indonesia
         </CardDescription>
       </CardHeader>
-      
+
       <CardContent className="space-y-6">
         {/* Google Sign In Button */}
         <Button
           onClick={handleGoogleSignIn}
-          disabled={isSigningIn}
-          className="w-full bg-white border border-neutral-300 text-neutral-700 hover:bg-neutral-50 hover:border-neutral-400 transition-colors"
+          disabled={isLoading || isAuthenticated}
+          className="w-full bg-white border border-neutral-300 text-neutral-700 hover:bg-neutral-50 hover:border-neutral-400 transition-colors disabled:opacity-50"
           size="lg"
         >
-          {isSigningIn ? (
+          {isAuthenticated ? (
+            <CheckCircle2 className="mr-2 h-5 w-5 text-green-600" />
+          ) : isLoading ? (
             <Loader2 className="mr-2 h-5 w-5 animate-spin" />
           ) : (
             <svg className="mr-2 h-5 w-5" viewBox="0 0 24 24">
@@ -75,14 +129,28 @@ export function LoginForm({ onSuccess, redirectUrl }: LoginFormProps) {
               />
             </svg>
           )}
-          {isSigningIn ? "Sedang masuk..." : "Masuk dengan Google"}
+          {getButtonText()}
         </Button>
 
-        {/* Mock Notice */}
-        <div className="text-xs text-center text-neutral-500 bg-neutral-50 p-3 rounded-lg">
-          <strong>Mode Demo:</strong> Ini adalah simulasi login untuk demo. 
-          Klik tombol di atas untuk "masuk" dengan akun demo.
-        </div>
+        {/* Status Message */}
+        {getStatusMessage() && (
+          <div className="text-sm text-blue-600 bg-blue-50 p-3 rounded-lg border border-blue-200">
+            {getStatusMessage()}
+          </div>
+        )}
+
+        {/* Error Message */}
+        {showError && (
+          <div className="text-sm text-red-600 bg-red-50 p-3 rounded-lg border border-red-200">
+            {authError}
+            <button
+              onClick={clearError}
+              className="ml-2 text-red-800 hover:text-red-900 underline"
+            >
+              Tutup
+            </button>
+          </div>
+        )}
 
         {/* Terms */}
         <p className="text-xs text-neutral-500 text-center leading-relaxed">

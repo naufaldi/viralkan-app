@@ -9,8 +9,8 @@ import {
   ReportResponseSchema,
   ReportWithUserResponseSchema,
   PaginatedReportsResponseSchema,
-  ErrorResponseSchema,
-} from "./types";
+  ReportsErrorResponseSchema,
+} from "@/schema/reports";
 import * as shell from "./shell";
 
 type Env = {
@@ -53,11 +53,11 @@ const getReportsRoute = createRoute({
     },
     400: {
       description: "Invalid query parameters",
-      content: { "application/json": { schema: ErrorResponseSchema } },
+      content: { "application/json": { schema: ReportsErrorResponseSchema } },
     },
     500: {
       description: "Internal server error",
-      content: { "application/json": { schema: ErrorResponseSchema } },
+      content: { "application/json": { schema: ReportsErrorResponseSchema } },
     },
   },
 });
@@ -80,11 +80,11 @@ const getEnrichedReportsRoute = createRoute({
     },
     400: {
       description: "Invalid query parameters",
-      content: { "application/json": { schema: ErrorResponseSchema } },
+      content: { "application/json": { schema: ReportsErrorResponseSchema } },
     },
     500: {
       description: "Internal server error",
-      content: { "application/json": { schema: ErrorResponseSchema } },
+      content: { "application/json": { schema: ReportsErrorResponseSchema } },
     },
   },
 });
@@ -105,15 +105,15 @@ const getReportByIdRoute = createRoute({
     },
     400: {
       description: "Invalid report ID",
-      content: { "application/json": { schema: ErrorResponseSchema } },
+      content: { "application/json": { schema: ReportsErrorResponseSchema } },
     },
     404: {
       description: "Report not found",
-      content: { "application/json": { schema: ErrorResponseSchema } },
+      content: { "application/json": { schema: ReportsErrorResponseSchema } },
     },
     500: {
       description: "Internal server error",
-      content: { "application/json": { schema: ErrorResponseSchema } },
+      content: { "application/json": { schema: ReportsErrorResponseSchema } },
     },
   },
 });
@@ -142,15 +142,15 @@ const createReportRoute = createRoute({
     },
     400: {
       description: "Invalid request data",
-      content: { "application/json": { schema: ErrorResponseSchema } },
+      content: { "application/json": { schema: ReportsErrorResponseSchema } },
     },
     401: {
       description: "User not authenticated",
-      content: { "application/json": { schema: ErrorResponseSchema } },
+      content: { "application/json": { schema: ReportsErrorResponseSchema } },
     },
     500: {
       description: "Internal server error",
-      content: { "application/json": { schema: ErrorResponseSchema } },
+      content: { "application/json": { schema: ReportsErrorResponseSchema } },
     },
   },
 });
@@ -180,23 +180,23 @@ const updateReportRoute = createRoute({
     },
     400: {
       description: "Invalid request data",
-      content: { "application/json": { schema: ErrorResponseSchema } },
+      content: { "application/json": { schema: ReportsErrorResponseSchema } },
     },
     401: {
       description: "User not authenticated",
-      content: { "application/json": { schema: ErrorResponseSchema } },
+      content: { "application/json": { schema: ReportsErrorResponseSchema } },
     },
     403: {
       description: "Access forbidden - not the owner",
-      content: { "application/json": { schema: ErrorResponseSchema } },
+      content: { "application/json": { schema: ReportsErrorResponseSchema } },
     },
     404: {
       description: "Report not found",
-      content: { "application/json": { schema: ErrorResponseSchema } },
+      content: { "application/json": { schema: ReportsErrorResponseSchema } },
     },
     500: {
       description: "Internal server error",
-      content: { "application/json": { schema: ErrorResponseSchema } },
+      content: { "application/json": { schema: ReportsErrorResponseSchema } },
     },
   },
 });
@@ -221,23 +221,23 @@ const deleteReportRoute = createRoute({
     },
     400: {
       description: "Invalid report ID",
-      content: { "application/json": { schema: ErrorResponseSchema } },
+      content: { "application/json": { schema: ReportsErrorResponseSchema } },
     },
     401: {
       description: "User not authenticated",
-      content: { "application/json": { schema: ErrorResponseSchema } },
+      content: { "application/json": { schema: ReportsErrorResponseSchema } },
     },
     403: {
       description: "Access forbidden - not the owner",
-      content: { "application/json": { schema: ErrorResponseSchema } },
+      content: { "application/json": { schema: ReportsErrorResponseSchema } },
     },
     404: {
       description: "Report not found",
-      content: { "application/json": { schema: ErrorResponseSchema } },
+      content: { "application/json": { schema: ReportsErrorResponseSchema } },
     },
     500: {
       description: "Internal server error",
-      content: { "application/json": { schema: ErrorResponseSchema } },
+      content: { "application/json": { schema: ReportsErrorResponseSchema } },
     },
   },
 });
@@ -262,15 +262,15 @@ const getMyReportsRoute = createRoute({
     },
     400: {
       description: "Invalid query parameters",
-      content: { "application/json": { schema: ErrorResponseSchema } },
+      content: { "application/json": { schema: ReportsErrorResponseSchema } },
     },
     401: {
       description: "User not authenticated",
-      content: { "application/json": { schema: ErrorResponseSchema } },
+      content: { "application/json": { schema: ReportsErrorResponseSchema } },
     },
     500: {
       description: "Internal server error",
-      content: { "application/json": { schema: ErrorResponseSchema } },
+      content: { "application/json": { schema: ReportsErrorResponseSchema } },
     },
   },
 });
@@ -300,23 +300,23 @@ const validateOwnershipRoute = createRoute({
     },
     400: {
       description: "Invalid report ID",
-      content: { "application/json": { schema: ErrorResponseSchema } },
+      content: { "application/json": { schema: ReportsErrorResponseSchema } },
     },
     401: {
       description: "User not authenticated",
-      content: { "application/json": { schema: ErrorResponseSchema } },
+      content: { "application/json": { schema: ReportsErrorResponseSchema } },
     },
     403: {
       description: "Access forbidden - not the owner",
-      content: { "application/json": { schema: ErrorResponseSchema } },
+      content: { "application/json": { schema: ReportsErrorResponseSchema } },
     },
     404: {
       description: "Report not found",
-      content: { "application/json": { schema: ErrorResponseSchema } },
+      content: { "application/json": { schema: ReportsErrorResponseSchema } },
     },
     500: {
       description: "Internal server error",
-      content: { "application/json": { schema: ErrorResponseSchema } },
+      content: { "application/json": { schema: ReportsErrorResponseSchema } },
     },
   },
 });

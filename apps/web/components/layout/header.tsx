@@ -1,136 +1,139 @@
 "use client";
 
-import { useState } from "react";
 import { Button } from "@repo/ui/components/ui/button";
 import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-} from "@repo/ui/components/ui/sheet";
-import { Badge } from "@repo/ui/components/ui/badge";
-import { Menu, X } from "lucide-react";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@repo/ui/components/ui/dropdown-menu";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@repo/ui/components/ui/avatar";
+import { MapPin, LogOut, LayoutDashboard, FileText } from "lucide-react";
+import Link from "next/link";
+import { useAuthContext } from "../../contexts/AuthContext";
 
 const Header = () => {
-  const [isOpen, setIsOpen] = useState(false);
+  const { isAuthenticated, isLoading, backendUser, signOut } = useAuthContext();
 
-  const navItems = [
-    { label: "Cara Kerja", href: "#how-it-works" },
-    { label: "Statistik", href: "#statistics" },
-    { label: "Disclaimer", href: "#disclaimer" },
-  ];
+  const handleLogout = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
+
+  const renderAuthButton = () => {
+    if (isLoading) {
+      return (
+        <Button size="sm" disabled className="bg-primary-600">
+          Loading...
+        </Button>
+      );
+    }
+
+    if (isAuthenticated && backendUser) {
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+              <Avatar className="h-8 w-8">
+                <AvatarImage
+                  src={backendUser.avatar_url || undefined}
+                  alt={backendUser.name}
+                />
+                <AvatarFallback>
+                  {backendUser.name?.charAt(0)?.toUpperCase() || "U"}
+                </AvatarFallback>
+              </Avatar>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-56" align="end" forceMount>
+            <DropdownMenuLabel className="font-normal">
+              <div className="flex flex-col space-y-1">
+                <p className="text-sm font-medium leading-none">
+                  {backendUser.name}
+                </p>
+                <p className="text-xs leading-none text-muted-foreground">
+                  {backendUser.email}
+                </p>
+              </div>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link href="/dashboard" className="cursor-pointer">
+                <LayoutDashboard className="mr-2 h-4 w-4" />
+                Dashboard
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/laporan/buat" className="cursor-pointer">
+                <FileText className="mr-2 h-4 w-4" />
+                Buat Laporan
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+              <LogOut className="mr-2 h-4 w-4" />
+              Keluar
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    }
+
+    return (
+      <Button asChild size="sm" className="bg-primary-600 hover:bg-primary-700">
+        <Link href="/login">Mulai Lapor</Link>
+      </Button>
+    );
+  };
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-slate-200/50 shadow-sm">
-      <div className="container mx-auto px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between">
-          {/* Logo */}
+    <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-sm border-b border-neutral-200">
+      <div className="container mx-auto px-6 py-4">
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 shadow-lg">
-              <span className="text-xl font-bold text-white">V</span>
+            <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
+              <MapPin className="h-5 w-5 text-white" />
             </div>
-            <span className="text-xl font-bold text-slate-900">Viralkan</span>
-            <Badge
-              variant="secondary"
-              className="bg-blue-50 text-blue-700 text-xs px-2 py-1"
-            >
-              Beta
-            </Badge>
+            <span className="text-xl font-semibold text-neutral-900">
+              Viralkan
+            </span>
           </div>
-
-          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
-            {navItems.map((item) => (
-              <a
-                key={item.label}
-                href={item.href}
-                className="text-slate-600 hover:text-slate-900 font-medium transition-colors duration-200 hover:underline hover:underline-offset-4"
-              >
-                {item.label}
-              </a>
-            ))}
+            <a
+              href="/laporan"
+              className="text-neutral-600 hover:text-neutral-900 font-medium transition-colors"
+            >
+              Laporan
+            </a>
+            <a
+              href="#how-it-works"
+              className="text-neutral-600 hover:text-neutral-900 font-medium transition-colors"
+            >
+              Cara Kerja
+            </a>
+            <a
+              href="#community"
+              className="text-neutral-600 hover:text-neutral-900 font-medium transition-colors"
+            >
+              Komunitas
+            </a>
+            <a
+              href="#about"
+              className="text-neutral-600 hover:text-neutral-900 font-medium transition-colors"
+            >
+              Tentang
+            </a>
+            {renderAuthButton()}
           </nav>
-
-          {/* Desktop Auth Buttons */}
-          <div className="hidden md:flex items-center gap-3">
-            <Button
-              variant="ghost"
-              className="text-slate-600 hover:text-slate-900 hover:bg-slate-100"
-            >
-              Masuk
-            </Button>
-            <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-md hover:shadow-lg transition-all duration-300">
-              Daftar
-            </Button>
-          </div>
-
-          {/* Mobile Menu */}
-          <Sheet open={isOpen} onOpenChange={setIsOpen}>
-            <SheetTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="md:hidden hover:bg-slate-100"
-              >
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">Toggle navigation menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent
-              side="right"
-              className="w-80 bg-white/95 backdrop-blur-xl border-l border-slate-200/50"
-            >
-              <div className="flex flex-col h-full">
-                {/* Mobile Header */}
-                <div className="flex items-center justify-between pb-6 border-b border-slate-200">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-purple-600">
-                      <span className="text-sm font-bold text-white">V</span>
-                    </div>
-                    <span className="text-lg font-bold text-slate-900">
-                      Viralkan
-                    </span>
-                  </div>
-                </div>
-
-                {/* Mobile Navigation */}
-                <nav className="flex flex-col gap-6 py-8">
-                  {navItems.map((item) => (
-                    <a
-                      key={item.label}
-                      href={item.href}
-                      onClick={() => setIsOpen(false)}
-                      className="text-slate-600 hover:text-slate-900 font-medium text-lg transition-colors duration-200 hover:translate-x-2 transform"
-                    >
-                      {item.label}
-                    </a>
-                  ))}
-                </nav>
-
-                {/* Mobile Auth Buttons */}
-                <div className="mt-auto space-y-4 pt-6 border-t border-slate-200">
-                  <Button
-                    variant="outline"
-                    className="w-full border-slate-200 hover:bg-slate-50"
-                  >
-                    Masuk
-                  </Button>
-                  <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-md">
-                    Daftar
-                  </Button>
-
-                  {/* Platform Info */}
-                  <div className="pt-4 text-center">
-                    <Badge
-                      variant="secondary"
-                      className="bg-slate-100 text-slate-600 text-xs"
-                    >
-                      Platform Komunitas Indonesia
-                    </Badge>
-                  </div>
-                </div>
-              </div>
-            </SheetContent>
-          </Sheet>
         </div>
       </div>
     </header>

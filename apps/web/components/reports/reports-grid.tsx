@@ -7,13 +7,17 @@ interface ReportsGridProps {
   onReportClick?: (report: MockReportWithUser) => void;
 }
 
-export function ReportsGrid({ reports, isLoading, onReportClick }: ReportsGridProps) {
+export function ReportsGrid({
+  reports,
+  isLoading,
+  onReportClick,
+}: ReportsGridProps) {
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {[...Array(6)].map((_, index) => (
-          <div 
-            key={index} 
+          <div
+            key={index}
             className="bg-neutral-100 rounded-lg h-80 animate-pulse"
           />
         ))}

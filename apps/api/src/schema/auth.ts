@@ -116,6 +116,9 @@ export const AuthErrorResponseSchema = z.object({
   }),
 });
 
+// Alias for compatibility
+export const ErrorResponseSchema = AuthErrorResponseSchema;
+
 // Request schemas for API endpoints
 export const TokenVerificationRequestSchema = z.object({
   token: z.string().min(1).openapi({

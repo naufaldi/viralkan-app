@@ -34,7 +34,8 @@ export const mockReports: MockReportWithUser[] = [
     lon: 106.8456,
     created_at: "2024-07-10T08:30:00Z",
     user_name: "Sari Dewi",
-    user_avatar: "https://ui-avatars.com/api/?name=Sari+Dewi&background=2563eb&color=fff",
+    user_avatar:
+      "https://ui-avatars.com/api/?name=Sari+Dewi&background=2563eb&color=fff",
   },
   {
     id: 2,
@@ -47,7 +48,8 @@ export const mockReports: MockReportWithUser[] = [
     lon: 106.8372,
     created_at: "2024-07-10T06:15:00Z",
     user_name: "Ahmad Rahman",
-    user_avatar: "https://ui-avatars.com/api/?name=Ahmad+Rahman&background=2563eb&color=fff",
+    user_avatar:
+      "https://ui-avatars.com/api/?name=Ahmad+Rahman&background=2563eb&color=fff",
   },
   {
     id: 3,
@@ -60,7 +62,8 @@ export const mockReports: MockReportWithUser[] = [
     lon: 106.8229,
     created_at: "2024-07-10T05:45:00Z",
     user_name: "Maya Sari",
-    user_avatar: "https://ui-avatars.com/api/?name=Maya+Sari&background=2563eb&color=fff",
+    user_avatar:
+      "https://ui-avatars.com/api/?name=Maya+Sari&background=2563eb&color=fff",
   },
   {
     id: 4,
@@ -73,7 +76,8 @@ export const mockReports: MockReportWithUser[] = [
     lon: 106.8317,
     created_at: "2024-07-09T22:20:00Z",
     user_name: "Budi Santoso",
-    user_avatar: "https://ui-avatars.com/api/?name=Budi+Santoso&background=2563eb&color=fff",
+    user_avatar:
+      "https://ui-avatars.com/api/?name=Budi+Santoso&background=2563eb&color=fff",
   },
   {
     id: 5,
@@ -86,7 +90,8 @@ export const mockReports: MockReportWithUser[] = [
     lon: 106.8472,
     created_at: "2024-07-09T19:10:00Z",
     user_name: "Indira Putri",
-    user_avatar: "https://ui-avatars.com/api/?name=Indira+Putri&background=2563eb&color=fff",
+    user_avatar:
+      "https://ui-avatars.com/api/?name=Indira+Putri&background=2563eb&color=fff",
   },
   {
     id: 6,
@@ -99,7 +104,8 @@ export const mockReports: MockReportWithUser[] = [
     lon: 106.8133,
     created_at: "2024-07-09T16:30:00Z",
     user_name: "Eko Wijaya",
-    user_avatar: "https://ui-avatars.com/api/?name=Eko+Wijaya&background=2563eb&color=fff",
+    user_avatar:
+      "https://ui-avatars.com/api/?name=Eko+Wijaya&background=2563eb&color=fff",
   },
   {
     id: 7,
@@ -112,7 +118,8 @@ export const mockReports: MockReportWithUser[] = [
     lon: 106.8497,
     created_at: "2024-07-09T14:15:00Z",
     user_name: "Dewi Kartika",
-    user_avatar: "https://ui-avatars.com/api/?name=Dewi+Kartika&background=2563eb&color=fff",
+    user_avatar:
+      "https://ui-avatars.com/api/?name=Dewi+Kartika&background=2563eb&color=fff",
   },
   {
     id: 8,
@@ -125,7 +132,8 @@ export const mockReports: MockReportWithUser[] = [
     lon: 106.8441,
     created_at: "2024-07-09T12:45:00Z",
     user_name: "Rudi Hartono",
-    user_avatar: "https://ui-avatars.com/api/?name=Rudi+Hartono&background=2563eb&color=fff",
+    user_avatar:
+      "https://ui-avatars.com/api/?name=Rudi+Hartono&background=2563eb&color=fff",
   },
   {
     id: 9,
@@ -138,7 +146,8 @@ export const mockReports: MockReportWithUser[] = [
     lon: 106.9097,
     created_at: "2024-07-09T10:20:00Z",
     user_name: "Lisa Anggraeni",
-    user_avatar: "https://ui-avatars.com/api/?name=Lisa+Anggraeni&background=2563eb&color=fff",
+    user_avatar:
+      "https://ui-avatars.com/api/?name=Lisa+Anggraeni&background=2563eb&color=fff",
   },
   {
     id: 10,
@@ -151,7 +160,8 @@ export const mockReports: MockReportWithUser[] = [
     lon: 106.8272,
     created_at: "2024-07-09T08:00:00Z",
     user_name: "Fajar Nugraha",
-    user_avatar: "https://ui-avatars.com/api/?name=Fajar+Nugraha&background=2563eb&color=fff",
+    user_avatar:
+      "https://ui-avatars.com/api/?name=Fajar+Nugraha&background=2563eb&color=fff",
   },
   {
     id: 11,
@@ -164,7 +174,8 @@ export const mockReports: MockReportWithUser[] = [
     lon: 106.8142,
     created_at: "2024-07-08T21:30:00Z",
     user_name: "Sinta Maharani",
-    user_avatar: "https://ui-avatars.com/api/?name=Sinta+Maharani&background=2563eb&color=fff",
+    user_avatar:
+      "https://ui-avatars.com/api/?name=Sinta+Maharani&background=2563eb&color=fff",
   },
   {
     id: 12,
@@ -177,7 +188,8 @@ export const mockReports: MockReportWithUser[] = [
     lon: 106.8733,
     created_at: "2024-07-08T18:45:00Z",
     user_name: "Yudi Pratama",
-    user_avatar: "https://ui-avatars.com/api/?name=Yudi+Pratama&background=2563eb&color=fff",
+    user_avatar:
+      "https://ui-avatars.com/api/?name=Yudi+Pratama&background=2563eb&color=fff",
   },
   {
     id: 13,
@@ -190,7 +202,8 @@ export const mockReports: MockReportWithUser[] = [
     lon: 106.8672,
     created_at: "2024-07-08T16:10:00Z",
     user_name: "Rani Puspitasari",
-    user_avatar: "https://ui-avatars.com/api/?name=Rani+Puspitasari&background=2563eb&color=fff",
+    user_avatar:
+      "https://ui-avatars.com/api/?name=Rani+Puspitasari&background=2563eb&color=fff",
   },
   {
     id: 14,
@@ -203,7 +216,8 @@ export const mockReports: MockReportWithUser[] = [
     lon: 106.8747,
     created_at: "2024-07-08T13:25:00Z",
     user_name: "Galih Prabowo",
-    user_avatar: "https://ui-avatars.com/api/?name=Galih+Prabowo&background=2563eb&color=fff",
+    user_avatar:
+      "https://ui-avatars.com/api/?name=Galih+Prabowo&background=2563eb&color=fff",
   },
   {
     id: 15,
@@ -216,34 +230,37 @@ export const mockReports: MockReportWithUser[] = [
     lon: 106.8253,
     created_at: "2024-07-08T11:50:00Z",
     user_name: "Mila Kencana",
-    user_avatar: "https://ui-avatars.com/api/?name=Mila+Kencana&background=2563eb&color=fff",
-  }
+    user_avatar:
+      "https://ui-avatars.com/api/?name=Mila+Kencana&background=2563eb&color=fff",
+  },
 ];
 
 // Mock pagination function
 export function getMockReportsPaginated(
   page: number = 1,
   limit: number = 10,
-  category?: "berlubang" | "retak" | "lainnya"
+  category?: "berlubang" | "retak" | "lainnya",
 ): MockPaginatedReports {
   let filteredReports = mockReports;
-  
+
   if (category) {
-    filteredReports = mockReports.filter(report => report.category === category);
+    filteredReports = mockReports.filter(
+      (report) => report.category === category,
+    );
   }
-  
+
   const total = filteredReports.length;
   const pages = Math.ceil(total / limit);
   const start = (page - 1) * limit;
   const end = start + limit;
   const items = filteredReports.slice(start, end);
-  
+
   return {
     items,
     total,
     page,
     limit,
-    pages
+    pages,
   };
 }
 
@@ -252,32 +269,34 @@ export const categoryConfig = {
   berlubang: {
     label: "Berlubang",
     color: "bg-red-100 text-red-700",
-    icon: "🕳️"
+    icon: "🕳️",
   },
   retak: {
     label: "Retak",
-    color: "bg-yellow-100 text-yellow-700", 
-    icon: "⚡"
+    color: "bg-yellow-100 text-yellow-700",
+    icon: "⚡",
   },
   lainnya: {
     label: "Lainnya",
     color: "bg-blue-100 text-blue-700",
-    icon: "🚧"
-  }
+    icon: "🚧",
+  },
 };
 
 // Time ago helper function
 export function getTimeAgo(dateString: string): string {
   const now = new Date();
   const reportDate = new Date(dateString);
-  const diffInHours = Math.floor((now.getTime() - reportDate.getTime()) / (1000 * 60 * 60));
-  
+  const diffInHours = Math.floor(
+    (now.getTime() - reportDate.getTime()) / (1000 * 60 * 60),
+  );
+
   if (diffInHours < 1) return "Baru saja";
   if (diffInHours < 24) return `${diffInHours} jam yang lalu`;
-  
+
   const diffInDays = Math.floor(diffInHours / 24);
   if (diffInDays < 7) return `${diffInDays} hari yang lalu`;
-  
+
   const diffInWeeks = Math.floor(diffInDays / 7);
   return `${diffInWeeks} minggu yang lalu`;
 }
