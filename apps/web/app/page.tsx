@@ -4,9 +4,6 @@ import { Badge } from "@repo/ui/components/ui/badge";
 import {
   Card,
   CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
 } from "@repo/ui/components/ui/card";
 import {
   MapPin,

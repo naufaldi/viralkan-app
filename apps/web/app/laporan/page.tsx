@@ -8,7 +8,6 @@ import { ReportsGrid } from "../../components/reports/reports-grid";
 import { ReportFilters } from "../../components/reports/report-filters";
 import { Pagination } from "../../components/ui/pagination";
 import { 
-  getMockReportsPaginated, 
   MockReportWithUser,
   mockReports 
 } from "../../lib/mock-data";
