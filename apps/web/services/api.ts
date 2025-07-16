@@ -115,17 +115,17 @@ export async function uploadImage(file: File): Promise<{ url: string }> {
   // Using a real placeholder service that returns actual images
   const dummyImages = [
     "https://picsum.photos/800/600?random=1",
-    "https://picsum.photos/800/600?random=2", 
+    "https://picsum.photos/800/600?random=2",
     "https://picsum.photos/800/600?random=3",
     "https://picsum.photos/800/600?random=4",
-    "https://picsum.photos/800/600?random=5"
+    "https://picsum.photos/800/600?random=5",
   ];
-  
+
   // Randomly select a dummy image
   const randomIndex = Math.floor(Math.random() * dummyImages.length);
   const dummyUrl = dummyImages[randomIndex];
 
   console.log(`Mock upload: ${file.name} -> ${dummyUrl}`);
-  
+
   return { url: dummyUrl };
 }

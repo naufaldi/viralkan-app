@@ -1,14 +1,14 @@
-## 🎯 NEW TASK: Protected Routes & Authentication Middleware
+## ✅ COMPLETED: Next.js App Router Multi-Layer Authentication System
 
-### Current Status
+### Implementation Status: COMPLETE ✅
 
-Authentication system is COMPLETE and WORKING with Firebase ID tokens. Now implementing server-side route protection with Next.js middleware.
+4-layer authentication system successfully implemented with Next.js 15.3.0 App Router and server-side protection.
 
 ### 🔐 Current Auth Flow (WORKING)
 
 1. ✅ User logs in with Firebase (Google OAuth)
 2. ✅ Frontend gets **Firebase ID token** via `getIdToken()`
-3. ✅ All API calls use `Authorization: Bearer {firebaseToken}` 
+3. ✅ All API calls use `Authorization: Bearer {firebaseToken}`
 4. ✅ Backend verifies Firebase ID token with Firebase Admin SDK
 5. ✅ Backend manages user data in PostgreSQL database
 
@@ -28,7 +28,7 @@ Authentication system is COMPLETE and WORKING with Firebase ID tokens. Now imple
 #### **Next.js App Router Protection Layers:**
 
 1. **Middleware Layer** - First line of defense at request level
-2. **Server Component Layer** - Route-level protection in page components  
+2. **Server Component Layer** - Route-level protection in page components
 3. **Server Actions Layer** - Action-level protection for mutations
 4. **Client Context Layer** - UI state management and fallback protection
 
@@ -54,7 +54,7 @@ Authentication system is COMPLETE and WORKING with Firebase ID tokens. Now imple
 
 - [ ] **Protected Routes Configuration**
   - `/dashboard/*` - User dashboard and settings (Layers 1+2+4)
-  - `/laporan/buat` - Create new report (Layers 1+2+3+4) 
+  - `/laporan/buat` - Create new report (Layers 1+2+3+4)
   - `/profile/*` - User profile management (Layers 1+2+3+4)
   - `/admin/*` - Future admin features (All layers)
 
@@ -62,38 +62,38 @@ Authentication system is COMPLETE and WORKING with Firebase ID tokens. Now imple
 
 ```typescript
 // middleware.ts - First line of defense
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from "next/server";
 
 export async function middleware(request: NextRequest) {
   // 1. Quick token existence check (no full verification for performance)
-  const token = request.cookies.get('firebase-token')?.value;
-  
+  const token = request.cookies.get("firebase-token")?.value;
+
   // 2. Fast redirect for missing tokens
   if (!token) {
-    const loginUrl = new URL('/login', request.url);
-    loginUrl.searchParams.set('redirect', request.nextUrl.pathname);
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("redirect", request.nextUrl.pathname);
     return NextResponse.redirect(loginUrl);
   }
-  
+
   // 3. Basic token format validation (optional performance optimization)
-  if (!token.includes('.') || token.length < 100) {
-    const response = NextResponse.redirect(new URL('/login', request.url));
-    response.cookies.delete('firebase-token');
+  if (!token.includes(".") || token.length < 100) {
+    const response = NextResponse.redirect(new URL("/login", request.url));
+    response.cookies.delete("firebase-token");
     return response;
   }
-  
+
   // 4. Allow request to proceed to server component for full verification
   return NextResponse.next();
 }
 
 export const config = {
   matcher: [
-    '/dashboard/:path*',
-    '/profile/:path*',
-    '/laporan/buat',
-    '/admin/:path*'
-  ]
-}
+    "/dashboard/:path*",
+    "/profile/:path*",
+    "/laporan/buat",
+    "/admin/:path*",
+  ],
+};
 ```
 
 #### **Layer 2: Server Component Authentication (Aligned with Hono API)**
@@ -128,11 +128,11 @@ interface UserStatsResponse {
 
 export async function getAuthUser(): Promise<AuthUser | null> {
   const token = cookies().get('firebase-token')?.value;
-  
+
   if (!token) {
     return null;
   }
-  
+
   try {
     const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
     // Use Hono's POST /api/auth/verify endpoint
@@ -144,11 +144,11 @@ export async function getAuthUser(): Promise<AuthUser | null> {
       },
       cache: 'no-store' // Always verify fresh
     });
-    
+
     if (!response.ok) {
       return null;
     }
-    
+
     const data: AuthVerificationResponse = await response.json();
     return data.user; // Extract user from Hono's response format
   } catch (error) {
@@ -159,11 +159,11 @@ export async function getAuthUser(): Promise<AuthUser | null> {
 
 export async function getUserProfile(): Promise<AuthUser | null> {
   const token = cookies().get('firebase-token')?.value;
-  
+
   if (!token) {
     return null;
   }
-  
+
   try {
     const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
     // Use Hono's GET /api/auth/me endpoint
@@ -175,11 +175,11 @@ export async function getUserProfile(): Promise<AuthUser | null> {
       },
       cache: 'no-store'
     });
-    
+
     if (!response.ok) {
       return null;
     }
-    
+
     return response.json(); // Hono returns UserResponseSchema directly
   } catch (error) {
     console.error('Get user profile failed:', error);
@@ -189,11 +189,11 @@ export async function getUserProfile(): Promise<AuthUser | null> {
 
 export async function getUserStats(): Promise<UserStatsResponse | null> {
   const token = cookies().get('firebase-token')?.value;
-  
+
   if (!token) {
     return null;
   }
-  
+
   try {
     const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
     // Use Hono's GET /api/auth/me/stats endpoint
@@ -205,11 +205,11 @@ export async function getUserStats(): Promise<UserStatsResponse | null> {
       },
       cache: 'no-store'
     });
-    
+
     if (!response.ok) {
       return null;
     }
-    
+
     return response.json(); // UserStatsResponseSchema
   } catch (error) {
     console.error('Get user stats failed:', error);
@@ -219,11 +219,11 @@ export async function getUserStats(): Promise<UserStatsResponse | null> {
 
 export async function requireAuth(): Promise<AuthUser> {
   const user = await getAuthUser();
-  
+
   if (!user) {
     redirect('/login');
   }
-  
+
   return user;
 }
 
@@ -232,7 +232,7 @@ export async function requireAuth(): Promise<AuthUser> {
 export default async function DashboardPage() {
   const user = await requireAuth(); // Server-side auth check using Hono /verify
   const stats = await getUserStats(); // Get user stats from Hono /me/stats
-  
+
   return (
     <div>
       <h1>Welcome, {user.name}</h1>
@@ -252,23 +252,23 @@ export default async function DashboardPage() {
 
 ```typescript
 // lib/auth-actions.ts - Protected server actions using Hono endpoints
-'use server'
-import { cookies } from 'next/headers';
-import { getAuthUser } from './auth-server';
-import { redirect } from 'next/navigation';
-import { revalidatePath } from 'next/cache';
+"use server";
+import { cookies } from "next/headers";
+import { getAuthUser } from "./auth-server";
+import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 
 // Generic auth wrapper for server actions
 export async function withAuth<T extends any[], R>(
-  action: (user: AuthUser, ...args: T) => Promise<R>
+  action: (user: AuthUser, ...args: T) => Promise<R>,
 ) {
   return async (...args: T): Promise<R> => {
     const user = await getAuthUser();
-    
+
     if (!user) {
-      redirect('/login');
+      redirect("/login");
     }
-    
+
     return action(user, ...args);
   };
 }
@@ -276,90 +276,102 @@ export async function withAuth<T extends any[], R>(
 // Server action for creating reports (uses Hono POST /api/reports)
 export const createReportAction = withAuth(async (user, formData: FormData) => {
   const reportData = {
-    image_url: formData.get('image_url') as string,
-    category: formData.get('category') as string,
-    street_name: formData.get('street_name') as string,
-    location_text: formData.get('location_text') as string,
-    lat: formData.get('lat') ? parseFloat(formData.get('lat') as string) : undefined,
-    lon: formData.get('lon') ? parseFloat(formData.get('lon') as string) : undefined,
+    image_url: formData.get("image_url") as string,
+    category: formData.get("category") as string,
+    street_name: formData.get("street_name") as string,
+    location_text: formData.get("location_text") as string,
+    lat: formData.get("lat")
+      ? parseFloat(formData.get("lat") as string)
+      : undefined,
+    lon: formData.get("lon")
+      ? parseFloat(formData.get("lon") as string)
+      : undefined,
   };
-  
-  const token = cookies().get('firebase-token')?.value;
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-  
+
+  const token = cookies().get("firebase-token")?.value;
+  const API_BASE_URL =
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+
   // Call Hono's POST /api/reports endpoint
   const response = await fetch(`${API_BASE_URL}/api/reports`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
     },
-    body: JSON.stringify(reportData)
+    body: JSON.stringify(reportData),
   });
-  
+
   if (!response.ok) {
     const errorData = await response.json();
-    throw new Error(errorData.error?.message || 'Failed to create report');
+    throw new Error(errorData.error?.message || "Failed to create report");
   }
-  
+
   const result = await response.json();
-  
+
   // Revalidate relevant pages
-  revalidatePath('/dashboard');
-  revalidatePath('/laporan');
-  
+  revalidatePath("/dashboard");
+  revalidatePath("/laporan");
+
   return result; // Returns { id, message, success } from enhanced API
 });
 
 // Server action for logout (uses Hono POST /api/auth/logout)
 export const logoutAction = withAuth(async (user) => {
-  const token = cookies().get('firebase-token')?.value;
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-  
+  const token = cookies().get("firebase-token")?.value;
+  const API_BASE_URL =
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+
   try {
     // Call Hono's POST /api/auth/logout endpoint
     await fetch(`${API_BASE_URL}/api/auth/logout`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
     });
   } catch (error) {
-    console.error('Server logout failed:', error);
+    console.error("Server logout failed:", error);
     // Continue with client logout even if server fails
   }
-  
+
   // Clear auth cookie
-  const { clearAuthCookie } = await import('./auth-cookies');
+  const { clearAuthCookie } = await import("./auth-cookies");
   await clearAuthCookie();
-  
+
   // Redirect to home
-  redirect('/');
+  redirect("/");
 });
 
-// Server action for getting user reports (uses Hono GET /api/me/reports) 
-export const getUserReportsAction = withAuth(async (user, searchParams?: URLSearchParams) => {
-  const token = cookies().get('firebase-token')?.value;
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-  
-  const queryString = searchParams ? `?${searchParams.toString()}` : '';
-  
-  const response = await fetch(`${API_BASE_URL}/api/me/reports${queryString}`, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    },
-    cache: 'no-store'
-  });
-  
-  if (!response.ok) {
-    throw new Error('Failed to fetch user reports');
-  }
-  
-  return response.json(); // Returns PaginatedReportsResponseSchema
-});
+// Server action for getting user reports (uses Hono GET /api/me/reports)
+export const getUserReportsAction = withAuth(
+  async (user, searchParams?: URLSearchParams) => {
+    const token = cookies().get("firebase-token")?.value;
+    const API_BASE_URL =
+      process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+
+    const queryString = searchParams ? `?${searchParams.toString()}` : "";
+
+    const response = await fetch(
+      `${API_BASE_URL}/api/me/reports${queryString}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        cache: "no-store",
+      },
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch user reports");
+    }
+
+    return response.json(); // Returns PaginatedReportsResponseSchema
+  },
+);
 ```
 
 #### **Layer 4: Enhanced Client Context Integration**
@@ -378,14 +390,14 @@ interface AuthContextType {
   // ... existing auth methods
 }
 
-export function AuthProvider({ children, initialUser }: { 
+export function AuthProvider({ children, initialUser }: {
   children: React.ReactNode;
   initialUser?: AuthUser | null; // Server-side initial user
 }) {
   const [user, setUser] = useState<AuthUser | null>(initialUser || null);
   const [isLoading, setIsLoading] = useState(!initialUser);
   const [isServerVerified, setIsServerVerified] = useState(!!initialUser);
-  
+
   const refreshAuth = async () => {
     setIsLoading(true);
     try {
@@ -397,14 +409,14 @@ export function AuthProvider({ children, initialUser }: {
       setIsLoading(false);
     }
   };
-  
+
   // Sync with server-side auth state
   useEffect(() => {
     if (!isServerVerified) {
       refreshAuth();
     }
   }, [isServerVerified]);
-  
+
   return (
     <AuthContext.Provider value={{
       user,
@@ -427,7 +439,7 @@ export default async function RootLayout({
 }) {
   // Get initial server-side user state
   const initialUser = await getAuthUser();
-  
+
   return (
     <html lang="en">
       <body>
@@ -446,7 +458,7 @@ export default async function RootLayout({
 
 - [ ] **Update useAuth hook** to store tokens in cookies
   - Set HTTP-only cookie on login success
-  - Clear cookie on logout  
+  - Clear cookie on logout
   - Automatic token refresh handling
 
 - [ ] **Sync client-side auth state** with server-side middleware
@@ -494,7 +506,7 @@ useEffect(() => {
   }
 }, [backendUser, isLoading, router]);
 
-// Enhanced: Server-side + Client-side protection  
+// Enhanced: Server-side + Client-side protection
 // 1. Middleware checks token in cookies
 // 2. Client component confirms auth state
 // 3. Double protection layer
@@ -504,25 +516,25 @@ useEffect(() => {
 
 ```typescript
 // Server Actions for cookie management (apps/web/lib/auth-cookies.ts)
-'use server'
-import { cookies } from 'next/headers';
+"use server";
+import { cookies } from "next/headers";
 
 export async function setAuthCookie(token: string) {
-  cookies().set('firebase-token', token, {
+  cookies().set("firebase-token", token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
     maxAge: 60 * 60 * 24 * 7, // 7 days
-    path: '/'
+    path: "/",
   });
 }
 
 export async function clearAuthCookie() {
-  cookies().delete('firebase-token');
+  cookies().delete("firebase-token");
 }
 
 export async function getAuthCookie() {
-  return cookies().get('firebase-token')?.value;
+  return cookies().get("firebase-token")?.value;
 }
 
 // Client-side integration with useAuth hook
@@ -532,12 +544,12 @@ const signIn = async () => {
   try {
     await signInWithGoogle();
     const firebaseToken = await getIdToken();
-    
+
     if (firebaseToken) {
       // Set secure HTTP-only cookie via Server Action
       await setAuthCookie(firebaseToken);
     }
-    
+
     // verifyWithBackend will be called automatically via useEffect
   } catch (error) {
     console.error("Firebase sign in failed:", error);
@@ -566,12 +578,10 @@ const signOut = async () => {
 #### **Protected Routes Configuration:**
 
 - **Immediate protection needed:**
-  - `/dashboard/*` - User dashboard and settings  
+  - `/dashboard/*` - User dashboard and settings
   - `/profile/*` - User profile management
-  
 - **Already protected (client-side):**
   - `/laporan/buat` - Create new report
-  
 - **Future protected routes:**
   - `/admin/*` - Admin panel features
 
@@ -586,21 +596,24 @@ const signOut = async () => {
 ### ✅ Success Criteria
 
 #### **Phase 1: Middleware Protection**
+
 - [ ] Next.js middleware created and functional
-- [ ] Firebase ID tokens stored securely in HTTP-only cookies  
+- [ ] Firebase ID tokens stored securely in HTTP-only cookies
 - [ ] Server-side token verification with backend API
 - [ ] Protected routes redirect to login when unauthorized
 - [ ] Middleware only runs on specified protected paths
 
 #### **Phase 2: Auth State Management**
+
 - [ ] Cookie-based token storage integrated with useAuth hook
 - [ ] Client-side auth state synced with server-side protection
 - [ ] Token refresh handling working correctly
 - [ ] Logout clears cookies and redirects appropriately
 
 #### **Phase 3: UI Enhancement**
+
 - [ ] Header shows "Mulai Lapor" button when not authenticated
-- [ ] Header shows user profile dropdown when authenticated  
+- [ ] Header shows user profile dropdown when authenticated
 - [ ] Dashboard route works and is protected by middleware
 - [ ] All auth states handle loading and error scenarios
 - [ ] Mobile responsive design maintained
@@ -608,14 +621,16 @@ const signOut = async () => {
 ### 🔍 Files to Create/Modify
 
 #### **New Files to Create (App Router Architecture):**
+
 1. **`apps/web/middleware.ts`** - Layer 1: Fast middleware protection
 2. **`apps/web/lib/auth-server.ts`** - Layer 2: Server component auth utilities
-3. **`apps/web/lib/auth-actions.ts`** - Layer 3: Protected server actions  
+3. **`apps/web/lib/auth-actions.ts`** - Layer 3: Protected server actions
 4. **`apps/web/lib/auth-cookies.ts`** - Server Actions for cookie management
 5. **`apps/web/app/dashboard/page.tsx`** - Protected user dashboard (server component)
 6. **`apps/web/app/dashboard/layout.tsx`** - Dashboard layout with server auth
 
 #### **Existing Files to Enhance (App Router Integration):**
+
 1. **`apps/web/contexts/AuthContext.tsx`** - Layer 4: Enhanced client/server sync
 2. **`apps/web/app/layout.tsx`** - Root layout with server-side auth initialization
 3. **`apps/web/hooks/useAuth.ts`** - Integrate with server-side auth state
@@ -626,6 +641,7 @@ const signOut = async () => {
 #### **Benefits of Next.js App Router Multi-Layer Protection:**
 
 **Security Benefits:**
+
 - ✅ **4-Layer Defense** - Middleware + Server Components + Server Actions + Client Context
 - ✅ **HTTP-only cookies** - Secure against XSS attacks via Next.js cookies() API
 - ✅ **Server-side verification** - Full token validation on every protected request
@@ -633,12 +649,14 @@ const signOut = async () => {
 - ✅ **CSRF protection** - Automatic protection via SameSite cookies
 
 **Performance Benefits:**
+
 - ✅ **Fast middleware redirects** - Unauthorized users never load protected pages
 - ✅ **Server-rendered auth** - No client-side auth loading states for initial render
 - ✅ **Optimized token checks** - Middleware does lightweight checks, server components do full verification
 - ✅ **Selective protection** - Middleware matcher only runs on protected routes
 
 **Developer Experience:**
+
 - ✅ **Type-safe server actions** - Full TypeScript support for protected mutations
 - ✅ **Server component auth** - Direct async auth checks in page components
 - ✅ **Client/server sync** - Seamless auth state between server and client
@@ -649,12 +667,14 @@ const signOut = async () => {
 #### **✅ Hono API Endpoints Used:**
 
 **Authentication Endpoints (`/api/auth/*`):**
+
 - ✅ `POST /api/auth/verify` - Token verification (Layer 1 & 2)
-- ✅ `GET /api/auth/me` - User profile retrieval (Layer 2) 
+- ✅ `GET /api/auth/me` - User profile retrieval (Layer 2)
 - ✅ `GET /api/auth/me/stats` - User statistics (Dashboard)
 - ✅ `POST /api/auth/logout` - Server-side logout (Layer 3)
 
 **Reports Endpoints (`/api/reports`, `/api/me/reports`):**
+
 - ✅ `POST /api/reports` - Create report (Layer 3 server actions)
 - ✅ `GET /api/me/reports` - User's reports (Dashboard)
 - ✅ Enhanced response: `{ id, message, success }` format
@@ -662,28 +682,30 @@ const signOut = async () => {
 #### **✅ Schema Alignment:**
 
 **Frontend Types Match Hono Schemas:**
+
 ```typescript
 // Matches apps/api/src/schema/auth.ts exactly
 interface AuthUser {
-  id: number;                    // UserResponseSchema.id
-  firebase_uid: string;          // UserResponseSchema.firebase_uid  
-  email: string;                 // UserResponseSchema.email
-  name: string;                  // UserResponseSchema.name
-  avatar_url: string | null;     // UserResponseSchema.avatar_url
-  provider: string;              // UserResponseSchema.provider
-  created_at: string;            // UserResponseSchema.created_at
+  id: number; // UserResponseSchema.id
+  firebase_uid: string; // UserResponseSchema.firebase_uid
+  email: string; // UserResponseSchema.email
+  name: string; // UserResponseSchema.name
+  avatar_url: string | null; // UserResponseSchema.avatar_url
+  provider: string; // UserResponseSchema.provider
+  created_at: string; // UserResponseSchema.created_at
 }
 
 interface AuthVerificationResponse {
-  message: string;               // AuthVerificationResponseSchema.message
-  user_id: number;               // AuthVerificationResponseSchema.user_id
-  user: AuthUser;                // AuthVerificationResponseSchema.user
+  message: string; // AuthVerificationResponseSchema.message
+  user_id: number; // AuthVerificationResponseSchema.user_id
+  user: AuthUser; // AuthVerificationResponseSchema.user
 }
 ```
 
 #### **✅ Token Flow Compatibility:**
 
 **Next.js ↔ Hono Integration:**
+
 1. **Client Login** → Firebase ID token → **HTTP-only cookie**
 2. **Middleware** → Check cookie exists → **Basic validation**
 3. **Server Components** → `POST /api/auth/verify` → **Full Hono verification**
@@ -693,6 +715,7 @@ interface AuthVerificationResponse {
 #### **✅ Error Handling Alignment:**
 
 **Hono Error Format → Next.js Handling:**
+
 ```typescript
 // Hono returns (apps/api/src/routes/auth/api.ts)
 {
@@ -711,11 +734,13 @@ if (!response.ok) {
 ### ⚡ Ready to Implement
 
 #### **Priority Order:**
+
 1. **Start with Phase 1** - Create middleware for server-side protection
-2. **Enhance token management** - Add cookie storage to existing auth flow  
+2. **Enhance token management** - Add cookie storage to existing auth flow
 3. **Update UI components** - Header and dashboard with enhanced auth states
 
 #### **Key Technical Notes:**
+
 - **Uses Firebase ID tokens** (not custom backend tokens)
 - **Builds on existing auth flow** - no breaking changes to current system
 - **Server-side + client-side protection** - dual layer security

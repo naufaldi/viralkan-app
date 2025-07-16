@@ -8,7 +8,7 @@ import {
   CardDescription,
 } from "@repo/ui/components/ui/card";
 import { Loader2, CheckCircle2 } from "lucide-react";
-import { useAuth } from "../../hooks/useAuth";
+import { useAuthContext } from "../../contexts/AuthContext";
 
 interface LoginFormProps {
   onSuccess?: () => void;
@@ -19,12 +19,12 @@ export function LoginForm({ onSuccess, redirectUrl }: LoginFormProps) {
   const {
     signIn,
     isAuthenticated,
-    isVerifying,
+    isLoading: isVerifying,
     authError,
     clearError,
-    isFirebaseAuthenticated,
-    isBackendVerified,
-  } = useAuth();
+    firebaseUser,
+    backendUser,
+  } = useAuthContext();
   const [isSigningIn, setIsSigningIn] = useState(false);
 
   const handleGoogleSignIn = async () => {
@@ -77,7 +77,7 @@ export function LoginForm({ onSuccess, redirectUrl }: LoginFormProps) {
   };
 
   const getStatusMessage = () => {
-    if (isFirebaseAuthenticated && !isBackendVerified && isVerifying) {
+    if (firebaseUser && !backendUser && isVerifying) {
       return "Menyimpan data pengguna...";
     }
     if (isAuthenticated) {

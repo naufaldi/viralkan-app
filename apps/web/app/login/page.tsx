@@ -4,19 +4,19 @@ import { useEffect } from "react";
 import { MapPin, ArrowLeft } from "lucide-react";
 import { Button } from "@repo/ui/components/ui/button";
 import { LoginForm } from "../../components/auth/login-form";
-import { useMockAuth } from "../../hooks/use-mock-auth";
+import { useAuthContext } from "../../contexts/AuthContext";
 
 export default function LoginPage() {
-  const { isAuthenticated, loading } = useMockAuth();
+  const { isAuthenticated, isLoading } = useAuthContext();
 
   // Redirect if already authenticated
   useEffect(() => {
-    if (!loading && isAuthenticated) {
+    if (!isLoading && isAuthenticated) {
       window.location.href = "/";
     }
-  }, [isAuthenticated, loading]);
+  }, [isAuthenticated, isLoading]);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">

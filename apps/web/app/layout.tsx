@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { AuthProvider } from "../contexts/AuthContext";
+import { getAuthUser } from "../lib/auth-server";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -18,15 +19,18 @@ export const metadata: Metadata = {
     "Petakan, bagikan, dan hindari jalan rusak di seluruh Indonesia. Jadikan suaramu terdengar lewat kekuatan media sosial.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Get initial server-side user state
+  const initialUser = await getAuthUser();
+
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider initialUser={initialUser}>{children}</AuthProvider>
       </body>
     </html>
   );

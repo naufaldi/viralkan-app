@@ -1,6 +1,4 @@
-"use client";
-
-import { useAuthContext } from "../../contexts/AuthContext";
+import { requireAuth, getUserStats } from "../../lib/auth-server";
 import { Button } from "@repo/ui/components/ui/button";
 import {
   Card,
@@ -17,17 +15,16 @@ import {
 } from "@repo/ui/components/ui/avatar";
 import {
   FileText,
-  Users,
   Plus,
   MapPin,
   Calendar,
-  BarChart3,
+  TrendingUp,
+  Eye,
 } from "lucide-react";
-import { StatusCard } from "../../components/dashboard/StatusCard";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { useEffect, useState, useCallback } from "react";
+import Header from "../../components/layout/header";
+import { getUserReportsAction } from "../../lib/auth-actions";
 
 interface Report {
   id: number;
@@ -39,56 +36,28 @@ interface Report {
   street_name?: string;
 }
 
-interface DashboardStats {
-  user_total_reports: number;
-  platform_total_reports: number;
-  user_reports_this_month: number;
-  platform_reports_this_month: number;
-}
+// interface DashboardStats {
+//   user_total_reports: number;
+//   platform_total_reports: number;
+//   user_reports_this_month: number;
+//   platform_reports_this_month: number;
+// }
 
-export default function DashboardPage() {
-  const { isAuthenticated, isLoading, backendUser, apiCall } = useAuthContext();
-  const router = useRouter();
-  const [userReports, setUserReports] = useState<Report[]>([]);
-  const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(
-    null,
-  );
-  const [loadingReports, setLoadingReports] = useState(true);
+export default async function DashboardPage() {
+  // Server-side auth check using Hono /verify
+  const user = await requireAuth();
+  const stats = await getUserStats();
 
-  const fetchUserData = useCallback(async () => {
-    try {
-      setLoadingReports(true);
-
-      // Fetch user reports
-      const reportsResponse = await apiCall("/api/me/reports");
-      if (reportsResponse.ok) {
-        const reports = await reportsResponse.json();
-        setUserReports(reports);
-      }
-
-      // Fetch dashboard stats (user + platform totals)
-      const statsResponse = await apiCall("/api/dashboard/stats");
-      if (statsResponse.ok) {
-        const stats = await statsResponse.json();
-        setDashboardStats(stats);
-      }
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-    } finally {
-      setLoadingReports(false);
-    }
-  }, [apiCall]);
-
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.push("/login");
-      return;
-    }
-
-    if (isAuthenticated && backendUser) {
-      fetchUserData();
-    }
-  }, [isAuthenticated, isLoading, backendUser, router, fetchUserData]);
+  // Fetch user reports with server action
+  let userReports: Report[] = [];
+  try {
+    userReports = await getUserReportsAction(
+      new URLSearchParams("limit=6"),
+    );
+  } catch (error) {
+    console.error("Error fetching user reports:", error);
+    userReports = [];
+  }
 
   const getStatusBadge = (status: string) => {
     switch (status.toLowerCase()) {
@@ -148,193 +117,243 @@ export default function DashboardPage() {
     });
   };
 
-  if (isLoading || !backendUser) {
-    return (
-      <div className="container mx-auto px-6 py-8">
-        <div className="flex items-center justify-center min-h-96">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
-            <p className="mt-4 text-neutral-600">Memuat dashboard...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="container mx-auto px-6 py-8">
-      {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
-        <div className="flex items-center gap-4 mb-4 md:mb-0">
-          <Avatar className="h-16 w-16">
-            <AvatarImage
-              src={backendUser.avatar_url || undefined}
-              alt={backendUser.name}
-            />
-            <AvatarFallback className="text-lg">
-              {backendUser.name?.charAt(0)?.toUpperCase() || "U"}
-            </AvatarFallback>
-          </Avatar>
-          <div>
-            <h1 className="text-3xl font-bold text-neutral-900">
-              Selamat datang, {backendUser.name}!
-            </h1>
-            <p className="text-neutral-600">
-              Dashboard laporan dan kontribusi komunitas
-            </p>
-          </div>
-        </div>
+    <div className="min-h-screen bg-neutral-50">
+      <Header />
 
-        <Button asChild className="bg-primary-600 hover:bg-primary-700">
-          <Link href="/laporan/buat">
-            <Plus className="mr-2 h-4 w-4" />
-            Buat Laporan Baru
-          </Link>
-        </Button>
-      </div>
-
-      {/* Stats Section */}
-      {dashboardStats && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <StatusCard
-            title="Laporan Saya"
-            value={dashboardStats.user_total_reports}
-            description="Total laporan yang telah Anda buat"
-            icon={FileText}
-            iconColor="text-blue-600"
-            trend={{
-              value: dashboardStats.user_reports_this_month,
-              label: "bulan ini",
-              isPositive: dashboardStats.user_reports_this_month > 0,
-            }}
-          />
-
-          <StatusCard
-            title="Total Platform"
-            value={dashboardStats.platform_total_reports}
-            description="Total laporan di seluruh platform"
-            icon={BarChart3}
-            iconColor="text-green-600"
-            trend={{
-              value: dashboardStats.platform_reports_this_month,
-              label: "bulan ini",
-              isPositive: dashboardStats.platform_reports_this_month > 0,
-            }}
-          />
-
-          <StatusCard
-            title="Kontribusi Saya"
-            value={
-              dashboardStats.platform_total_reports > 0
-                ? `${Math.round(
-                    (dashboardStats.user_total_reports /
-                      dashboardStats.platform_total_reports) *
-                      100,
-                  )}%`
-                : "0%"
-            }
-            description="Persentase kontribusi Anda"
-            icon={Users}
-            iconColor="text-purple-600"
-          />
-
-          <StatusCard
-            title="Aktivitas Bulan Ini"
-            value={dashboardStats.user_reports_this_month}
-            description="Laporan baru yang Anda buat"
-            icon={Calendar}
-            iconColor="text-orange-600"
-          />
-        </div>
-      )}
-
-      {/* Reports Section */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
+      <main className="container mx-auto px-6 py-8">
+        {/* Welcome Section */}
+        <div className="mb-8">
+          <div className="flex items-center gap-4 mb-4">
+            <Avatar className="h-16 w-16">
+              <AvatarImage src={user.avatar_url || undefined} alt={user.name} />
+              <AvatarFallback className="text-lg">
+                {user.name?.charAt(0)?.toUpperCase() || "U"}
+              </AvatarFallback>
+            </Avatar>
             <div>
-              <CardTitle>Laporan Saya</CardTitle>
-              <CardDescription>
-                Daftar semua laporan yang telah Anda buat
-              </CardDescription>
-            </div>
-            <Button variant="outline" asChild>
-              <Link href="/laporan">Lihat Semua</Link>
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {loadingReports ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-            </div>
-          ) : userReports.length === 0 ? (
-            <div className="text-center py-8">
-              <FileText className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Belum ada laporan
-              </h3>
-              <p className="text-gray-600 mb-4">
-                Anda belum membuat laporan apapun. Mari mulai dengan membuat
-                laporan pertama!
+              <h1 className="text-3xl font-bold text-neutral-900">
+                Selamat datang, {user.name}!
+              </h1>
+              <p className="text-neutral-600">
+                Dashboard untuk memantau kontribusi Anda di Viralkan
               </p>
-              <Button asChild>
-                <Link href="/laporan/buat">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Buat Laporan Pertama
-                </Link>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Badge
+              variant="secondary"
+              className="bg-primary-100 text-primary-700"
+            >
+              <MapPin className="mr-1 h-3 w-3" />
+              Kontributor Aktif
+            </Badge>
+            <Badge variant="outline">
+              Bergabung{" "}
+              {new Date(user.created_at).toLocaleDateString("id-ID", {
+                year: "numeric",
+                month: "long",
+              })}
+            </Badge>
+          </div>
+        </div>
+
+        {/* Stats Cards */}
+        {stats && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Total Laporan
+                </CardTitle>
+                <FileText className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-primary-600">
+                  {stats.total_reports}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Laporan yang telah Anda buat
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Bulan Ini</CardTitle>
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-success">
+                  {stats.reports_this_month}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Laporan di bulan{" "}
+                  {new Date().toLocaleDateString("id-ID", { month: "long" })}
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Terakhir Lapor
+                </CardTitle>
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-neutral-700">
+                  {stats.last_report_date
+                    ? new Date(stats.last_report_date).toLocaleDateString(
+                        "id-ID",
+                        {
+                          day: "numeric",
+                          month: "short",
+                        },
+                      )
+                    : "Belum ada"}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {stats.last_report_date
+                    ? `${Math.floor((Date.now() - new Date(stats.last_report_date).getTime()) / (1000 * 60 * 60 * 24))} hari lalu`
+                    : "Buat laporan pertama Anda"}
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Quick Actions */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <Card className="bg-gradient-to-br from-primary-50 to-primary-100 border-primary-200">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-primary-600 rounded-lg flex items-center justify-center">
+                  <Plus className="h-6 w-6 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-neutral-900 mb-1">
+                    Buat Laporan Baru
+                  </h3>
+                  <p className="text-sm text-neutral-600 mb-3">
+                    Laporkan kerusakan jalan yang Anda temukan
+                  </p>
+                  <Button
+                    asChild
+                    size="sm"
+                    className="bg-primary-600 hover:bg-primary-700"
+                  >
+                    <Link href="/laporan/buat">Mulai Lapor</Link>
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-neutral-50 to-neutral-100 border-neutral-200">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-neutral-600 rounded-lg flex items-center justify-center">
+                  <Eye className="h-6 w-6 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-neutral-900 mb-1">
+                    Lihat Laporan Anda
+                  </h3>
+                  <p className="text-sm text-neutral-600 mb-3">
+                    Pantau status dan respons dari laporan Anda
+                  </p>
+                  <Button asChild size="sm" variant="outline">
+                    <Link href="/laporan?filter=my-reports">Lihat Laporan</Link>
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Recent Reports Section */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Laporan Terbaru Saya</CardTitle>
+                <CardDescription>
+                  Daftar 6 laporan terbaru yang telah Anda buat
+                </CardDescription>
+              </div>
+              <Button variant="outline" asChild>
+                <Link href="/laporan?filter=my-reports">Lihat Semua</Link>
               </Button>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {userReports.slice(0, 6).map((report) => (
-                <Card
-                  key={report.id}
-                  className="hover:shadow-md transition-shadow"
-                >
-                  <CardContent className="p-4">
-                    {report.image_url && (
-                      <div className="aspect-video bg-gray-100 rounded-lg mb-3 overflow-hidden relative">
-                        <Image
-                          src={report.image_url}
-                          alt={report.title}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                    )}
-
-                    <div className="space-y-2">
-                      <div className="flex items-start justify-between">
-                        <h3 className="font-medium text-gray-900 line-clamp-2">
-                          {report.title || "Laporan Kerusakan Jalan"}
-                        </h3>
-                        {getStatusBadge(report.status)}
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        {getCategoryBadge(report.category)}
-                      </div>
-
-                      {report.street_name && (
-                        <div className="flex items-center gap-1 text-sm text-gray-600">
-                          <MapPin className="h-3 w-3" />
-                          {report.street_name}
+          </CardHeader>
+          <CardContent>
+            {userReports.length === 0 ? (
+              <div className="text-center py-12 text-neutral-500">
+                <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p className="text-lg font-medium mb-2">Belum ada laporan</p>
+                <p className="text-sm mb-4">
+                  Mulai buat laporan untuk melihat aktivitas Anda disini
+                </p>
+                <Button asChild>
+                  <Link href="/laporan/buat">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Buat Laporan Pertama
+                  </Link>
+                </Button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {userReports.slice(0, 6).map((report) => (
+                  <Card
+                    key={report.id}
+                    className="hover:shadow-md transition-shadow"
+                  >
+                    <CardContent className="p-4">
+                      {report.image_url && (
+                        <div className="aspect-video bg-gray-100 rounded-lg mb-3 overflow-hidden relative">
+                          <Image
+                            src={report.image_url}
+                            alt={report.title}
+                            fill
+                            className="object-cover"
+                          />
                         </div>
                       )}
 
-                      <div className="flex items-center gap-1 text-sm text-gray-500">
-                        <Calendar className="h-3 w-3" />
-                        {formatDate(report.created_at)}
+                      <div className="space-y-2">
+                        <div className="flex items-start justify-between">
+                          <h3 className="font-medium text-gray-900 line-clamp-2">
+                            {report.title || "Laporan Kerusakan Jalan"}
+                          </h3>
+                          {getStatusBadge(report.status)}
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          {getCategoryBadge(report.category)}
+                        </div>
+
+                        {report.street_name && (
+                          <div className="flex items-center gap-1 text-sm text-gray-600">
+                            <MapPin className="h-3 w-3" />
+                            {report.street_name}
+                          </div>
+                        )}
+
+                        <div className="flex items-center gap-1 text-sm text-gray-500">
+                          <Calendar className="h-3 w-3" />
+                          {formatDate(report.created_at)}
+                        </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </main>
     </div>
   );
 }

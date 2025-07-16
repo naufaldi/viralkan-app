@@ -86,34 +86,35 @@ This document outlines the authentication system design for Viralkan, a road dam
 
 ```typescript
 // apps/web/middleware.ts
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from "next/server";
 
 export async function middleware(request: NextRequest) {
   // Quick token existence check
-  const token = request.cookies.get('firebase-token')?.value;
-  
+  const token = request.cookies.get("firebase-token")?.value;
+
   if (!token) {
-    const loginUrl = new URL('/login', request.url);
-    loginUrl.searchParams.set('redirect', request.nextUrl.pathname);
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("redirect", request.nextUrl.pathname);
     return NextResponse.redirect(loginUrl);
   }
-  
+
   // Basic format validation (optional optimization)
-  if (!token.includes('.') || token.length < 100) {
-    const response = NextResponse.redirect(new URL('/login', request.url));
-    response.cookies.delete('firebase-token');
+  if (!token.includes(".") || token.length < 100) {
+    const response = NextResponse.redirect(new URL("/login", request.url));
+    response.cookies.delete("firebase-token");
     return response;
   }
-  
+
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/laporan/buat', '/profile/:path*']
-}
+  matcher: ["/dashboard/:path*", "/laporan/buat", "/profile/:path*"],
+};
 ```
 
 **Characteristics**:
+
 - ✅ Runs only on protected routes (performance)
 - ✅ Fast cookie existence check
 - ✅ No backend calls (minimal latency)
@@ -125,26 +126,26 @@ export const config = {
 
 ```typescript
 // apps/web/lib/auth-server.ts
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 export async function getAuthUser(): Promise<AuthUser | null> {
-  const token = cookies().get('firebase-token')?.value;
-  
+  const token = cookies().get("firebase-token")?.value;
+
   if (!token) return null;
-  
+
   try {
     const response = await fetch(`${API_BASE_URL}/api/auth/verify`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
       },
-      cache: 'no-store'
+      cache: "no-store",
     });
-    
+
     if (!response.ok) return null;
-    
+
     const data: AuthVerificationResponse = await response.json();
     return data.user;
   } catch {
@@ -154,22 +155,24 @@ export async function getAuthUser(): Promise<AuthUser | null> {
 
 export async function requireAuth(): Promise<AuthUser> {
   const user = await getAuthUser();
-  if (!user) redirect('/login');
+  if (!user) redirect("/login");
   return user;
 }
 ```
 
 **Usage in Protected Pages**:
+
 ```typescript
 // app/dashboard/page.tsx
 export default async function DashboardPage() {
   const user = await requireAuth(); // Server-side auth check
-  
+
   return <DashboardContent user={user} />;
 }
 ```
 
 **Characteristics**:
+
 - ✅ Full token verification via Hono API
 - ✅ Server-rendered with authenticated user data
 - ✅ No client-side loading states
@@ -181,46 +184,47 @@ export default async function DashboardPage() {
 
 ```typescript
 // apps/web/lib/auth-actions.ts
-'use server'
-import { getAuthUser } from './auth-server';
-import { redirect } from 'next/navigation';
+"use server";
+import { getAuthUser } from "./auth-server";
+import { redirect } from "next/navigation";
 
 export async function withAuth<T extends any[], R>(
-  action: (user: AuthUser, ...args: T) => Promise<R>
+  action: (user: AuthUser, ...args: T) => Promise<R>,
 ) {
   return async (...args: T): Promise<R> => {
     const user = await getAuthUser();
-    if (!user) redirect('/login');
+    if (!user) redirect("/login");
     return action(user, ...args);
   };
 }
 
 export const createReportAction = withAuth(async (user, formData: FormData) => {
   const reportData = {
-    image_url: formData.get('image_url') as string,
-    category: formData.get('category') as string,
-    street_name: formData.get('street_name') as string,
-    location_text: formData.get('location_text') as string,
+    image_url: formData.get("image_url") as string,
+    category: formData.get("category") as string,
+    street_name: formData.get("street_name") as string,
+    location_text: formData.get("location_text") as string,
   };
-  
+
   const response = await fetch(`${API_BASE_URL}/api/reports`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
     },
-    body: JSON.stringify(reportData)
+    body: JSON.stringify(reportData),
   });
-  
+
   if (!response.ok) {
-    throw new Error('Failed to create report');
+    throw new Error("Failed to create report");
   }
-  
+
   return response.json();
 });
 ```
 
 **Characteristics**:
+
 - ✅ Type-safe protected mutations
 - ✅ Automatic user context injection
 - ✅ Server-side validation and security
@@ -233,23 +237,23 @@ export const createReportAction = withAuth(async (user, formData: FormData) => {
 ```typescript
 // apps/web/contexts/AuthContext.tsx
 'use client'
-export function AuthProvider({ 
-  children, 
-  initialUser 
-}: { 
+export function AuthProvider({
+  children,
+  initialUser
+}: {
   children: React.ReactNode;
   initialUser?: AuthUser | null;
 }) {
   const [user, setUser] = useState<AuthUser | null>(initialUser || null);
   const [isLoading, setIsLoading] = useState(!initialUser);
-  
+
   // Sync with server-side auth state
   useEffect(() => {
     if (!initialUser) {
       refreshAuth();
     }
   }, [initialUser]);
-  
+
   return (
     <AuthContext.Provider value={{ user, isLoading, ... }}>
       {children}
@@ -259,11 +263,12 @@ export function AuthProvider({
 ```
 
 **Root Layout Integration**:
+
 ```typescript
 // app/layout.tsx
 export default async function RootLayout({ children }) {
   const initialUser = await getAuthUser(); // Server-side initial state
-  
+
   return (
     <html>
       <body>
@@ -277,6 +282,7 @@ export default async function RootLayout({ children }) {
 ```
 
 **Characteristics**:
+
 - ✅ Server-side initial auth state
 - ✅ No client-side loading on first render
 - ✅ Seamless client/server synchronization
@@ -292,18 +298,18 @@ export default async function RootLayout({ children }) {
 // apps/api/src/routes/auth/middleware.ts
 export const firebaseAuthMiddleware = async (c: AuthContext, next: Next) => {
   const authHeader = c.req.header("Authorization");
-  
+
   if (!authHeader?.startsWith("Bearer ")) {
     return c.json({ error: "Missing Authorization header" }, 401);
   }
-  
+
   const idToken = authHeader.substring(7);
   const result = await shell.verifyTokenAndGetUser(sql, idToken);
-  
+
   if (!result.success) {
     return c.json({ error: result.error }, result.statusCode);
   }
-  
+
   c.set("user_id", result.data.user_id);
   await next();
 };
@@ -318,9 +324,9 @@ export const firebaseAuthMiddleware = async (c: AuthContext, next: Next) => {
 authRouter.openapi(verifyRoute, async (c) => {
   const authHeader = c.req.header("Authorization");
   const idToken = authHeader.substring(7);
-  
+
   const result = await shell.verifyTokenAndGetUser(sql, idToken);
-  
+
   if (result.success) {
     return c.json(result.data, 200);
   } else {
@@ -332,8 +338,8 @@ authRouter.openapi(verifyRoute, async (c) => {
 authRouter.openapi(getMeRoute, async (c) => {
   const userId = c.get("user_id");
   const result = await shell.getUserById(sql, userId, userId);
-  
-  return result.success 
+
+  return result.success
     ? c.json(result.data, 200)
     : c.json({ error: result.error }, result.statusCode);
 });
@@ -368,25 +374,26 @@ export const UserResponseSchema = z.object({
 
 ```typescript
 // apps/web/lib/auth-cookies.ts
-'use server'
-import { cookies } from 'next/headers';
+"use server";
+import { cookies } from "next/headers";
 
 export async function setAuthCookie(token: string) {
-  cookies().set('firebase-token', token, {
+  cookies().set("firebase-token", token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
     maxAge: 60 * 60 * 24 * 7, // 7 days
-    path: '/'
+    path: "/",
   });
 }
 
 export async function clearAuthCookie() {
-  cookies().delete('firebase-token');
+  cookies().delete("firebase-token");
 }
 ```
 
 **Cookie Security Features**:
+
 - ✅ **httpOnly**: Prevents XSS access to tokens
 - ✅ **secure**: HTTPS-only in production
 - ✅ **sameSite: strict**: CSRF protection
@@ -424,7 +431,9 @@ interface AuthVerificationResponse {
 // Frontend types match backend Zod schemas exactly
 // apps/web/lib/types/auth.ts - matches apps/api/src/schema/auth.ts
 export type AuthUser = z.infer<typeof UserResponseSchema>;
-export type AuthVerificationResponse = z.infer<typeof AuthVerificationResponseSchema>;
+export type AuthVerificationResponse = z.infer<
+  typeof AuthVerificationResponseSchema
+>;
 ```
 
 ---
@@ -434,9 +443,9 @@ export type AuthVerificationResponse = z.infer<typeof AuthVerificationResponseSc
 ### Comprehensive Error Management
 
 ```typescript
-type AuthError = 
+type AuthError =
   | "firebase-auth-failed"
-  | "firebase-token-invalid" 
+  | "firebase-token-invalid"
   | "backend-verification-failed"
   | "network-error"
   | "unknown-error";
@@ -444,7 +453,8 @@ type AuthError =
 const AUTH_ERROR_MESSAGES: Record<AuthError, string> = {
   "firebase-auth-failed": "Gagal masuk dengan Google. Silakan coba lagi.",
   "firebase-token-invalid": "Sesi telah berakhir. Silakan masuk kembali.",
-  "backend-verification-failed": "Gagal verifikasi dengan server. Silakan coba lagi.",
+  "backend-verification-failed":
+    "Gagal verifikasi dengan server. Silakan coba lagi.",
   "network-error": "Tidak ada koneksi internet. Silakan coba lagi.",
   "unknown-error": "Terjadi kesalahan. Silakan coba lagi.",
 };
@@ -457,7 +467,7 @@ const AUTH_ERROR_MESSAGES: Record<AuthError, string> = {
 useEffect(() => {
   if (firebaseUser && authError === "firebase-token-invalid") {
     // Attempt token refresh
-    getIdToken(true).then(newToken => {
+    getIdToken(true).then((newToken) => {
       if (newToken) {
         setAuthCookie(newToken);
         verifyWithBackend();
@@ -514,24 +524,28 @@ useEffect(() => {
 ## Implementation Checklist
 
 ### Phase 1: Core Infrastructure
+
 - [ ] Configure Firebase project and Admin SDK
 - [ ] Set up Next.js middleware for route protection
 - [ ] Implement server component auth utilities
 - [ ] Create secure cookie management system
 
-### Phase 2: Backend Integration  
+### Phase 2: Backend Integration
+
 - [ ] Implement Hono auth middleware
 - [ ] Create auth verification endpoints
 - [ ] Set up user management in PostgreSQL
 - [ ] Add comprehensive error handling
 
 ### Phase 3: Frontend Enhancement
+
 - [ ] Build client auth context with server sync
 - [ ] Create protected server actions
 - [ ] Implement auth-aware UI components
 - [ ] Add token refresh and error recovery
 
 ### Phase 4: Testing & Security
+
 - [ ] Test all authentication flows
 - [ ] Verify security headers and cookies
 - [ ] Load test protected endpoints

@@ -45,7 +45,7 @@ interface CreateReportFormProps {
 export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [uploadError, setUploadError] = useState<string | undefined>(undefined);
-  
+
   console.log("CreateReportForm rendered, selectedImage:", selectedImage);
 
   const {
@@ -68,7 +68,7 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
       image_url: "",
     },
   });
-  
+
   console.log("Form state:", form.formState);
   console.log("Form errors:", form.formState.errors);
 
@@ -92,13 +92,13 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
   const onSubmit = async (data: CreateReportInput) => {
     console.log("🎉 onSubmit function called with data:", data);
     console.log("selectedImage in onSubmit:", selectedImage);
-    
+
     if (!selectedImage) {
       console.log("No image selected, showing error");
       setUploadError("Silakan pilih foto jalan rusak terlebih dahulu");
       return;
     }
-    
+
     console.log("About to submit report with actual API call");
     await submitReport(data, selectedImage);
   };
@@ -122,7 +122,7 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
   const isLoading = isSubmitting || isUploading;
 
   console.log("About to render CreateReportForm");
-  
+
   return (
     <div className="max-w-2xl mx-auto">
       <Card>
@@ -134,9 +134,12 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit, (errors) => {
-              console.log("❌ Form validation errors:", errors);
-            })} className="space-y-6">
+            <form
+              onSubmit={form.handleSubmit(onSubmit, (errors) => {
+                console.log("❌ Form validation errors:", errors);
+              })}
+              className="space-y-6"
+            >
               {/* Image Upload */}
               <div className="space-y-2">
                 <label className="text-sm font-medium text-neutral-900">
@@ -263,7 +266,14 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
                 type="submit"
                 className="w-full"
                 disabled={isLoading || !selectedImage}
-                onClick={() => console.log("Submit button clicked, selectedImage:", selectedImage, "isLoading:", isLoading)}
+                onClick={() =>
+                  console.log(
+                    "Submit button clicked, selectedImage:",
+                    selectedImage,
+                    "isLoading:",
+                    isLoading,
+                  )
+                }
               >
                 {isLoading ? (
                   <>

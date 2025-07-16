@@ -113,6 +113,7 @@
    - Simulates real upload experience with loading states
 
 **✅ CURRENT STATUS:**
+
 - Form is fully functional with Firebase authentication
 - Image upload works with dummy placeholder images (IMPORTANT: Using picsum.photos for testing - NOT real uploads!)
 - All validation and error handling implemented
@@ -128,12 +129,14 @@ This form currently uses DUMMY IMAGE UPLOAD via picsum.photos placeholder servic
 **Root Cause:** The form's `image_url` field validation is rejecting our temporary placeholder URL.
 
 **Solution Plan:**
+
 1. **Fix Form Validation** - Set a valid dummy URL immediately when image is selected
-2. **Backend Integration** - Ensure dummy images work with API validation  
+2. **Backend Integration** - Ensure dummy images work with API validation
 3. **User Experience** - User uploads real image file, but behind the scenes we use dummy URLs
 4. **Testing** - Verify complete form submission works end-to-end
 
 **Implementation Steps:**
+
 1. Use real picsum.photos URL for form validation (not temp placeholder)
 2. Test form submission reaches `onSubmit` function
 3. Test API call with dummy image URL
@@ -232,6 +235,7 @@ apps/web/
 ### **Priority 2: Real Image Upload Implementation (SKIPPED FOR NOW)**
 
 **Task: Implement Cloudflare R2 Image Upload**
+
 - Replace dummy image upload with real Cloudflare R2 integration
 - Set up R2 bucket configuration and API keys
 - Implement secure image upload with proper file handling
@@ -239,6 +243,7 @@ apps/web/
 - Update API to handle real image URLs
 
 **Files to Update:**
+
 - `/apps/web/services/api.ts` - Replace mock uploadImage function
 - Environment variables for R2 configuration
 - Backend R2 integration if needed

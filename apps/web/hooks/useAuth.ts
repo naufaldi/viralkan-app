@@ -2,21 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { useFirebaseAuth } from "./useFirebaseAuth";
-
-interface BackendUser {
-  id: number;
-  firebase_uid: string;
-  email: string;
-  name: string;
-  avatar_url: string | null;
-  provider: string;
-  created_at: string;
-}
+import { setAuthCookie, clearAuthCookie } from "../lib/auth-cookies";
+import type { AuthUser } from "../lib/auth-server";
 
 interface AuthVerificationResponse {
   message: string;
   user_id: number;
-  user: BackendUser;
+  user: AuthUser;
 }
 
 type AuthError =
@@ -35,16 +27,19 @@ const AUTH_ERROR_MESSAGES: Record<AuthError, string> = {
   "unknown-error": "Terjadi kesalahan. Silakan coba lagi.",
 };
 
-export function useAuth() {
+export function useAuth(initialUser?: AuthUser | null) {
   const {
     user: firebaseUser,
     signInWithGoogle,
     signOut: firebaseSignOut,
     getIdToken,
   } = useFirebaseAuth();
-  const [backendUser, setBackendUser] = useState<BackendUser | null>(null);
+  const [backendUser, setBackendUser] = useState<AuthUser | null>(
+    initialUser || null,
+  );
   const [isVerifying, setIsVerifying] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [isServerVerified, setIsServerVerified] = useState(!!initialUser);
 
   const API_BASE_URL =
     process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
@@ -105,12 +100,35 @@ export function useAuth() {
   // Auto-verify when Firebase user changes
   useEffect(() => {
     if (firebaseUser) {
-      verifyWithBackend();
+      // Set cookie immediately when Firebase user is available
+      const setCookieAndVerify = async () => {
+        try {
+          const firebaseToken = await getIdToken();
+          if (firebaseToken) {
+            // Set secure HTTP-only cookie via Server Action
+            await setAuthCookie(firebaseToken);
+          }
+          // Then verify with backend
+          await verifyWithBackend();
+        } catch (error) {
+          console.error("Failed to set auth cookie:", error);
+          handleAuthError("unknown-error");
+        }
+      };
+      setCookieAndVerify();
     } else {
       setBackendUser(null);
       setAuthError(null);
+      setIsServerVerified(false);
     }
   }, [firebaseUser]);
+
+  // Sync with server-side auth state
+  useEffect(() => {
+    if (!isServerVerified && !isVerifying) {
+      refreshAuth();
+    }
+  }, [isServerVerified, isVerifying]);
 
   const apiCall = async (
     url: string,
@@ -136,11 +154,25 @@ export function useAuth() {
     });
   };
 
+  const refreshAuth = async () => {
+    setIsVerifying(true);
+    try {
+      // This would call server-side verification
+      await verifyWithBackend();
+      setIsServerVerified(true);
+    } catch (error) {
+      console.error("Auth refresh failed:", error);
+      setIsServerVerified(false);
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
   const signIn = async () => {
     clearError();
     try {
       await signInWithGoogle();
-      // verifyWithBackend will be called automatically via useEffect
+      // Cookie setting and backend verification will be handled automatically via useEffect
     } catch (error) {
       console.error("Firebase sign in failed:", error);
       handleAuthError("firebase-auth-failed");
@@ -151,13 +183,18 @@ export function useAuth() {
   const signOut = async () => {
     try {
       await firebaseSignOut();
+      // Clear secure cookie via Server Action
+      await clearAuthCookie();
       setBackendUser(null);
       setAuthError(null);
+      setIsServerVerified(false);
     } catch (error) {
       console.error("Sign out failed:", error);
       // Force clear state even if sign out fails
+      await clearAuthCookie();
       setBackendUser(null);
       setAuthError(null);
+      setIsServerVerified(false);
     }
   };
 
@@ -174,6 +211,7 @@ export function useAuth() {
     // Combined auth state
     isAuthenticated: !!firebaseUser && !!backendUser,
     isLoading: isVerifying,
+    isServerVerified,
 
     // Error state
     authError,
@@ -186,7 +224,8 @@ export function useAuth() {
     // API helper
     apiCall,
 
-    // Manual verification (if needed)
+    // Manual verification
     verifyWithBackend,
+    refreshAuth,
   };
 }
