@@ -392,6 +392,40 @@ Would you like me to [specific improvement]?"
 - Export from `packages/ui/src/index.ts`
 - Use TypeScript for all components
 
+### Frontend Code Organization
+
+- **Services**: API calls and external service integrations go in `apps/web/services/`
+- **Custom Hooks**: Reusable React hooks go in `apps/web/hooks/`
+- **Types**: Shared TypeScript types go in `apps/web/lib/types/`
+- **Utils**: Utility functions go in `apps/web/lib/utils/`
+
+### Frontend Best Practices
+
+**Framework Preference Order:**
+
+1. **Next.js built-in functions** (Link, useRouter, etc.) - Always prefer these first
+2. **React patterns** (hooks, components) - Second choice
+3. **Vanilla JavaScript** - Only as last resort
+
+**Navigation:**
+
+- Use `Link` from `next/link` for client-side navigation
+- Use `useRouter` from `next/navigation` for programmatic navigation
+- NEVER use `window.location.href` unless absolutely necessary
+
+**State Management:**
+
+- Use React hooks (useState, useEffect) for component state
+- Use Context API for shared state
+- Avoid over-engineering with external state libraries unless truly needed
+
+**Code Quality:**
+
+- Follow existing patterns in the codebase
+- Use TypeScript types consistently
+- Prefer functional components over class components
+- Keep components small and focused
+
 ## Working Together
 
 - This is always a feature branch - no backwards compatibility needed

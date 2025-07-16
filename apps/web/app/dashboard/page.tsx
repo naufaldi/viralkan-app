@@ -50,7 +50,9 @@ export default function DashboardPage() {
   const { isAuthenticated, isLoading, backendUser, apiCall } = useAuthContext();
   const router = useRouter();
   const [userReports, setUserReports] = useState<Report[]>([]);
-  const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(null);
+  const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(
+    null,
+  );
   const [loadingReports, setLoadingReports] = useState(true);
 
   const fetchUserData = useCallback(async () => {
@@ -160,7 +162,6 @@ export default function DashboardPage() {
   }
 
   return (
-    
     <div className="container mx-auto px-6 py-8">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
@@ -228,7 +229,7 @@ export default function DashboardPage() {
                 ? `${Math.round(
                     (dashboardStats.user_total_reports /
                       dashboardStats.platform_total_reports) *
-                      100
+                      100,
                   )}%`
                 : "0%"
             }

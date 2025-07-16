@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { Button } from "@repo/ui/components/ui/button";
 import { Badge } from "@repo/ui/components/ui/badge";
 import { Card, CardContent } from "@repo/ui/components/ui/card";
@@ -57,18 +58,23 @@ export default function Home() {
                   <Button
                     size="lg"
                     className="bg-primary-600 hover:bg-primary-700"
+                    asChild
                   >
-                    <Camera className="mr-2 h-5 w-5" />
-                    Mulai Lapor Sekarang
+                    <Link href="/laporan/buat">
+                      <Camera className="mr-2 h-5 w-5" />
+                      Mulai Lapor Sekarang
+                    </Link>
                   </Button>
                   <Button
                     variant="outline"
                     size="lg"
                     className="border-neutral-300"
-                    onClick={() => (window.location.href = "/laporan")}
+                    asChild
                   >
-                    <MessageSquare className="mr-2 h-4 w-4" />
-                    Lihat Laporan
+                    <Link href="/laporan">
+                      <MessageSquare className="mr-2 h-4 w-4" />
+                      Lihat Laporan
+                    </Link>
                   </Button>
                 </div>
               </div>
@@ -318,7 +324,7 @@ export default function Home() {
                     </div>
 
                     <p className="text-neutral-700 mb-4 leading-relaxed">
-                      "{testimonial.testimonial}"
+                      &ldquo;{testimonial.testimonial}&rdquo;
                     </p>
 
                     <div className="flex items-center justify-between">
@@ -413,9 +419,14 @@ export default function Home() {
                     Viralkan. Bantu teman-teman hindari lubang, suaramu
                     berpengaruh!
                   </p>
-                  <Button className="bg-primary-600 hover:bg-primary-700">
-                    <ArrowRight className="mr-2 h-4 w-4" />
-                    Mulai Berkontribusi
+                  <Button
+                    className="bg-primary-600 hover:bg-primary-700"
+                    asChild
+                  >
+                    <Link href="/laporan/buat">
+                      <ArrowRight className="mr-2 h-4 w-4" />
+                      Mulai Berkontribusi
+                    </Link>
                   </Button>
                 </CardContent>
               </Card>
@@ -440,9 +451,15 @@ export default function Home() {
                 teman-teman.
               </p>
 
-              <Button size="lg" className="bg-primary-600 hover:bg-primary-700">
-                <Camera className="mr-2 h-5 w-5" />
-                Mulai Lapor Gratis
+              <Button
+                size="lg"
+                className="bg-primary-600 hover:bg-primary-700"
+                asChild
+              >
+                <Link href="/laporan/buat">
+                  <Camera className="mr-2 h-5 w-5" />
+                  Mulai Lapor Gratis
+                </Link>
               </Button>
             </div>
           </div>

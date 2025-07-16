@@ -99,7 +99,7 @@ export function ReportFilters({
               variant="secondary"
               className="bg-neutral-100 text-neutral-700 border-0"
             >
-              "{searchQuery}"
+              &quot;{searchQuery}&quot;
             </Badge>
           )}
 

@@ -138,7 +138,15 @@ const createReportRoute = createRoute({
   responses: {
     201: {
       description: "Report created successfully",
-      content: { "application/json": { schema: z.object({ id: z.number() }) } },
+      content: { 
+        "application/json": { 
+          schema: z.object({ 
+            id: z.number(),
+            message: z.string(),
+            success: z.boolean()
+          }) 
+        } 
+      },
     },
     400: {
       description: "Invalid request data",
@@ -446,7 +454,11 @@ reportsRouter.openapi(createReportRoute, async (c) => {
     const result = await shell.createNewReport(userId, reportData);
 
     if (result.success) {
-      return c.json(result.data, 201);
+      return c.json({
+        id: result.data.id,
+        message: "Laporan berhasil dibuat! Terima kasih telah melaporkan kerusakan jalan.",
+        success: true
+      }, 201);
     }
 
     return c.json(
