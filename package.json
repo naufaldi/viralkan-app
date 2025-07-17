@@ -26,6 +26,7 @@
     "packages/*"
   ],
   "dependencies": {
-    "@hono/zod-openapi": "^0.19.9"
+    "@hono/zod-openapi": "^0.19.9",
+    "zod": "^4.0.5"
   }
 }
