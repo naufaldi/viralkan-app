@@ -16,6 +16,7 @@ export const UploadErrorResponseSchema = z.object({
     code: z.string(),
     message: z.string(),
     timestamp: z.string(),
+    requestId: z.string().optional(),
   }),
 });
 
@@ -49,6 +50,7 @@ export type FileValidationResult = AppResult<{
     size: number;
     type: string;
     extension: string;
+    name: string;
   };
 }>;
 
