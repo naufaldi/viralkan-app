@@ -1,14 +1,14 @@
 ## R2 Upload System Design
 
-### Version 1 — MVP (Backend Proxy Upload)
+### Version 1 — MVP (Backend Proxy Upload)
 
-#### 1 — Overview
+#### 1 — Overview
 
 - Frontend: simple `fetch('/api/upload', { method:'POST', body: FormData })`
 - Backend Hono: receives raw image, streams to R2, records metadata
 - No conversion or presigned URLs
 
-#### 2 — Components
+#### 2 — Components
 
 - **Next.js Frontend**
   - File input → Server Action
@@ -24,7 +24,7 @@
 - **R2 Bucket**: stores original image blobs
 - **PostgreSQL**: `reports(image_key, image_url, ...)`
 
-#### 3 — Sequence (MVP)
+#### 3 — Sequence (MVP)
 
 ```mermaid
 sequenceDiagram
@@ -37,7 +37,7 @@ sequenceDiagram
   Frontend->>Browser: display report
 ```
 
-#### 4 — Code Snippet (MVP)
+#### 4 — Code Snippet (MVP)
 
 ```ts
 // apps/api/src/routes/upload.ts
@@ -54,7 +54,7 @@ app.post('/api/upload', verifyToken, async (c) => {
 });
 ```
 
-#### 5 — Pros / Cons (MVP)
+#### 5 — Pros / Cons (MVP)
 
 | Pros                                  | Cons                                       |
 | ------------------------------------- | ------------------------------------------ |
@@ -63,14 +63,14 @@ app.post('/api/upload', verifyToken, async (c) => {
 
 ---
 
-### Version 2 — Presigned URLs with Frontend WebP Conversion
+### Version 2 — Presigned URLs with Frontend WebP Conversion
 
-#### 1 — Overview
+#### 1 — Overview
 
 - Frontend: convert to WebP via canvas/WASM, then upload via presigned URL
 - Backend: issues URL, records metadata only
 
-#### 2 — Components
+#### 2 — Components
 
 - **Next.js Frontend**
   - Canvas/WebAssembly → WebP blob
@@ -86,7 +86,7 @@ app.post('/api/upload', verifyToken, async (c) => {
 - **R2 Bucket**
 - **PostgreSQL**
 
-#### 3 — Sequence (v2)
+#### 3 — Sequence (v2)
 
 ```mermaid
 sequenceDiagram
@@ -100,7 +100,7 @@ sequenceDiagram
   Hono->>Frontend: { report }
 ```
 
-#### 4 — Code Snippets (v2)
+#### 4 — Code Snippets (v2)
 
 ```ts
 // sign
@@ -123,7 +123,7 @@ app.post('/api/upload/complete', verifyToken, async (c) => {
 });
 ```
 
-#### 5 — Pros / Cons (v2)
+#### 5 — Pros / Cons (v2)
 
 | Pros                              | Cons                                  |
 | --------------------------------- | ------------------------------------- |
@@ -158,3 +158,73 @@ for await (const obj of R2.list()) {
 2. Build v2 frontend conversion UI
 3. Deploy backend sign & complete endpoints
 4. Add monitoring & metrics for upload success
+
+## Implementation Status
+
+### ✅ Completed (Task 1)
+
+- Backend upload endpoint infrastructure with 4-layer architecture
+- Database schema with uploads table and image_key field
+- Environment configuration for R2 credentials
+- OpenAPI documentation and route integration
+
+### 🚧 In Progress
+
+- Task 2: MVP image upload endpoint implementation
+- Frontend upload service integration
+- ImageUpload component enhancements
+
+### 📋 Upcoming
+
+- End-to-end testing
+- Error handling improvements
+- Performance monitoring
+- V2 presigned URL implementation
+
+## Environment Setup
+
+### Development
+
+```bash
+R2_ACCESS_KEY_ID="your_r2_access_key"
+R2_SECRET_ACCESS_KEY="your_r2_secret_key"
+R2_BUCKET_NAME="viralkan-reports"
+R2_ENDPOINT="https://account_id.r2.cloudflarestorage.com"
+R2_PUBLIC_URL="https://pub-xxxxx.r2.dev"
+```
+
+### Production
+
+```bash
+R2_PUBLIC_URL="https://cdn.faldi.xyz"
+```
+
+## API Endpoints
+
+### Current Implementation
+
+- `POST /api/upload` - MVP file upload endpoint
+- Authentication via Firebase JWT
+- File validation (JPEG, PNG, WebP, max 10MB)
+- Rate limiting (10 uploads/hour per user)
+
+### Response Format
+
+```json
+{
+  "imageUrl": "https://cdn.faldi.xyz/123/uuid_timestamp_image.jpg",
+  "imageKey": "123/uuid_timestamp_image.jpg"
+}
+```
+
+### Error Responses
+
+```json
+{
+  "error": {
+    "code": "FILE_TOO_LARGE",
+    "message": "File size exceeds 10MB limit",
+    "timestamp": "2025-01-20T10:30:00Z"
+  }
+}
+```

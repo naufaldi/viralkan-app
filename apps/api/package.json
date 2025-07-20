@@ -15,6 +15,7 @@
     "db:seed": "bun run src/db/seed.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.848.0",
     "@google-cloud/storage": "^7.14.0",
     "@hono/node-server": "^1.13.7",
     "@hono/swagger-ui": "^0.5.2",

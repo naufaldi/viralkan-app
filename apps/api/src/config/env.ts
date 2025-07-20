@@ -6,7 +6,7 @@ const getRequiredEnv = (key: string): string => {
   return value;
 };
 
-const getOptionalEnv = (key: string, defaultValue: string = ""): string => {
+const getOptionalEnv = (key: string, defaultValue: string = ''): string => {
   return process.env[key] || defaultValue;
 };
 
@@ -31,58 +31,61 @@ const getOptionalNumber = (key: string, defaultValue: number): number => {
 
 export const env = {
   // Database - Required for security
-  DATABASE_URL: getRequiredEnv("DATABASE_URL"),
+  DATABASE_URL: getRequiredEnv('DATABASE_URL'),
 
   // Server
-  PORT: getOptionalNumber("PORT", 3000),
-  NODE_ENV: getOptionalEnv("NODE_ENV", "development"),
+  PORT: getOptionalNumber('PORT', 3000),
+  NODE_ENV: getOptionalEnv('NODE_ENV', 'development'),
 
   // Firebase - Required for auth
   FIREBASE_SERVICE_ACCOUNT_JSON: getRequiredEnv(
-    "FIREBASE_SERVICE_ACCOUNT_JSON",
+    'FIREBASE_SERVICE_ACCOUNT_JSON'
   ),
 
   // Google OAuth - Optional for development
-  GOOGLE_CLIENT_ID: getOptionalEnv("GOOGLE_CLIENT_ID"),
-  GOOGLE_CLIENT_SECRET: getOptionalEnv("GOOGLE_CLIENT_SECRET"),
+  GOOGLE_CLIENT_ID: getOptionalEnv('GOOGLE_CLIENT_ID'),
+  GOOGLE_CLIENT_SECRET: getOptionalEnv('GOOGLE_CLIENT_SECRET'),
 
   // Cloudflare R2 - Optional for development
-  R2_ACCESS_KEY: getOptionalEnv("R2_ACCESS_KEY"),
-  R2_SECRET_KEY: getOptionalEnv("R2_SECRET_KEY"),
-  R2_BUCKET: getOptionalEnv("R2_BUCKET"),
-  R2_ENDPOINT: getOptionalEnv("R2_ENDPOINT"),
+  R2_ACCESS_KEY_ID: getOptionalEnv('R2_ACCESS_KEY_ID'),
+  R2_SECRET_ACCESS_KEY: getOptionalEnv('R2_SECRET_ACCESS_KEY'),
+  R2_BUCKET_NAME: getOptionalEnv('R2_BUCKET_NAME'),
+  R2_ENDPOINT: getOptionalEnv('R2_ENDPOINT'),
+  R2_PUBLIC_URL: getOptionalEnv('R2_PUBLIC_URL'),
 
   // JWT - Required for security
-  JWT_SECRET: getRequiredEnv("JWT_SECRET"),
+  JWT_SECRET: getRequiredEnv('JWT_SECRET'),
 };
 
 export const validateEnv = (): void => {
   try {
     // Test that all required environment variables are loaded
     Object.entries(env);
-    console.log("✅ All environment variables validated");
+    console.log('✅ All environment variables validated');
 
     // Warn about missing optional variables in development
-    if (env.NODE_ENV === "development") {
+    if (env.NODE_ENV === 'development') {
       const optionalWarnings: string[] = [];
 
-      if (!env.GOOGLE_CLIENT_ID) optionalWarnings.push("GOOGLE_CLIENT_ID");
+      if (!env.GOOGLE_CLIENT_ID) optionalWarnings.push('GOOGLE_CLIENT_ID');
       if (!env.GOOGLE_CLIENT_SECRET)
-        optionalWarnings.push("GOOGLE_CLIENT_SECRET");
-      if (!env.R2_ACCESS_KEY) optionalWarnings.push("R2_ACCESS_KEY");
-      if (!env.R2_SECRET_KEY) optionalWarnings.push("R2_SECRET_KEY");
-      if (!env.R2_BUCKET) optionalWarnings.push("R2_BUCKET");
-      if (!env.R2_ENDPOINT) optionalWarnings.push("R2_ENDPOINT");
+        optionalWarnings.push('GOOGLE_CLIENT_SECRET');
+      if (!env.R2_ACCESS_KEY_ID) optionalWarnings.push('R2_ACCESS_KEY_ID');
+      if (!env.R2_SECRET_ACCESS_KEY)
+        optionalWarnings.push('R2_SECRET_ACCESS_KEY');
+      if (!env.R2_BUCKET_NAME) optionalWarnings.push('R2_BUCKET_NAME');
+      if (!env.R2_ENDPOINT) optionalWarnings.push('R2_ENDPOINT');
+      if (!env.R2_PUBLIC_URL) optionalWarnings.push('R2_PUBLIC_URL');
 
       if (optionalWarnings.length > 0) {
         console.warn(
-          `⚠️ Optional environment variables not set (features may be limited): ${optionalWarnings.join(", ")}`,
+          `⚠️ Optional environment variables not set (features may be limited): ${optionalWarnings.join(', ')}`
         );
       }
     }
   } catch (error) {
-    console.error("❌ Environment validation failed:", error);
-    if (env.NODE_ENV === "production") {
+    console.error('❌ Environment validation failed:', error);
+    if (env.NODE_ENV === 'production') {
       process.exit(1);
     }
     throw error;

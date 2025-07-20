@@ -1,13 +1,13 @@
 # Implementation Plan
 
-- [ ] 1. Set up backend upload endpoint infrastructure following 4-layer architecture
+- [x] 1. Set up backend upload endpoint infrastructure following 4-layer architecture
   - Create upload route directory at `apps/api/src/routes/upload/` with api.ts, shell.ts, core.ts, data.ts, types.ts files
   - Configure Cloudflare R2 client with environment variables in data layer
   - Add upload route to main API router in `apps/api/src/index.ts`
   - Follow backend-rules.mdc for proper layer separation and type organization
   - _Requirements: 2.1, 3.1_
 
-- [ ] 2. Implement MVP image upload endpoint using AppResult pattern
+- [x] 2. Implement MVP image upload endpoint using AppResult pattern
   - Write POST `/api/upload` endpoint in api.ts with Firebase auth middleware and Zod validation
   - Implement business logic orchestration in shell.ts using AppResult pattern
   - Add pure file validation logic in core.ts (size, type validation)

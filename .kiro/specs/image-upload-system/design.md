@@ -11,6 +11,22 @@ The system leverages the existing architecture:
 - **Storage**: Cloudflare R2 for image storage
 - **Database**: PostgreSQL for report metadata (including image URLs)
 
+## Implementation Reference
+
+For detailed implementation examples and code snippets, see: `docs/upload-design.md`
+
+### Version 1 — MVP (Backend Proxy Upload)
+
+- Frontend: `fetch('/api/upload', { method:'POST', body: FormData })`
+- Backend: receives raw image, streams to R2, records metadata
+- No conversion or presigned URLs
+
+### Version 2 — Presigned URLs (Future)
+
+- Frontend: WebP conversion + direct R2 upload via presigned URLs
+- Backend: issues URLs, records metadata only
+- Better scalability and performance
+
 ## Architecture
 
 ### System Components
