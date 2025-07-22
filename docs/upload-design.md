@@ -41,14 +41,14 @@ sequenceDiagram
 
 ```ts
 // apps/api/src/routes/upload.ts
-app.post('/api/upload', verifyToken, async (c) => {
-  const data = await c.req.body({ type: 'arrayBuffer' });
-  const key = `${c.get('user_id')}/${crypto.randomUUID()}_${Date.now()}`;
+app.post("/api/upload", verifyToken, async (c) => {
+  const data = await c.req.body({ type: "arrayBuffer" });
+  const key = `${c.get("user_id")}/${crypto.randomUUID()}_${Date.now()}`;
   await R2.put(key, Buffer.from(data));
   const url = `https://${R2_ENDPOINT}/${key}`;
   await c.env.DB.query(
     `INSERT INTO reports(user_id, image_key, image_url) VALUES($1,$2,$3)`,
-    [c.get('user_id'), key, url]
+    [c.get("user_id"), key, url],
   );
   return c.json({ imageUrl: url });
 });
@@ -104,20 +104,20 @@ sequenceDiagram
 
 ```ts
 // sign
-app.post('/api/upload/sign', verifyToken, async (c) => {
+app.post("/api/upload/sign", verifyToken, async (c) => {
   const { fileName } = await c.req.json();
-  const key = `${c.get('user_id')}/${crypto.randomUUID()}_${fileName}.webp`;
-  const url = await R2.presignUrl(key, { method: 'PUT', expires: 300 });
+  const key = `${c.get("user_id")}/${crypto.randomUUID()}_${fileName}.webp`;
+  const url = await R2.presignUrl(key, { method: "PUT", expires: 300 });
   return c.json({ url, fileKey: key });
 });
 
 // complete
-app.post('/api/upload/complete', verifyToken, async (c) => {
+app.post("/api/upload/complete", verifyToken, async (c) => {
   const { fileKey, category, street_name } = await c.req.json();
   const imageUrl = `https://${R2_ENDPOINT}/${fileKey}`;
   await c.env.DB.query(
     `INSERT INTO reports(user_id, image_key, image_url, category, street_name) VALUES($1,$2,$3,$4,$5)`,
-    [c.get('user_id'), fileKey, imageUrl, category, street_name]
+    [c.get("user_id"), fileKey, imageUrl, category, street_name],
   );
   return c.json({ imageUrl });
 });
@@ -137,7 +137,7 @@ app.post('/api/upload/complete', verifyToken, async (c) => {
 Daily cron in Hono:
 
 ```ts
-const used = await DB.query('SELECT image_key FROM reports');
+const used = await DB.query("SELECT image_key FROM reports");
 for await (const obj of R2.list()) {
   if (!used.rows.find((r) => r.image_key === obj.key)) {
     await R2.delete(obj.key);

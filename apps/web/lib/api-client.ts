@@ -1,16 +1,16 @@
 // API Client for Hono backend
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export interface ReportFilters {
   page?: number;
   limit?: number;
-  category?: 'berlubang' | 'retak' | 'lainnya';
+  category?: "berlubang" | "retak" | "lainnya";
   search?: string;
 }
 
 export interface Report {
   id: number;
-  category: 'berlubang' | 'retak' | 'lainnya';
+  category: "berlubang" | "retak" | "lainnya";
   street_name: string;
   location_text: string;
   image_url: string;
@@ -47,13 +47,13 @@ class ApiClient {
 
   private async request<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
   ): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
 
     const response = await fetch(url, {
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         ...options.headers,
       },
       ...options,
@@ -63,7 +63,7 @@ class ApiClient {
       const errorData = await response.json().catch(() => ({}));
       throw new Error(
         errorData.error?.message ||
-          `HTTP ${response.status}: ${response.statusText}`
+          `HTTP ${response.status}: ${response.statusText}`,
       );
     }
 
@@ -73,29 +73,29 @@ class ApiClient {
   async getReports(filters: ReportFilters = {}): Promise<PaginatedReports> {
     const params = new URLSearchParams();
 
-    if (filters.page) params.append('page', filters.page.toString());
-    if (filters.limit) params.append('limit', filters.limit.toString());
-    if (filters.category) params.append('category', filters.category);
-    if (filters.search) params.append('search', filters.search);
+    if (filters.page) params.append("page", filters.page.toString());
+    if (filters.limit) params.append("limit", filters.limit.toString());
+    if (filters.category) params.append("category", filters.category);
+    if (filters.search) params.append("search", filters.search);
 
     const queryString = params.toString();
-    const endpoint = `/api/reports${queryString ? `?${queryString}` : ''}`;
+    const endpoint = `/api/reports${queryString ? `?${queryString}` : ""}`;
 
     return this.request<PaginatedReports>(endpoint);
   }
 
   async getEnrichedReports(
-    filters: ReportFilters = {}
+    filters: ReportFilters = {},
   ): Promise<PaginatedReports> {
     const params = new URLSearchParams();
 
-    if (filters.page) params.append('page', filters.page.toString());
-    if (filters.limit) params.append('limit', filters.limit.toString());
-    if (filters.category) params.append('category', filters.category);
-    if (filters.search) params.append('search', filters.search);
+    if (filters.page) params.append("page", filters.page.toString());
+    if (filters.limit) params.append("limit", filters.limit.toString());
+    if (filters.category) params.append("category", filters.category);
+    if (filters.search) params.append("search", filters.search);
 
     const queryString = params.toString();
-    const endpoint = `/api/reports/enriched${queryString ? `?${queryString}` : ''}`;
+    const endpoint = `/api/reports/enriched${queryString ? `?${queryString}` : ""}`;
 
     return this.request<PaginatedReports>(endpoint);
   }

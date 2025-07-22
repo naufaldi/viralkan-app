@@ -1,7 +1,7 @@
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
-import { sql } from '@/db/connection';
-import { createSuccess, createError, AppResult, AppError } from '@/types';
-import type { UploadResult, R2Config, DbUploadRecord } from './types';
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { sql } from "@/db/connection";
+import { createSuccess, createError, AppResult, AppError } from "@/types";
+import type { UploadResult, R2Config, DbUploadRecord } from "./types";
 
 /**
  * Initialize R2 client with configuration
@@ -10,7 +10,7 @@ import type { UploadResult, R2Config, DbUploadRecord } from './types';
  */
 export const createR2Client = (config: R2Config): S3Client => {
   return new S3Client({
-    region: 'auto',
+    region: "auto",
     endpoint: config.endpoint,
     credentials: {
       accessKeyId: config.accessKeyId,
@@ -33,28 +33,28 @@ export const uploadToR2 = async (
   bucketName: string,
   key: string,
   fileBuffer: Buffer,
-  contentType: string
+  contentType: string,
 ): Promise<UploadResult> => {
   try {
     // Validate inputs
     if (!client) {
-      return createError('R2 client not initialized', 500);
+      return createError("R2 client not initialized", 500);
     }
 
-    if (!bucketName || bucketName.trim() === '') {
-      return createError('R2 bucket name not configured', 500);
+    if (!bucketName || bucketName.trim() === "") {
+      return createError("R2 bucket name not configured", 500);
     }
 
-    if (!key || key.trim() === '') {
-      return createError('Storage key cannot be empty', 500);
+    if (!key || key.trim() === "") {
+      return createError("Storage key cannot be empty", 500);
     }
 
     if (!fileBuffer || fileBuffer.length === 0) {
-      return createError('File buffer is empty', 400);
+      return createError("File buffer is empty", 400);
     }
 
-    if (!contentType || contentType.trim() === '') {
-      return createError('Content type is required', 400);
+    if (!contentType || contentType.trim() === "") {
+      return createError("Content type is required", 400);
     }
 
     const command = new PutObjectCommand({
@@ -63,11 +63,11 @@ export const uploadToR2 = async (
       Body: fileBuffer,
       ContentType: contentType,
       // Set cache control for better performance
-      CacheControl: 'public, max-age=31536000', // 1 year
+      CacheControl: "public, max-age=31536000", // 1 year
       // Add metadata for debugging
       Metadata: {
-        'upload-timestamp': Date.now().toString(),
-        'file-size': fileBuffer.length.toString(),
+        "upload-timestamp": Date.now().toString(),
+        "file-size": fileBuffer.length.toString(),
       },
     });
 
@@ -75,20 +75,20 @@ export const uploadToR2 = async (
 
     // Verify upload was successful
     if (!response || !response.ETag) {
-      return createError('Upload completed but verification failed', 500);
+      return createError("Upload completed but verification failed", 500);
     }
 
     console.log(
-      `R2 upload successful: key=${key}, size=${fileBuffer.length}, etag=${response.ETag}`
+      `R2 upload successful: key=${key}, size=${fileBuffer.length}, etag=${response.ETag}`,
     );
 
     return createSuccess({
-      imageUrl: '', // Will be set by shell layer
+      imageUrl: "", // Will be set by shell layer
       imageKey: key,
     });
   } catch (error: any) {
     // Enhanced error logging with context
-    console.error('R2 upload error:', {
+    console.error("R2 upload error:", {
       error: error.message,
       code: error.code,
       statusCode: error.$metadata?.httpStatusCode,
@@ -99,37 +99,37 @@ export const uploadToR2 = async (
     });
 
     // Handle specific AWS/R2 errors
-    if (error.name === 'NoSuchBucket') {
+    if (error.name === "NoSuchBucket") {
       return createError(`R2 bucket '${bucketName}' does not exist`, 500);
     }
 
-    if (error.name === 'AccessDenied') {
+    if (error.name === "AccessDenied") {
       return createError(
-        'Access denied to R2 storage - check credentials',
-        500
+        "Access denied to R2 storage - check credentials",
+        500,
       );
     }
 
-    if (error.name === 'InvalidBucketName') {
+    if (error.name === "InvalidBucketName") {
       return createError(`Invalid R2 bucket name: ${bucketName}`, 500);
     }
 
-    if (error.name === 'EntityTooLarge') {
-      return createError('File too large for storage service', 400);
+    if (error.name === "EntityTooLarge") {
+      return createError("File too large for storage service", 400);
     }
 
-    if (error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED') {
-      return createError('Cannot connect to R2 storage service', 500);
+    if (error.code === "ENOTFOUND" || error.code === "ECONNREFUSED") {
+      return createError("Cannot connect to R2 storage service", 500);
     }
 
-    if (error.code === 'ETIMEDOUT') {
-      return createError('Upload timeout - please try again', 500);
+    if (error.code === "ETIMEDOUT") {
+      return createError("Upload timeout - please try again", 500);
     }
 
     // Generic error with context
     return createError(
-      `Storage upload failed: ${error.message || 'Unknown error'}`,
-      500
+      `Storage upload failed: ${error.message || "Unknown error"}`,
+      500,
     );
   }
 };
@@ -148,28 +148,28 @@ export const recordUploadMetadata = async (
   imageKey: string,
   imageUrl: string,
   fileSize: number,
-  fileType: string
+  fileType: string,
 ): Promise<AppResult<DbUploadRecord>> => {
   try {
     // Validate inputs
     if (!userId || userId <= 0) {
-      return createError('Invalid user ID for database record', 400);
+      return createError("Invalid user ID for database record", 400);
     }
 
-    if (!imageKey || imageKey.trim() === '') {
-      return createError('Image key is required for database record', 400);
+    if (!imageKey || imageKey.trim() === "") {
+      return createError("Image key is required for database record", 400);
     }
 
-    if (!imageUrl || imageUrl.trim() === '') {
-      return createError('Image URL is required for database record', 400);
+    if (!imageUrl || imageUrl.trim() === "") {
+      return createError("Image URL is required for database record", 400);
     }
 
     if (fileSize <= 0) {
-      return createError('Invalid file size for database record', 400);
+      return createError("Invalid file size for database record", 400);
     }
 
-    if (!fileType || fileType.trim() === '') {
-      return createError('File type is required for database record', 400);
+    if (!fileType || fileType.trim() === "") {
+      return createError("File type is required for database record", 400);
     }
 
     const result = await sql`
@@ -179,21 +179,21 @@ export const recordUploadMetadata = async (
     `;
 
     if (result.length === 0) {
-      console.error('Database insert returned no rows:', {
+      console.error("Database insert returned no rows:", {
         userId,
         imageKey,
         imageUrl,
       });
       return createError(
-        'Failed to record upload metadata - no rows returned',
-        500
+        "Failed to record upload metadata - no rows returned",
+        500,
       );
     }
 
     console.log(`Upload metadata recorded for user ${userId}: ${imageKey}`);
     return createSuccess(result[0] as DbUploadRecord);
   } catch (error: any) {
-    console.error('Database error recording upload:', {
+    console.error("Database error recording upload:", {
       error: error.message,
       code: error.code,
       userId,
@@ -204,32 +204,32 @@ export const recordUploadMetadata = async (
     });
 
     // Handle specific database errors
-    if (error.code === '23505') {
+    if (error.code === "23505") {
       // Unique constraint violation
-      return createError('Upload record already exists', 409);
+      return createError("Upload record already exists", 409);
     }
 
-    if (error.code === '23503') {
+    if (error.code === "23503") {
       // Foreign key constraint violation
-      return createError('Invalid user ID - user does not exist', 400);
+      return createError("Invalid user ID - user does not exist", 400);
     }
 
-    if (error.code === '23514') {
+    if (error.code === "23514") {
       // Check constraint violation
-      return createError('Invalid data provided for upload record', 400);
+      return createError("Invalid data provided for upload record", 400);
     }
 
-    if (error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND') {
-      return createError('Database connection failed', 500);
+    if (error.code === "ECONNREFUSED" || error.code === "ENOTFOUND") {
+      return createError("Database connection failed", 500);
     }
 
-    if (error.message?.includes('timeout')) {
-      return createError('Database operation timed out', 500);
+    if (error.message?.includes("timeout")) {
+      return createError("Database operation timed out", 500);
     }
 
     return createError(
-      `Database error: ${error.message || 'Unknown database error'}`,
-      500
+      `Database error: ${error.message || "Unknown database error"}`,
+      500,
     );
   }
 };
@@ -244,10 +244,10 @@ export const recordUploadMetadata = async (
 export const deleteFromR2 = async (
   client: S3Client,
   bucketName: string,
-  key: string
+  key: string,
 ): Promise<AppResult<boolean>> => {
   try {
-    const { DeleteObjectCommand } = await import('@aws-sdk/client-s3');
+    const { DeleteObjectCommand } = await import("@aws-sdk/client-s3");
     const command = new DeleteObjectCommand({
       Bucket: bucketName,
       Key: key,
@@ -256,8 +256,8 @@ export const deleteFromR2 = async (
     await client.send(command);
     return createSuccess(true);
   } catch (error) {
-    console.error('R2 delete error:', error);
-    return createError('Failed to delete file from storage', 500);
+    console.error("R2 delete error:", error);
+    return createError("Failed to delete file from storage", 500);
   }
 };
 
@@ -267,7 +267,7 @@ export const deleteFromR2 = async (
  * @returns Promise<AppResult<DbUploadRecord | null>>
  */
 export const getUploadByKey = async (
-  imageKey: string
+  imageKey: string,
 ): Promise<AppResult<DbUploadRecord | null>> => {
   try {
     const result = await sql`
@@ -278,8 +278,8 @@ export const getUploadByKey = async (
 
     return createSuccess((result[0] as DbUploadRecord) || null);
   } catch (error) {
-    console.error('Database error fetching upload:', error);
-    return createError('Failed to fetch upload record', 500);
+    console.error("Database error fetching upload:", error);
+    return createError("Failed to fetch upload record", 500);
   }
 };
 
@@ -291,17 +291,17 @@ export const getUploadByKey = async (
  */
 export const getUserUploadCount = async (
   userId: number,
-  timeWindowMinutes: number = 60
+  timeWindowMinutes: number = 60,
 ): Promise<AppResult<number>> => {
   try {
     // Validate inputs
     if (!userId || userId <= 0) {
-      return createError('Invalid user ID for rate limit check', 400);
+      return createError("Invalid user ID for rate limit check", 400);
     }
 
     if (timeWindowMinutes <= 0 || timeWindowMinutes > 1440) {
       // Max 24 hours
-      return createError('Invalid time window for rate limit check', 400);
+      return createError("Invalid time window for rate limit check", 400);
     }
 
     const result = await sql`
@@ -316,18 +316,18 @@ export const getUserUploadCount = async (
       return createSuccess(0);
     }
 
-    const count = parseInt(result[0]?.count || '0');
+    const count = parseInt(result[0]?.count || "0");
 
     if (isNaN(count)) {
       console.error(
-        `Invalid count returned for user ${userId}: ${result[0]?.count}`
+        `Invalid count returned for user ${userId}: ${result[0]?.count}`,
       );
-      return createError('Invalid rate limit data', 500);
+      return createError("Invalid rate limit data", 500);
     }
 
     return createSuccess(count);
   } catch (error: any) {
-    console.error('Database error checking upload count:', {
+    console.error("Database error checking upload count:", {
       error: error.message,
       code: error.code,
       userId,
@@ -335,20 +335,20 @@ export const getUserUploadCount = async (
     });
 
     // Handle specific database errors
-    if (error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND') {
+    if (error.code === "ECONNREFUSED" || error.code === "ENOTFOUND") {
       return createError(
-        'Database connection failed for rate limit check',
-        500
+        "Database connection failed for rate limit check",
+        500,
       );
     }
 
-    if (error.message?.includes('timeout')) {
-      return createError('Rate limit check timed out', 500);
+    if (error.message?.includes("timeout")) {
+      return createError("Rate limit check timed out", 500);
     }
 
     return createError(
-      `Rate limit check failed: ${error.message || 'Unknown error'}`,
-      500
+      `Rate limit check failed: ${error.message || "Unknown error"}`,
+      500,
     );
   }
 };

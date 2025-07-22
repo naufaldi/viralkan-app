@@ -2,16 +2,16 @@
 // Each feature should export its router and be included here
 
 // Router exports
-export { authRouter } from './auth';
-export { reportsRouter } from './reports';
-export { uploadRouter } from './upload';
+export { authRouter } from "./auth";
+export { reportsRouter } from "./reports";
+export { uploadRouter } from "./upload";
 
 // Middleware exports (for convenience)
 export {
   firebaseAuthMiddleware,
   optionalAuthMiddleware,
   requireRole,
-} from './auth';
+} from "./auth";
 
 // Public API type exports - these are the main types external consumers would use
 export type {
@@ -22,7 +22,7 @@ export type {
   LogoutResponse,
   ErrorResponse,
   UserStatsResponse,
-} from './auth';
+} from "./auth";
 
 export type {
   // Reports types
@@ -32,13 +32,13 @@ export type {
   Report,
   ReportWithUser,
   PaginatedReports,
-} from './reports';
+} from "./reports";
 
 export type {
   // Upload types
   UploadResponse,
   UploadErrorResponse,
   FileValidationConfig,
-} from './upload';
+} from "./upload";
 
 // Note: Common types (AppResult, error classes) should be imported directly from @/types

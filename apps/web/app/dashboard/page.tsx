@@ -51,9 +51,7 @@ export default async function DashboardPage() {
   // Fetch user reports with server action
   let userReports: Report[] = [];
   try {
-    userReports = await getUserReportsAction(
-      new URLSearchParams("limit=6"),
-    );
+    userReports = await getUserReportsAction(new URLSearchParams("limit=6"));
   } catch (error) {
     console.error("Error fetching user reports:", error);
     userReports = [];

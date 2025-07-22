@@ -1,5 +1,5 @@
-import { z } from '@hono/zod-openapi';
-import { AppResult } from '@/types';
+import { z } from "@hono/zod-openapi";
+import { AppResult } from "@/types";
 
 // Zod schemas for validation
 export const UploadFileSchema = z.object({

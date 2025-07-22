@@ -4,16 +4,16 @@ import {
   AppResult,
   ForbiddenError,
   ValidationError,
-} from '@/types';
-import type { UploadResult, R2Config } from './types';
+} from "@/types";
+import type { UploadResult, R2Config } from "./types";
 import {
   validateUploadedFile,
   generateStorageKey,
   generatePublicUrl,
   canUserUpload,
   validateR2Config,
-} from './core';
-import { createR2Client, uploadToR2, getUserUploadCount } from './data';
+} from "./core";
+import { createR2Client, uploadToR2, getUserUploadCount } from "./data";
 
 // Rate limiting configuration (for future implementation)
 // const UPLOAD_RATE_LIMIT = 10; // uploads per hour
@@ -29,16 +29,16 @@ import { createR2Client, uploadToR2, getUserUploadCount } from './data';
 export const processFileUpload = async (
   userId: number,
   file: any,
-  r2Config: R2Config
+  r2Config: R2Config,
 ): Promise<UploadResult> => {
   try {
     // 1. Validate user permissions with detailed error
     if (!userId || userId <= 0) {
-      return createError('Invalid user ID provided', 400);
+      return createError("Invalid user ID provided", 400);
     }
 
     if (!canUserUpload(userId)) {
-      return createError('User account does not have upload permissions', 403);
+      return createError("User account does not have upload permissions", 403);
     }
 
     // 2. Check rate limiting (basic implementation for MVP)
@@ -49,13 +49,13 @@ export const processFileUpload = async (
         if (uploadCountResult.data >= UPLOAD_RATE_LIMIT) {
           return createError(
             `Upload rate limit exceeded. Maximum ${UPLOAD_RATE_LIMIT} uploads per hour allowed.`,
-            429
+            429,
           );
         }
       } else {
         // Log rate limit check failure but don't block upload
         console.warn(
-          `Rate limit check failed for user ${userId}: ${uploadCountResult.error}`
+          `Rate limit check failed for user ${userId}: ${uploadCountResult.error}`,
         );
       }
     } catch (rateLimitError) {
@@ -67,11 +67,11 @@ export const processFileUpload = async (
     const configValidation = validateR2Config(r2Config);
     if (!configValidation.isValid) {
       console.error(
-        `R2 configuration validation failed for user ${userId}: ${configValidation.error}`
+        `R2 configuration validation failed for user ${userId}: ${configValidation.error}`,
       );
       return createError(
         `Storage service configuration error: ${configValidation.error}`,
-        500
+        500,
       );
     }
 
@@ -79,7 +79,7 @@ export const processFileUpload = async (
     const validationResult = validateUploadedFile(file);
     if (!validationResult.success) {
       console.warn(
-        `File validation failed for user ${userId}: ${validationResult.error}`
+        `File validation failed for user ${userId}: ${validationResult.error}`,
       );
       return createError(validationResult.error, validationResult.statusCode);
     }
@@ -94,7 +94,7 @@ export const processFileUpload = async (
       publicUrl = generatePublicUrl(storageKey, r2Config.publicUrl);
     } catch (error) {
       console.error(`Storage key generation failed for user ${userId}:`, error);
-      return createError('Failed to generate storage location', 500);
+      return createError("Failed to generate storage location", 500);
     }
 
     // 6. Convert file to buffer for R2 upload with enhanced error handling
@@ -106,8 +106,8 @@ export const processFileUpload = async (
         fileBuffer = Buffer.from(arrayBuffer);
       } else if (
         validatedFile &&
-        typeof validatedFile === 'object' &&
-        'stream' in validatedFile
+        typeof validatedFile === "object" &&
+        "stream" in validatedFile
       ) {
         // Hono file object with stream
         const chunks: Uint8Array[] = [];
@@ -121,7 +121,7 @@ export const processFileUpload = async (
 
         const totalLength = chunks.reduce(
           (acc, chunk) => acc + chunk.length,
-          0
+          0,
         );
         const result = new Uint8Array(totalLength);
         let offset = 0;
@@ -138,15 +138,15 @@ export const processFileUpload = async (
       } else {
         console.error(
           `Unsupported file format for user ${userId}:`,
-          typeof validatedFile
+          typeof validatedFile,
         );
-        return createError('Unsupported file format received', 400);
+        return createError("Unsupported file format received", 400);
       }
 
       // Verify buffer size matches expected size
       if (fileBuffer.length !== metadata.size) {
         console.warn(
-          `File size mismatch for user ${userId}: expected ${metadata.size}, got ${fileBuffer.length}`
+          `File size mismatch for user ${userId}: expected ${metadata.size}, got ${fileBuffer.length}`,
         );
         // Don't fail, but log for monitoring
       }
@@ -156,7 +156,7 @@ export const processFileUpload = async (
         fileName: metadata.name,
         fileSize: metadata.size,
       });
-      return createError('Failed to process uploaded file', 500);
+      return createError("Failed to process uploaded file", 500);
     }
 
     // 7. Create R2 client with error handling
@@ -166,9 +166,9 @@ export const processFileUpload = async (
     } catch (error: any) {
       console.error(
         `R2 client creation failed for user ${userId}:`,
-        error.message
+        error.message,
       );
-      return createError('Storage service unavailable', 500);
+      return createError("Storage service unavailable", 500);
     }
 
     // 8. Upload to R2 storage with comprehensive error handling
@@ -177,7 +177,7 @@ export const processFileUpload = async (
       r2Config.bucketName,
       storageKey,
       fileBuffer,
-      metadata.type
+      metadata.type,
     );
 
     if (!uploadResult.success) {
@@ -214,7 +214,7 @@ export const processFileUpload = async (
       error: error.message,
       stack: error.stack,
     });
-    return createError('An unexpected error occurred during upload', 500);
+    return createError("An unexpected error occurred during upload", 500);
   }
 };
 
@@ -226,11 +226,11 @@ export const processFileUpload = async (
  */
 export const validateUploadRequest = async (
   userId: number,
-  file: any
+  file: any,
 ): Promise<AppResult<boolean>> => {
   // Check user authorization
   if (!canUserUpload(userId)) {
-    return createError('User not authorized to upload files', 403);
+    return createError("User not authorized to upload files", 403);
   }
 
   // Validate file
@@ -248,7 +248,7 @@ export const validateUploadRequest = async (
  */
 export const getR2Config = (): R2Config => {
   // Import env configuration
-  const { env } = require('@/config/env');
+  const { env } = require("@/config/env");
 
   const config: R2Config = {
     bucketName: env.R2_BUCKET_NAME,
@@ -265,7 +265,7 @@ export const getR2Config = (): R2Config => {
     .map(([key, _]) => key);
 
   if (missingFields.length > 0) {
-    throw new Error(`Missing R2 configuration: ${missingFields.join(', ')}`);
+    throw new Error(`Missing R2 configuration: ${missingFields.join(", ")}`);
   }
 
   return config;

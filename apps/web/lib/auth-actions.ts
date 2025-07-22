@@ -7,7 +7,7 @@ import { revalidatePath } from "next/cache";
 // Server action for creating reports (uses Hono POST /api/reports)
 export async function createReportAction(formData: FormData) {
   const user = await getAuthUser();
-  
+
   if (!user) {
     redirect("/login");
   }
@@ -56,7 +56,7 @@ export async function createReportAction(formData: FormData) {
 // Server action for logout (uses Hono POST /api/auth/logout)
 export async function logoutAction() {
   const user = await getAuthUser();
-  
+
   if (!user) {
     redirect("/login");
   }
@@ -90,7 +90,7 @@ export async function logoutAction() {
 // Server action for getting user reports (uses Hono GET /api/me/reports)
 export async function getUserReportsAction(searchParams?: URLSearchParams) {
   const user = await getAuthUser();
-  
+
   if (!user) {
     redirect("/login");
   }
@@ -102,17 +102,14 @@ export async function getUserReportsAction(searchParams?: URLSearchParams) {
 
   const queryString = searchParams ? `?${searchParams.toString()}` : "";
 
-  const response = await fetch(
-    `${API_BASE_URL}/api/me/reports${queryString}`,
-    {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      cache: "no-store",
+  const response = await fetch(`${API_BASE_URL}/api/me/reports${queryString}`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
     },
-  );
+    cache: "no-store",
+  });
 
   if (!response.ok) {
     throw new Error("Failed to fetch user reports");

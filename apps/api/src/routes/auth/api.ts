@@ -167,11 +167,14 @@ const logoutRoute = createRoute({
 
 authRouter.openapi(healthRoute, async (c) => {
   try {
-    return c.json({
-      message: "Auth service is running",
-      timestamp: new Date().toISOString(),
-      status: "healthy",
-    }, 200);
+    return c.json(
+      {
+        message: "Auth service is running",
+        timestamp: new Date().toISOString(),
+        status: "healthy",
+      },
+      200,
+    );
   } catch (error) {
     console.error("Health check error:", error);
     return c.json(

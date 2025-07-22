@@ -1,8 +1,8 @@
-import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi';
-import { cors } from 'hono/cors';
-import { firebaseAuthMiddleware } from '../../middleware/auth';
-import { UploadResponseSchema, UploadErrorResponseSchema } from './types';
-import * as shell from './shell';
+import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
+import { cors } from "hono/cors";
+import { firebaseAuthMiddleware } from "../../middleware/auth";
+import { UploadResponseSchema, UploadErrorResponseSchema } from "./types";
+import * as shell from "./shell";
 
 type Env = {
   Variables: {
@@ -15,65 +15,69 @@ export const uploadRouter = new OpenAPIHono<Env>();
 
 // Global middleware for all routes
 uploadRouter.use(
-  '*',
+  "*",
   cors({
-    origin: ['http://localhost:3000', 'https://viralkan.com'],
+    origin: ["http://localhost:3000", "https://viralkan.com"],
     credentials: true,
-    allowMethods: ['POST', 'OPTIONS'],
-    allowHeaders: ['Content-Type', 'Authorization'],
-  })
+    allowMethods: ["POST", "OPTIONS"],
+    allowHeaders: ["Content-Type", "Authorization"],
+  }),
 );
 
 // --- Route Definitions ---
 
 const uploadImageRoute = createRoute({
-  method: 'post',
-  path: '/',
+  method: "post",
+  path: "/",
   request: {
     body: {
       content: {
-        'multipart/form-data': {
+        "multipart/form-data": {
           schema: z.object({
             file: z
               .any()
-              .describe('Image file to upload (JPEG, PNG, WebP, max 10MB)'),
+              .openapi({
+                type: "string",
+                format: "binary",
+                description: "Image file to upload (JPEG, PNG, WebP, max 10MB)",
+              }),
           }),
         },
       },
     },
   },
   middleware: [firebaseAuthMiddleware],
-  summary: 'Upload image file',
+  summary: "Upload image file",
   description:
-    'Upload an image file to Cloudflare R2 storage for use in reports',
-  tags: ['Upload'],
+    "Upload an image file to Cloudflare R2 storage for use in reports",
+  tags: ["Upload"],
   security: [{ bearerAuth: [] }],
   responses: {
     200: {
-      description: 'Image uploaded successfully',
+      description: "Image uploaded successfully",
       content: {
-        'application/json': { schema: UploadResponseSchema },
+        "application/json": { schema: UploadResponseSchema },
       },
     },
     400: {
-      description: 'Invalid file or validation error',
-      content: { 'application/json': { schema: UploadErrorResponseSchema } },
+      description: "Invalid file or validation error",
+      content: { "application/json": { schema: UploadErrorResponseSchema } },
     },
     401: {
-      description: 'User not authenticated',
-      content: { 'application/json': { schema: UploadErrorResponseSchema } },
+      description: "User not authenticated",
+      content: { "application/json": { schema: UploadErrorResponseSchema } },
     },
     403: {
-      description: 'User not authorized to upload',
-      content: { 'application/json': { schema: UploadErrorResponseSchema } },
+      description: "User not authorized to upload",
+      content: { "application/json": { schema: UploadErrorResponseSchema } },
     },
     429: {
-      description: 'Rate limit exceeded',
-      content: { 'application/json': { schema: UploadErrorResponseSchema } },
+      description: "Rate limit exceeded",
+      content: { "application/json": { schema: UploadErrorResponseSchema } },
     },
     500: {
-      description: 'Internal server error',
-      content: { 'application/json': { schema: UploadErrorResponseSchema } },
+      description: "Internal server error",
+      content: { "application/json": { schema: UploadErrorResponseSchema } },
     },
   },
 });
@@ -86,23 +90,25 @@ uploadRouter.openapi(uploadImageRoute, async (c) => {
 
   try {
     // Enhanced authentication error handling
-    const userId = c.get('user_id');
+    const userIdRaw = c.get("user_id");
+    const userId =
+      typeof userIdRaw === "string" ? parseInt(userIdRaw, 10) : userIdRaw;
 
     if (!userId || userId <= 0) {
       console.warn(
-        `Authentication failed - invalid user ID: ${userId} [${requestId}]`
+        `Authentication failed - invalid user ID: ${userId} [${requestId}]`,
       );
       return c.json(
         {
           error: {
-            code: 'UNAUTHORIZED',
+            code: "UNAUTHORIZED",
             message:
-              'Authentication required. Please provide a valid authorization token.',
+              "Authentication required. Please provide a valid authorization token.",
             timestamp: new Date().toISOString(),
             requestId,
           },
         },
-        401
+        401,
       );
     }
 
@@ -117,37 +123,37 @@ uploadRouter.openapi(uploadImageRoute, async (c) => {
       console.error(
         `Request parsing failed for user ${userId}:`,
         parseError.message,
-        `[${requestId}]`
+        `[${requestId}]`,
       );
       return c.json(
         {
           error: {
-            code: 'INVALID_REQUEST',
+            code: "INVALID_REQUEST",
             message:
-              'Failed to parse multipart form data. Ensure request is properly formatted.',
+              "Failed to parse multipart form data. Ensure request is properly formatted.",
             timestamp: new Date().toISOString(),
             requestId,
           },
         },
-        400
+        400,
       );
     }
 
     if (!file) {
       console.warn(
-        `No file provided in request for user ${userId} [${requestId}]`
+        `No file provided in request for user ${userId} [${requestId}]`,
       );
       return c.json(
         {
           error: {
-            code: 'MISSING_FILE',
+            code: "MISSING_FILE",
             message:
-              'No file provided in request. Please select an image file to upload.',
+              "No file provided in request. Please select an image file to upload.",
             timestamp: new Date().toISOString(),
             requestId,
           },
         },
-        400
+        400,
       );
     }
 
@@ -159,32 +165,32 @@ uploadRouter.openapi(uploadImageRoute, async (c) => {
       console.error(
         `R2 configuration error for user ${userId}:`,
         configError.message,
-        `[${requestId}]`
+        `[${requestId}]`,
       );
       return c.json(
         {
           error: {
-            code: 'CONFIGURATION_ERROR',
+            code: "CONFIGURATION_ERROR",
             message:
-              'Storage service temporarily unavailable. Please try again later.',
+              "Storage service temporarily unavailable. Please try again later.",
             timestamp: new Date().toISOString(),
             requestId,
           },
         },
-        500
+        500,
       );
     }
 
     // Process file upload with enhanced error context
     console.log(
-      `Processing upload for user ${userId}, file: ${file.name || 'unknown'} [${requestId}]`
+      `Processing upload for user ${userId}, file: ${file.name || "unknown"} [${requestId}]`,
     );
     const result = await shell.processFileUpload(userId, file, r2Config);
 
     if (result.success) {
       const processingTime = Date.now() - startTime;
       console.log(
-        `Upload successful for user ${userId} in ${processingTime}ms [${requestId}]`
+        `Upload successful for user ${userId} in ${processingTime}ms [${requestId}]`,
       );
       return c.json(result.data, 200);
     }
@@ -209,14 +215,14 @@ uploadRouter.openapi(uploadImageRoute, async (c) => {
           requestId,
         },
       },
-      statusCode
+      statusCode,
     );
   } catch (error: any) {
     const processingTime = Date.now() - startTime;
     console.error(`Unexpected error in upload endpoint:`, {
       error: error.message,
       stack: error.stack,
-      userId: c.get('user_id'),
+      userId: c.get("user_id"),
       processingTime,
       requestId,
     });
@@ -224,14 +230,14 @@ uploadRouter.openapi(uploadImageRoute, async (c) => {
     return c.json(
       {
         error: {
-          code: 'INTERNAL_ERROR',
+          code: "INTERNAL_ERROR",
           message:
-            'An unexpected error occurred while processing your upload. Please try again.',
+            "An unexpected error occurred while processing your upload. Please try again.",
           timestamp: new Date().toISOString(),
           requestId,
         },
       },
-      500
+      500,
     );
   }
 });
@@ -249,86 +255,86 @@ function getErrorCode(statusCode: number, errorMessage: string): string {
     case 400:
       // File validation errors
       if (
-        message.includes('file size') ||
-        message.includes('exceeds') ||
-        message.includes('mb')
+        message.includes("file size") ||
+        message.includes("exceeds") ||
+        message.includes("mb")
       ) {
-        return 'FILE_TOO_LARGE';
+        return "FILE_TOO_LARGE";
       }
-      if (message.includes('file type') || message.includes('mime type')) {
-        return 'INVALID_FILE_TYPE';
+      if (message.includes("file type") || message.includes("mime type")) {
+        return "INVALID_FILE_TYPE";
       }
       if (
-        message.includes('extension') ||
-        message.includes('allowed extensions')
+        message.includes("extension") ||
+        message.includes("allowed extensions")
       ) {
-        return 'INVALID_FILE_EXTENSION';
+        return "INVALID_FILE_EXTENSION";
       }
-      if (message.includes('empty') || message.includes('corrupted')) {
-        return 'INVALID_FILE_CONTENT';
+      if (message.includes("empty") || message.includes("corrupted")) {
+        return "INVALID_FILE_CONTENT";
       }
       if (
-        message.includes('filename') ||
-        message.includes('illegal characters')
+        message.includes("filename") ||
+        message.includes("illegal characters")
       ) {
-        return 'INVALID_FILENAME';
+        return "INVALID_FILENAME";
       }
-      if (message.includes('buffer') || message.includes('format')) {
-        return 'FILE_PROCESSING_ERROR';
+      if (message.includes("buffer") || message.includes("format")) {
+        return "FILE_PROCESSING_ERROR";
       }
-      if (message.includes('user id') || message.includes('invalid user')) {
-        return 'INVALID_USER';
+      if (message.includes("user id") || message.includes("invalid user")) {
+        return "INVALID_USER";
       }
-      return 'VALIDATION_ERROR';
+      return "VALIDATION_ERROR";
 
     case 401:
-      return 'UNAUTHORIZED';
+      return "UNAUTHORIZED";
 
     case 403:
-      if (message.includes('permissions') || message.includes('authorized')) {
-        return 'INSUFFICIENT_PERMISSIONS';
+      if (message.includes("permissions") || message.includes("authorized")) {
+        return "INSUFFICIENT_PERMISSIONS";
       }
-      return 'FORBIDDEN';
+      return "FORBIDDEN";
 
     case 429:
       if (
-        message.includes('rate limit') ||
-        message.includes('uploads per hour')
+        message.includes("rate limit") ||
+        message.includes("uploads per hour")
       ) {
-        return 'RATE_LIMIT_EXCEEDED';
+        return "RATE_LIMIT_EXCEEDED";
       }
-      return 'TOO_MANY_REQUESTS';
+      return "TOO_MANY_REQUESTS";
 
     case 500:
       // Storage-related errors
       if (
-        message.includes('r2') ||
-        message.includes('storage') ||
-        message.includes('bucket')
+        message.includes("r2") ||
+        message.includes("storage") ||
+        message.includes("bucket")
       ) {
-        return 'STORAGE_ERROR';
+        return "STORAGE_ERROR";
       }
-      if (message.includes('database') || message.includes('sql')) {
-        return 'DATABASE_ERROR';
+      if (message.includes("database") || message.includes("sql")) {
+        return "DATABASE_ERROR";
       }
-      if (message.includes('configuration') || message.includes('config')) {
-        return 'CONFIGURATION_ERROR';
+      if (message.includes("configuration") || message.includes("config")) {
+        return "CONFIGURATION_ERROR";
       }
-      if (message.includes('client') || message.includes('connection')) {
-        return 'SERVICE_UNAVAILABLE';
+      if (message.includes("client") || message.includes("connection")) {
+        return "SERVICE_UNAVAILABLE";
       }
-      if (message.includes('timeout')) {
-        return 'TIMEOUT_ERROR';
+      if (message.includes("timeout")) {
+        return "TIMEOUT_ERROR";
       }
       if (
-        message.includes('access denied') ||
-        message.includes('credentials')
+        message.includes("access denied") ||
+        message.includes("credentials")
       ) {
-        return 'STORAGE_ACCESS_ERROR';
+        return "STORAGE_ACCESS_ERROR";
       }
-      return 'INTERNAL_ERROR';
+      return "INTERNAL_ERROR";
 
     default:
-      return 'UNKNOWN_ERROR';
+      return "UNKNOWN_ERROR";
   }
 }
