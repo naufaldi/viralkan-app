@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -29,9 +29,12 @@ import {
   SelectValue,
 } from "@repo/ui/components/ui/select";
 import { Alert, AlertDescription } from "@repo/ui/components/ui/alert";
-import { AlertCircle, MapPin, Send, FileText } from "lucide-react";
+import { AlertCircle, MapPin, Send, FileText, CheckCircle } from "lucide-react";
+import { toast } from "sonner";
 import ImageUpload from "../forms/image-upload";
 import { useCreateReport } from "../../hooks/use-create-report";
+import { uploadImage } from "../../services/upload";
+import { useAuth } from "../../hooks/useAuth";
 import {
   CreateReportSchema,
   CreateReportInput,
@@ -45,6 +48,10 @@ interface CreateReportFormProps {
 export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [uploadError, setUploadError] = useState<string | undefined>(undefined);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [formError, setFormError] = useState<string | undefined>(undefined);
+
+  const { getToken, isAuthenticated } = useAuth();
 
   console.log("CreateReportForm rendered, selectedImage:", selectedImage);
 
@@ -72,6 +79,14 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
   console.log("Form state:", form.formState);
   console.log("Form errors:", form.formState.errors);
 
+  // Clear form errors when user starts typing
+  const watchedValues = form.watch();
+  useEffect(() => {
+    if (formError) {
+      setFormError(undefined);
+    }
+  }, [watchedValues, formError]);
+
   const handleImageSelect = (file: File) => {
     console.log("handleImageSelect called with file:", file);
     setSelectedImage(file);
@@ -80,6 +95,7 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
     form.setValue("image_url", dummyUrl);
     console.log("Set form image_url to:", dummyUrl);
     setUploadError(undefined);
+    setFormError(undefined);
     clearError();
   };
 
@@ -87,20 +103,83 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
     setSelectedImage(null);
     form.setValue("image_url", "");
     setUploadError(undefined);
+    setFormError(undefined);
   };
 
   const onSubmit = async (data: CreateReportInput) => {
     console.log("🎉 onSubmit function called with data:", data);
     console.log("selectedImage in onSubmit:", selectedImage);
 
+    // Clear any previous errors
+    setFormError(undefined);
+    setUploadError(undefined);
+
     if (!selectedImage) {
       console.log("No image selected, showing error");
-      setUploadError("Silakan pilih foto jalan rusak terlebih dahulu");
+      setFormError("Silakan pilih foto jalan rusak terlebih dahulu");
       return;
     }
 
-    console.log("About to submit report with actual API call");
-    await submitReport(data, selectedImage);
+    if (!isAuthenticated) {
+      setFormError("Silakan login terlebih dahulu");
+      return;
+    }
+
+    try {
+      // Upload image first
+      setIsUploadingImage(true);
+      clearError();
+
+      console.log("Starting image upload...");
+      const token = await getToken();
+      if (!token) {
+        setFormError("Gagal mendapatkan token autentikasi");
+        return;
+      }
+      
+      const uploadResult = await uploadImage(selectedImage, token);
+
+      if (!uploadResult.success || !uploadResult.data) {
+        console.error("Upload failed:", uploadResult.error);
+        setFormError(uploadResult.error?.message || "Gagal mengunggah foto");
+        return;
+      }
+
+      console.log("Image uploaded successfully:", uploadResult.data);
+
+      // Show success toast for image upload
+      toast.success("Foto berhasil diunggah", {
+        description: "Sedang membuat laporan...",
+        icon: <CheckCircle className="h-4 w-4" />,
+      });
+
+      // Update form data with uploaded image URL
+      const reportData = {
+        ...data,
+        image_url: uploadResult.data.imageUrl,
+      };
+
+      console.log("Submitting report with uploaded image:", reportData);
+      await submitReport(reportData, selectedImage);
+      
+      // Show success toast for report creation
+      toast.success("Laporan berhasil dibuat!", {
+        description: "Terima kasih telah melaporkan kerusakan jalan",
+        icon: <CheckCircle className="h-4 w-4" />,
+        duration: 5000,
+      });
+
+    } catch (error) {
+      console.error("Submit error:", error);
+      setFormError("Terjadi kesalahan saat membuat laporan");
+      
+      // Show error toast as well
+      toast.error("Gagal membuat laporan", {
+        description: "Silakan coba lagi beberapa saat",
+      });
+    } finally {
+      setIsUploadingImage(false);
+    }
   };
 
   // Get current location (optional)
@@ -119,20 +198,33 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
     }
   };
 
-  const isLoading = isSubmitting || isUploading;
+  const isLoading = isSubmitting || isUploading || isUploadingImage;
 
   console.log("About to render CreateReportForm");
 
   return (
     <div className="max-w-2xl mx-auto">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
+      <Card className="border-neutral-200 shadow-card rounded-lg">
+        <CardHeader className="pb-6">
+          <CardTitle className="flex items-center gap-3 text-xl font-semibold text-neutral-900 tracking-tight">
+            <div className="w-8 h-8 bg-primary-50 rounded-lg flex items-center justify-center border border-primary-100">
+              <FileText className="h-5 w-5 text-primary-600" />
+            </div>
             Buat Laporan Jalan Rusak
           </CardTitle>
+          <p className="text-base text-neutral-600 mt-2">
+            Laporkan kondisi jalan rusak untuk membantu perbaikan infrastruktur
+          </p>
         </CardHeader>
         <CardContent>
+          {/* Form Error Alert - shown at top */}
+          {(formError || submitError) && (
+            <Alert variant="destructive" className="mb-6">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{formError || submitError}</AlertDescription>
+            </Alert>
+          )}
+
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(onSubmit, (errors) => {
@@ -149,7 +241,7 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
                   selectedImage={selectedImage}
                   onImageSelect={handleImageSelect}
                   onImageRemove={handleImageRemove}
-                  isUploading={isUploading}
+                  isUploading={isUploadingImage}
                   error={uploadError}
                   disabled={isLoading}
                 />
@@ -253,18 +345,11 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
                 </Button>
               </div>
 
-              {/* Submit Error */}
-              {submitError && (
-                <Alert variant="destructive">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>{submitError}</AlertDescription>
-                </Alert>
-              )}
-
               {/* Submit Button */}
               <Button
                 type="submit"
-                className="w-full"
+                size="lg"
+                className="w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-3 px-6 rounded-md transition-all duration-150 shadow-sm hover:shadow-md"
                 disabled={isLoading || !selectedImage}
                 onClick={() =>
                   console.log(
@@ -278,7 +363,11 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
                 {isLoading ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    {isUploading ? "Mengunggah..." : "Membuat Laporan..."}
+                    {isUploadingImage
+                      ? "Mengunggah Foto..."
+                      : isUploading
+                        ? "Mengunggah..."
+                        : "Membuat Laporan..."}
                   </>
                 ) : (
                   <>

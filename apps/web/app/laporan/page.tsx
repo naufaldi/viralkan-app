@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Link from "next/link";
 import { Button } from "@repo/ui/components/ui/button";
 import { Badge } from "@repo/ui/components/ui/badge";
 import { MapPin, Plus, FileText } from "lucide-react";
@@ -8,6 +9,7 @@ import { ReportsGrid } from "../../components/reports/reports-grid";
 import { ReportFilters } from "../../components/reports/report-filters";
 import { Pagination } from "../../components/ui/pagination";
 import { MockReportWithUser, mockReports } from "../../lib/mock-data";
+import Header from "components/layout/header";
 
 export default function LaporanPage() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -82,41 +84,7 @@ export default function LaporanPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-sm border-b border-neutral-200">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
-                <MapPin className="h-5 w-5 text-white" />
-              </div>
-              <span className="text-xl font-semibold text-neutral-900">
-                Viralkan
-              </span>
-            </div>
-            <nav className="hidden md:flex items-center gap-8">
-              <a
-                href="/"
-                className="text-neutral-600 hover:text-neutral-900 font-medium transition-colors"
-              >
-                Beranda
-              </a>
-              <a href="/laporan" className="text-primary-600 font-medium">
-                Laporan
-              </a>
-              <a
-                href="#"
-                className="text-neutral-600 hover:text-neutral-900 font-medium transition-colors"
-              >
-                Tentang
-              </a>
-              <Button size="sm" className="bg-primary-600 hover:bg-primary-700">
-                Mulai Lapor
-              </Button>
-            </nav>
-          </div>
-        </div>
-      </header>
-
+     <Header/>
       <main className="container mx-auto px-6 py-8">
         {/* Page Header */}
         <div className="mb-8">

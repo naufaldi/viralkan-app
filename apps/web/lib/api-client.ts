@@ -1,5 +1,5 @@
 // API Client for Hono backend
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
 export interface ReportFilters {
   page?: number;
@@ -102,6 +102,35 @@ class ApiClient {
 
   async getReportById(id: number): Promise<Report> {
     return this.request<Report>(`/api/reports/${id}`);
+  }
+
+  async post<T>(
+    endpoint: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    data: any,
+    options?: RequestInit,
+  ): Promise<{ data: T }> {
+    const response = await fetch(`${this.baseUrl}${endpoint}`, {
+      method: "POST",
+      ...options,
+      headers: {
+        ...options?.headers,
+      },
+      body: data,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw {
+        response: {
+          data: errorData,
+          status: response.status,
+        },
+      };
+    }
+
+    const result = await response.json();
+    return { data: result };
   }
 }
 

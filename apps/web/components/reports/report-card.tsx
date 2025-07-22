@@ -28,6 +28,7 @@ export function ReportCard({ report, onClick }: ReportCardProps) {
       <CardContent className="p-0">
         {/* Report Image */}
         <div className="relative">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={report.image_url}
             alt={`Kerusakan jalan di ${report.street_name}`}

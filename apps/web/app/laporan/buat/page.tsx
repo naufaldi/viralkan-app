@@ -7,6 +7,7 @@ import CreateReportForm from "../../../components/reports/create-report-form";
 import { Card, CardContent } from "@repo/ui/components/ui/card";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@repo/ui/components/ui/alert";
+import Header from "components/layout/header";
 
 export default function CreateReportPage() {
   const router = useRouter();
@@ -55,6 +56,8 @@ export default function CreateReportPage() {
   }
 
   return (
+    <>
+     <Header />
     <div className="min-h-screen bg-neutral-50">
       <div className="container mx-auto px-6 py-8">
         {/* Header */}
@@ -71,5 +74,6 @@ export default function CreateReportPage() {
         <CreateReportForm />
       </div>
     </div>
+    </>
   );
 }

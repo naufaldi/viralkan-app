@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { CreateReportInput } from "../lib/types/api";
-import { uploadImage } from "../services/api";
 import { useAuthContext } from "../contexts/AuthContext";
+
 
 interface UseCreateReportOptions {
   onSuccess?: (reportId: number) => void;
@@ -30,20 +30,10 @@ export function useCreateReport(options?: UseCreateReportOptions) {
     setError(null);
 
     try {
-      let imageUrl = data.image_url;
-
-      // Upload image if provided
-      if (imageFile) {
-        setIsUploading(true);
-        const uploadResult = await uploadImage(imageFile);
-        imageUrl = uploadResult.url;
-        setIsUploading(false);
-      }
-
       // Create report using the auth context's apiCall method
+      // Image upload is handled separately in the form component
       const reportData: CreateReportInput = {
         ...data,
-        image_url: imageUrl,
       };
 
       const response = await apiCall(`/api/reports`, {
@@ -74,7 +64,6 @@ export function useCreateReport(options?: UseCreateReportOptions) {
       options?.onError?.(errorMessage);
     } finally {
       setIsSubmitting(false);
-      setIsUploading(false);
     }
   };
 

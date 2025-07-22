@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { AuthProvider } from "../contexts/AuthContext";
 import { getAuthUser } from "../lib/auth-server";
+import { Toaster } from "@repo/ui";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -30,7 +31,10 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <AuthProvider initialUser={initialUser}>{children}</AuthProvider>
+        <AuthProvider initialUser={initialUser}>
+          {children}
+          <Toaster />
+        </AuthProvider>
       </body>
     </html>
   );

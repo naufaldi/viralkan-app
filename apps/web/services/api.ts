@@ -106,26 +106,5 @@ export async function getProfile(token: string): Promise<{ user: any }> {
   return authenticatedApiRequest<{ user: any }>("/api/auth/me", token);
 }
 
-// Image upload function (mock implementation with valid dummy URLs)
-export async function uploadImage(file: File): Promise<{ url: string }> {
-  // Simulate upload delay
-  await new Promise((resolve) => setTimeout(resolve, 1500));
-
-  // Return a valid dummy image URL that will pass API validation
-  // Using a real placeholder service that returns actual images
-  const dummyImages = [
-    "https://picsum.photos/800/600?random=1",
-    "https://picsum.photos/800/600?random=2",
-    "https://picsum.photos/800/600?random=3",
-    "https://picsum.photos/800/600?random=4",
-    "https://picsum.photos/800/600?random=5",
-  ];
-
-  // Randomly select a dummy image
-  const randomIndex = Math.floor(Math.random() * dummyImages.length);
-  const dummyUrl = dummyImages[randomIndex];
-
-  console.log(`Mock upload: ${file.name} -> ${dummyUrl}`);
-
-  return { url: dummyUrl };
-}
+// Re-export upload function from upload service for backward compatibility
+export { uploadImage, } from "./upload";

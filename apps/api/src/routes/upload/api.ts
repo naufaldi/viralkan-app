@@ -34,13 +34,11 @@ const uploadImageRoute = createRoute({
       content: {
         "multipart/form-data": {
           schema: z.object({
-            file: z
-              .any()
-              .openapi({
-                type: "string",
-                format: "binary",
-                description: "Image file to upload (JPEG, PNG, WebP, max 10MB)",
-              }),
+            file: z.any().openapi({
+              type: "string",
+              format: "binary",
+              description: "Image file to upload (JPEG, PNG, WebP, max 10MB)",
+            }),
           }),
         },
       },

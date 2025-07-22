@@ -695,4 +695,56 @@ export const copy = {
 
 ---
 
-This design system provides a solid foundation for the Viralkan MVP while being extensible for future iterations. It prioritizes accessibility, performance, and civic trust—essential for a public service platform.
+Design every interface so that:
+
+Clarity and Familiarity
+
+Use recognizable, familiar admin/UI patterns (cards, sidebars, top bars, modals, action buttons) in line with established systems (e.g. WordPress Admin).
+
+Place common actions (Add, Edit, Delete, Trash, Status Toggle) exactly where users expect.
+
+Visual Hierarchy & Spacing
+
+Apply clean, consistent spacing (gap-2, px-4), clear grouping (containers like Card, PanelBody), and clear separation of unrelated elements.
+
+Headings use large, bold typography (text-lg, font-semibold). Body text is readable (14–16px, normal weight, line-height ≥1.5).
+
+Subtle shadows and separators signal boundaries and improve scanability.
+
+Reduce Complexity and Overload
+
+Never overload screens: chunk content into logical steps/panels.
+
+Default advanced/complex options to collapsed or expandable.
+
+Reduce visible choices per screen (Hick’s Law), always collapse rarely-used options.
+
+Proximity, Similarity, and Consistency
+
+All related controls are visually grouped and containerized.
+
+Inputs, filters, toggles, and icons must share consistent sizing, alignment, and style conventions across the UI (Law of Similarity).
+
+Actionable and Accessible
+
+Critical actions are big, close, and clickable (never small or hard to tap—Fitts’s Law). Avoid icon-only actions unless grouped.
+
+Feedback, Progress, and Responsiveness
+
+Show immediate feedback for any user action within 400ms (Doherty Threshold): skeleton loaders, spinners, banners, or optimistic UI.
+
+Multi-step or long tasks must display progress indicators (stepper, “Step X of Y,” breadcrumbs). Show save states (“Saving…”, “Unsaved changes”).
+
+Emphasize next step visually (highlight active steps, primary button styling—Goal Gradient).
+
+Responsiveness & Adaptability
+
+Layout adapts at key breakpoints (desktop: 3 columns, tablet: 2, mobile: 1).
+
+All paddings, margins, icon/text sizes, and clickable areas must scale correctly across devices.
+
+Never Violate a Law
+
+Missing any principle above = design failure. Do not push for review if a principle is violated.
+
+Law list enforced: Aesthetic-Usability, Hick’s Law, Jakob’s Law, Fitts’s Law, Law of Proximity, Zeigarnik Effect, Goal Gradient, Law of Similarity, Miller’s Law, Doherty Threshold.

@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "exports": {
+    ".": "./src/index.ts",
     "./postcss.config": "./postcss.config.mjs",
     "./components/*": "./src/components/*.tsx",
     "./lib/*": "./src/lib/*.ts",

@@ -224,6 +224,12 @@ export function useAuth(initialUser?: AuthUser | null) {
     // API helper
     apiCall,
 
+    // Token access
+    getToken: getIdToken,
+    get token() {
+      return firebaseUser ? getIdToken() : null;
+    },
+
     // Manual verification
     verifyWithBackend,
     refreshAuth,

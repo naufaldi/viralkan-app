@@ -15,7 +15,7 @@ interface ImageUploadProps {
   disabled?: boolean;
 }
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB - matches backend limit
 const ACCEPTED_FORMATS = ["image/jpeg", "image/png", "image/webp"];
 
 export default function ImageUpload({
@@ -112,10 +112,10 @@ export default function ImageUpload({
     <div className="space-y-4">
       {!selectedImage ? (
         <Card
-          className={`border-2 border-dashed transition-all duration-200 cursor-pointer ${
+          className={`border-2 border-dashed transition-all duration-150 cursor-pointer rounded-lg ${
             dragOver
-              ? "border-primary-400 bg-primary-50"
-              : "border-neutral-300 hover:border-primary-400 hover:bg-primary-50"
+              ? "border-primary-500 bg-primary-50"
+              : "border-neutral-200 hover:border-primary-400 hover:bg-neutral-25"
           } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
@@ -123,82 +123,97 @@ export default function ImageUpload({
           onClick={handleUploadClick}
         >
           <CardContent className="p-12 text-center">
-            <div className="space-y-4">
-              <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto">
+            <div className="space-y-6">
+              <div className="w-16 h-16 bg-primary-50 rounded-full flex items-center justify-center mx-auto border border-primary-100">
                 <Upload className="h-8 w-8 text-primary-600" />
               </div>
 
               <div className="space-y-2">
-                <h3 className="text-lg font-semibold text-neutral-900">
-                  Upload Foto Jalan Rusak
+                <h3 className="text-lg font-semibold text-neutral-900 tracking-tight">
+                  Drag foto jalan rusak ke sini
                 </h3>
-                <p className="text-neutral-600">
-                  Seret foto ke sini atau klik untuk memilih
+                <p className="text-base text-neutral-700">
+                  atau klik untuk memilih file dari perangkat
                 </p>
-                <p className="text-sm text-neutral-500">
-                  PNG, JPG, WEBP hingga 5MB
+                <p className="text-sm text-neutral-500 mt-3">
+                  Format: JPEG, PNG, WebP • Maksimal 10MB
                 </p>
               </div>
 
               <Button
                 type="button"
                 variant="outline"
-                className="mt-4"
+                size="lg"
+                className="mt-6 px-6 py-3 text-base font-medium border-neutral-200 hover:bg-neutral-25 hover:border-primary-300 transition-all duration-150"
                 disabled={disabled}
                 onClick={(e) => {
                   e.stopPropagation();
                   handleUploadClick();
                 }}
               >
-                <ImageIcon className="mr-2 h-4 w-4" />
+                <ImageIcon className="mr-3 h-5 w-5" />
                 Pilih Foto
               </Button>
             </div>
           </CardContent>
         </Card>
       ) : (
-        <Card className="border border-neutral-200">
-          <CardContent className="p-4">
+        <Card className="border border-neutral-200 bg-surface shadow-card rounded-lg overflow-hidden">
+          <CardContent className="p-0">
             <div className="relative">
               {preview && (
                 <div className="relative">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={preview}
-                    alt="Preview"
-                    className="w-full h-64 object-cover rounded-lg"
+                    alt="Preview foto jalan rusak"
+                    className="w-full h-72 object-cover"
                   />
 
                   {isUploading && (
-                    <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg">
+                    <div className="absolute inset-0 bg-neutral-900 bg-opacity-60 flex items-center justify-center backdrop-blur-sm">
                       <div className="text-white text-center">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
-                        <p className="text-sm">Mengunggah...</p>
+                        <div className="animate-spin rounded-full h-10 w-10 border-2 border-white border-t-transparent mx-auto mb-3"></div>
+                        <p className="text-base font-medium">
+                          Mengunggah foto...
+                        </p>
+                        <p className="text-sm text-neutral-200 mt-1">
+                          Mohon tunggu sebentar
+                        </p>
                       </div>
                     </div>
                   )}
                 </div>
               )}
 
-              <div className="flex items-center justify-between mt-4">
-                <div className="flex items-center space-x-2">
-                  <ImageIcon className="h-4 w-4 text-neutral-600" />
-                  <span className="text-sm text-neutral-600 truncate">
-                    {selectedImage.name}
-                  </span>
-                  <span className="text-xs text-neutral-500">
-                    ({(selectedImage.size / 1024 / 1024).toFixed(1)} MB)
-                  </span>
-                </div>
+              <div className="p-4 bg-neutral-25 border-t border-neutral-100">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                      <ImageIcon className="h-4 w-4 text-green-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-neutral-900 truncate">
+                        {selectedImage.name}
+                      </p>
+                      <p className="text-xs text-neutral-500">
+                        {(selectedImage.size / 1024 / 1024).toFixed(1)} MB •
+                        Foto siap digunakan
+                      </p>
+                    </div>
+                  </div>
 
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleRemoveImage}
-                  disabled={disabled || isUploading}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleRemoveImage}
+                    disabled={disabled || isUploading}
+                    className="text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100 rounded-md p-2 transition-colors duration-150"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </div>
           </CardContent>
