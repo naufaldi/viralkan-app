@@ -1,15 +1,14 @@
-import { Hono } from 'hono';
+import { OpenAPIHono } from '@hono/zod-openapi';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import { serve } from '@hono/node-server';
 import { swaggerUI } from '@hono/swagger-ui';
-import { openAPISpecs } from 'hono-openapi';
 import { reportsRouter, authRouter, uploadRouter } from '@/routes';
 import { env, validateEnv } from '@/config/env';
 import { testConnection } from '@/db/connection';
 import { initializeFirebase } from '@/config/firebase';
 
-const app = new Hono();
+const app = new OpenAPIHono();
 
 // Validate environment variables
 validateEnv();
@@ -62,69 +61,62 @@ app.route('/api/reports', reportsRouter);
 app.route('/api/auth', authRouter);
 app.route('/api/upload', uploadRouter);
 
-// OpenAPI Specification Endpoint
-app.get(
-  '/openapi',
-  openAPISpecs(app, {
-    documentation: {
-      info: {
-        title: 'Viralkan API',
-        version: '1.0.0',
-        description:
-          'API for reporting road damage and infrastructure issues in Indonesia',
-        contact: {
-          name: 'Viralkan Team',
-          url: 'https://viralkan.app',
-        },
-        license: {
-          name: 'MIT',
-          url: 'https://opensource.org/licenses/MIT',
-        },
-      },
-      servers: [
-        {
-          url:
-            env.NODE_ENV === 'production'
-              ? 'https://api.viralkan.app'
-              : `http://localhost:${env.PORT}`,
-          description:
-            env.NODE_ENV === 'production'
-              ? 'Production server'
-              : 'Development server',
-        },
-      ],
-      components: {
-        securitySchemes: {
-          bearerAuth: {
-            type: 'http',
-            scheme: 'bearer',
-            bearerFormat: 'JWT',
-            description: 'Firebase JWT token for authentication',
-          },
-        },
-      },
-      security: [
-        {
-          bearerAuth: [],
-        },
-      ],
-      tags: [
-        {
-          name: 'Reports',
-          description: 'Road damage and infrastructure issue reports',
-        },
-        {
-          name: 'Auth',
-          description: 'Authentication and user management',
-        },
-        {
-          name: 'Upload',
-          description: 'Image upload and file management',
-        },
-      ],
+// Configure OpenAPI documentation
+app.openAPIRegistry.registerComponent('securitySchemes', 'bearerAuth', {
+  type: 'http',
+  scheme: 'bearer',
+  bearerFormat: 'JWT',
+  description: 'Firebase JWT token for authentication',
+});
+
+app.doc('/openapi', {
+  openapi: '3.0.0',
+  info: {
+    title: 'Viralkan API',
+    version: '1.0.0',
+    description:
+      'API for reporting road damage and infrastructure issues in Indonesia',
+    contact: {
+      name: 'Viralkan Team',
+      url: 'https://viralkan.app',
     },
-  })
-);
+    license: {
+      name: 'MIT',
+      url: 'https://opensource.org/licenses/MIT',
+    },
+  },
+  servers: [
+    {
+      url:
+        env.NODE_ENV === 'production'
+          ? 'https://api.viralkan.app'
+          : `http://localhost:${env.PORT}`,
+      description:
+        env.NODE_ENV === 'production'
+          ? 'Production server'
+          : 'Development server',
+    },
+  ],
+  security: [
+    {
+      bearerAuth: [],
+    },
+  ],
+  tags: [
+    {
+      name: 'Reports',
+      description: 'Road damage and infrastructure issue reports',
+    },
+    {
+      name: 'Auth',
+      description: 'Authentication and user management',
+    },
+    {
+      name: 'Upload',
+      description: 'Image upload and file management',
+    },
+  ],
+});
 
 // Swagger UI Documentation
 app.get(

@@ -171,7 +171,7 @@ authRouter.openapi(healthRoute, async (c) => {
       message: "Auth service is running",
       timestamp: new Date().toISOString(),
       status: "healthy",
-    });
+    }, 200);
   } catch (error) {
     console.error("Health check error:", error);
     return c.json(
