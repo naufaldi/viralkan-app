@@ -1,7 +1,7 @@
 // API Client for Hono backend - Updated to use unified service
 // Maintains backward compatibility while using the new unified reports service
 
-import { reportsService } from "../services/reports";
+import { reportsService } from "../services/api-client";
 
 export interface ReportFilters {
   page?: number;

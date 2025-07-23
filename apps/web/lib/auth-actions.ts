@@ -97,9 +97,12 @@ export async function getUserReportsAction(searchParams?: URLSearchParams) {
 
   const cookieStore = await cookies();
   const token = cookieStore.get("firebase-token")?.value;
-  const API_BASE_URL =
-    process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
+  if (!token) {
+    throw new Error("No authentication token found in cookies");
+  }
+
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
   const queryString = searchParams ? `?${searchParams.toString()}` : "";
 
   const response = await fetch(`${API_BASE_URL}/api/reports/me${queryString}`, {
@@ -112,8 +115,50 @@ export async function getUserReportsAction(searchParams?: URLSearchParams) {
   });
 
   if (!response.ok) {
-    throw new Error("Failed to fetch user reports");
+    const errorText = await response.text();
+    throw new Error(`API Error: ${response.status} - ${errorText}`);
   }
 
   return response.json(); // Returns PaginatedReportsResponseSchema
+}
+
+// Server action for getting public reports (no authentication required)
+export async function getPublicReportsAction(searchParams?: URLSearchParams) {
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+  const queryString = searchParams ? `?${searchParams.toString()}` : "";
+
+  const response = await fetch(`${API_BASE_URL}/api/reports${queryString}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    cache: "no-store", // Always fresh data for public content
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`API Error: ${response.status} - ${errorText}`);
+  }
+
+  return response.json(); // Returns PaginatedReportsResponseSchema
+}
+
+// Server action for getting public reports stats (no authentication required)
+export async function getPublicReportsStatsAction() {
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+
+  const response = await fetch(`${API_BASE_URL}/api/reports/stats`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    cache: "no-store", // Always fresh data for public content
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`API Error: ${response.status} - ${errorText}`);
+  }
+
+  return response.json();
 }

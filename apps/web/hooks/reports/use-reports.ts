@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { reportsService } from '../../services/reports'
+import { reportsService } from '../../services/api-client'
 import type { PaginatedReports } from '../../lib/types/api'
 
 export interface ReportQueryParams {

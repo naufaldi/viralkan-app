@@ -1,48 +1,54 @@
-"use client";
-
-import { useState } from "react";
-import { Pagination } from "../../components/ui/pagination";
 import { ReportsHero } from "../../components/reports/reports-hero";
-import { ReportsFilterSection } from "../../components/reports/reports-filter-section";
-import { ReportsGrid } from "../../components/reports/reports-grid";
 import { ReportsErrorState } from "../../components/reports/reports-error-state";
-import { useReports, useReportsStats } from "../../hooks/reports";
+import { getPublicReportsAction, getPublicReportsStatsAction } from "../../lib/auth-actions";
 import Header from "components/layout/header";
+import { LaporanClientWrapper } from "../../components/reports/laporan-client-wrapper";
 
 type CategoryType = "berlubang" | "retak" | "lainnya";
 
-export default function LaporanPage() {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [selectedCategory, setSelectedCategory] = useState<CategoryType | undefined>(undefined);
-  const [searchQuery, setSearchQuery] = useState("");
+interface LaporanPageProps {
+  searchParams: {
+    page?: string;
+    category?: CategoryType;
+    search?: string;
+  };
+}
 
-  // TanStack Query hooks
-  const { 
-    data: reports, 
-    isLoading: reportsLoading, 
-    error: reportsError 
-  } = useReports({
-    page: currentPage,
-    limit: 20,
-    category: selectedCategory || undefined,
-    search: searchQuery || undefined,
-  });
+export default async function LaporanPage({ searchParams }: LaporanPageProps) {
+  // Parse search params with defaults
+  const currentPage = parseInt(searchParams.page || "1");
+  const selectedCategory = searchParams.category;
+  const searchQuery = searchParams.search || "";
 
-  const { 
-    data: stats, 
-    isLoading: statsLoading, 
-    error: statsError 
-  } = useReportsStats();
+  // Build query parameters
+  const queryParams = new URLSearchParams();
+  queryParams.set("page", currentPage.toString());
+  queryParams.set("limit", "20");
+  if (selectedCategory) queryParams.set("category", selectedCategory);
+  if (searchQuery) queryParams.set("search", searchQuery);
+
+  // Server-side data fetching
+  let reports, stats, reportsError: Error | null = null, statsError: Error | null = null;
+  
+  try {
+    [reports, stats] = await Promise.all([
+      getPublicReportsAction(queryParams),
+      getPublicReportsStatsAction(),
+    ]);
+  } catch (error) {
+    console.error("Error fetching public reports:", error);
+    reportsError = error instanceof Error ? error : new Error("Unknown error occurred");
+  }
 
   // Transform stats to match expected format
   const transformedStats = stats ? {
-    totalReports: stats.total,
-    thisWeek: stats.recent,
-    today: Math.floor(stats.recent / 7), // Estimate today's reports
+    totalReports: stats.total || 0,
+    thisWeek: stats.recent || 0,
+    today: Math.floor((stats.recent || 0) / 7), // Estimate today's reports
     byCategory: {
-      berlubang: stats.byCategory.berlubang || 0,
-      retak: stats.byCategory.retak || 0,
-      lainnya: stats.byCategory.lainnya || 0,
+      berlubang: stats.byCategory?.berlubang || 0,
+      retak: stats.byCategory?.retak || 0,
+      lainnya: stats.byCategory?.lainnya || 0,
     },
   } : {
     totalReports: 0,
@@ -53,25 +59,6 @@ export default function LaporanPage() {
       retak: 0,
       lainnya: 0,
     },
-  };
-
-  const handleReportClick = (report: any) => {
-    // Will navigate to report detail page
-    console.log("Navigate to report:", report.id);
-  };
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
-
-  const handleCategoryChange = (category?: CategoryType) => {
-    setSelectedCategory(category);
-    setCurrentPage(1); // Reset to first page when filtering
-  };
-
-  const handleSearchChange = (query: string) => {
-    setSearchQuery(query);
-    setCurrentPage(1); // Reset to first page when searching
   };
 
   // Handle error states
@@ -98,56 +85,18 @@ export default function LaporanPage() {
         <ReportsHero
           stats={transformedStats}
           searchQuery={searchQuery}
-          onSearchChange={handleSearchChange}
-          isLoading={statsLoading}
+          onSearchChange={() => {}} // Will be handled by client wrapper
+          isLoading={false} // Server-side, no loading state
         />
 
-        {/* Filter Section */}
-        <ReportsFilterSection
+        {/* Client Wrapper for Interactive Features */}
+        <LaporanClientWrapper
+          initialReports={reports}
+          initialStats={transformedStats}
+          currentPage={currentPage}
           selectedCategory={selectedCategory}
           searchQuery={searchQuery}
-          onCategoryChange={handleCategoryChange}
-          onSearchChange={handleSearchChange}
         />
-
-        {/* Gallery Section */}
-        <section className="py-12">
-          <div className="container mx-auto px-4">
-            {/* Results Summary */}
-            <div className="flex items-center justify-between mb-8">
-              <div className="text-sm text-muted-foreground">
-                {reportsLoading ? (
-                  "Memuat data..."
-                ) : (
-                  <>
-                    Menampilkan {reports?.items?.length || 0} dari{" "}
-                    {reports?.total || 0} laporan
-                    {selectedCategory && ` untuk kategori "${selectedCategory}"`}
-                    {searchQuery && ` dengan kata kunci "${searchQuery}"`}
-                  </>
-                )}
-              </div>
-            </div>
-
-            {/* Reports Grid */}
-            <ReportsGrid
-              reports={reports?.items || []}
-              isLoading={reportsLoading}
-              onReportClick={handleReportClick}
-            />
-
-            {/* Pagination */}
-            {reports && reports.pages > 1 && (
-              <div className="flex justify-center mt-12">
-                <Pagination
-                  currentPage={currentPage}
-                  totalPages={reports.pages}
-                  onPageChange={handlePageChange}
-                />
-              </div>
-            )}
-          </div>
-        </section>
       </main>
     </div>
   );

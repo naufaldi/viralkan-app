@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 
 // Types matching Hono API schemas
 interface AuthUser {
-  id: number;
+  id: string; // Changed from number to string (UUID v7)
   firebase_uid: string;
   email: string;
   name: string;
@@ -14,7 +14,7 @@ interface AuthUser {
 
 interface AuthVerificationResponse {
   message: string;
-  user_id: number;
+  user_id: string; // Changed from number to string (UUID v7)
   user: AuthUser;
 }
 
@@ -33,8 +33,8 @@ export async function getAuthUser(): Promise<AuthUser | null> {
   }
 
   try {
-    const API_BASE_URL =
-      process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+    
     // Use Hono's POST /api/auth/verify endpoint
     const response = await fetch(`${API_BASE_URL}/api/auth/verify`, {
       method: "POST",
