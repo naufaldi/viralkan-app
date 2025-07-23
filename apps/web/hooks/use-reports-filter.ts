@@ -11,7 +11,7 @@ interface UseReportsFilterReturn {
   currentPage: number;
   selectedCategory: "berlubang" | "retak" | "lainnya" | undefined;
   searchQuery: string;
-  
+
   // Computed values
   filteredAndPaginatedReports: {
     items: MockReportWithUser[];
@@ -20,7 +20,7 @@ interface UseReportsFilterReturn {
     limit: number;
     pages: number;
   };
-  
+
   // Actions
   setCurrentPage: (page: number) => void;
   setSelectedCategory: (category?: "berlubang" | "retak" | "lainnya") => void;
@@ -30,9 +30,9 @@ interface UseReportsFilterReturn {
   handleSearchChange: (query: string) => void;
 }
 
-export function useReportsFilter({ 
-  reports, 
-  reportsPerPage = 12 
+export function useReportsFilter({
+  reports,
+  reportsPerPage = 12,
 }: UseReportsFilterOptions): UseReportsFilterReturn {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedCategory, setSelectedCategory] = useState<
@@ -100,10 +100,10 @@ export function useReportsFilter({
     currentPage,
     selectedCategory,
     searchQuery,
-    
+
     // Computed values
     filteredAndPaginatedReports,
-    
+
     // Actions
     setCurrentPage,
     setSelectedCategory,
@@ -112,4 +112,4 @@ export function useReportsFilter({
     handleCategoryChange,
     handleSearchChange,
   };
-} 
+}

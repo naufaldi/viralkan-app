@@ -530,23 +530,27 @@ Viralkan adopts a **true monochrome design system** (95% grayscale) with minimal
 #### 7.1.1 Why Monochrome for Viralkan?
 
 **Government Neutrality**
+
 - Civic tools should feel impartial, not branded or partisan
 - Gray/black/white appears official without political color associations
 - Creates universal trust across all community members regardless of background
 
 **People-to-People Focus**
+
 - The real "color" comes from user-generated content (road damage photos)
 - Interface serves as a neutral backdrop, not competing for attention
 - Community-generated content becomes the primary visual focal point
 - Photos of potholes, cracks, and road damage are the important visuals
 
 **Content-First Architecture**
+
 - Road damage imagery should be the primary visual element
 - Monochrome UI ensures actual problems stand out clearly
 - Users need to see road conditions clearly, not fancy interface colors
 - Puts focus on civic issues, not design aesthetics
 
 **Universal Accessibility**
+
 - Works perfectly for colorblind users without special accommodation
 - High contrast displays work better with neutral tones
 - No cultural color associations or biases
@@ -555,61 +559,66 @@ Viralkan adopts a **true monochrome design system** (95% grayscale) with minimal
 #### 7.1.2 Color Token Strategy
 
 **Base Palette (95% of interface)**
+
 ```css
 :root {
   /* True Monochrome Scale */
   --color-white: #ffffff;
-  --color-neutral-25: #fcfcfd;    /* Subtle background tint */
-  --color-neutral-50: #f8fafc;    /* Light backgrounds */
-  --color-neutral-100: #f1f5f9;   /* Muted backgrounds */
-  --color-neutral-200: #e2e8f0;   /* Borders & dividers */
-  --color-neutral-300: #cbd5e1;   /* Disabled states */
-  --color-neutral-400: #94a3b8;   /* Placeholder text */
-  --color-neutral-500: #64748b;   /* Secondary text */
-  --color-neutral-600: #475569;   /* Body text */
-  --color-neutral-700: #334155;   /* Headings */
-  --color-neutral-800: #1e293b;   /* High contrast text */
-  --color-neutral-900: #0f172a;   /* Primary text */
-  --color-neutral-950: #020617;   /* Maximum contrast */
+  --color-neutral-25: #fcfcfd; /* Subtle background tint */
+  --color-neutral-50: #f8fafc; /* Light backgrounds */
+  --color-neutral-100: #f1f5f9; /* Muted backgrounds */
+  --color-neutral-200: #e2e8f0; /* Borders & dividers */
+  --color-neutral-300: #cbd5e1; /* Disabled states */
+  --color-neutral-400: #94a3b8; /* Placeholder text */
+  --color-neutral-500: #64748b; /* Secondary text */
+  --color-neutral-600: #475569; /* Body text */
+  --color-neutral-700: #334155; /* Headings */
+  --color-neutral-800: #1e293b; /* High contrast text */
+  --color-neutral-900: #0f172a; /* Primary text */
+  --color-neutral-950: #020617; /* Maximum contrast */
   --color-black: #000000;
 }
 ```
 
 **Functional Color (5% - Essential Only)**
+
 ```css
 :root {
   /* Interactive Accent */
-  --color-accent: var(--color-neutral-800);      /* Dark gray for primary actions */
+  --color-accent: var(--color-neutral-800); /* Dark gray for primary actions */
   --color-accent-hover: var(--color-neutral-900); /* Darker for hover states */
-  
+
   /* Critical Safety (Red for urgent damage & errors only) */
   --color-danger: #dc2626;
-  
+
   /* Success Status (Green for resolved issues only) */
   --color-success: #16a34a;
-  
+
   /* Damage Categories (Minimal differentiation) */
-  --color-pothole: #dc2626;                      /* Critical - red for urgency */
-  --color-crack: var(--color-neutral-600);       /* Moderate - gray */
-  --color-other: var(--color-neutral-500);       /* General - lighter gray */
+  --color-pothole: #dc2626; /* Critical - red for urgency */
+  --color-crack: var(--color-neutral-600); /* Moderate - gray */
+  --color-other: var(--color-neutral-500); /* General - lighter gray */
 }
 ```
 
 #### 7.1.3 Implementation Benefits
 
 **Trust Through Simplicity**
+
 - Builds trust through honest, unmanipulative design
 - No color psychology tricks - just clear, functional interface
 - Government-appropriate professional appearance
 - Focuses attention on actual civic issues, not branding
 
 **Technical Advantages**
+
 - Simpler color management and maintenance
 - Better performance with fewer color variations
 - Easier dark mode implementation when needed
 - Reduced cognitive load for users reporting emergencies
 
 **Community Alignment**
+
 - Neutral appearance welcomes all community members
 - Focus remains on shared civic responsibility
 - Interface doesn't compete with important content (damage photos)

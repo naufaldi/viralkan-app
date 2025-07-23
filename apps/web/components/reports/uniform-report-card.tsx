@@ -2,27 +2,21 @@ import { Badge } from "@repo/ui/components/ui/badge";
 import { Card, CardContent } from "@repo/ui/components/ui/card";
 import { MapPin, Crosshair } from "lucide-react";
 import Image from "next/image";
-import { MockReportWithUser } from "../../lib/mock-data";
+import type { ReportWithUser } from "../../utils/stats-utils";
 import { formatCoordinates, getTimeAgo } from "@/utils/reports";
 import { REPORT_CATEGORIES } from "@/constant/reports";
 
 interface UniformReportCardProps {
-  report: MockReportWithUser & {
-    latitude?: number;
-    longitude?: number;
-  };
+  report: ReportWithUser;
   onClick?: () => void;
 }
 
 export function UniformReportCard({ report, onClick }: UniformReportCardProps) {
-
-
-
   const categoryInfo = REPORT_CATEGORIES[report.category];
-  const hasCoordinates = report.latitude !== undefined && report.longitude !== undefined;
+  const hasCoordinates = report.lat !== null && report.lon !== null;
 
   return (
-    <Card 
+    <Card
       className="cursor-pointer group overflow-hidden transition-all duration-200 hover:shadow-card-hover hover:-translate-y-1 border-neutral-200 rounded-lg"
       onClick={onClick}
     >
@@ -35,19 +29,21 @@ export function UniformReportCard({ report, onClick }: UniformReportCardProps) {
           className="w-full aspect-[4/3] object-cover transition-transform duration-300 group-hover:scale-105"
         />
         <div className="absolute top-3 left-3">
-          <Badge className={`${categoryInfo.color} border-0 text-xs rounded-full px-3 py-1`}>
+          <Badge
+            className={`${categoryInfo.color} border-0 text-xs rounded-full px-3 py-1`}
+          >
             <span className="mr-1">{categoryInfo.icon}</span>
             {categoryInfo.label}
           </Badge>
         </div>
       </div>
-      
+
       <CardContent className="p-4">
         <div className="space-y-3">
           <h3 className="font-semibold text-neutral-900 line-clamp-2 text-base">
             {report.street_name}
           </h3>
-          
+
           <div className="space-y-2">
             {/* Main Location */}
             <div className="flex items-start gap-2">
@@ -56,18 +52,18 @@ export function UniformReportCard({ report, onClick }: UniformReportCardProps) {
                 {report.location_text}
               </p>
             </div>
-            
+
             {/* Coordinates (Optional) */}
             {hasCoordinates && (
               <div className="flex items-center gap-2">
                 <Crosshair className="text-neutral-400 flex-shrink-0 h-3 w-3" />
                 <span className="text-xs text-neutral-500 font-mono">
-                  {formatCoordinates(report.latitude!, report.longitude!)}
+                  {formatCoordinates(report.lat!, report.lon!)}
                 </span>
               </div>
             )}
           </div>
-          
+
           <div className="flex items-center justify-between pt-1">
             <div className="flex items-center gap-2">
               {report.user_avatar && (
@@ -84,11 +80,11 @@ export function UniformReportCard({ report, onClick }: UniformReportCardProps) {
               </span>
             </div>
             <span className="text-xs text-neutral-500">
-              {getTimeAgo(report.created_at)}
+              {getTimeAgo(typeof report.created_at === 'string' ? report.created_at : report.created_at.toISOString())}
             </span>
           </div>
         </div>
       </CardContent>
     </Card>
   );
-} 
+}

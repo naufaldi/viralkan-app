@@ -3,7 +3,7 @@ import * as React from "react";
 import { cn } from "@repo/ui/lib/utils";
 
 export interface InputProps
-  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
+  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "size"> {
   size?: "sm" | "default" | "lg";
 }
 

@@ -29,12 +29,20 @@ import {
   SelectValue,
 } from "@repo/ui/components/ui/select";
 import { Alert, AlertDescription } from "@repo/ui/components/ui/alert";
-import { AlertCircle, MapPin, Send, FileText, CheckCircle, Upload } from "lucide-react";
+import {
+  AlertCircle,
+  MapPin,
+  Send,
+  FileText,
+  CheckCircle,
+  Upload,
+} from "lucide-react";
 import { toast } from "sonner";
 import ImageUpload from "../forms/image-upload";
 import { useCreateReport } from "../../hooks/use-create-report";
 import { uploadImage } from "../../services/upload";
 import { useAuth } from "../../hooks/useAuth";
+import { useInvalidateDashboard } from "../../hooks/dashboard";
 import {
   CreateReportSchema,
   CreateReportInput,
@@ -52,6 +60,7 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
   const [formError, setFormError] = useState<string | undefined>(undefined);
 
   const { getToken, isAuthenticated } = useAuth();
+  const { invalidateAll } = useInvalidateDashboard();
 
   console.log("CreateReportForm rendered, selectedImage:", selectedImage);
 
@@ -62,7 +71,12 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
     error: submitError,
     clearError,
   } = useCreateReport({
-    onSuccess,
+    onSuccess: (reportId) => {
+      // Invalidate dashboard cache to ensure fresh data on redirect
+      invalidateAll();
+      // Call the original onSuccess callback if provided
+      onSuccess?.(reportId);
+    },
   });
 
   const form = useForm<CreateReportInput>({
@@ -138,7 +152,7 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
         setFormError("Gagal mendapatkan token autentikasi");
         return;
       }
-      
+
       const uploadResult = await uploadImage(selectedImage, token);
 
       if (!uploadResult.success || !uploadResult.data) {
@@ -165,18 +179,17 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
 
       console.log("Submitting report with cleaned data:", cleanedData);
       await submitReport(cleanedData, selectedImage);
-      
+
       // Show success toast for report creation
       toast.success("Laporan berhasil dibuat!", {
         description: "Terima kasih telah melaporkan kerusakan jalan",
         icon: <CheckCircle className="h-4 w-4" />,
         duration: 5000,
       });
-
     } catch (error) {
       console.error("Submit error:", error);
       setFormError("Terjadi kesalahan saat membuat laporan");
-      
+
       // Show error toast as well
       toast.error("Gagal membuat laporan", {
         description: "Silakan coba lagi beberapa saat",
@@ -189,21 +202,21 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
   // Get current location (optional)
   const getCurrentLocation = () => {
     setIsGettingLocation(true);
-    
+
     if (navigator.geolocation) {
       // Show loading state
       toast.loading("Mendapatkan lokasi...", {
         id: "location",
       });
-      
+
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const lat = position.coords.latitude;
           const lon = position.coords.longitude;
-          
+
           form.setValue("lat", lat);
           form.setValue("lon", lon);
-          
+
           // Show success message
           toast.success("Lokasi berhasil diperoleh", {
             id: "location",
@@ -213,12 +226,13 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
         },
         (error) => {
           console.warn("Geolocation error:", error);
-          
+
           // Show error message
           let errorMessage = "Gagal mendapatkan lokasi";
           switch (error.code) {
             case error.PERMISSION_DENIED:
-              errorMessage = "Izin lokasi ditolak. Silakan izinkan akses lokasi di browser Anda.";
+              errorMessage =
+                "Izin lokasi ditolak. Silakan izinkan akses lokasi di browser Anda.";
               break;
             case error.POSITION_UNAVAILABLE:
               errorMessage = "Informasi lokasi tidak tersedia.";
@@ -227,7 +241,7 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
               errorMessage = "Waktu permintaan lokasi habis.";
               break;
           }
-          
+
           toast.error(errorMessage, {
             id: "location",
             duration: 5000,
@@ -237,19 +251,20 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
           enableHighAccuracy: true,
           timeout: 10000,
           maximumAge: 60000,
-        }
+        },
       );
     } else {
       toast.error("Browser Anda tidak mendukung geolokasi", {
         duration: 3000,
       });
     }
-    
+
     setIsGettingLocation(false);
   };
 
   const [isGettingLocation, setIsGettingLocation] = useState(false);
-  const isLoading = isSubmitting || isUploading || isUploadingImage || isGettingLocation;
+  const isLoading =
+    isSubmitting || isUploading || isUploadingImage || isGettingLocation;
 
   console.log("About to render CreateReportForm");
 
@@ -261,18 +276,24 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
             <FileText className="h-5 w-5 text-neutral-700" />
           </div>
           <div>
-            <div className="text-xl font-bold text-neutral-900">Bagikan Kondisi Jalan Rusak</div>
+            <div className="text-xl font-bold text-neutral-900">
+              Bagikan Kondisi Jalan Rusak
+            </div>
             <div className="text-sm font-normal text-neutral-600 mt-1">
-              Bantu komunitas menghindari jalan rusak dan tingkatkan kesadaran publik
+              Bantu komunitas menghindari jalan rusak dan tingkatkan kesadaran
+              publik
             </div>
           </div>
         </CardTitle>
       </CardHeader>
-      
+
       <CardContent className="p-6 lg:p-8">
         {/* Form Error Alert - shown at top */}
         {(formError || submitError) && (
-          <Alert variant="destructive" className="mb-6 border-red-200 bg-red-50">
+          <Alert
+            variant="destructive"
+            className="mb-6 border-red-200 bg-red-50"
+          >
             <AlertCircle className="h-4 w-4" />
             <AlertDescription className="text-red-800 font-medium">
               {formError || submitError}
@@ -302,7 +323,8 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
                 disabled={isLoading}
               />
               <p className="text-sm text-neutral-600">
-                Unggah foto yang jelas untuk membantu komunitas mengidentifikasi lokasi jalan rusak.
+                Unggah foto yang jelas untuk membantu komunitas mengidentifikasi
+                lokasi jalan rusak.
               </p>
             </div>
 
@@ -323,15 +345,26 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
                       disabled={isLoading}
                     >
                       <FormControl>
-                        <SelectTrigger size="lg" className="border-neutral-300 focus:border-neutral-600 focus:ring-neutral-600/20 bg-white">
+                        <SelectTrigger
+                          size="lg"
+                          className="border-neutral-300 focus:border-neutral-600 focus:ring-neutral-600/20 bg-white"
+                        >
                           <SelectValue placeholder="Pilih kategori kerusakan">
                             {field.value && (
                               <div className="flex flex-col items-start text-left">
                                 <div className="font-medium text-neutral-900">
-                                  {REPORT_CATEGORIES.find(cat => cat.value === field.value)?.label}
+                                  {
+                                    REPORT_CATEGORIES.find(
+                                      (cat) => cat.value === field.value,
+                                    )?.label
+                                  }
                                 </div>
                                 <div className="text-sm text-neutral-600">
-                                  {REPORT_CATEGORIES.find(cat => cat.value === field.value)?.description}
+                                  {
+                                    REPORT_CATEGORIES.find(
+                                      (cat) => cat.value === field.value,
+                                    )?.description
+                                  }
                                 </div>
                               </div>
                             )}
@@ -340,9 +373,15 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
                       </FormControl>
                       <SelectContent className="border-neutral-200 shadow-lg bg-white">
                         {REPORT_CATEGORIES.map((option) => (
-                          <SelectItem key={option.value} value={option.value} className="py-3">
+                          <SelectItem
+                            key={option.value}
+                            value={option.value}
+                            className="py-3"
+                          >
                             <div className="space-y-1">
-                              <div className="font-medium text-neutral-900">{option.label}</div>
+                              <div className="font-medium text-neutral-900">
+                                {option.label}
+                              </div>
                               <div className="text-sm text-neutral-600">
                                 {option.description}
                               </div>
@@ -352,7 +391,8 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
                       </SelectContent>
                     </Select>
                     <FormDescription className="text-sm text-neutral-600">
-                      Pilih jenis kerusakan jalan yang paling sesuai dengan kondisi yang Anda temukan.
+                      Pilih jenis kerusakan jalan yang paling sesuai dengan
+                      kondisi yang Anda temukan.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -378,7 +418,8 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
                       />
                     </FormControl>
                     <FormDescription className="text-sm text-neutral-600">
-                      Nama jalan atau area tempat kerusakan berada (maksimal 255 karakter).
+                      Nama jalan atau area tempat kerusakan berada (maksimal 255
+                      karakter).
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -405,7 +446,8 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
                     />
                   </FormControl>
                   <FormDescription className="text-sm text-neutral-600">
-                    Deskripsi detail lokasi kerusakan jalan untuk memudahkan komunitas menemukan lokasi (maksimal 500 karakter).
+                    Deskripsi detail lokasi kerusakan jalan untuk memudahkan
+                    komunitas menemukan lokasi (maksimal 500 karakter).
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -423,21 +465,23 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
                       Latitude
                     </FormLabel>
                     <FormControl>
-                                             <Input
-                         type="number"
-                         step="any"
-                         placeholder="Contoh: -7.260000"
-                         disabled={isLoading}
-                         size="lg"
-                         className="border-neutral-300 focus:border-neutral-600 focus:ring-neutral-600/20 bg-white"
-                         {...field}
-                         onChange={(e) => {
-                           const value = e.target.value;
-                           // Convert empty string to undefined, otherwise parse as number
-                           field.onChange(value === "" ? undefined : parseFloat(value));
-                         }}
-                         value={field.value || ""}
-                       />
+                      <Input
+                        type="number"
+                        step="any"
+                        placeholder="Contoh: -7.260000"
+                        disabled={isLoading}
+                        size="lg"
+                        className="border-neutral-300 focus:border-neutral-600 focus:ring-neutral-600/20 bg-white"
+                        {...field}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          // Convert empty string to undefined, otherwise parse as number
+                          field.onChange(
+                            value === "" ? undefined : parseFloat(value),
+                          );
+                        }}
+                        value={field.value || ""}
+                      />
                     </FormControl>
                     <FormDescription className="text-sm text-neutral-600">
                       Koordinat latitude lokasi kerusakan.
@@ -455,21 +499,23 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
                       Longitude
                     </FormLabel>
                     <FormControl>
-                                             <Input
-                         type="number"
-                         step="any"
-                         placeholder="Contoh: 112.780000"
-                         disabled={isLoading}
-                         size="lg"
-                         className="border-neutral-300 focus:border-neutral-600 focus:ring-neutral-600/20 bg-white"
-                         {...field}
-                         onChange={(e) => {
-                           const value = e.target.value;
-                           // Convert empty string to undefined, otherwise parse as number
-                           field.onChange(value === "" ? undefined : parseFloat(value));
-                         }}
-                         value={field.value || ""}
-                       />
+                      <Input
+                        type="number"
+                        step="any"
+                        placeholder="Contoh: 112.780000"
+                        disabled={isLoading}
+                        size="lg"
+                        className="border-neutral-300 focus:border-neutral-600 focus:ring-neutral-600/20 bg-white"
+                        {...field}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          // Convert empty string to undefined, otherwise parse as number
+                          field.onChange(
+                            value === "" ? undefined : parseFloat(value),
+                          );
+                        }}
+                        value={field.value || ""}
+                      />
                     </FormControl>
                     <FormDescription className="text-sm text-neutral-600">
                       Koordinat longitude lokasi kerusakan.

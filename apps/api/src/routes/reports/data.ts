@@ -131,7 +131,8 @@ export const findReportById = async (
 export const createReport = async (
   userId: string, // Changed from number to string (UUID v7)
   reportData: CreateReportInput,
-): Promise<AppResult<{ id: string }>> => { // Changed return type to string
+): Promise<AppResult<{ id: string }>> => {
+  // Changed return type to string
   try {
     const reportId = uuidv7(); // Generate UUID v7 for new report
     const query = `

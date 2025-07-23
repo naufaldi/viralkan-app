@@ -594,6 +594,7 @@ The authentication system supports two distinct data patterns, each optimized fo
 ### Server-Side Data Fetching (Server Actions/Components)
 
 **When to Use:**
+
 - ✅ Dashboard data that loads once with the page
 - ✅ Content that needs to be SEO-friendly
 - ✅ Data that requires server-side validation
@@ -601,6 +602,7 @@ The authentication system supports two distinct data patterns, each optimized fo
 - ✅ Content that rarely changes during user session
 
 **When NOT to Use:**
+
 - ❌ Data that needs real-time updates
 - ❌ Interactive components with frequent state changes
 - ❌ Global state shared across many components
@@ -614,7 +616,7 @@ export default async function DashboardPage() {
   // ✅ Server-side authentication check
   const user = await requireAuth(); // Runs on server, no loading state needed
   const stats = await getUserStats(); // Direct API call from server
-  
+
   // ✅ Server-side data fetching with error handling
   let userReports: Report[] = [];
   try {
@@ -627,7 +629,7 @@ export default async function DashboardPage() {
   return (
     <div className="min-h-screen bg-neutral-50">
       <Header />
-      
+
       {/* ✅ Data is immediately available, no loading state */}
       <main className="container mx-auto px-8 py-12 max-w-7xl">
         <div className="mb-16">
@@ -671,7 +673,7 @@ export async function getUserReportsAction(searchParams?: URLSearchParams) {
   // ✅ Direct API call with server-side token
   const cookieStore = await cookies();
   const token = cookieStore.get("firebase-token")?.value;
-  
+
   const response = await fetch(`${API_BASE_URL}/api/reports/me${queryString}`, {
     method: "GET",
     headers: {
@@ -690,6 +692,7 @@ export async function getUserReportsAction(searchParams?: URLSearchParams) {
 ```
 
 **Characteristics:**
+
 - 🚀 **Fast Initial Load** - No client-side JavaScript needed
 - 🔍 **SEO Friendly** - Content available in initial HTML
 - 🔒 **Secure** - Authentication happens server-side
@@ -699,6 +702,7 @@ export async function getUserReportsAction(searchParams?: URLSearchParams) {
 ### Client-Side Context State (Reactive Components)
 
 **When to Use:**
+
 - ✅ Header/navigation that shows user status
 - ✅ Components that need real-time auth state changes
 - ✅ Interactive elements that respond to login/logout
@@ -706,6 +710,7 @@ export async function getUserReportsAction(searchParams?: URLSearchParams) {
 - ✅ Components that need loading and error states
 
 **When NOT to Use:**
+
 - ❌ SEO-critical content
 - ❌ Large datasets that load once
 - ❌ Server-side protected routes
@@ -746,9 +751,9 @@ const Header = () => {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-11 w-11 rounded-full">
               <Avatar className="h-10 w-10">
-                <AvatarImage 
-                  src={backendUser.avatar_url || undefined} 
-                  alt={backendUser.name} 
+                <AvatarImage
+                  src={backendUser.avatar_url || undefined}
+                  alt={backendUser.name}
                 />
                 <AvatarFallback>
                   {backendUser.name?.charAt(0)?.toUpperCase() || "U"}
@@ -784,7 +789,7 @@ const Header = () => {
           <MapPin className="h-6 w-6" />
           <span className="font-bold">Viralkan</span>
         </Link>
-        
+
         {/* ✅ Reactive auth button */}
         {renderAuthButton()}
       </div>
@@ -799,7 +804,7 @@ const Header = () => {
 // apps/web/contexts/AuthContext.tsx
 'use client'
 
-export function AuthProvider({ 
+export function AuthProvider({
   children,
   initialUser // ✅ Server-side initial state for hydration
 }: {
@@ -868,6 +873,7 @@ export default async function RootLayout({ children }) {
 ```
 
 **Characteristics:**
+
 - ⚡ **Real-time Updates** - Responds to auth state changes immediately
 - 🎯 **Interactive** - Loading states, error handling, user actions
 - 🌐 **Global State** - Available to any component using the context
@@ -876,16 +882,16 @@ export default async function RootLayout({ children }) {
 
 ### Decision Matrix: When to Use Each Approach
 
-| Use Case | Server Action | Client Context | Reasoning |
-|----------|---------------|----------------|-----------|
-| **Dashboard data loading** | ✅ **Recommended** | ❌ Not suitable | Data loads once, needs to be fast and SEO-friendly |
-| **User profile in header** | ❌ Not suitable | ✅ **Recommended** | Changes frequently (login/logout), needs reactive UI |
-| **Protected page content** | ✅ **Recommended** | ❌ Not suitable | Static content, better SEO, server-side protection |
-| **Login/logout buttons** | ❌ Not suitable | ✅ **Recommended** | Interactive, needs loading states, real-time updates |
-| **Report creation form** | ✅ **Recommended** | ❌ Not suitable | Form submission, server-side validation, one-time action |
-| **Navigation menu state** | ❌ Not suitable | ✅ **Recommended** | Global state, responsive to auth changes |
-| **Initial page authentication** | ✅ **Recommended** | ❌ Not suitable | Fast loading, no client-side delays, SEO benefits |
-| **Real-time notifications** | ❌ Not suitable | ✅ **Recommended** | Dynamic updates, user interaction required |
+| Use Case                        | Server Action      | Client Context     | Reasoning                                                |
+| ------------------------------- | ------------------ | ------------------ | -------------------------------------------------------- |
+| **Dashboard data loading**      | ✅ **Recommended** | ❌ Not suitable    | Data loads once, needs to be fast and SEO-friendly       |
+| **User profile in header**      | ❌ Not suitable    | ✅ **Recommended** | Changes frequently (login/logout), needs reactive UI     |
+| **Protected page content**      | ✅ **Recommended** | ❌ Not suitable    | Static content, better SEO, server-side protection       |
+| **Login/logout buttons**        | ❌ Not suitable    | ✅ **Recommended** | Interactive, needs loading states, real-time updates     |
+| **Report creation form**        | ✅ **Recommended** | ❌ Not suitable    | Form submission, server-side validation, one-time action |
+| **Navigation menu state**       | ❌ Not suitable    | ✅ **Recommended** | Global state, responsive to auth changes                 |
+| **Initial page authentication** | ✅ **Recommended** | ❌ Not suitable    | Fast loading, no client-side delays, SEO benefits        |
+| **Real-time notifications**     | ❌ Not suitable    | ✅ **Recommended** | Dynamic updates, user interaction required               |
 
 ### Hybrid Pattern: Best of Both Worlds
 
@@ -896,19 +902,19 @@ The optimal approach combines both strategies:
 export default async function DashboardPage() {
   const user = await requireAuth(); // ✅ Server-side auth
   const initialReports = await getUserReportsAction(); // ✅ Server-side data
-  
+
   return (
     <div>
       {/* ✅ Client component for reactive UI */}
       <Header /> {/* Uses client context for auth state */}
-      
+
       {/* ✅ Server-rendered content with initial data */}
       <main>
         <h1>Welcome, {user.name}!</h1>
-        
+
         {/* ✅ Client component that can refetch data */}
-        <ReportsTable 
-          initialData={initialReports} 
+        <ReportsTable
+          initialData={initialReports}
           userId={user.id}
         />
       </main>
@@ -918,6 +924,7 @@ export default async function DashboardPage() {
 ```
 
 This hybrid approach provides:
+
 - 🚀 Fast initial load (server-rendered)
 - ⚡ Interactive updates (client-side)
 - 🔍 SEO benefits (server content)

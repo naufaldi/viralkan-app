@@ -48,10 +48,16 @@ export const CreateUserSchema = z.object({
 });
 
 export const UserResponseSchema = z.object({
-  id: z.string().regex(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i, "Invalid UUID format").openapi({
-    example: "01890dd5-ea3f-7746-b3a5-e8c5e0b0f4a1",
-    description: "Unique user ID (UUID v7)",
-  }),
+  id: z
+    .string()
+    .regex(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
+      "Invalid UUID format",
+    )
+    .openapi({
+      example: "01890dd5-ea3f-7746-b3a5-e8c5e0b0f4a1",
+      description: "Unique user ID (UUID v7)",
+    }),
   firebase_uid: z.string().openapi({
     example: "firebase_uid_1234567890",
     description: "Firebase user unique identifier",
@@ -83,10 +89,16 @@ export const AuthVerificationResponseSchema = z.object({
     example: "Authentication successful",
     description: "Success message",
   }),
-  user_id: z.string().regex(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i, "Invalid UUID format").openapi({
-    example: "01890dd5-ea3f-7746-b3a5-e8c5e0b0f4a1",
-    description: "Unique user ID (UUID v7)",
-  }),
+  user_id: z
+    .string()
+    .regex(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
+      "Invalid UUID format",
+    )
+    .openapi({
+      example: "01890dd5-ea3f-7746-b3a5-e8c5e0b0f4a1",
+      description: "Unique user ID (UUID v7)",
+    }),
   user: UserResponseSchema,
 });
 

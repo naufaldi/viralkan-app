@@ -14,7 +14,7 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@repo/ui/components/ui/avatar";
-import { MapPin, LogOut, LayoutDashboard, FileText, ChevronUp } from "lucide-react";
+import { LogOut, LayoutDashboard, FileText, ChevronUp } from "lucide-react";
 import Link from "next/link";
 import { useAuthContext } from "../../contexts/AuthContext";
 
@@ -32,7 +32,12 @@ const Header = () => {
   const renderAuthButton = () => {
     if (isLoading) {
       return (
-        <Button size="default" disabled variant="default" className="min-h-[44px]">
+        <Button
+          size="default"
+          disabled
+          variant="default"
+          className="min-h-[44px]"
+        >
           Loading...
         </Button>
       );
@@ -42,8 +47,8 @@ const Header = () => {
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               className="relative h-11 w-11 rounded-full hover:bg-neutral-100 focus:bg-neutral-100 transition-colors"
               aria-label="User menu"
             >
@@ -58,9 +63,9 @@ const Header = () => {
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent 
-            className="w-64 border-neutral-200 shadow-lg" 
-            align="end" 
+          <DropdownMenuContent
+            className="w-64 border-neutral-200 shadow-lg"
+            align="end"
             forceMount
             sideOffset={8}
           >
@@ -76,20 +81,26 @@ const Header = () => {
             </DropdownMenuLabel>
             <DropdownMenuSeparator className="bg-neutral-200" />
             <DropdownMenuItem asChild className="py-2.5">
-              <Link href="/dashboard" className="cursor-pointer flex items-center">
+              <Link
+                href="/dashboard"
+                className="cursor-pointer flex items-center"
+              >
                 <LayoutDashboard className="mr-3 h-4 w-4" />
                 <span className="font-medium">Dashboard</span>
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild className="py-2.5">
-              <Link href="/laporan/buat" className="cursor-pointer flex items-center">
+              <Link
+                href="/laporan/buat"
+                className="cursor-pointer flex items-center"
+              >
                 <FileText className="mr-3 h-4 w-4" />
                 <span className="font-medium">Buat Laporan</span>
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator className="bg-neutral-200" />
-            <DropdownMenuItem 
-              onClick={handleLogout} 
+            <DropdownMenuItem
+              onClick={handleLogout}
               className="cursor-pointer py-2.5 text-red-600 hover:text-red-700 hover:bg-red-50"
             >
               <LogOut className="mr-3 h-4 w-4" />
@@ -101,7 +112,12 @@ const Header = () => {
     }
 
     return (
-      <Button asChild size="default" variant="default" className="min-h-[44px] px-6">
+      <Button
+        asChild
+        size="default"
+        variant="default"
+        className="min-h-[44px] px-6"
+      >
         <Link href="/login">Mulai Lapor</Link>
       </Button>
     );
@@ -147,11 +163,9 @@ const Header = () => {
             >
               Tentang
             </Link>
-            
+
             {/* Auth Button with proper spacing */}
-            <div className="ml-4">
-              {renderAuthButton()}
-            </div>
+            <div className="ml-4">{renderAuthButton()}</div>
           </nav>
 
           {/* Mobile Menu Button (for future mobile menu) */}

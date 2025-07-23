@@ -107,14 +107,14 @@ export const reportsService = {
     data: CreateReportInput,
     token: string,
   ): Promise<{ id: number; message: string; success: boolean }> => {
-    return authenticatedApiRequest<{ id: number; message: string; success: boolean }>(
-      "/api/reports",
-      token,
-      {
-        method: "POST",
-        body: JSON.stringify(data),
-      },
-    );
+    return authenticatedApiRequest<{
+      id: number;
+      message: string;
+      success: boolean;
+    }>("/api/reports", token, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
   },
 
   // Get user's reports (authenticated)
@@ -171,10 +171,10 @@ export const reportsService = {
     id: number,
     token: string,
   ): Promise<{ canEdit: boolean; report: ReportResponse }> => {
-    return authenticatedApiRequest<{ canEdit: boolean; report: ReportResponse }>(
-      `/api/reports/${id}/ownership`,
-      token,
-    );
+    return authenticatedApiRequest<{
+      canEdit: boolean;
+      report: ReportResponse;
+    }>(`/api/reports/${id}/ownership`, token);
   },
 
   // Get reports statistics
@@ -186,13 +186,16 @@ export const reportsService = {
     // This endpoint might not exist yet, so we'll implement it when needed
     // For now, we can calculate stats from the reports data
     const reports = await reportsService.getReports({ limit: 1000 });
-    
-    const byCategory = reports.items.reduce((acc, report) => {
-      acc[report.category] = (acc[report.category] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
 
-    const recent = reports.items.filter(report => {
+    const byCategory = reports.items.reduce(
+      (acc, report) => {
+        acc[report.category] = (acc[report.category] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
+
+    const recent = reports.items.filter((report) => {
       const reportDate = new Date(report.created_at);
       const weekAgo = new Date();
       weekAgo.setDate(weekAgo.getDate() - 7);
@@ -221,4 +224,9 @@ export const {
 } = reportsService;
 
 // Re-export types for convenience
-export type { CreateReportInput, ReportResponse, ReportWithUser, PaginatedReports }; 
+export type {
+  CreateReportInput,
+  ReportResponse,
+  ReportWithUser,
+  PaginatedReports,
+};

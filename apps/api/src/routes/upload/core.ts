@@ -144,14 +144,16 @@ export const generatePublicUrl = (
  * @param userId - The user ID to validate
  * @returns Boolean indicating if user can upload
  */
-export const canUserUpload = (userId: string): boolean => { // Changed from number to string (UUID v7)
+export const canUserUpload = (userId: string): boolean => {
+  // Changed from number to string (UUID v7)
   // Enhanced validation
   if (!userId || typeof userId !== "string" || userId.trim().length === 0) {
     return false;
   }
 
   // UUID string validation - should be valid UUID format
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const uuidRegex =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   if (!uuidRegex.test(userId)) {
     return false;
   }

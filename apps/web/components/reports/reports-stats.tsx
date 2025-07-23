@@ -23,7 +23,7 @@ export function ReportsStats({ stats }: ReportsStatsProps) {
         </div>
         <div className="text-sm text-muted-foreground">Jalan Berlubang</div>
       </Card>
-      
+
       <Card className="p-6 text-center">
         <div className="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center mx-auto mb-3">
           <TrendingUp className="h-6 w-6 text-yellow-600" />
@@ -33,7 +33,7 @@ export function ReportsStats({ stats }: ReportsStatsProps) {
         </div>
         <div className="text-sm text-muted-foreground">Jalan Retak</div>
       </Card>
-      
+
       <Card className="p-6 text-center col-span-2">
         <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-3">
           <MapPin className="h-6 w-6 text-blue-600" />
@@ -45,4 +45,4 @@ export function ReportsStats({ stats }: ReportsStatsProps) {
       </Card>
     </div>
   );
-} 
+}

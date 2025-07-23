@@ -30,13 +30,7 @@ import {
   DropdownMenuTrigger,
 } from "@repo/ui/components/ui/dropdown-menu";
 import { Input } from "@repo/ui/components/ui/input";
-import {
-  ArrowUpDown,
-  Eye,
-  Edit,
-  MoreHorizontal,
-  Search,
-} from "lucide-react";
+import { ArrowUpDown, Eye, Edit, MoreHorizontal, Search } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -59,11 +53,14 @@ export function ReportsTable({ data, isLoading = false }: ReportsTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([
     { id: "created_at", desc: true },
   ]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({
-    image_url: false, // Hide thumbnail on mobile by default
-    category: false,  // Hide category on mobile by default
-  });
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+    [],
+  );
+  const [columnVisibility, setColumnVisibility] =
+    React.useState<VisibilityState>({
+      image_url: false, // Hide thumbnail on mobile by default
+      category: false, // Hide category on mobile by default
+    });
   const [globalFilter, setGlobalFilter] = React.useState("");
 
   // Responsive column visibility
@@ -71,29 +68,35 @@ export function ReportsTable({ data, isLoading = false }: ReportsTableProps) {
     const handleResize = () => {
       const isMobile = window.innerWidth < 768;
       const isTablet = window.innerWidth < 1024;
-      
+
       setColumnVisibility({
         image_url: !isMobile, // Show thumbnail on tablet and desktop
-        category: !isTablet,  // Show category on desktop only
+        category: !isTablet, // Show category on desktop only
       });
     };
 
     handleResize(); // Set initial state
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   const getStatusBadge = (status: string) => {
     switch (status.toLowerCase()) {
       case "pending":
         return (
-          <Badge variant="secondary" className="bg-neutral-100 text-neutral-700">
+          <Badge
+            variant="secondary"
+            className="bg-neutral-100 text-neutral-700"
+          >
             Menunggu
           </Badge>
         );
       case "under_review":
         return (
-          <Badge variant="secondary" className="bg-neutral-200 text-neutral-800">
+          <Badge
+            variant="secondary"
+            className="bg-neutral-200 text-neutral-800"
+          >
             Ditinjau
           </Badge>
         );
@@ -112,19 +115,28 @@ export function ReportsTable({ data, isLoading = false }: ReportsTableProps) {
     switch (category.toLowerCase()) {
       case "berlubang":
         return (
-          <Badge variant="outline" className="border-neutral-300 text-neutral-700">
+          <Badge
+            variant="outline"
+            className="border-neutral-300 text-neutral-700"
+          >
             Berlubang
           </Badge>
         );
       case "retak":
         return (
-          <Badge variant="outline" className="border-neutral-300 text-neutral-700">
+          <Badge
+            variant="outline"
+            className="border-neutral-300 text-neutral-700"
+          >
             Retak
           </Badge>
         );
       case "lainnya":
         return (
-          <Badge variant="outline" className="border-neutral-300 text-neutral-700">
+          <Badge
+            variant="outline"
+            className="border-neutral-300 text-neutral-700"
+          >
             Lainnya
           </Badge>
         );
@@ -351,7 +363,7 @@ export function ReportsTable({ data, isLoading = false }: ReportsTableProps) {
                       ? null
                       : flexRender(
                           header.column.columnDef.header,
-                          header.getContext()
+                          header.getContext(),
                         )}
                   </TableHead>
                 ))}
@@ -368,16 +380,24 @@ export function ReportsTable({ data, isLoading = false }: ReportsTableProps) {
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
                     </TableCell>
                   ))}
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
                   <div className="text-neutral-500">
-                    <div className="text-lg font-medium mb-2">Tidak ada laporan</div>
+                    <div className="text-lg font-medium mb-2">
+                      Tidak ada laporan
+                    </div>
                     <div className="text-sm">
                       Laporan Anda akan muncul di sini setelah dibuat
                     </div>
@@ -393,10 +413,15 @@ export function ReportsTable({ data, isLoading = false }: ReportsTableProps) {
       {table.getPageCount() > 1 && (
         <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
           <div className="text-sm text-neutral-600 text-center md:text-left">
-            Menampilkan {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1} hingga{" "}
+            Menampilkan{" "}
+            {table.getState().pagination.pageIndex *
+              table.getState().pagination.pageSize +
+              1}{" "}
+            hingga{" "}
             {Math.min(
-              (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
-              table.getFilteredRowModel().rows.length
+              (table.getState().pagination.pageIndex + 1) *
+                table.getState().pagination.pageSize,
+              table.getFilteredRowModel().rows.length,
             )}{" "}
             dari {table.getFilteredRowModel().rows.length} laporan
           </div>
@@ -412,31 +437,36 @@ export function ReportsTable({ data, isLoading = false }: ReportsTableProps) {
               <span className="sm:hidden">←</span>
             </Button>
             <div className="flex items-center space-x-1">
-              {Array.from({ length: Math.min(table.getPageCount(), 5) }, (_, i) => {
-                const pageIndex = table.getState().pagination.pageIndex;
-                const totalPages = table.getPageCount();
-                let displayPage = i;
-                
-                // Show pages around current page for mobile
-                if (totalPages > 5) {
-                  const start = Math.max(0, pageIndex - 2);
-                  const end = Math.min(totalPages - 1, start + 4);
-                  displayPage = start + i;
-                  if (displayPage > end) return null;
-                }
-                
-                return (
-                  <Button
-                    key={displayPage}
-                    variant={pageIndex === displayPage ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => table.setPageIndex(displayPage)}
-                    className="w-8 h-8 p-0"
-                  >
-                    {displayPage + 1}
-                  </Button>
-                );
-              })}
+              {Array.from(
+                { length: Math.min(table.getPageCount(), 5) },
+                (_, i) => {
+                  const pageIndex = table.getState().pagination.pageIndex;
+                  const totalPages = table.getPageCount();
+                  let displayPage = i;
+
+                  // Show pages around current page for mobile
+                  if (totalPages > 5) {
+                    const start = Math.max(0, pageIndex - 2);
+                    const end = Math.min(totalPages - 1, start + 4);
+                    displayPage = start + i;
+                    if (displayPage > end) return null;
+                  }
+
+                  return (
+                    <Button
+                      key={displayPage}
+                      variant={
+                        pageIndex === displayPage ? "default" : "outline"
+                      }
+                      size="sm"
+                      onClick={() => table.setPageIndex(displayPage)}
+                      className="w-8 h-8 p-0"
+                    >
+                      {displayPage + 1}
+                    </Button>
+                  );
+                },
+              )}
             </div>
             <Button
               variant="outline"

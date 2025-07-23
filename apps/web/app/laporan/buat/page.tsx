@@ -70,7 +70,9 @@ export default function CreateReportPage() {
                   Bagikan Kondisi Jalan Rusak
                 </h1>
                 <p className="text-lg sm:text-xl text-neutral-600 leading-relaxed max-w-2xl lg:max-w-none">
-                  Bantu komunitas menghindari jalan rusak dan tingkatkan kesadaran publik tentang masalah infrastruktur di sekitar kita.
+                  Bantu komunitas menghindari jalan rusak dan tingkatkan
+                  kesadaran publik tentang masalah infrastruktur di sekitar
+                  kita.
                 </p>
               </div>
 
@@ -86,7 +88,8 @@ export default function CreateReportPage() {
                         Bantu Komunitas
                       </h3>
                       <p className="text-sm text-neutral-600">
-                        Bagikan lokasi jalan rusak agar warga lain bisa menghindari kerusakan yang sama.
+                        Bagikan lokasi jalan rusak agar warga lain bisa
+                        menghindari kerusakan yang sama.
                       </p>
                     </div>
                   </div>
@@ -99,7 +102,8 @@ export default function CreateReportPage() {
                         Tingkatkan Kesadaran
                       </h3>
                       <p className="text-sm text-neutral-600">
-                        Viral di media sosial untuk menarik perhatian dan mendorong perbaikan infrastruktur.
+                        Viral di media sosial untuk menarik perhatian dan
+                        mendorong perbaikan infrastruktur.
                       </p>
                     </div>
                   </div>
@@ -112,7 +116,8 @@ export default function CreateReportPage() {
                         Platform Komunitas
                       </h3>
                       <p className="text-sm text-neutral-600">
-                        Viralkan adalah platform berbagi informasi komunitas, bukan layanan resmi pemerintah.
+                        Viralkan adalah platform berbagi informasi komunitas,
+                        bukan layanan resmi pemerintah.
                       </p>
                     </div>
                   </div>

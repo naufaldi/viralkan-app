@@ -1,16 +1,21 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Pagination } from "../ui/pagination";
 import { ReportsFilterSection } from "./reports-filter-section";
 import { ReportsGrid } from "./reports-grid";
+import type { ReportWithUser } from "../../utils/stats-utils";
 
 type CategoryType = "berlubang" | "retak" | "lainnya";
 
+interface ReportsData {
+  items: ReportWithUser[];
+  total: number;
+  pages: number;
+}
+
 interface LaporanClientWrapperProps {
-  initialReports: any;
-  initialStats: any;
+  initialReports: ReportsData;
   currentPage: number;
   selectedCategory?: CategoryType;
   searchQuery: string;
@@ -18,7 +23,6 @@ interface LaporanClientWrapperProps {
 
 export function LaporanClientWrapper({
   initialReports,
-  initialStats,
   currentPage,
   selectedCategory,
   searchQuery,
@@ -26,9 +30,9 @@ export function LaporanClientWrapper({
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const handleReportClick = (report: any) => {
+  const handleReportClick = (report: ReportWithUser) => {
     // Will navigate to report detail page
-    console.log("Navigate to report:", report.id);
+    router.push(`/laporan/${report.id}`);
   };
 
   const handlePageChange = (page: number) => {

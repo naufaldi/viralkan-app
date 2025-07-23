@@ -1,13 +1,13 @@
 Design Principles to Follow
-Law	Apply by…
-Aesthetic Usability	Use spacing/typography to make forms feel easier
-Hick’s Law	Avoid clutter; collapse complex settings
-Jakob’s Law	Stick to familiar WP Admin patterns (cards, sidebars, modals)
-Fitts’s Law	Place important buttons close, large, clear
-Law of Proximity	Group logic and inputs with spacing + PanelBody + layout components
-Zeigarnik Effect	Use progress indicators, save states
-Goal-Gradient	Emphasize progress in wizards (e.g. New Rule flow)
-Law of Similarity	Ensure toggles, selectors, filters share styling and layout conventions
+Law Apply by…
+Aesthetic Usability Use spacing/typography to make forms feel easier
+Hick’s Law Avoid clutter; collapse complex settings
+Jakob’s Law Stick to familiar WP Admin patterns (cards, sidebars, modals)
+Fitts’s Law Place important buttons close, large, clear
+Law of Proximity Group logic and inputs with spacing + PanelBody + layout components
+Zeigarnik Effect Use progress indicators, save states
+Goal-Gradient Emphasize progress in wizards (e.g. New Rule flow)
+Law of Similarity Ensure toggles, selectors, filters share styling and layout conventions
 Aesthetic-Usability Effect
 Clean, consistent spacing (e.g. gap-2, px-4)
 

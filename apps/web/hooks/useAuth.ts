@@ -104,7 +104,7 @@ export function useAuth(initialUser?: AuthUser | null) {
       const setCookieAndVerify = async () => {
         try {
           const firebaseToken = await getIdToken();
-          
+
           if (firebaseToken) {
             // Set secure HTTP-only cookie via Server Action
             await setAuthCookie(firebaseToken);

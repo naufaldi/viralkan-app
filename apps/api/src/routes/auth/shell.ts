@@ -109,7 +109,11 @@ export const getUserById = async (
       return createError("Valid user ID is required", 400);
     }
 
-    if (!requestingUserId || typeof requestingUserId !== "string" || requestingUserId.trim().length === 0) {
+    if (
+      !requestingUserId ||
+      typeof requestingUserId !== "string" ||
+      requestingUserId.trim().length === 0
+    ) {
       return createError("Valid requesting user ID is required", 400);
     }
 
@@ -291,7 +295,11 @@ export const getUserStats = async (
       return createError("Valid user ID is required", 400);
     }
 
-    if (!requestingUserId || typeof requestingUserId !== "string" || requestingUserId.trim().length === 0) {
+    if (
+      !requestingUserId ||
+      typeof requestingUserId !== "string" ||
+      requestingUserId.trim().length === 0
+    ) {
       return createError("Valid requesting user ID is required", 400);
     }
 

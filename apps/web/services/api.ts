@@ -56,7 +56,7 @@ export async function createReport(
   data: CreateReportInput,
   token: string,
 ): Promise<{ id: number }> {
-  console.warn('DEPRECATED: Use reportsService.createReport() instead');
+  console.warn("DEPRECATED: Use reportsService.createReport() instead");
   return reportsService.createReport(data, token);
 }
 
@@ -66,12 +66,12 @@ export async function getReports(params?: {
   category?: string;
   user_id?: string;
 }): Promise<PaginatedReports> {
-  console.warn('DEPRECATED: Use reportsService.getReports() instead');
+  console.warn("DEPRECATED: Use reportsService.getReports() instead");
   return reportsService.getReports(params);
 }
 
 export async function getReport(id: number): Promise<ReportResponse> {
-  console.warn('DEPRECATED: Use reportsService.getReportById() instead');
+  console.warn("DEPRECATED: Use reportsService.getReportById() instead");
   return reportsService.getReportById(id);
 }
 
@@ -82,7 +82,7 @@ export async function getUserReports(
     limit?: number;
   },
 ): Promise<PaginatedReports> {
-  console.warn('DEPRECATED: Use reportsService.getUserReports() instead');
+  console.warn("DEPRECATED: Use reportsService.getUserReports() instead");
   return reportsService.getUserReports(token, params);
 }
 
@@ -98,4 +98,4 @@ export async function getProfile(token: string): Promise<{ user: any }> {
 }
 
 // Re-export upload function from upload service for backward compatibility
-export { uploadImage, } from "./upload";
+export { uploadImage } from "./upload";

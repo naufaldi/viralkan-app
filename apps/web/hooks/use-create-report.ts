@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { CreateReportInput } from "../lib/types/api";
 import { useAuthContext } from "../contexts/AuthContext";
 
-
 interface UseCreateReportOptions {
   onSuccess?: (reportId: number) => void;
   onError?: (error: string) => void;
@@ -52,8 +51,8 @@ export function useCreateReport(options?: UseCreateReportOptions) {
       if (options?.onSuccess) {
         options.onSuccess(result.id);
       } else {
-        // Default success behavior - redirect to reports list
-        router.push(`/laporan?success=true&reportId=${result.id}`);
+        // Default success behavior - redirect to dashboard for better UX
+        router.push(`/dashboard?success=true&reportId=${result.id}`);
       }
     } catch (err) {
       const errorMessage =

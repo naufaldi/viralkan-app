@@ -1,24 +1,26 @@
 import { ReportsHero } from "../../components/reports/reports-hero";
 import { ReportsErrorState } from "../../components/reports/reports-error-state";
-import { getPublicReportsAction, getPublicReportsStatsAction } from "../../lib/auth-actions";
+import { getPublicReportsWithStats } from "../../lib/auth-actions";
+import { getDefaultStats } from "../../utils/stats-utils";
 import Header from "components/layout/header";
 import { LaporanClientWrapper } from "../../components/reports/laporan-client-wrapper";
 
 type CategoryType = "berlubang" | "retak" | "lainnya";
 
 interface LaporanPageProps {
-  searchParams: {
+  searchParams: Promise<{
     page?: string;
     category?: CategoryType;
     search?: string;
-  };
+  }>;
 }
 
 export default async function LaporanPage({ searchParams }: LaporanPageProps) {
   // Parse search params with defaults
-  const currentPage = parseInt(searchParams.page || "1");
-  const selectedCategory = searchParams.category;
-  const searchQuery = searchParams.search || "";
+  const params = await searchParams;
+  const currentPage = parseInt(params.page || "1");
+  const selectedCategory = params.category;
+  const searchQuery = params.search || "";
 
   // Build query parameters
   const queryParams = new URLSearchParams();
@@ -27,50 +29,32 @@ export default async function LaporanPage({ searchParams }: LaporanPageProps) {
   if (selectedCategory) queryParams.set("category", selectedCategory);
   if (searchQuery) queryParams.set("search", searchQuery);
 
-  // Server-side data fetching
-  let reports, stats, reportsError: Error | null = null, statsError: Error | null = null;
-  
+  // Server-side data fetching with stats calculation
+  let reports,
+    stats,
+    reportsError: Error | null = null;
+
   try {
-    [reports, stats] = await Promise.all([
-      getPublicReportsAction(queryParams),
-      getPublicReportsStatsAction(),
-    ]);
+    // Fetch reports and calculate stats from real data
+    const result = await getPublicReportsWithStats(queryParams, true);
+    reports = result.reports;
+    stats = result.stats || getDefaultStats();
   } catch (error) {
-    console.error("Error fetching public reports:", error);
-    reportsError = error instanceof Error ? error : new Error("Unknown error occurred");
+    reportsError =
+      error instanceof Error ? error : new Error("Unknown error occurred");
+    stats = getDefaultStats();
   }
 
-  // Transform stats to match expected format
-  const transformedStats = stats ? {
-    totalReports: stats.total || 0,
-    thisWeek: stats.recent || 0,
-    today: Math.floor((stats.recent || 0) / 7), // Estimate today's reports
-    byCategory: {
-      berlubang: stats.byCategory?.berlubang || 0,
-      retak: stats.byCategory?.retak || 0,
-      lainnya: stats.byCategory?.lainnya || 0,
-    },
-  } : {
-    totalReports: 0,
-    thisWeek: 0,
-    today: 0,
-    byCategory: {
-      berlubang: 0,
-      retak: 0,
-      lainnya: 0,
-    },
-  };
+  // Stats are already in the correct format from stats-utils
+  const transformedStats = stats;
 
   // Handle error states
-  if (reportsError || statsError) {
+  if (reportsError) {
     return (
       <div className="min-h-screen bg-background">
         <Header />
         <div className="container mx-auto px-4 py-12">
-          <ReportsErrorState 
-            error={reportsError || statsError} 
-            onRetry={() => window.location.reload()}
-          />
+          <ReportsErrorState error={reportsError} />
         </div>
       </div>
     );
@@ -79,20 +63,18 @@ export default async function LaporanPage({ searchParams }: LaporanPageProps) {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      
+
       <main className="relative">
         {/* Hero Section */}
         <ReportsHero
           stats={transformedStats}
           searchQuery={searchQuery}
-          onSearchChange={() => {}} // Will be handled by client wrapper
           isLoading={false} // Server-side, no loading state
         />
 
         {/* Client Wrapper for Interactive Features */}
         <LaporanClientWrapper
           initialReports={reports}
-          initialStats={transformedStats}
           currentPage={currentPage}
           selectedCategory={selectedCategory}
           searchQuery={searchQuery}
@@ -101,4 +83,3 @@ export default async function LaporanPage({ searchParams }: LaporanPageProps) {
     </div>
   );
 }
-

@@ -406,6 +406,8 @@ Would you like me to [specific improvement]?"
 1. **Next.js built-in functions** (Link, useRouter, etc.) - Always prefer these first
 2. **React patterns** (hooks, components) - Second choice
 3. **Vanilla JavaScript** - Only as last resort
+4. Never use tenary inside tenary
+5. More Server Side for Auth, instead of client side
 
 **Navigation:**
 

@@ -10,4 +10,4 @@ export function ReportsEmptyState() {
       </p>
     </div>
   );
-} 
+}

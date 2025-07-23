@@ -102,7 +102,8 @@ export async function getUserReportsAction(searchParams?: URLSearchParams) {
     throw new Error("No authentication token found in cookies");
   }
 
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+  const API_BASE_URL =
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
   const queryString = searchParams ? `?${searchParams.toString()}` : "";
 
   const response = await fetch(`${API_BASE_URL}/api/reports/me${queryString}`, {
@@ -124,7 +125,8 @@ export async function getUserReportsAction(searchParams?: URLSearchParams) {
 
 // Server action for getting public reports (no authentication required)
 export async function getPublicReportsAction(searchParams?: URLSearchParams) {
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+  const API_BASE_URL =
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
   const queryString = searchParams ? `?${searchParams.toString()}` : "";
 
   const response = await fetch(`${API_BASE_URL}/api/reports${queryString}`, {
@@ -143,22 +145,42 @@ export async function getPublicReportsAction(searchParams?: URLSearchParams) {
   return response.json(); // Returns PaginatedReportsResponseSchema
 }
 
-// Server action for getting public reports stats (no authentication required)
-export async function getPublicReportsStatsAction() {
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-
-  const response = await fetch(`${API_BASE_URL}/api/reports/stats`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    cache: "no-store", // Always fresh data for public content
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`API Error: ${response.status} - ${errorText}`);
+// Enhanced server action for getting public reports with stats calculation
+export async function getPublicReportsWithStats(
+  queryParams?: URLSearchParams,
+  includeStats = false
+) {
+  // Fetch paginated reports for display
+  const displayReports = await getPublicReportsAction(queryParams);
+  
+  if (!includeStats) {
+    return { reports: displayReports, stats: null };
   }
-
-  return response.json();
+  
+  // Fetch larger dataset for stats calculation (no pagination limits)
+  const statsParams = new URLSearchParams();
+  statsParams.set("limit", "1000"); // Get more data for accurate stats
+  // Don't include search/filter params for stats - we want total counts
+  
+  try {
+    const allReports = await getPublicReportsAction(statsParams);
+    
+    // Import stats calculation function
+    const { calculateStatsFromReports, validateReportsData, getDefaultStats } = 
+      await import("../utils/stats-utils");
+    
+    // Validate and calculate stats
+    if (validateReportsData(allReports?.items)) {
+      const stats = calculateStatsFromReports(allReports.items);
+      return { reports: displayReports, stats };
+    } else {
+      // Fallback to default stats if data is invalid
+      return { reports: displayReports, stats: getDefaultStats() };
+    }
+  } catch {
+    // If stats calculation fails, return reports with default stats
+    const { getDefaultStats } = await import("../utils/stats-utils");
+    return { reports: displayReports, stats: getDefaultStats() };
+  }
 }
+

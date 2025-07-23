@@ -59,29 +59,54 @@ export const ReportQuerySchema = z.object({
     example: "berlubang",
     description: "Filter reports by damage category",
   }),
-  user_id: z.string().regex(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i, "Invalid UUID format").optional().openapi({
-    example: "01890dd5-ea3f-7746-b3a5-e8c5e0b0f4a1",
-    description: "Filter reports by user ID (UUID)",
-  }),
+  user_id: z
+    .string()
+    .regex(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
+      "Invalid UUID format",
+    )
+    .optional()
+    .openapi({
+      example: "01890dd5-ea3f-7746-b3a5-e8c5e0b0f4a1",
+      description: "Filter reports by user ID (UUID)",
+    }),
 });
 
 export const ReportParamsSchema = z.object({
-  id: z.string().regex(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i, "Invalid UUID format").openapi({
-    example: "01890dd5-ea3f-7746-b3a5-e8c5e0b0f4a1",
-    description: "Unique identifier of the report (UUID v7)",
-  }),
+  id: z
+    .string()
+    .regex(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
+      "Invalid UUID format",
+    )
+    .openapi({
+      example: "01890dd5-ea3f-7746-b3a5-e8c5e0b0f4a1",
+      description: "Unique identifier of the report (UUID v7)",
+    }),
 });
 
 // Response Schemas
 export const ReportResponseSchema = z.object({
-  id: z.string().regex(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i, "Invalid UUID format").openapi({ 
-    example: "01890dd5-ea3f-7746-b3a5-e8c5e0b0f4a1",
-    description: "Report ID (UUID v7)" 
-  }),
-  user_id: z.string().regex(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i, "Invalid UUID format").openapi({ 
-    example: "01890dd5-1234-7746-b3a5-e8c5e0b0f4a1",
-    description: "User ID (UUID v7)" 
-  }),
+  id: z
+    .string()
+    .regex(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
+      "Invalid UUID format",
+    )
+    .openapi({
+      example: "01890dd5-ea3f-7746-b3a5-e8c5e0b0f4a1",
+      description: "Report ID (UUID v7)",
+    }),
+  user_id: z
+    .string()
+    .regex(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
+      "Invalid UUID format",
+    )
+    .openapi({
+      example: "01890dd5-1234-7746-b3a5-e8c5e0b0f4a1",
+      description: "User ID (UUID v7)",
+    }),
   image_url: z
     .string()
     .url()

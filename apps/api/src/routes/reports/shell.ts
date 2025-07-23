@@ -69,7 +69,8 @@ export const getReportById = async (
 export const createNewReport = async (
   userId: string, // Changed from number to string (UUID v7)
   reportInput: CreateReportInput,
-): Promise<AppResult<{ id: string }>> => { // Changed return type to string
+): Promise<AppResult<{ id: string }>> => {
+  // Changed return type to string
   try {
     // Sanitize input data using core business logic
     const sanitizedData = core.sanitizeReportData(reportInput);

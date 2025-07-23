@@ -1,435 +1,267 @@
-# Dashboard API Integration & Recent Reports Layout Analysis
+# Viralkan App Development TODO
 
-## 🚨 CRITICAL BUG FIX: Server-Side Authentication (Following system-design.md)
+## 🚀 NEW PLAN: Server-Side Stats Generation for /laporan Page
 
 ### Problem Analysis:
-**Error**: `Server Error fetching user reports: Error: Failed to fetch user reports`
+- ❌ No `/api/reports/stats` endpoint exists in the API
+- ✅ We have `/api/reports/` endpoint that returns all reports with pagination
+- ✅ Reports data contains all information needed to calculate stats
+- ✅ `/laporan` page is public and needs SEO optimization (server-side rendering)
 
-**Root Cause Identified**:
-- **Cookie Token Issue**: Firebase token not properly accessible in server actions
-- **Timing Issue**: Server action might run before cookie is set
-- **Token Validation**: Token might be expired or invalid
+### Solution: Generate Stats from Reports Data Using Next.js Server Components
 
-### ✅ **System Design Architecture Available**: system-design.md
-The app already has a perfect 4-layer server-side authentication system:
+Instead of creating a new API endpoint, we'll process the reports data server-side in Next.js to generate statistics. This approach is:
 
-```typescript
-// Layer 1: Next.js Middleware (Fast Protection) ✅ Working
-// Layer 2: Server Component Authentication ✅ Working  
-// Layer 3: Server Actions Protection ❌ Needs Fix
-// Layer 4: Client Context Integration ✅ Working
-```
-
-### Current Implementation Status:
-✅ **Cookie Management**: `auth-cookies.ts` exists with proper functions
-✅ **Client Auth**: `useAuth.ts` sets Firebase tokens in HTTP-only cookies
-✅ **Server Actions**: `auth-actions.ts` reads tokens from cookies
-✅ **API Endpoints**: `/api/reports/me` exists and works
-❌ **Token Access**: Server actions can't read Firebase tokens properly
-
-### Architecture Verification:
-```typescript
-// ✅ Client sets token in cookie (useAuth.ts:104-110)
-const firebaseToken = await getIdToken();
-if (firebaseToken) {
-  await setAuthCookie(firebaseToken); // Sets HTTP-only cookie
-}
-
-// ✅ Server reads token from cookie (auth-actions.ts:95-96)
-const cookieStore = await cookies();
-const token = cookieStore.get("firebase-token")?.value;
-
-// ❌ Issue: Token might be undefined, expired, or invalid
-```
-
-## Solution: Fix Server-Side Authentication (Keep system-design.md Architecture)
-
-### Why Server-Side Auth is Better:
-1. **✅ Follows Design**: Matches established system-design.md architecture
-2. **✅ Server Rendered**: Better SEO and performance
-3. **✅ Secure**: Server-side validation and protection
-4. **✅ Consistent**: Same pattern as other server actions
-5. **✅ Type Safe**: Full TypeScript support with proper types
-
-### Implementation Plan:
-
-#### Phase 1: ✅ FIXED - Server-Side Authentication & Upload System
-- [x] **Identified Root Cause**: UUID format mismatch
-  - [x] Database had `bigint` IDs but API expected UUID format
-  - [x] User ID was `1` (integer) but API expected UUID string
-  - [x] Created and ran UUID migration successfully
-
-- [x] **Database Migration Completed**
-  ```sql
-  -- Successfully migrated from BIGSERIAL to UUID
-  -- users.id: bigint → uuid
-  -- reports.id: bigint → uuid  
-  -- reports.user_id: bigint → uuid
-  -- All foreign key relationships preserved
-  -- All data migrated successfully
-  ```
-
-- [x] **Upload System Fixed**
-  - [x] Created missing `uploads` table via `001_add_upload_system.sql`
-  - [x] Added `image_key` field to `reports` table
-  - [x] Upload API now has proper database support
-  - [x] File uploads can be tracked and rate-limited
-
-- [x] **Authentication Flow Fixed**
-  - [x] Server actions now work with UUID user IDs
-  - [x] API endpoints accept UUID format properly
-  - [x] Dashboard loads without authentication errors
-  - [x] User reports display correctly
-
-**Result**: ✅ Dashboard and upload system now work perfectly with server-side authentication!
-
-#### Phase 2: Enhance Server-Side Auth (Optional)
-- [ ] **Add Token Validation**
-  - [ ] Validate token format before API calls
-  - [ ] Add token expiration checking
-  - [ ] Implement automatic token refresh
-
-- [ ] **Improve Error Recovery**
-  - [ ] Add retry mechanism for failed requests
-  - [ ] Implement graceful degradation
-  - [ ] Add user-friendly error messages
-
-#### Phase 3: Implement Table Layout (Keep Server-Side)
-- [ ] **Keep Server Component Architecture**
-  - [ ] Dashboard remains server component
-  - [ ] Use server actions for data fetching
-  - [ ] Implement client-side table with server data
-
-- [ ] **Create Reports Table Component**
-  - [ ] Define column schema: Date, Thumbnail, Title, Category, Status, Actions
-  - [ ] Implement sorting with client-side JavaScript
-  - [ ] Add responsive design for mobile
-
-- [ ] **Integrate with Server Data**
-  - [ ] Pass server-fetched data to client table component
-  - [ ] Handle loading states with skeleton rows
-  - [ ] Add empty state when no reports exist
-
-### Benefits of This Approach:
-1. **✅ Follows Design**: Matches established system-design.md architecture
-2. **✅ Server Rendered**: Better SEO and performance
-3. **✅ Secure**: Server-side validation and protection
-4. **✅ Consistent**: Same pattern as other server actions
-5. **✅ Type Safe**: Full TypeScript support with proper types
-
-### Files to Modify:
-- `apps/web/lib/auth-actions.ts` - Add debugging and better error handling
-- `apps/web/hooks/useAuth.ts` - Ensure proper cookie setting
-- `apps/web/app/dashboard/page.tsx` - Keep as server component
-- `apps/web/components/dashboard/reports-table.tsx` - Client component for table
-
-### What We Need to Fix:
-1. **Cookie Token Access**: Ensure Firebase tokens are properly stored and read
-2. **Token Validation**: Add proper token format and expiration checking
-3. **Error Handling**: Better error messages and recovery mechanisms
-4. **Timing Issues**: Handle cases where server action runs before cookie is set
-
-### Testing Checklist:
-- [ ] Dashboard loads without authentication errors
-- [ ] User reports display correctly
-- [ ] Loading states work properly
-- [ ] Error states handle failures gracefully
-- [ ] Table sorting and pagination work
-- [ ] Mobile responsiveness maintained
-
-## Current State Analysis
-
-**Existing Implementation:**
-- Dashboard currently shows redesigned UI with better spacing and typography
-- Quick action cards are static/visual only - not connected to API
-- Recent reports section uses gallery/grid layout (3 columns)
-- Stats cards already integrated with API (`getUserStats()`)
-
-## Task 1: API Integration for Cards
-
-### Cards to Integrate:
-- [ ] **"Buat Laporan Baru" Card**: Already linked to `/laporan/buat` route
-- [ ] **"Lihat Laporan Anda" Card**: Already linked to `/laporan?filter=my-reports` 
-- [ ] **Stats Cards**: ✅ Already integrated with `getUserStats()` API
-
-**Assessment**: The cards are already functionally integrated. They navigate to correct routes and stats pull from API.
-
-## Task 2: Recent Reports Layout Decision Analysis
-
-### Current Implementation: Gallery/Grid Layout
-```
-┌─────────┬─────────┬─────────┐
-│ Report 1│ Report 2│ Report 3│
-│ [IMAGE] │ [IMAGE] │ [IMAGE] │
-│ Title   │ Title   │ Title   │
-│ Status  │ Status  │ Status  │
-└─────────┴─────────┴─────────┘
-```
-
-## Layout Options Comparison
-
-### Option 1: Table Layout
-**Pros:**
-- **Information density**: Can show more data per row (ID, date, category, status, location)
-- **Scannable**: Easy to compare multiple reports side-by-side
-- **Sortable**: Can add sorting by date, status, category
-- **Compact**: Shows more reports in less vertical space
-- **Professional**: Matches civic/government dashboard conventions
-- **Mobile responsive**: Can stack/hide columns on smaller screens
-
-**Cons:**
-- **Less visual**: No prominent image display
-- **Boring**: May feel less engaging than visual cards
-- **Limited preview**: Harder to get quick visual context of damage
-- **No thumbnail benefit**: Users can't quickly identify reports by image
-
-### Option 2: Gallery/Grid Layout (Current)
-**Pros:**
-- **Visual appeal**: Images provide immediate context
-- **Quick recognition**: Users can identify reports by damage photos
-- **Modern UX**: Feels more like social media/modern apps
-- **Engagement**: More likely to encourage interaction
-- **Better for photos**: Showcases the core evidence (damage images)
-
-**Cons:**
-- **Space inefficient**: Takes more vertical scrolling
-- **Limited information**: Can't show much metadata per card
-- **Mobile issues**: May become too small on mobile devices
-- **Loading heavy**: All images need to load simultaneously
-
-### Option 3: List Layout (Hybrid)
-**Pros:**
-- **Balanced approach**: Shows image + detailed info in rows
-- **Efficient**: More compact than gallery, more visual than table
-- **Flexible**: Can show variable amounts of information
-- **Mobile friendly**: Naturally responsive design
-
-**Cons:**
-- **Design complexity**: Harder to make visually consistent
-- **Image sizing**: Challenging to balance image vs text space
-- **Not specialized**: May not excel at either visual or data aspects
-
-## Recommendation Analysis
-
-### For Civic/Government Context:
-**Table layout is recommended** for the following reasons:
-
-1. **Government User Expectations**: Officials expect data-rich, scannable interfaces
-2. **Efficiency**: Need to process many reports quickly
-3. **Data Priority**: Status, date, location more important than visual appeal
-4. **Professional Image**: Tables convey seriousness and professionalism
-5. **Accessibility**: Screen readers handle tables better
-6. **Performance**: No image loading delays
-
-### For Citizen/Public Context:
-**Gallery layout is recommended** for the following reasons:
-
-1. **User Engagement**: Citizens more likely to browse visual content
-2. **Recognition**: People remember their reports by the damage photo
-3. **Motivation**: Seeing fixed roads provides positive reinforcement
-4. **Modern Expectations**: Matches social media interaction patterns
-
-## Implementation Recommendation
-
-**Hybrid Approach - Context Aware:**
-
-### For Dashboard "Recent Reports":
-- Use **Table Layout** for efficiency and professionalism
-- Show: Date, Title, Status, Category, Actions
-- Add thumbnail column for visual reference
-- Enable sorting and filtering
-
-### For Public Reports Page:
-- Keep **Gallery Layout** for public engagement
-- Focus on visual storytelling
-- Encourage community participation
-
-## Implementation Plan
-
-### Phase 1: Critical Bug Fix
-- [ ] **Fix API Endpoint URL** in `auth-actions.ts`
-  - [ ] Change `/api/me/reports` to `/api/reports/me` in `getUserReportsAction()`
-  - [ ] Update comment to reflect correct endpoint
-  - [ ] Test dashboard loads without errors
-- [ ] **Verify API Integration**
-  - [ ] Confirm stats cards API integration working
-  - [ ] Test navigation from action cards
-  - [ ] Ensure all routes function correctly
-
-### Phase 2: Recent Reports Table Implementation with TanStack Table
-- [ ] **Install dependencies**
-  - [ ] Add `@tanstack/react-table` to web app
-  - [ ] Verify shadcn table components available
-  
-- [ ] **Setup TanStack Table Structure**
-  - [ ] Create table column definitions using TanStack Table API
-  - [ ] Define column schema: Date, Thumbnail, Title, Category, Status, Location, Actions
-  - [ ] Implement column sorting with TanStack Table hooks
-  - [ ] Add column filtering capabilities
-  
-- [ ] **Implement shadcn Table Components**
-  - [ ] Use shadcn `Table`, `TableHeader`, `TableBody`, `TableRow`, `TableCell` components
-  - [ ] Integrate with TanStack Table data and state management
-  - [ ] Style table with monochrome civic design system
-  - [ ] Add responsive design with column hiding/stacking on mobile
-  
-- [ ] **Table Features Implementation**
-  - [ ] **Sorting**: Click column headers to sort by date, status, category
-  - [ ] **Thumbnail column**: Small image preview (64x64px) with fallback
-  - [ ] **Status badges**: Use existing monochrome badge system
-  - [ ] **Actions column**: View Details, Edit Report (for user's own reports)
-  - [ ] **Row hover states**: Subtle highlight matching design system
-  
-- [ ] **Data Integration**
-  - [ ] Connect to existing `getUserReportsAction()` API
-  - [ ] Handle loading states with skeleton rows
-  - [ ] Implement error handling for failed requests
-  - [ ] Add empty state when no reports exist
-  
-- [ ] **Mobile Responsiveness**
-  - [ ] Test table on mobile devices (responsive columns)
-  - [ ] Consider horizontal scroll or column stacking
-  - [ ] Ensure touch-friendly action buttons
-
-### Phase 3: Enhanced TanStack Table Features
-- [ ] **Pagination with TanStack Table**
-  - [ ] Implement `usePagination` hook from TanStack Table
-  - [ ] Add pagination controls (previous, next, page numbers)
-  - [ ] Set page size options (10, 25, 50 reports per page)
-  - [ ] Show total results count
-  
-- [ ] **Advanced Filtering**
-  - [ ] Implement `useFilters` hook for column-based filtering
-  - [ ] Add status filter dropdown (pending, in-review, resolved)
-  - [ ] Add category filter (berlubang, retak, lainnya)
-  - [ ] Add date range filter for created_at
-  - [ ] Global search across title and location
-  
-- [ ] **Performance Optimization**
-  - [ ] Implement virtual scrolling for large datasets (if needed)
-  - [ ] Add debounced search input
-  - [ ] Optimize API calls with proper caching
-  - [ ] Lazy load images in thumbnail column
-  
-- [ ] **Additional Features**
-  - [ ] Export table data to CSV
-  - [ ] Column visibility toggle
-  - [ ] Column reordering (drag & drop)
-  - [ ] Bulk actions (if needed for admin features)
-
-## Final Recommendation: **Table Layout with TanStack Table**
-
-**Technical Implementation:**
-- **TanStack Table**: Powerful, headless table library with built-in sorting, filtering, pagination
-- **shadcn Components**: Pre-styled `Table` components that match civic design system
-- **Responsive Design**: Mobile-friendly with column hiding/stacking
-- **Performance**: Virtual scrolling and lazy loading for large datasets
-
-**Reasoning:**
-1. **Context**: This is a dashboard for tracking contributions - data efficiency > visual appeal
-2. **User Goal**: Monitor status and manage reports - not browse casually
-3. **Civic Standards**: Government platforms prioritize information density
-4. **Scalability**: Tables handle 10+ reports better than galleries
-5. **Accessibility**: Better for screen readers and keyboard navigation
-6. **TanStack Benefits**: Built-in sorting, filtering, pagination without reinventing the wheel
-
-The gallery was good for the initial design, but a professional table interface powered by TanStack Table will better serve the dashboard's core purpose of efficient report management while providing advanced features out of the box.
+1. **More Efficient**: No additional API calls or database queries
+2. **SEO Friendly**: Server-side processing for public page 
+3. **Real-time**: Stats always reflect current data
+4. **Simple**: Reuses existing working API endpoint
 
 ---
 
-## 🚨 CRITICAL ARCHITECTURE FIX: Data Fetching Strategy Mismatch
+## Implementation Plan
 
-### Problem Analysis:
-**Issue**: Dashboard doesn't auto-refresh after form submission due to incorrect data fetching patterns
+### Phase 1: Server-Side Stats Processing ⚡ (HIGH PRIORITY)
 
-**Current Wrong Architecture**:
-- ❌ `/laporan` page (public) → Might be using client-side (should be server-side for SEO)
-- ❌ `/dashboard` page (private) → Uses server-side caching (should be client-side for real-time updates)
-- ❌ Form submission flow → Submit → redirect to dashboard → stale cached data shown
+#### Task 1.1: Create Stats Processing Utility Function
+- [ ] **Create `apps/web/utils/stats-utils.ts`**
+  - [ ] `calculateStatsFromReports(reports: ReportWithUser[]): StatsData`
+  - [ ] Calculate total reports count
+  - [ ] Calculate reports by category (berlubang, retak, lainnya)
+  - [ ] Calculate recent reports (this week, today)
+  - [ ] Use date-fns or similar for date calculations
+  - [ ] Add proper TypeScript types
 
-**Root Cause**: Mixing server-side and client-side patterns incorrectly based on use case
+```typescript
+interface StatsData {
+  totalReports: number;
+  thisWeek: number;
+  today: number;
+  byCategory: {
+    berlubang: number;
+    retak: number;
+    lainnya: number;
+  };
+}
 
-### ✅ Correct Architecture (Following system-design.md):
+// Example calculation logic:
+function calculateStatsFromReports(reports: ReportWithUser[]): StatsData {
+  const now = new Date();
+  const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  
+  return {
+    totalReports: reports.length,
+    thisWeek: reports.filter(r => new Date(r.created_at) >= weekAgo).length,
+    today: reports.filter(r => new Date(r.created_at) >= todayStart).length,
+    byCategory: {
+      berlubang: reports.filter(r => r.category === 'berlubang').length,
+      retak: reports.filter(r => r.category === 'retak').length,
+      lainnya: reports.filter(r => r.category === 'lainnya').length,
+    }
+  };
+}
+```
 
-#### `/laporan` Page - Public Reports Listing
-**Should Use: Server-Side Data Fetching**
-- **Why**: SEO-friendly, fast initial load, public content needs to be indexed
-- **Pattern**: Server components + server actions
-- **Benefits**: Fast public access, search engine indexing, no authentication needed
+#### Task 1.2: Enhance getPublicReportsAction for Stats
+- [ ] **Modify `/laporan` page data fetching**
+  - [ ] Fetch larger dataset when generating stats (e.g., limit=1000)
+  - [ ] Add optional `includeStats: boolean` parameter
+  - [ ] When `includeStats=true`, fetch more data for accurate stats
+  - [ ] Return both paginated reports AND calculated stats
+  - [ ] Cache results for performance
 
-#### `/dashboard` Page - Private User Dashboard  
-**Should Use: Client-Side Data Fetching**
-- **Why**: Real-time updates after form submissions, interactive, no SEO needed
-- **Pattern**: Client components + React Query/SWR or useEffect
-- **Benefits**: Auto-refresh on navigation, real-time data, better UX for authenticated users
+```typescript
+// Enhanced server action approach:
+export async function getPublicReportsWithStats(
+  queryParams: URLSearchParams,
+  includeStats = false
+) {
+  // Fetch paginated reports for display
+  const displayReports = await getPublicReportsAction(queryParams);
+  
+  if (!includeStats) {
+    return { reports: displayReports, stats: null };
+  }
+  
+  // Fetch larger dataset for stats calculation (no pagination)
+  const statsParams = new URLSearchParams();
+  statsParams.set("limit", "1000"); // Get more data for accurate stats
+  const allReports = await getPublicReportsAction(statsParams);
+  
+  // Calculate stats from all reports
+  const stats = calculateStatsFromReports(allReports.items || []);
+  
+  return { reports: displayReports, stats };
+}
+```
 
-#### Form Submission Flow
-**Current Flow**: Submit form → redirect to dashboard → stale server-cached data
-**Correct Flow**: Submit form → redirect to dashboard → fresh client-side data fetch
+#### Task 1.3: Update /laporan Page Implementation
+- [ ] **Modify `apps/web/app/laporan/page.tsx`**
+  - [ ] Remove broken stats API call completely
+  - [ ] Use enhanced `getPublicReportsWithStats()` function
+  - [ ] Process stats server-side before rendering
+  - [ ] Keep server component architecture for SEO
+  - [ ] Handle loading and error states properly
 
-### Implementation Plan:
+```typescript
+// Updated laporan page approach:
+export default async function LaporanPage({ searchParams }: LaporanPageProps) {
+  const params = await searchParams;
+  // ... existing param processing ...
+  
+  try {
+    // Fetch both reports and stats in one optimized call
+    const { reports, stats } = await getPublicReportsWithStats(queryParams, true);
+    
+    // Stats are now calculated server-side from real data
+    const transformedStats = stats || defaultStats;
+    
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="relative">
+          <ReportsHero stats={transformedStats} searchQuery={searchQuery} />
+          <LaporanClientWrapper 
+            initialReports={reports}
+            currentPage={currentPage}
+            selectedCategory={selectedCategory}
+            searchQuery={searchQuery}
+          />
+        </main>
+      </div>
+    );
+  } catch (error) {
+    // ... error handling ...
+  }
+}
+```
 
-#### Phase 1: Fix Data Fetching Architecture
-- [ ] **Audit Current Implementation**
-  - [ ] Check `/laporan` page current data fetching method
-  - [ ] Check `/dashboard` page current data fetching method  
-  - [ ] Identify which pages use server vs client-side data fetching
-  - [ ] Document current caching behavior
+---
 
-#### Phase 2: Convert `/laporan` to Server-Side (SEO Optimization)
-- [ ] **Implement Server-Side Data Fetching for Public Reports**
-  - [ ] Create `getPublicReportsAction()` server action
-  - [ ] Convert `/laporan` page to server component
-  - [ ] Add proper pagination with server-side logic
-  - [ ] Implement filtering/search with URL search params
-  - [ ] Ensure SEO-friendly URLs and meta tags
-  - [ ] Test that public page loads fast without JavaScript
+### Phase 2: Performance Optimization 🚀 (MEDIUM PRIORITY)
 
-#### Phase 3: Convert `/dashboard` to Client-Side (Real-time Updates)
-- [ ] **Implement Client-Side Data Fetching for Dashboard**
-  - [ ] Replace server-side `getUserReportsAction()` with client-side hook
-  - [ ] Create `useDashboardData()` hook with React Query or SWR
-  - [ ] Add loading states and error handling
-  - [ ] Implement automatic refetch on focus/visibility change
-  - [ ] Add manual refresh capability
-  - [ ] Ensure data refreshes when navigating back from form submission
+#### Task 2.1: Implement Smart Caching
+- [ ] **Add Next.js caching for stats**
+  - [ ] Cache stats calculation results for 5-10 minutes
+  - [ ] Use Next.js `unstable_cache` or similar
+  - [ ] Invalidate cache when new reports are created
+  - [ ] Balance freshness vs performance
 
-#### Phase 4: Fix Form Submission Cache Invalidation
-- [ ] **Ensure Dashboard Auto-Refresh After Form Submission**
-  - [ ] Modify form submission to trigger dashboard data refresh
-  - [ ] Add success callback that invalidates dashboard cache
-  - [ ] Test: Submit form → redirect to dashboard → see new report immediately
-  - [ ] Add optimistic updates if needed for better UX
-  - [ ] Handle edge cases (network failures, slow API responses)
+```typescript
+import { unstable_cache } from 'next/cache';
 
-### Architecture Decision Matrix:
+const getCachedStats = unstable_cache(
+  async () => {
+    const allReports = await getPublicReportsAction(/* large limit */);
+    return calculateStatsFromReports(allReports.items || []);
+  },
+  ['public-reports-stats'],
+  { revalidate: 300 } // Cache for 5 minutes
+);
+```
 
-| Page | Current | Should Be | Reasoning |
-|------|---------|-----------|-----------|
-| `/laporan` (public) | ❓ Unknown | 🚀 Server-side | SEO, fast public access, no auth needed |
-| `/dashboard` (private) | 🚀 Server-side | ⚡ Client-side | Real-time updates, interactive, no SEO needed |
-| Form submission | ❌ No refresh | ✅ Auto refresh | Better UX after actions |
+#### Task 2.2: Optimize Database Queries
+- [ ] **Consider API-level optimization (Future)**
+  - [ ] Add `GET /api/reports/summary` endpoint for efficient stats
+  - [ ] Use SQL aggregation instead of fetching all records
+  - [ ] Return count queries only (no full report data)
+  - [ ] This is optional - client-side processing works fine for now
 
-### Benefits After Fix:
-1. **🔍 Better SEO**: Public reports indexed by search engines
-2. **⚡ Real-time Dashboard**: Fresh data after form submissions
-3. **🚀 Fast Public Access**: Server-rendered public content
-4. **🎯 Better UX**: Interactive dashboard with live updates
-5. **📱 Correct Patterns**: Server for public, client for private
+---
 
-### Files to Modify:
-- `apps/web/app/laporan/page.tsx` - Convert to server component
-- `apps/web/app/dashboard/page.tsx` - Convert to client component  
-- `apps/web/lib/auth-actions.ts` - Keep server actions for laporan
-- `apps/web/hooks/` - Create dashboard data hooks
-- `apps/web/components/reports/create-report-form.tsx` - Add success callback
+### Phase 3: Type Safety & Error Handling 🛡️ (MEDIUM PRIORITY)
 
-### Testing Checklist:
-- [ ] Public `/laporan` page loads fast without JavaScript
-- [ ] Public `/laporan` page has proper SEO meta tags
-- [ ] Dashboard shows fresh data after form submission
-- [ ] Dashboard has loading states and error handling
-- [ ] Form submission → dashboard redirect → new report visible immediately
-- [ ] Dashboard data refreshes when returning from other pages
+#### Task 3.1: Fix Type Mismatches
+- [ ] **Update component types**
+  - [ ] Ensure `LaporanClientWrapper` uses correct API types
+  - [ ] Match types with actual API response structure
+  - [ ] Remove mock/placeholder types
+  - [ ] Add proper error boundary types
 
-**Priority**: 🚨 **HIGH** - This affects core user experience and SEO
+#### Task 3.2: Enhance Error Handling
+- [ ] **Robust error states**
+  - [ ] Handle stats calculation failures gracefully
+  - [ ] Show default/fallback stats when calculation fails
+  - [ ] Add retry mechanism for failed API calls
+  - [ ] Proper error logging for debugging
+
+---
+
+## Benefits of This Approach
+
+### ✅ Technical Advantages:
+1. **No New API Endpoint**: Reuses existing `/api/reports/` endpoint
+2. **Better Performance**: Single API call instead of multiple
+3. **SEO Optimized**: Server-side rendering for public page
+4. **Real-time Stats**: Always reflects current data
+5. **Type Safe**: Full TypeScript support throughout
+
+### ✅ User Experience:
+1. **Fast Loading**: Server-rendered content loads immediately
+2. **Always Accurate**: Stats match visible reports
+3. **No Loading States**: Stats available on first render
+4. **Better SEO**: Search engines can index stats content
+
+### ✅ Development Benefits:
+1. **Less Complexity**: No new API routes to maintain
+2. **Easier Testing**: Pure functions for stats calculation
+3. **Better Caching**: Can cache at multiple levels
+4. **Future Flexibility**: Easy to optimize later if needed
+
+---
+
+## Current Task Priority:
+
+### 🚨 IMMEDIATE (Complete today):
+1. ✅ **DONE**: Remove broken `getPublicReportsStatsAction()`
+2. ✅ **DONE**: Fix server component function passing issue
+3. [ ] **IN PROGRESS**: Create `calculateStatsFromReports()` utility
+4. [ ] **PENDING**: Update `/laporan` page to use new stats approach
+5. [ ] **PENDING**: Test and verify everything works
+
+### 🚀 NEXT (This week):
+6. [ ] Add performance caching
+7. [ ] Optimize for large datasets
+8. [ ] Add comprehensive error handling
+9. [ ] Write tests for stats calculations
+
+---
+
+## Testing Checklist:
+
+### ✅ Must Work:
+- [ ] `/laporan` page loads without errors
+- [ ] Stats display accurate numbers
+- [ ] Server-side rendering works (view source shows content)
+- [ ] Search and filtering work correctly
+- [ ] Mobile responsive design
+- [ ] No lint/TypeScript errors
+
+### ✅ Performance Tests:
+- [ ] Page loads in <2 seconds
+- [ ] Stats calculation handles 1000+ reports
+- [ ] Memory usage remains reasonable
+- [ ] Caching works properly
+
+---
+
+## Files to Modify:
+
+### ✅ Core Implementation:
+- `apps/web/lib/stats-utils.ts` ← **NEW FILE** (stats calculation)
+- `apps/web/app/laporan/page.tsx` ← **MODIFY** (use new stats approach)
+- `apps/web/lib/auth-actions.ts` ← **ENHANCE** (add stats option)
+
+### ✅ Type Safety:
+- `apps/web/components/reports/laporan-client-wrapper.tsx` ← **VERIFY TYPES**
+- `apps/web/components/reports/reports-hero.tsx` ← **VERIFY PROPS**
+
+### ✅ Testing:
+- Test stats calculation with various data sets
+- Test error handling when API fails
+- Test caching performance
+
+---
+
+**This approach gives us accurate, real-time stats without requiring any API changes, while maintaining excellent SEO and performance for the public `/laporan` page.**

@@ -77,8 +77,9 @@ class ApiClient {
   ): Promise<{ data: T }> {
     // For upload and other POST requests, we still need the original implementation
     // since they might not be part of the reports service
-    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-    
+    const API_BASE_URL =
+      process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: "POST",
       ...options,

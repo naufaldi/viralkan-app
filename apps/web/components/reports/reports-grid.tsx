@@ -1,12 +1,12 @@
 import { UniformReportCard } from "./uniform-report-card";
 import { ReportsEmptyState } from "./reports-empty-state";
 import { ReportsLoadingState } from "./reports-loading-state";
-import { MockReportWithUser } from "../../lib/mock-data";
+import type { ReportWithUser } from "../../utils/stats-utils";
 
 interface ReportsGridProps {
-  reports: MockReportWithUser[];
+  reports: ReportWithUser[];
   isLoading?: boolean;
-  onReportClick?: (report: MockReportWithUser) => void;
+  onReportClick?: (report: ReportWithUser) => void;
 }
 
 export function ReportsGrid({

@@ -1,4 +1,7 @@
-import { requireAuth, getUserStats } from "../../lib/auth-server";
+"use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@repo/ui/components/ui/button";
 import {
   Card,
@@ -20,43 +23,57 @@ import {
   Calendar,
   TrendingUp,
   Eye,
+  Loader2,
 } from "lucide-react";
 import Link from "next/link";
 import Header from "../../components/layout/header";
-import { getUserReportsAction } from "../../lib/auth-actions";
 import { ReportsTable } from "../../components/dashboard/reports-table";
+import { useAuthContext } from "../../contexts/AuthContext";
+import { useDashboardReports, useDashboardStats } from "../../hooks/dashboard";
 
-interface Report {
-  id: number;
-  title: string;
-  category: string;
-  status: string;
-  created_at: string;
-  image_url?: string;
-  street_name?: string;
-}
+export default function DashboardPage() {
+  const router = useRouter();
+  const { backendUser, isLoading: authLoading } = useAuthContext();
 
-// interface DashboardStats {
-//   user_total_reports: number;
-//   platform_total_reports: number;
-//   user_reports_this_month: number;
-//   platform_reports_this_month: number;
-// }
+  // Client-side data fetching with TanStack Query
+  const {
+    data: reportsData,
+    isLoading: reportsLoading,
+    error: reportsError,
+  } = useDashboardReports({ limit: 6 });
 
-export default async function DashboardPage() {
-  // Server-side auth check using Hono /verify
-  const user = await requireAuth();
-  const stats = await getUserStats();
+  const { data: stats, isLoading: statsLoading } = useDashboardStats();
 
-  // Fetch user reports with server action
-  let userReports: Report[] = [];
-  try {
-    userReports = await getUserReportsAction(new URLSearchParams("limit=6"));
-  } catch (error) {
-    console.error("Error fetching user reports:", error);
-    userReports = [];
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!authLoading && !backendUser) {
+      router.push("/login?redirect=/dashboard");
+    }
+  }, [backendUser, authLoading, router]);
+
+  // Show loading state while checking authentication
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p className="text-neutral-600">Memuat dashboard...</p>
+        </div>
+      </div>
+    );
   }
 
+  // Don't render if not authenticated (will redirect)
+  if (!backendUser) {
+    return null;
+  }
+
+  // Transform API data to match ReportsTable expected format
+  const userReports = (reportsData?.items || []).map((report) => ({
+    ...report,
+    title: report.street_name, // Use street_name as title
+    status: "pending", // Default status since API doesn't return status yet
+  }));
 
   return (
     <div className="min-h-screen bg-neutral-50">
@@ -67,14 +84,17 @@ export default async function DashboardPage() {
         <div className="mb-16">
           <div className="flex items-center gap-8 mb-6">
             <Avatar className="h-24 w-24 ring-4 ring-white shadow-lg">
-              <AvatarImage src={user.avatar_url || undefined} alt={user.name} />
+              <AvatarImage
+                src={backendUser.avatar_url || undefined}
+                alt={backendUser.name}
+              />
               <AvatarFallback className="text-2xl font-semibold bg-neutral-100">
-                {user.name?.charAt(0)?.toUpperCase() || "U"}
+                {backendUser.name?.charAt(0)?.toUpperCase() || "U"}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1">
               <h1 className="text-4xl font-bold text-neutral-900 mb-2">
-                Selamat datang, {user.name}!
+                Selamat datang, {backendUser.name}!
               </h1>
               <p className="text-lg text-neutral-600 mb-4">
                 Dashboard untuk memantau kontribusi Anda di Viralkan
@@ -89,10 +109,13 @@ export default async function DashboardPage() {
                 </Badge>
                 <Badge variant="outline" className="px-3 py-1">
                   Bergabung{" "}
-                  {new Date(user.created_at).toLocaleDateString("id-ID", {
-                    year: "numeric",
-                    month: "long",
-                  })}
+                  {new Date(backendUser.created_at).toLocaleDateString(
+                    "id-ID",
+                    {
+                      year: "numeric",
+                      month: "long",
+                    },
+                  )}
                 </Badge>
               </div>
             </div>
@@ -100,77 +123,102 @@ export default async function DashboardPage() {
         </div>
 
         {/* Stats Cards */}
-        {stats && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-            <Card className="border-0 shadow-md hover:shadow-lg transition-shadow duration-200">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-                <CardTitle className="text-sm font-semibold text-neutral-600 uppercase tracking-wide">
-                  Total Laporan
-                </CardTitle>
-                <div className="p-2 bg-neutral-100 rounded-lg">
-                  <FileText className="h-5 w-5 text-neutral-600" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+          <Card className="border-0 shadow-md hover:shadow-lg transition-shadow duration-200">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+              <CardTitle className="text-sm font-semibold text-neutral-600 uppercase tracking-wide">
+                Total Laporan
+              </CardTitle>
+              <div className="p-2 bg-neutral-100 rounded-lg">
+                <FileText className="h-5 w-5 text-neutral-600" />
+              </div>
+            </CardHeader>
+            <CardContent className="pt-0">
+              {statsLoading ? (
+                <div className="flex items-center space-x-2">
+                  <Loader2 className="h-6 w-6 animate-spin" />
+                  <span className="text-neutral-500">Memuat...</span>
                 </div>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="text-4xl font-bold text-neutral-900 mb-2">
-                  {stats.total_reports}
-                </div>
-                <p className="text-sm text-neutral-500">
-                  Laporan yang telah Anda buat
-                </p>
-              </CardContent>
-            </Card>
+              ) : (
+                <>
+                  <div className="text-4xl font-bold text-neutral-900 mb-2">
+                    {stats?.total_reports || 0}
+                  </div>
+                  <p className="text-sm text-neutral-500">
+                    Laporan yang telah Anda buat
+                  </p>
+                </>
+              )}
+            </CardContent>
+          </Card>
 
-            <Card className="border-0 shadow-md hover:shadow-lg transition-shadow duration-200">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-                <CardTitle className="text-sm font-semibold text-neutral-600 uppercase tracking-wide">
-                  Bulan Ini
-                </CardTitle>
-                <div className="p-2 bg-neutral-100 rounded-lg">
-                  <TrendingUp className="h-5 w-5 text-neutral-600" />
+          <Card className="border-0 shadow-md hover:shadow-lg transition-shadow duration-200">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+              <CardTitle className="text-sm font-semibold text-neutral-600 uppercase tracking-wide">
+                Bulan Ini
+              </CardTitle>
+              <div className="p-2 bg-neutral-100 rounded-lg">
+                <TrendingUp className="h-5 w-5 text-neutral-600" />
+              </div>
+            </CardHeader>
+            <CardContent className="pt-0">
+              {statsLoading ? (
+                <div className="flex items-center space-x-2">
+                  <Loader2 className="h-6 w-6 animate-spin" />
+                  <span className="text-neutral-500">Memuat...</span>
                 </div>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="text-4xl font-bold text-neutral-900 mb-2">
-                  {stats.reports_this_month}
-                </div>
-                <p className="text-sm text-neutral-500">
-                  Laporan di bulan{" "}
-                  {new Date().toLocaleDateString("id-ID", { month: "long" })}
-                </p>
-              </CardContent>
-            </Card>
+              ) : (
+                <>
+                  <div className="text-4xl font-bold text-neutral-900 mb-2">
+                    {stats?.reports_this_month || 0}
+                  </div>
+                  <p className="text-sm text-neutral-500">
+                    Laporan di bulan{" "}
+                    {new Date().toLocaleDateString("id-ID", { month: "long" })}
+                  </p>
+                </>
+              )}
+            </CardContent>
+          </Card>
 
-            <Card className="border-0 shadow-md hover:shadow-lg transition-shadow duration-200">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-                <CardTitle className="text-sm font-semibold text-neutral-600 uppercase tracking-wide">
-                  Terakhir Lapor
-                </CardTitle>
-                <div className="p-2 bg-neutral-100 rounded-lg">
-                  <Calendar className="h-5 w-5 text-neutral-600" />
+          <Card className="border-0 shadow-md hover:shadow-lg transition-shadow duration-200">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+              <CardTitle className="text-sm font-semibold text-neutral-600 uppercase tracking-wide">
+                Terakhir Lapor
+              </CardTitle>
+              <div className="p-2 bg-neutral-100 rounded-lg">
+                <Calendar className="h-5 w-5 text-neutral-600" />
+              </div>
+            </CardHeader>
+            <CardContent className="pt-0">
+              {statsLoading ? (
+                <div className="flex items-center space-x-2">
+                  <Loader2 className="h-6 w-6 animate-spin" />
+                  <span className="text-neutral-500">Memuat...</span>
                 </div>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="text-4xl font-bold text-neutral-900 mb-2">
-                  {stats.last_report_date
-                    ? new Date(stats.last_report_date).toLocaleDateString(
-                        "id-ID",
-                        {
-                          day: "numeric",
-                          month: "short",
-                        },
-                      )
-                    : "Belum ada"}
-                </div>
-                <p className="text-sm text-neutral-500">
-                  {stats.last_report_date
-                    ? `${Math.floor((Date.now() - new Date(stats.last_report_date).getTime()) / (1000 * 60 * 60 * 24))} hari lalu`
-                    : "Buat laporan pertama Anda"}
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        )}
+              ) : (
+                <>
+                  <div className="text-4xl font-bold text-neutral-900 mb-2">
+                    {stats?.last_report_date
+                      ? new Date(stats.last_report_date).toLocaleDateString(
+                          "id-ID",
+                          {
+                            day: "numeric",
+                            month: "short",
+                          },
+                        )
+                      : "Belum ada"}
+                  </div>
+                  <p className="text-sm text-neutral-500">
+                    {stats?.last_report_date
+                      ? `${Math.floor((Date.now() - new Date(stats.last_report_date).getTime()) / (1000 * 60 * 60 * 24))} hari lalu`
+                      : "Buat laporan pertama Anda"}
+                  </p>
+                </>
+              )}
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
@@ -211,7 +259,11 @@ export default async function DashboardPage() {
                   <p className="text-neutral-600 mb-4 leading-relaxed">
                     Pantau status dan respons dari laporan Anda
                   </p>
-                  <Button asChild variant="outline" className="border-neutral-300 px-6 py-2">
+                  <Button
+                    asChild
+                    variant="outline"
+                    className="border-neutral-300 px-6 py-2"
+                  >
                     <Link href="/laporan?filter=my-reports">Lihat Laporan</Link>
                   </Button>
                 </div>
@@ -232,13 +284,36 @@ export default async function DashboardPage() {
                   Kelola dan pantau status laporan yang telah Anda buat
                 </CardDescription>
               </div>
-              <Button variant="outline" asChild className="border-neutral-300 px-6">
+              <Button
+                variant="outline"
+                asChild
+                className="border-neutral-300 px-6"
+              >
                 <Link href="/laporan?filter=my-reports">Lihat Semua</Link>
               </Button>
             </div>
           </CardHeader>
           <CardContent className="px-8 pb-8">
-            <ReportsTable data={userReports} />
+            {reportsLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="text-center">
+                  <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+                  <p className="text-neutral-600">Memuat laporan...</p>
+                </div>
+              </div>
+            ) : reportsError ? (
+              <div className="text-center py-12">
+                <p className="text-red-600 mb-4">Gagal memuat laporan</p>
+                <Button
+                  variant="outline"
+                  onClick={() => window.location.reload()}
+                >
+                  Coba Lagi
+                </Button>
+              </div>
+            ) : (
+              <ReportsTable data={userReports} />
+            )}
           </CardContent>
         </Card>
       </main>

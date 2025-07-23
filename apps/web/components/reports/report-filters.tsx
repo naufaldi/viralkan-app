@@ -70,7 +70,7 @@ export function ReportFilters({
           {categories.map(([key, config]) => {
             const isActive = selectedCategory === key;
             const isPothole = key === "berlubang";
-            
+
             return (
               <Button
                 key={key}
@@ -80,8 +80,8 @@ export function ReportFilters({
                 className={
                   isActive
                     ? `${
-                        isPothole 
-                          ? "bg-red-600 hover:bg-red-700 text-white" 
+                        isPothole
+                          ? "bg-red-600 hover:bg-red-700 text-white"
                           : "bg-neutral-800 hover:bg-neutral-900 text-white"
                       } rounded-md`
                     : "border-neutral-200 text-neutral-600 hover:bg-neutral-50 hover:border-neutral-300 rounded-md"
@@ -105,7 +105,9 @@ export function ReportFilters({
               variant="secondary"
               className="bg-neutral-100 text-neutral-700 border-neutral-200 rounded-full px-3 py-1"
             >
-              <span className="mr-1">{categoryConfig[selectedCategory].icon}</span>
+              <span className="mr-1">
+                {categoryConfig[selectedCategory].icon}
+              </span>
               {categoryConfig[selectedCategory].label}
             </Badge>
           )}

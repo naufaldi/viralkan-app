@@ -33,8 +33,9 @@ export async function getAuthUser(): Promise<AuthUser | null> {
   }
 
   try {
-    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-    
+    const API_BASE_URL =
+      process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+
     // Use Hono's POST /api/auth/verify endpoint
     const response = await fetch(`${API_BASE_URL}/api/auth/verify`, {
       method: "POST",
