@@ -41,7 +41,8 @@ export function ReportsHero({ stats, searchQuery, onSearchChange }: ReportsHeroP
                   placeholder="Cari berdasarkan lokasi atau nama jalan..."
                   value={searchQuery}
                   onChange={(e) => onSearchChange(e.target.value)}
-                  className="pl-10 bg-background border-neutral-200 focus:border-neutral-800 focus:ring-neutral-800/12 rounded-md lg:h-12"
+                  className="pl-10 bg-background border-neutral-200 focus:border-neutral-800 focus:ring-neutral-800/12 rounded-md "
+                  size="lg"
                 />
               </div>
               <Button size="lg" className="px-6 bg-neutral-800 hover:bg-neutral-900 text-white rounded-md" asChild>

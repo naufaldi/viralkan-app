@@ -29,7 +29,7 @@ import {
   SelectValue,
 } from "@repo/ui/components/ui/select";
 import { Alert, AlertDescription } from "@repo/ui/components/ui/alert";
-import { AlertCircle, MapPin, Send, FileText, CheckCircle } from "lucide-react";
+import { AlertCircle, MapPin, Send, FileText, CheckCircle, Upload } from "lucide-react";
 import { toast } from "sonner";
 import ImageUpload from "../forms/image-upload";
 import { useCreateReport } from "../../hooks/use-create-report";
@@ -73,6 +73,8 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
       category: undefined,
       location_text: "",
       image_url: "",
+      lat: undefined,
+      lon: undefined,
     },
   });
 
@@ -153,14 +155,16 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
         icon: <CheckCircle className="h-4 w-4" />,
       });
 
-      // Update form data with uploaded image URL
-      const reportData = {
+      // Clean up form data - convert empty strings to undefined for optional fields
+      const cleanedData = {
         ...data,
         image_url: uploadResult.data.imageUrl,
+        lat: data.lat || undefined, // Convert 0, null, empty string to undefined
+        lon: data.lon || undefined,
       };
 
-      console.log("Submitting report with uploaded image:", reportData);
-      await submitReport(reportData, selectedImage);
+      console.log("Submitting report with cleaned data:", cleanedData);
+      await submitReport(cleanedData, selectedImage);
       
       // Show success toast for report creation
       toast.success("Laporan berhasil dibuat!", {
@@ -184,91 +188,161 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
 
   // Get current location (optional)
   const getCurrentLocation = () => {
+    setIsGettingLocation(true);
+    
     if (navigator.geolocation) {
+      // Show loading state
+      toast.loading("Mendapatkan lokasi...", {
+        id: "location",
+      });
+      
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          form.setValue("lat", position.coords.latitude);
-          form.setValue("lon", position.coords.longitude);
+          const lat = position.coords.latitude;
+          const lon = position.coords.longitude;
+          
+          form.setValue("lat", lat);
+          form.setValue("lon", lon);
+          
+          // Show success message
+          toast.success("Lokasi berhasil diperoleh", {
+            id: "location",
+            description: `Lat: ${lat.toFixed(6)}, Lon: ${lon.toFixed(6)}`,
+            duration: 3000,
+          });
         },
         (error) => {
           console.warn("Geolocation error:", error);
-          // Silently fail - geolocation is optional
+          
+          // Show error message
+          let errorMessage = "Gagal mendapatkan lokasi";
+          switch (error.code) {
+            case error.PERMISSION_DENIED:
+              errorMessage = "Izin lokasi ditolak. Silakan izinkan akses lokasi di browser Anda.";
+              break;
+            case error.POSITION_UNAVAILABLE:
+              errorMessage = "Informasi lokasi tidak tersedia.";
+              break;
+            case error.TIMEOUT:
+              errorMessage = "Waktu permintaan lokasi habis.";
+              break;
+          }
+          
+          toast.error(errorMessage, {
+            id: "location",
+            duration: 5000,
+          });
         },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 60000,
+        }
       );
+    } else {
+      toast.error("Browser Anda tidak mendukung geolokasi", {
+        duration: 3000,
+      });
     }
+    
+    setIsGettingLocation(false);
   };
 
-  const isLoading = isSubmitting || isUploading || isUploadingImage;
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
+  const isLoading = isSubmitting || isUploading || isUploadingImage || isGettingLocation;
 
   console.log("About to render CreateReportForm");
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <Card className="border-neutral-200 shadow-card rounded-lg">
-        <CardHeader className="pb-6">
-          <CardTitle className="flex items-center gap-3 text-xl font-semibold text-neutral-900 tracking-tight">
-            <div className="w-8 h-8 bg-primary-50 rounded-lg flex items-center justify-center border border-primary-100">
-              <FileText className="h-5 w-5 text-primary-600" />
+    <Card className="border-neutral-200 shadow-lg rounded-xl overflow-hidden hover:translate-0 ">
+      <CardHeader className="bg-neutral-25 border-b border-neutral-200 px-6 py-6">
+        <CardTitle className="flex items-center gap-3 text-xl font-semibold text-neutral-900 tracking-tight">
+          <div className="w-10 h-10 bg-neutral-100 rounded-lg flex items-center justify-center border border-neutral-200">
+            <FileText className="h-5 w-5 text-neutral-700" />
+          </div>
+          <div>
+            <div className="text-xl font-bold text-neutral-900">Bagikan Kondisi Jalan Rusak</div>
+            <div className="text-sm font-normal text-neutral-600 mt-1">
+              Bantu komunitas menghindari jalan rusak dan tingkatkan kesadaran publik
             </div>
-            Buat Laporan Jalan Rusak
-          </CardTitle>
-          <p className="text-base text-neutral-600 mt-2">
-            Laporkan kondisi jalan rusak untuk membantu perbaikan infrastruktur
-          </p>
-        </CardHeader>
-        <CardContent>
-          {/* Form Error Alert - shown at top */}
-          {(formError || submitError) && (
-            <Alert variant="destructive" className="mb-6">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{formError || submitError}</AlertDescription>
-            </Alert>
-          )}
+          </div>
+        </CardTitle>
+      </CardHeader>
+      
+      <CardContent className="p-6 lg:p-8">
+        {/* Form Error Alert - shown at top */}
+        {(formError || submitError) && (
+          <Alert variant="destructive" className="mb-6 border-red-200 bg-red-50">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription className="text-red-800 font-medium">
+              {formError || submitError}
+            </AlertDescription>
+          </Alert>
+        )}
 
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(onSubmit, (errors) => {
-                console.log("❌ Form validation errors:", errors);
-              })}
-              className="space-y-6"
-            >
-              {/* Image Upload */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-neutral-900">
-                  Foto Jalan Rusak *
-                </label>
-                <ImageUpload
-                  selectedImage={selectedImage}
-                  onImageSelect={handleImageSelect}
-                  onImageRemove={handleImageRemove}
-                  isUploading={isUploadingImage}
-                  error={uploadError}
-                  disabled={isLoading}
-                />
-              </div>
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit, (errors) => {
+              console.log("❌ Form validation errors:", errors);
+            })}
+            className="space-y-6"
+          >
+            {/* Image Upload Section - Full Width */}
+            <div className="space-y-3">
+              <FormLabel className="text-base font-semibold text-neutral-900 flex items-center gap-2">
+                <Upload className="h-4 w-4 text-neutral-600" />
+                Foto Jalan Rusak *
+              </FormLabel>
+              <ImageUpload
+                selectedImage={selectedImage}
+                onImageSelect={handleImageSelect}
+                onImageRemove={handleImageRemove}
+                isUploading={isUploadingImage}
+                error={uploadError}
+                disabled={isLoading}
+              />
+              <p className="text-sm text-neutral-600">
+                Unggah foto yang jelas untuk membantu komunitas mengidentifikasi lokasi jalan rusak.
+              </p>
+            </div>
 
+            {/* Form Fields Grid - Responsive Layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Category Selection */}
               <FormField
                 control={form.control}
                 name="category"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Kategori Kerusakan *</FormLabel>
+                  <FormItem className="space-y-3">
+                    <FormLabel className="text-base font-semibold text-neutral-900">
+                      Kategori Kerusakan *
+                    </FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value || undefined}
                       disabled={isLoading}
                     >
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Pilih kategori kerusakan" />
+                        <SelectTrigger size="lg" className="border-neutral-300 focus:border-neutral-600 focus:ring-neutral-600/20 bg-white">
+                          <SelectValue placeholder="Pilih kategori kerusakan">
+                            {field.value && (
+                              <div className="flex flex-col items-start text-left">
+                                <div className="font-medium text-neutral-900">
+                                  {REPORT_CATEGORIES.find(cat => cat.value === field.value)?.label}
+                                </div>
+                                <div className="text-sm text-neutral-600">
+                                  {REPORT_CATEGORIES.find(cat => cat.value === field.value)?.description}
+                                </div>
+                              </div>
+                            )}
+                          </SelectValue>
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
+                      <SelectContent className="border-neutral-200 shadow-lg bg-white">
                         {REPORT_CATEGORIES.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            <div>
-                              <div className="font-medium">{option.label}</div>
+                          <SelectItem key={option.value} value={option.value} className="py-3">
+                            <div className="space-y-1">
+                              <div className="font-medium text-neutral-900">{option.label}</div>
                               <div className="text-sm text-neutral-600">
                                 {option.description}
                               </div>
@@ -277,8 +351,8 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
                         ))}
                       </SelectContent>
                     </Select>
-                    <FormDescription>
-                      Pilih jenis kerusakan jalan yang paling sesuai
+                    <FormDescription className="text-sm text-neutral-600">
+                      Pilih jenis kerusakan jalan yang paling sesuai dengan kondisi yang Anda temukan.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -290,96 +364,179 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
                 control={form.control}
                 name="street_name"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nama Jalan *</FormLabel>
+                  <FormItem className="space-y-3">
+                    <FormLabel className="text-base font-semibold text-neutral-900">
+                      Nama Jalan *
+                    </FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Contoh: Jl. Sudirman"
                         disabled={isLoading}
+                        size="lg"
+                        className="border-neutral-300 focus:border-neutral-600 focus:ring-neutral-600/20 bg-white"
                         {...field}
                       />
                     </FormControl>
-                    <FormDescription>
-                      Nama jalan atau area tempat kerusakan berada (maksimal 255
-                      karakter)
+                    <FormDescription className="text-sm text-neutral-600">
+                      Nama jalan atau area tempat kerusakan berada (maksimal 255 karakter).
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+            </div>
 
-              {/* Location Description */}
+            {/* Location Description - Full Width */}
+            <FormField
+              control={form.control}
+              name="location_text"
+              render={({ field }) => (
+                <FormItem className="space-y-3">
+                  <FormLabel className="text-base font-semibold text-neutral-900">
+                    Deskripsi Lokasi *
+                  </FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Contoh: Depan Mall Tunjungan Plaza, sebelah kiri arah Surabaya"
+                      rows={4}
+                      disabled={isLoading}
+                      className="border-neutral-300 focus:border-neutral-600 focus:ring-neutral-600/20 resize-none bg-white min-h-[120px]"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription className="text-sm text-neutral-600">
+                    Deskripsi detail lokasi kerusakan jalan untuk memudahkan komunitas menemukan lokasi (maksimal 500 karakter).
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Latitude and Longitude Inputs */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <FormField
                 control={form.control}
-                name="location_text"
+                name="lat"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Deskripsi Lokasi *</FormLabel>
+                  <FormItem className="space-y-3">
+                    <FormLabel className="text-base font-semibold text-neutral-900">
+                      Latitude
+                    </FormLabel>
                     <FormControl>
-                      <Textarea
-                        placeholder="Contoh: Depan Mall Tunjungan Plaza, sebelah kiri arah Surabaya"
-                        rows={3}
-                        disabled={isLoading}
-                        {...field}
-                      />
+                                             <Input
+                         type="number"
+                         step="any"
+                         placeholder="Contoh: -7.260000"
+                         disabled={isLoading}
+                         size="lg"
+                         className="border-neutral-300 focus:border-neutral-600 focus:ring-neutral-600/20 bg-white"
+                         {...field}
+                         onChange={(e) => {
+                           const value = e.target.value;
+                           // Convert empty string to undefined, otherwise parse as number
+                           field.onChange(value === "" ? undefined : parseFloat(value));
+                         }}
+                         value={field.value || ""}
+                       />
                     </FormControl>
-                    <FormDescription>
-                      Deskripsi detail lokasi kerusakan jalan (maksimal 500
-                      karakter)
+                    <FormDescription className="text-sm text-neutral-600">
+                      Koordinat latitude lokasi kerusakan.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+              <FormField
+                control={form.control}
+                name="lon"
+                render={({ field }) => (
+                  <FormItem className="space-y-3">
+                    <FormLabel className="text-base font-semibold text-neutral-900">
+                      Longitude
+                    </FormLabel>
+                    <FormControl>
+                                             <Input
+                         type="number"
+                         step="any"
+                         placeholder="Contoh: 112.780000"
+                         disabled={isLoading}
+                         size="lg"
+                         className="border-neutral-300 focus:border-neutral-600 focus:ring-neutral-600/20 bg-white"
+                         {...field}
+                         onChange={(e) => {
+                           const value = e.target.value;
+                           // Convert empty string to undefined, otherwise parse as number
+                           field.onChange(value === "" ? undefined : parseFloat(value));
+                         }}
+                         value={field.value || ""}
+                       />
+                    </FormControl>
+                    <FormDescription className="text-sm text-neutral-600">
+                      Koordinat longitude lokasi kerusakan.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
-              {/* Optional Location Button */}
-              <div className="flex justify-center">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={getCurrentLocation}
-                  disabled={isLoading}
-                >
-                  <MapPin className="mr-2 h-4 w-4" />
-                  Gunakan Lokasi Saat Ini
-                </Button>
-              </div>
-
-              {/* Submit Button */}
+            {/* Optional Location Button - Centered */}
+            <div className="flex justify-center pt-2">
               <Button
-                type="submit"
-                size="lg"
-                className="w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-3 px-6 rounded-md transition-all duration-150 shadow-sm hover:shadow-md"
-                disabled={isLoading || !selectedImage}
-                onClick={() =>
-                  console.log(
-                    "Submit button clicked, selectedImage:",
-                    selectedImage,
-                    "isLoading:",
-                    isLoading,
-                  )
-                }
+                type="button"
+                variant="outline"
+                onClick={getCurrentLocation}
+                disabled={isLoading}
+                className="h-12 px-6 border-neutral-300 text-neutral-700 hover:bg-neutral-50 hover:border-neutral-400 hover:text-neutral-900"
               >
-                {isLoading ? (
+                {isGettingLocation ? (
                   <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    {isUploadingImage
-                      ? "Mengunggah Foto..."
-                      : isUploading
-                        ? "Mengunggah..."
-                        : "Membuat Laporan..."}
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-neutral-600 mr-2"></div>
+                    Mendapatkan Lokasi...
                   </>
                 ) : (
                   <>
-                    <Send className="mr-2 h-4 w-4" />
-                    Buat Laporan
+                    <MapPin className="mr-2 h-4 w-4" />
+                    Gunakan Lokasi Saat Ini
                   </>
                 )}
               </Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
-    </div>
+            </div>
+
+            {/* Submit Button - Full Width */}
+            <Button
+              type="submit"
+              size="default"
+              className="w-full h-12 bg-neutral-900 hover:bg-neutral-800 text-white font-semibold text-base rounded-lg transition-all duration-150 shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0"
+              disabled={isLoading || !selectedImage}
+              onClick={() =>
+                console.log(
+                  "Submit button clicked, selectedImage:",
+                  selectedImage,
+                  "isLoading:",
+                  isLoading,
+                )
+              }
+            >
+              {isLoading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  {isUploadingImage
+                    ? "Mengunggah Foto..."
+                    : isUploading
+                      ? "Mengunggah..."
+                      : "Membuat Laporan..."}
+                </>
+              ) : (
+                <>
+                  <Send className="mr-2 h-4 w-4" />
+                  Bagikan Laporan
+                </>
+              )}
+            </Button>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
   );
 }
