@@ -18,9 +18,10 @@ interface ReportsHeroProps {
   };
   searchQuery: string;
   onSearchChange: (query: string) => void;
+  isLoading?: boolean;
 }
 
-export function ReportsHero({ stats, searchQuery, onSearchChange }: ReportsHeroProps) {
+export function ReportsHero({ stats, searchQuery, onSearchChange, isLoading = false }: ReportsHeroProps) {
   return (
     <section className="bg-gradient-to-b from-neutral-50 to-background border-b border-neutral-200">
       <div className="container mx-auto px-4 sm:px-6 py-12 lg:py-20">
@@ -72,15 +73,21 @@ export function ReportsHero({ stats, searchQuery, onSearchChange }: ReportsHeroP
               
               <div className="flex items-center gap-4 sm:gap-6 pt-4">
                 <div className="text-center">
-                  <div className="text-xl sm:text-2xl font-bold text-neutral-900">{stats.totalReports}+</div>
+                  <div className="text-xl sm:text-2xl font-bold text-neutral-900">
+                    {isLoading ? "..." : `${stats.totalReports}+`}
+                  </div>
                   <div className="text-xs sm:text-sm text-neutral-600">Total Laporan</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-xl sm:text-2xl font-bold text-neutral-900">{stats.thisWeek}</div>
+                  <div className="text-xl sm:text-2xl font-bold text-neutral-900">
+                    {isLoading ? "..." : stats.thisWeek}
+                  </div>
                   <div className="text-xs sm:text-sm text-neutral-600">Minggu Ini</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-xl sm:text-2xl font-bold text-neutral-900">{stats.today}</div>
+                  <div className="text-xl sm:text-2xl font-bold text-neutral-900">
+                    {isLoading ? "..." : stats.today}
+                  </div>
                   <div className="text-xs sm:text-sm text-neutral-600">Hari Ini</div>
                 </div>
               </div>
@@ -93,7 +100,7 @@ export function ReportsHero({ stats, searchQuery, onSearchChange }: ReportsHeroP
                   <AlertTriangle className="h-5 w-5 sm:h-6 sm:w-6 text-red-600" />
                 </div>
                 <div className="text-xl sm:text-2xl font-bold text-neutral-900 mb-1">
-                  {stats.byCategory.berlubang}
+                  {isLoading ? "..." : stats.byCategory.berlubang}
                 </div>
                 <div className="text-xs sm:text-sm text-neutral-600">Jalan Berlubang</div>
               </Card>
@@ -103,7 +110,7 @@ export function ReportsHero({ stats, searchQuery, onSearchChange }: ReportsHeroP
                   <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-neutral-600" />
                 </div>
                 <div className="text-xl sm:text-2xl font-bold text-neutral-900 mb-1">
-                  {stats.byCategory.retak}
+                  {isLoading ? "..." : stats.byCategory.retak}
                 </div>
                 <div className="text-xs sm:text-sm text-neutral-600">Jalan Retak</div>
               </Card>
@@ -113,7 +120,7 @@ export function ReportsHero({ stats, searchQuery, onSearchChange }: ReportsHeroP
                   <MapPin className="h-5 w-5 sm:h-6 sm:w-6 text-neutral-600" />
                 </div>
                 <div className="text-xl sm:text-2xl font-bold text-neutral-900 mb-1">
-                  {stats.byCategory.lainnya}
+                  {isLoading ? "..." : stats.byCategory.lainnya}
                 </div>
                 <div className="text-xs sm:text-sm text-neutral-600">Masalah Lainnya</div>
               </Card>

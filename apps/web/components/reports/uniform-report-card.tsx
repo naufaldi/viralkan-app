@@ -1,32 +1,25 @@
 import { Badge } from "@repo/ui/components/ui/badge";
 import { Card, CardContent } from "@repo/ui/components/ui/card";
-import { MapPin } from "lucide-react";
+import { MapPin, Crosshair } from "lucide-react";
 import Image from "next/image";
 import { MockReportWithUser } from "../../lib/mock-data";
+import { formatCoordinates, getTimeAgo } from "@/utils/reports";
+import { REPORT_CATEGORIES } from "@/constant/reports";
 
 interface UniformReportCardProps {
-  report: MockReportWithUser;
+  report: MockReportWithUser & {
+    latitude?: number;
+    longitude?: number;
+  };
   onClick?: () => void;
 }
 
 export function UniformReportCard({ report, onClick }: UniformReportCardProps) {
-  const categoryInfo = {
-    berlubang: { icon: "🕳️", label: "Berlubang", color: "bg-red-100 text-red-700" },
-    retak: { icon: "⚡", label: "Retak", color: "bg-neutral-100 text-neutral-700" },
-    lainnya: { icon: "🚧", label: "Lainnya", color: "bg-neutral-100 text-neutral-700" },
-  }[report.category];
 
-  const getTimeAgo = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
-    
-    if (diffInHours < 1) return "Baru saja";
-    if (diffInHours < 24) return `${diffInHours} jam lalu`;
-    const diffInDays = Math.floor(diffInHours / 24);
-    if (diffInDays < 7) return `${diffInDays} hari lalu`;
-    return date.toLocaleDateString("id-ID", { day: "numeric", month: "short" });
-  };
+
+
+  const categoryInfo = REPORT_CATEGORIES[report.category];
+  const hasCoordinates = report.latitude !== undefined && report.longitude !== undefined;
 
   return (
     <Card 
@@ -55,11 +48,24 @@ export function UniformReportCard({ report, onClick }: UniformReportCardProps) {
             {report.street_name}
           </h3>
           
-          <div className="flex items-start gap-2">
-            <MapPin className="text-neutral-500 mt-0.5 flex-shrink-0 h-4 w-4" />
-            <p className="text-neutral-600 line-clamp-2 text-sm">
-              {report.location_text}
-            </p>
+          <div className="space-y-2">
+            {/* Main Location */}
+            <div className="flex items-start gap-2">
+              <MapPin className="text-neutral-500 mt-0.5 flex-shrink-0 h-4 w-4" />
+              <p className="text-neutral-600 line-clamp-2 text-sm">
+                {report.location_text}
+              </p>
+            </div>
+            
+            {/* Coordinates (Optional) */}
+            {hasCoordinates && (
+              <div className="flex items-center gap-2">
+                <Crosshair className="text-neutral-400 flex-shrink-0 h-3 w-3" />
+                <span className="text-xs text-neutral-500 font-mono">
+                  {formatCoordinates(report.latitude!, report.longitude!)}
+                </span>
+              </div>
+            )}
           </div>
           
           <div className="flex items-center justify-between pt-1">
