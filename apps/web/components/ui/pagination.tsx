@@ -52,7 +52,7 @@ export function Pagination({
         size="sm"
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        className="border-neutral-300"
+        className="border-neutral-200 text-neutral-600 hover:bg-neutral-50 hover:border-neutral-300 disabled:text-neutral-400 disabled:cursor-not-allowed rounded-md"
       >
         <ChevronLeft className="h-4 w-4" />
         <span className="hidden sm:inline ml-1">Sebelumnya</span>
@@ -77,8 +77,8 @@ export function Pagination({
               onClick={() => onPageChange(page)}
               className={
                 currentPage === page
-                  ? "bg-primary-600 hover:bg-primary-700 text-white"
-                  : "border-neutral-300 text-neutral-600 hover:bg-neutral-50"
+                  ? "bg-neutral-800 hover:bg-neutral-900 text-white rounded-md"
+                  : "border-neutral-200 text-neutral-600 hover:bg-neutral-50 hover:border-neutral-300 rounded-md"
               }
             >
               {page}
@@ -93,7 +93,7 @@ export function Pagination({
         size="sm"
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className="border-neutral-300"
+        className="border-neutral-200 text-neutral-600 hover:bg-neutral-50 hover:border-neutral-300 disabled:text-neutral-400 disabled:cursor-not-allowed rounded-md"
       >
         <span className="hidden sm:inline mr-1">Selanjutnya</span>
         <ChevronRight className="h-4 w-4" />

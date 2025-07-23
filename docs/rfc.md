@@ -519,9 +519,116 @@ describe("firebaseAuthMiddleware", () => {
 4. Backend: Process request with user context
 ```
 
-## 7 · Component Library Requirements
+## 7 · Design System & Color Strategy
 
-### 6.1 Shared UI Components
+### 7.1 True Monochrome Approach
+
+**Design Philosophy: Content-First, Government-Neutral**
+
+Viralkan adopts a **true monochrome design system** (95% grayscale) with minimal functional color (5%). This approach is specifically chosen for the people-to-people civic reporting nature of the platform.
+
+#### 7.1.1 Why Monochrome for Viralkan?
+
+**Government Neutrality**
+- Civic tools should feel impartial, not branded or partisan
+- Gray/black/white appears official without political color associations
+- Creates universal trust across all community members regardless of background
+
+**People-to-People Focus**
+- The real "color" comes from user-generated content (road damage photos)
+- Interface serves as a neutral backdrop, not competing for attention
+- Community-generated content becomes the primary visual focal point
+- Photos of potholes, cracks, and road damage are the important visuals
+
+**Content-First Architecture**
+- Road damage imagery should be the primary visual element
+- Monochrome UI ensures actual problems stand out clearly
+- Users need to see road conditions clearly, not fancy interface colors
+- Puts focus on civic issues, not design aesthetics
+
+**Universal Accessibility**
+- Works perfectly for colorblind users without special accommodation
+- High contrast displays work better with neutral tones
+- No cultural color associations or biases
+- Maintains WCAG AA compliance across all users
+
+#### 7.1.2 Color Token Strategy
+
+**Base Palette (95% of interface)**
+```css
+:root {
+  /* True Monochrome Scale */
+  --color-white: #ffffff;
+  --color-neutral-25: #fcfcfd;    /* Subtle background tint */
+  --color-neutral-50: #f8fafc;    /* Light backgrounds */
+  --color-neutral-100: #f1f5f9;   /* Muted backgrounds */
+  --color-neutral-200: #e2e8f0;   /* Borders & dividers */
+  --color-neutral-300: #cbd5e1;   /* Disabled states */
+  --color-neutral-400: #94a3b8;   /* Placeholder text */
+  --color-neutral-500: #64748b;   /* Secondary text */
+  --color-neutral-600: #475569;   /* Body text */
+  --color-neutral-700: #334155;   /* Headings */
+  --color-neutral-800: #1e293b;   /* High contrast text */
+  --color-neutral-900: #0f172a;   /* Primary text */
+  --color-neutral-950: #020617;   /* Maximum contrast */
+  --color-black: #000000;
+}
+```
+
+**Functional Color (5% - Essential Only)**
+```css
+:root {
+  /* Interactive Accent */
+  --color-accent: var(--color-neutral-800);      /* Dark gray for primary actions */
+  --color-accent-hover: var(--color-neutral-900); /* Darker for hover states */
+  
+  /* Critical Safety (Red for urgent damage & errors only) */
+  --color-danger: #dc2626;
+  
+  /* Success Status (Green for resolved issues only) */
+  --color-success: #16a34a;
+  
+  /* Damage Categories (Minimal differentiation) */
+  --color-pothole: #dc2626;                      /* Critical - red for urgency */
+  --color-crack: var(--color-neutral-600);       /* Moderate - gray */
+  --color-other: var(--color-neutral-500);       /* General - lighter gray */
+}
+```
+
+#### 7.1.3 Implementation Benefits
+
+**Trust Through Simplicity**
+- Builds trust through honest, unmanipulative design
+- No color psychology tricks - just clear, functional interface
+- Government-appropriate professional appearance
+- Focuses attention on actual civic issues, not branding
+
+**Technical Advantages**
+- Simpler color management and maintenance
+- Better performance with fewer color variations
+- Easier dark mode implementation when needed
+- Reduced cognitive load for users reporting emergencies
+
+**Community Alignment**
+- Neutral appearance welcomes all community members
+- Focus remains on shared civic responsibility
+- Interface doesn't compete with important content (damage photos)
+- Encourages serious engagement with infrastructure issues
+
+#### 7.1.4 Rejected Approach: Blue Primary Color
+
+We specifically **rejected** the typical "civic blue" approach used by many government websites because:
+
+- **Not People-to-People**: Blue implies top-down government authority, but Viralkan is community-driven
+- **Competes with Content**: Colored interface elements draw attention away from road damage photos
+- **Partisan Associations**: Any colored branding could imply political associations
+- **Over-Designed**: Infrastructure reporting should feel serious and functional, not "designed"
+
+The monochrome approach ensures Viralkan feels like a serious civic tool built by and for the community, not a branded government service.
+
+## 8 · Component Library Requirements
+
+### 8.1 Shared UI Components
 
 ```typescript
 // packages/ui/src/components/
@@ -559,7 +666,7 @@ describe("firebaseAuthMiddleware", () => {
 
 ---
 
-## 7 · Database Schema (GIS-Ready)
+## 9 · Database Schema (GIS-Ready)
 
 ```sql
 CREATE EXTENSION IF NOT EXISTS postgis;
@@ -610,7 +717,7 @@ CREATE TABLE rate_limits (
 
 ---
 
-## 8 · Local Dev Setup (5 steps)
+## 10 · Local Dev Setup (5 steps)
 
 1. **Clone & Install** — `bun install` (root).
 2. **Env vars** — copy `.env.example` → `.env` (set Google keys & R2 keys).
@@ -644,9 +751,9 @@ VITE_RECAPTCHA_SITE_KEY=your_recaptcha_site_key
 
 ---
 
-## 9 · Production Stack (Docker + Traefik)
+## 11 · Production Stack (Docker + Traefik)
 
-### 9.1 compose.yml (excerpt)
+### 11.1 compose.yml (excerpt)
 
 ```yaml
 version: "3.9"
@@ -716,9 +823,9 @@ volumes:
 
 ---
 
-## 10 · Security & Performance
+## 12 · Security & Performance
 
-### 10.1 Rate Limiting
+### 12.1 Rate Limiting
 
 ```typescript
 // Per user limits
@@ -729,7 +836,7 @@ const RATE_LIMITS = {
 };
 ```
 
-### 10.2 Image Processing
+### 12.2 Image Processing
 
 ```typescript
 // Client-side validation
@@ -740,7 +847,7 @@ const IMAGE_CONSTRAINTS = {
 };
 ```
 
-### 10.3 PWA Configuration
+### 12.3 PWA Configuration
 
 ```typescript
 // vite.config.ts
@@ -770,7 +877,7 @@ export default defineConfig({
 
 ---
 
-## 11 · Milestone Checklist (Solo‑Dev)
+## 13 · Milestone Checklist (Solo‑Dev)
 
 | #         | Deliverable                           | Est (d) | Dependencies |
 | --------- | ------------------------------------- | ------- | ------------ |
@@ -796,9 +903,9 @@ export default defineConfig({
 
 ---
 
-## 12 · Testing Strategy
+## 14 · Testing Strategy
 
-### 12.1 Unit Tests
+### 14.1 Unit Tests
 
 ```typescript
 // API routes testing
@@ -814,7 +921,7 @@ describe("POST /api/reports", () => {
 });
 ```
 
-### 12.2 Integration Tests
+### 14.2 Integration Tests
 
 ```typescript
 // Database integration
@@ -827,7 +934,7 @@ describe("Reports CRUD", () => {
 });
 ```
 
-### 12.3 E2E Tests (Playwright)
+### 14.3 E2E Tests (Playwright)
 
 ```typescript
 // User flow testing
@@ -846,9 +953,9 @@ test("complete report creation flow", async ({ page }) => {
 
 ---
 
-## 13 · Monitoring & Observability
+## 15 · Monitoring & Observability
 
-### 13.1 Metrics Collection
+### 15.1 Metrics Collection
 
 ```typescript
 // Custom metrics
@@ -859,7 +966,7 @@ const metrics = {
 };
 ```
 
-### 13.2 Health Checks
+### 15.2 Health Checks
 
 ```typescript
 // API health endpoint
@@ -877,7 +984,7 @@ app.get("/health", async (c) => {
 
 ---
 
-## 14 · Open Points
+## 16 · Open Points
 
 - **Avatar URL** — hot‑link Google photo vs cache? (lean = hot‑link)
 - **Image retention** — purge >12 months via nightly job?
