@@ -1,0 +1,224 @@
+// Unified Reports API Service
+// Consolidates functionality from services/api.ts and lib/api-client.ts
+
+import {
+  CreateReportInput,
+  ReportResponse,
+  ReportWithUser,
+  PaginatedReports,
+  ErrorResponse,
+} from "../lib/types/api";
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+
+// Base API request function with consistent error handling
+async function apiRequest<T>(
+  endpoint: string,
+  options: RequestInit = {},
+): Promise<T> {
+  const url = `${API_BASE_URL}${endpoint}`;
+
+  const response = await fetch(url, {
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+    ...options,
+  });
+
+  if (!response.ok) {
+    const errorData: ErrorResponse = await response.json().catch(() => ({
+      error: {
+        code: "UNKNOWN_ERROR",
+        message: `HTTP ${response.status}: ${response.statusText}`,
+        timestamp: new Date().toISOString(),
+      },
+    }));
+    throw new Error(errorData.error.message || `HTTP ${response.status}`);
+  }
+
+  return response.json();
+}
+
+// Authenticated API request function
+async function authenticatedApiRequest<T>(
+  endpoint: string,
+  token: string,
+  options: RequestInit = {},
+): Promise<T> {
+  return apiRequest<T>(endpoint, {
+    ...options,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      ...options.headers,
+    },
+  });
+}
+
+// Reports API Service - Function-based approach
+export const reportsService = {
+  // Get reports with pagination and filters
+  getReports: async (params?: {
+    page?: number;
+    limit?: number;
+    category?: string;
+    search?: string;
+    user_id?: string;
+  }): Promise<PaginatedReports> => {
+    const searchParams = new URLSearchParams();
+
+    if (params?.page) searchParams.append("page", params.page.toString());
+    if (params?.limit) searchParams.append("limit", params.limit.toString());
+    if (params?.category) searchParams.append("category", params.category);
+    if (params?.search) searchParams.append("search", params.search);
+    if (params?.user_id) searchParams.append("user_id", params.user_id);
+
+    const endpoint = `/api/reports${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
+    return apiRequest<PaginatedReports>(endpoint);
+  },
+
+  // Get enriched reports with user information
+  getEnrichedReports: async (params?: {
+    page?: number;
+    limit?: number;
+    category?: string;
+    search?: string;
+    user_id?: string;
+  }): Promise<PaginatedReports> => {
+    const searchParams = new URLSearchParams();
+
+    if (params?.page) searchParams.append("page", params.page.toString());
+    if (params?.limit) searchParams.append("limit", params.limit.toString());
+    if (params?.category) searchParams.append("category", params.category);
+    if (params?.search) searchParams.append("search", params.search);
+    if (params?.user_id) searchParams.append("user_id", params.user_id);
+
+    const endpoint = `/api/reports/enriched${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
+    return apiRequest<PaginatedReports>(endpoint);
+  },
+
+  // Get individual report by ID
+  getReportById: async (id: number): Promise<ReportWithUser> => {
+    return apiRequest<ReportWithUser>(`/api/reports/${id}`);
+  },
+
+  // Create new report (authenticated)
+  createReport: async (
+    data: CreateReportInput,
+    token: string,
+  ): Promise<{ id: number; message: string; success: boolean }> => {
+    return authenticatedApiRequest<{ id: number; message: string; success: boolean }>(
+      "/api/reports",
+      token,
+      {
+        method: "POST",
+        body: JSON.stringify(data),
+      },
+    );
+  },
+
+  // Get user's reports (authenticated)
+  getUserReports: async (
+    token: string,
+    params?: {
+      page?: number;
+      limit?: number;
+      category?: string;
+    },
+  ): Promise<PaginatedReports> => {
+    const searchParams = new URLSearchParams();
+
+    if (params?.page) searchParams.append("page", params.page.toString());
+    if (params?.limit) searchParams.append("limit", params.limit.toString());
+    if (params?.category) searchParams.append("category", params.category);
+
+    const endpoint = `/api/reports/me${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
+    return authenticatedApiRequest<PaginatedReports>(endpoint, token);
+  },
+
+  // Update existing report (authenticated)
+  updateReport: async (
+    id: number,
+    data: Partial<CreateReportInput>,
+    token: string,
+  ): Promise<ReportResponse> => {
+    return authenticatedApiRequest<ReportResponse>(
+      `/api/reports/${id}`,
+      token,
+      {
+        method: "PUT",
+        body: JSON.stringify(data),
+      },
+    );
+  },
+
+  // Delete report (authenticated)
+  deleteReport: async (
+    id: number,
+    token: string,
+  ): Promise<{ success: boolean }> => {
+    return authenticatedApiRequest<{ success: boolean }>(
+      `/api/reports/${id}`,
+      token,
+      {
+        method: "DELETE",
+      },
+    );
+  },
+
+  // Validate report ownership (authenticated)
+  validateOwnership: async (
+    id: number,
+    token: string,
+  ): Promise<{ canEdit: boolean; report: ReportResponse }> => {
+    return authenticatedApiRequest<{ canEdit: boolean; report: ReportResponse }>(
+      `/api/reports/${id}/ownership`,
+      token,
+    );
+  },
+
+  // Get reports statistics
+  getReportsStats: async (): Promise<{
+    total: number;
+    byCategory: Record<string, number>;
+    recent: number;
+  }> => {
+    // This endpoint might not exist yet, so we'll implement it when needed
+    // For now, we can calculate stats from the reports data
+    const reports = await reportsService.getReports({ limit: 1000 });
+    
+    const byCategory = reports.items.reduce((acc, report) => {
+      acc[report.category] = (acc[report.category] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    const recent = reports.items.filter(report => {
+      const reportDate = new Date(report.created_at);
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      return reportDate > weekAgo;
+    }).length;
+
+    return {
+      total: reports.total,
+      byCategory,
+      recent,
+    };
+  },
+};
+
+// Export individual functions for backward compatibility
+export const {
+  getReports,
+  getEnrichedReports,
+  getReportById,
+  createReport,
+  getUserReports,
+  updateReport,
+  deleteReport,
+  validateOwnership,
+  getReportsStats,
+} = reportsService;
+
+// Re-export types for convenience
+export type { CreateReportInput, ReportResponse, ReportWithUser, PaginatedReports }; 

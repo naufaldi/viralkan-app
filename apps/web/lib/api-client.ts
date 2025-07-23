@@ -1,5 +1,7 @@
-// API Client for Hono backend
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+// API Client for Hono backend - Updated to use unified service
+// Maintains backward compatibility while using the new unified reports service
+
+import { reportsService } from "../services/reports";
 
 export interface ReportFilters {
   page?: number;
@@ -8,6 +10,8 @@ export interface ReportFilters {
   search?: string;
 }
 
+// Re-export types from the unified service for backward compatibility
+// Updated to match backend schema (no updated_at field)
 export interface Report {
   id: number;
   category: "berlubang" | "retak" | "lainnya";
@@ -15,10 +19,11 @@ export interface Report {
   location_text: string;
   image_url: string;
   created_at: string;
-  updated_at: string;
   user_id: number;
-  user_name?: string;
-  user_avatar?: string;
+  lat: number | null;
+  lon: number | null;
+  user_name?: string | null;
+  user_avatar?: string | null;
 }
 
 export interface PaginatedReports {
@@ -39,69 +44,29 @@ export interface ApiResponse<T> {
 }
 
 class ApiClient {
-  private baseUrl: string;
-
-  constructor(baseUrl: string = API_BASE_URL) {
-    this.baseUrl = baseUrl;
-  }
-
-  private async request<T>(
-    endpoint: string,
-    options: RequestInit = {},
-  ): Promise<T> {
-    const url = `${this.baseUrl}${endpoint}`;
-
-    const response = await fetch(url, {
-      headers: {
-        "Content-Type": "application/json",
-        ...options.headers,
-      },
-      ...options,
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(
-        errorData.error?.message ||
-          `HTTP ${response.status}: ${response.statusText}`,
-      );
-    }
-
-    return response.json();
-  }
-
+  // Use the unified service internally while maintaining the same public API
   async getReports(filters: ReportFilters = {}): Promise<PaginatedReports> {
-    const params = new URLSearchParams();
-
-    if (filters.page) params.append("page", filters.page.toString());
-    if (filters.limit) params.append("limit", filters.limit.toString());
-    if (filters.category) params.append("category", filters.category);
-    if (filters.search) params.append("search", filters.search);
-
-    const queryString = params.toString();
-    const endpoint = `/api/reports${queryString ? `?${queryString}` : ""}`;
-
-    return this.request<PaginatedReports>(endpoint);
+    return reportsService.getReports({
+      page: filters.page,
+      limit: filters.limit,
+      category: filters.category,
+      search: filters.search,
+    });
   }
 
   async getEnrichedReports(
     filters: ReportFilters = {},
   ): Promise<PaginatedReports> {
-    const params = new URLSearchParams();
-
-    if (filters.page) params.append("page", filters.page.toString());
-    if (filters.limit) params.append("limit", filters.limit.toString());
-    if (filters.category) params.append("category", filters.category);
-    if (filters.search) params.append("search", filters.search);
-
-    const queryString = params.toString();
-    const endpoint = `/api/reports/enriched${queryString ? `?${queryString}` : ""}`;
-
-    return this.request<PaginatedReports>(endpoint);
+    return reportsService.getEnrichedReports({
+      page: filters.page,
+      limit: filters.limit,
+      category: filters.category,
+      search: filters.search,
+    });
   }
 
   async getReportById(id: number): Promise<Report> {
-    return this.request<Report>(`/api/reports/${id}`);
+    return reportsService.getReportById(id);
   }
 
   async post<T>(
@@ -110,7 +75,11 @@ class ApiClient {
     data: any,
     options?: RequestInit,
   ): Promise<{ data: T }> {
-    const response = await fetch(`${this.baseUrl}${endpoint}`, {
+    // For upload and other POST requests, we still need the original implementation
+    // since they might not be part of the reports service
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+    
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: "POST",
       ...options,
       headers: {

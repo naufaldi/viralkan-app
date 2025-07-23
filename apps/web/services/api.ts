@@ -1,4 +1,5 @@
-// API service functions for making authenticated requests to the backend
+// DEPRECATED: API service functions - Use services/reports.ts instead
+// This file is kept for backward compatibility but will be removed in future versions
 
 import {
   CreateReportInput,
@@ -6,6 +7,9 @@ import {
   PaginatedReports,
   ErrorResponse,
 } from "../lib/types/api";
+
+// Import the new unified service
+import { reportsService } from "./reports";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
@@ -47,15 +51,13 @@ async function authenticatedApiRequest<T>(
   });
 }
 
-// Reports API functions
+// Reports API functions - DEPRECATED: Use reportsService from ./reports instead
 export async function createReport(
   data: CreateReportInput,
   token: string,
 ): Promise<{ id: number }> {
-  return authenticatedApiRequest<{ id: number }>("/api/reports", token, {
-    method: "POST",
-    body: JSON.stringify(data),
-  });
+  console.warn('DEPRECATED: Use reportsService.createReport() instead');
+  return reportsService.createReport(data, token);
 }
 
 export async function getReports(params?: {
@@ -64,19 +66,13 @@ export async function getReports(params?: {
   category?: string;
   user_id?: string;
 }): Promise<PaginatedReports> {
-  const searchParams = new URLSearchParams();
-
-  if (params?.page) searchParams.append("page", params.page.toString());
-  if (params?.limit) searchParams.append("limit", params.limit.toString());
-  if (params?.category) searchParams.append("category", params.category);
-  if (params?.user_id) searchParams.append("user_id", params.user_id);
-
-  const endpoint = `/api/reports${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
-  return apiRequest<PaginatedReports>(endpoint);
+  console.warn('DEPRECATED: Use reportsService.getReports() instead');
+  return reportsService.getReports(params);
 }
 
 export async function getReport(id: number): Promise<ReportResponse> {
-  return apiRequest<ReportResponse>(`/api/reports/${id}`);
+  console.warn('DEPRECATED: Use reportsService.getReportById() instead');
+  return reportsService.getReportById(id);
 }
 
 export async function getUserReports(
@@ -86,13 +82,8 @@ export async function getUserReports(
     limit?: number;
   },
 ): Promise<PaginatedReports> {
-  const searchParams = new URLSearchParams();
-
-  if (params?.page) searchParams.append("page", params.page.toString());
-  if (params?.limit) searchParams.append("limit", params.limit.toString());
-
-  const endpoint = `/api/me/reports${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
-  return authenticatedApiRequest<PaginatedReports>(endpoint, token);
+  console.warn('DEPRECATED: Use reportsService.getUserReports() instead');
+  return reportsService.getUserReports(token, params);
 }
 
 // Auth API functions
