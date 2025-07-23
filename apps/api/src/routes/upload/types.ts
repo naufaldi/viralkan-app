@@ -56,8 +56,8 @@ export type FileValidationResult = AppResult<{
 
 // Database entity interfaces
 export interface DbUploadRecord {
-  id: number;
-  user_id: number;
+  id: string; // Changed from number to string (UUID v7)
+  user_id: string; // Changed from number to string (UUID v7)
   image_key: string;
   image_url: string;
   file_size: number;

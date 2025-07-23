@@ -1,9 +1,13 @@
 -- Enable PostGIS extension for spatial data
 CREATE EXTENSION IF NOT EXISTS postgis;
 
+-- Note: Schema uses gen_random_uuid() as DEFAULT for new installations
+-- In production, the application layer should use uuidv7() for time-ordered UUIDs
+-- The DEFAULT is fallback only - application should explicitly generate UUIDs
+
 -- Users table for Firebase Auth integration
 CREATE TABLE IF NOT EXISTS users (
-  id BIGSERIAL PRIMARY KEY,
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   firebase_uid TEXT UNIQUE NOT NULL,
   email TEXT UNIQUE NOT NULL,
   name TEXT NOT NULL,
@@ -14,8 +18,8 @@ CREATE TABLE IF NOT EXISTS users (
 
 -- Reports table for road damage reports
 CREATE TABLE IF NOT EXISTS reports (
-  id BIGSERIAL PRIMARY KEY,
-  user_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
   image_url TEXT NOT NULL,
   category TEXT NOT NULL CHECK (category IN ('berlubang','retak','lainnya')),
   street_name TEXT NOT NULL,

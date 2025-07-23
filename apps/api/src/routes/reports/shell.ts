@@ -67,9 +67,9 @@ export const getReportById = async (
 };
 
 export const createNewReport = async (
-  userId: number,
+  userId: string, // Changed from number to string (UUID v7)
   reportInput: CreateReportInput,
-): Promise<AppResult<{ id: number }>> => {
+): Promise<AppResult<{ id: string }>> => { // Changed return type to string
   try {
     // Sanitize input data using core business logic
     const sanitizedData = core.sanitizeReportData(reportInput);
@@ -94,8 +94,8 @@ export const createNewReport = async (
 };
 
 export const updateExistingReport = async (
-  reportId: number,
-  userId: number,
+  reportId: string, // Changed from number to string (UUID v7)
+  userId: string, // Changed from number to string (UUID v7)
   updateData: Partial<CreateReportInput>,
 ): Promise<AppResult<ReportWithUser>> => {
   try {
@@ -165,8 +165,8 @@ export const updateExistingReport = async (
 };
 
 export const deleteExistingReport = async (
-  reportId: number,
-  userId: number,
+  reportId: string, // Changed from number to string (UUID v7)
+  userId: string, // Changed from number to string (UUID v7)
 ): Promise<AppResult<boolean>> => {
   try {
     // First get the existing report to validate permissions
@@ -198,7 +198,7 @@ export const deleteExistingReport = async (
 };
 
 export const getUserReports = async (
-  userId: number,
+  userId: string, // Changed from number to string (UUID v7)
   query: Pick<ReportQuery, "page" | "limit" | "category">,
 ): Promise<AppResult<PaginatedReports>> => {
   try {
@@ -275,8 +275,8 @@ export const getReportsWithEnrichedData = async (
 };
 
 export const validateReportOwnership = async (
-  reportId: number,
-  userId: number,
+  reportId: string, // Changed from number to string (UUID v7)
+  userId: string, // Changed from number to string (UUID v7)
 ): Promise<AppResult<ReportWithUser>> => {
   try {
     // Get the report from data layer

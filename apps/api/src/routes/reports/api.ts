@@ -15,7 +15,7 @@ import * as shell from "./shell";
 
 type Env = {
   Variables: {
-    user_id: number;
+    user_id: string; // Changed from number to string (UUID v7)
   };
 };
 
@@ -141,7 +141,7 @@ const createReportRoute = createRoute({
       content: {
         "application/json": {
           schema: z.object({
-            id: z.number(),
+            id: z.string(), // Changed from z.number() to z.string() (UUID v7)
             message: z.string(),
             success: z.boolean(),
           }),

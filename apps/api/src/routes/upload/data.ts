@@ -2,6 +2,7 @@ import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { sql } from "@/db/connection";
 import { createSuccess, createError, AppResult, AppError } from "@/types";
 import type { UploadResult, R2Config, DbUploadRecord } from "./types";
+import { uuidv7 } from "uuidv7";
 
 /**
  * Initialize R2 client with configuration
@@ -144,7 +145,7 @@ export const uploadToR2 = async (
  * @returns Promise<AppResult<DbUploadRecord>>
  */
 export const recordUploadMetadata = async (
-  userId: number,
+  userId: string, // Changed from number to string (UUID v7)
   imageKey: string,
   imageUrl: string,
   fileSize: number,
@@ -152,7 +153,7 @@ export const recordUploadMetadata = async (
 ): Promise<AppResult<DbUploadRecord>> => {
   try {
     // Validate inputs
-    if (!userId || userId <= 0) {
+    if (!userId || typeof userId !== "string" || userId.trim().length === 0) {
       return createError("Invalid user ID for database record", 400);
     }
 
@@ -172,9 +173,10 @@ export const recordUploadMetadata = async (
       return createError("File type is required for database record", 400);
     }
 
+    const uploadId = uuidv7(); // Generate UUID v7 for new upload record
     const result = await sql`
-      INSERT INTO uploads (user_id, image_key, image_url, file_size, file_type, created_at)
-      VALUES (${userId}, ${imageKey}, ${imageUrl}, ${fileSize}, ${fileType}, NOW())
+      INSERT INTO uploads (id, user_id, image_key, image_url, file_size, file_type, created_at)
+      VALUES (${uploadId}, ${userId}, ${imageKey}, ${imageUrl}, ${fileSize}, ${fileType}, NOW())
       RETURNING *
     `;
 
@@ -290,12 +292,12 @@ export const getUploadByKey = async (
  * @returns Promise<AppResult<number>>
  */
 export const getUserUploadCount = async (
-  userId: number,
+  userId: string, // Changed from number to string (UUID v7)
   timeWindowMinutes: number = 60,
 ): Promise<AppResult<number>> => {
   try {
     // Validate inputs
-    if (!userId || userId <= 0) {
+    if (!userId || typeof userId !== "string" || userId.trim().length === 0) {
       return createError("Invalid user ID for rate limit check", 400);
     }
 

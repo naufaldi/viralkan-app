@@ -27,13 +27,13 @@ import { createR2Client, uploadToR2, getUserUploadCount } from "./data";
  * @returns Promise<UploadResult>
  */
 export const processFileUpload = async (
-  userId: number,
+  userId: string, // Changed from number to string (UUID v7)
   file: any,
   r2Config: R2Config,
 ): Promise<UploadResult> => {
   try {
     // 1. Validate user permissions with detailed error
-    if (!userId || userId <= 0) {
+    if (!userId || typeof userId !== "string" || userId.trim().length === 0) {
       return createError("Invalid user ID provided", 400);
     }
 
@@ -225,7 +225,7 @@ export const processFileUpload = async (
  * @returns Promise<AppResult<boolean>>
  */
 export const validateUploadRequest = async (
-  userId: number,
+  userId: string, // Changed from number to string (UUID v7)
   file: any,
 ): Promise<AppResult<boolean>> => {
   // Check user authorization

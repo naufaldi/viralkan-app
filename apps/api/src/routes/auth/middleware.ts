@@ -4,8 +4,8 @@ import * as shell from "./shell";
 import type { ErrorResponse } from "./types";
 
 interface AuthContext extends Context {
-  get: (key: "user_id") => number;
-  set: (key: "user_id", value: number) => void;
+  get: (key: "user_id") => string; // Changed from number to string (UUID v7)
+  set: (key: "user_id", value: string) => void; // Changed from number to string (UUID v7)
 }
 
 /**

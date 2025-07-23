@@ -6,7 +6,7 @@ import * as shell from "./shell";
 
 type Env = {
   Variables: {
-    user_id: number;
+    user_id: string; // Changed from number to string (UUID v7)
   };
 };
 
@@ -88,11 +88,9 @@ uploadRouter.openapi(uploadImageRoute, async (c) => {
 
   try {
     // Enhanced authentication error handling
-    const userIdRaw = c.get("user_id");
-    const userId =
-      typeof userIdRaw === "string" ? parseInt(userIdRaw, 10) : userIdRaw;
+    const userId = c.get("user_id");
 
-    if (!userId || userId <= 0) {
+    if (!userId || typeof userId !== "string" || userId.trim().length === 0) {
       console.warn(
         `Authentication failed - invalid user ID: ${userId} [${requestId}]`,
       );

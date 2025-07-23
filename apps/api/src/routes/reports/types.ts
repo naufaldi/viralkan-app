@@ -12,8 +12,8 @@ export type ReportParams = z.infer<typeof ReportParamsSchema>;
 
 // Database Entity Types (specific to reports)
 export interface Report {
-  id: number;
-  user_id: number;
+  id: string; // Changed from number to string (UUID v7)
+  user_id: string; // Changed from number to string (UUID v7)
   image_url: string;
   category: "berlubang" | "retak" | "lainnya";
   street_name: string;

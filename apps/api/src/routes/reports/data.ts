@@ -8,6 +8,7 @@ import type {
   PaginatedReports,
 } from "./types";
 import type { AppResult } from "@/types";
+import { uuidv7 } from "uuidv7";
 
 // Database operations for reports
 
@@ -30,7 +31,7 @@ export const findReportsWithPagination = async (
 
     if (user_id) {
       whereConditions.push(`r.user_id = $${paramIndex}`);
-      params.push(parseInt(user_id));
+      params.push(user_id); // Now expects UUID string, no parseInt needed
       paramIndex++;
     }
 
@@ -93,7 +94,7 @@ export const findReportsWithPagination = async (
 };
 
 export const findReportById = async (
-  id: number,
+  id: string, // Changed from number to string (UUID v7)
 ): Promise<AppResult<ReportWithUser>> => {
   try {
     const query = `
@@ -128,12 +129,14 @@ export const findReportById = async (
 };
 
 export const createReport = async (
-  userId: number,
+  userId: string, // Changed from number to string (UUID v7)
   reportData: CreateReportInput,
-): Promise<AppResult<{ id: number }>> => {
+): Promise<AppResult<{ id: string }>> => { // Changed return type to string
   try {
+    const reportId = uuidv7(); // Generate UUID v7 for new report
     const query = `
       INSERT INTO reports (
+        id,
         user_id, 
         image_url, 
         category, 
@@ -142,11 +145,12 @@ export const createReport = async (
         lat, 
         lon
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       RETURNING id
     `;
 
     const params = [
+      reportId,
       userId,
       reportData.image_url,
       reportData.category,
@@ -170,8 +174,8 @@ export const createReport = async (
 };
 
 export const updateReport = async (
-  id: number,
-  userId: number,
+  id: string, // Changed from number to string (UUID v7)
+  userId: string, // Changed from number to string (UUID v7)
   reportData: Partial<CreateReportInput>,
 ): Promise<AppResult<boolean>> => {
   try {
@@ -250,8 +254,8 @@ export const updateReport = async (
 };
 
 export const deleteReport = async (
-  id: number,
-  userId: number,
+  id: string, // Changed from number to string (UUID v7)
+  userId: string, // Changed from number to string (UUID v7)
 ): Promise<AppResult<boolean>> => {
   try {
     const query = `
@@ -273,12 +277,12 @@ export const deleteReport = async (
 };
 
 export const findReportsByUserId = async (
-  userId: number,
+  userId: string, // Changed from number to string (UUID v7)
   query: Pick<ReportQuery, "page" | "limit" | "category">,
 ): Promise<AppResult<PaginatedReports>> => {
   const extendedQuery: ReportQuery = {
     ...query,
-    user_id: userId.toString(),
+    user_id: userId, // userId is already a string (UUID)
   };
 
   return findReportsWithPagination(extendedQuery);

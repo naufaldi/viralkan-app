@@ -22,7 +22,7 @@ export type UserStatsResponse = z.infer<typeof UserStatsResponseSchema>;
 
 // Database user interface (specific to auth)
 export interface DbUser {
-  id: number;
+  id: string; // Changed from number to string (UUID v7)
   firebase_uid: string;
   email: string;
   name: string;

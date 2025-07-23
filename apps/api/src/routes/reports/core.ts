@@ -85,7 +85,7 @@ export const calculateReportPriority = (
 
 export const canUserEditReport = (
   report: ReportWithUser,
-  userId: number,
+  userId: string, // Changed from number to string (UUID v7)
 ): boolean => {
   // Business rule: Only the report creator can edit their report
   return report.user_id === userId;
@@ -93,7 +93,7 @@ export const canUserEditReport = (
 
 export const canUserDeleteReport = (
   report: ReportWithUser,
-  userId: number,
+  userId: string, // Changed from number to string (UUID v7)
 ): boolean => {
   // Business rule: Only the report creator can delete their report
   return report.user_id === userId;
@@ -190,7 +190,7 @@ export const sortReportsByPriority = (
 export const validateReportUpdate = (
   currentReport: ReportWithUser,
   updateData: Partial<CreateReportInput>,
-  userId: number,
+  userId: string, // Changed from number to string (UUID v7)
 ): AppResult<Partial<CreateReportInput>> => {
   // Business rule: Check user permissions
   if (!canUserEditReport(currentReport, userId)) {

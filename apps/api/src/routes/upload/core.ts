@@ -116,7 +116,7 @@ export const validateUploadedFile = (file: any): FileValidationResult => {
  * @returns Unique storage key
  */
 export const generateStorageKey = (
-  userId: number,
+  userId: string, // Changed from number to string (UUID v7)
   filename: string,
 ): string => {
   const timestamp = Date.now();
@@ -144,13 +144,15 @@ export const generatePublicUrl = (
  * @param userId - The user ID to validate
  * @returns Boolean indicating if user can upload
  */
-export const canUserUpload = (userId: number): boolean => {
+export const canUserUpload = (userId: string): boolean => { // Changed from number to string (UUID v7)
   // Enhanced validation
-  if (!userId || typeof userId !== "number") {
+  if (!userId || typeof userId !== "string" || userId.trim().length === 0) {
     return false;
   }
 
-  if (userId <= 0 || !Number.isInteger(userId)) {
+  // UUID string validation - should be valid UUID format
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!uuidRegex.test(userId)) {
     return false;
   }
 

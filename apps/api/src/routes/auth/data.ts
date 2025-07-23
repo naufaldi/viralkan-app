@@ -1,5 +1,6 @@
 import type { Sql } from "postgres";
 import type { CreateUser, DbUser } from "./types";
+import { uuidv7 } from "uuidv7";
 
 /**
  * Creates a new user in the database
@@ -9,13 +10,15 @@ export const createUser = async (
   sql: Sql,
   userData: CreateUser,
 ): Promise<DbUser> => {
+  const userId = uuidv7(); // Generate UUID v7 for new user
   const insertUser = `
-    INSERT INTO users(firebase_uid, email, name, avatar_url, provider)
-    VALUES($1, $2, $3, $4, $5)
+    INSERT INTO users(id, firebase_uid, email, name, avatar_url, provider)
+    VALUES($1, $2, $3, $4, $5, $6)
     RETURNING id, firebase_uid, email, name, avatar_url, provider, created_at;
   `;
 
   const result = await sql.unsafe(insertUser, [
+    userId,
     userData.firebase_uid,
     userData.email,
     userData.name,
@@ -55,7 +58,7 @@ export const findUserByFirebaseUid = async (
  */
 export const findUserById = async (
   sql: Sql,
-  userId: number,
+  userId: string, // Changed from number to string (UUID v7)
 ): Promise<DbUser | null> => {
   const findUser = `
     SELECT id, firebase_uid, email, name, avatar_url, provider, created_at
@@ -166,13 +169,15 @@ export const upsertUser = async (
     return result[0] as unknown as DbUser;
   } else {
     // Create new user
+    const userId = uuidv7(); // Generate UUID v7 for new user
     const insertUser = `
-      INSERT INTO users(firebase_uid, email, name, avatar_url, provider)
-      VALUES($1, $2, $3, $4, $5)
+      INSERT INTO users(id, firebase_uid, email, name, avatar_url, provider)
+      VALUES($1, $2, $3, $4, $5, $6)
       RETURNING id, firebase_uid, email, name, avatar_url, provider, created_at;
     `;
 
     const result = await sql.unsafe(insertUser, [
+      userId,
       userData.firebase_uid,
       userData.email,
       userData.name,
@@ -251,7 +256,7 @@ export const userExistsByEmail = async (
  */
 export const getUserStats = async (
   sql: Sql,
-  userId: number,
+  userId: string, // Changed from number to string (UUID v7)
 ): Promise<{
   total_reports: number;
   reports_by_category: { berlubang: number; retak: number; lainnya: number };

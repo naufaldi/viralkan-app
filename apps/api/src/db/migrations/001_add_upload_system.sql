@@ -7,8 +7,8 @@ ALTER TABLE reports ADD COLUMN IF NOT EXISTS image_key TEXT;
 
 -- Create uploads table for tracking upload metadata
 CREATE TABLE IF NOT EXISTS uploads (
-    id BIGSERIAL PRIMARY KEY,
-    user_id BIGINT REFERENCES users (id) ON DELETE CASCADE,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users (id) ON DELETE CASCADE,
     image_key TEXT UNIQUE NOT NULL,
     image_url TEXT NOT NULL,
     file_size INTEGER NOT NULL,

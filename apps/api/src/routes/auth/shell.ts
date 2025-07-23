@@ -100,16 +100,16 @@ export const verifyTokenAndGetUser = async (
  */
 export const getUserById = async (
   sql: Sql,
-  userId: number,
-  requestingUserId: number,
+  userId: string, // Changed from number to string (UUID v7)
+  requestingUserId: string, // Changed from number to string (UUID v7)
 ): Promise<AppResult<UserResponse>> => {
   try {
     // Input validation
-    if (!userId || userId <= 0) {
+    if (!userId || typeof userId !== "string" || userId.trim().length === 0) {
       return createError("Valid user ID is required", 400);
     }
 
-    if (!requestingUserId || requestingUserId <= 0) {
+    if (!requestingUserId || typeof requestingUserId !== "string" || requestingUserId.trim().length === 0) {
       return createError("Valid requesting user ID is required", 400);
     }
 
@@ -152,12 +152,12 @@ export const getUserById = async (
  */
 export const updateUserProfile = async (
   sql: Sql,
-  userId: number,
+  userId: string, // Changed from number to string (UUID v7)
   updateData: Partial<CreateUser>,
 ): Promise<AppResult<UserResponse>> => {
   try {
     // Input validation
-    if (!userId || userId <= 0) {
+    if (!userId || typeof userId !== "string" || userId.trim().length === 0) {
       return createError("Valid user ID is required", 400);
     }
 
@@ -228,11 +228,11 @@ export const updateUserProfile = async (
  */
 export const handleUserLogout = async (
   sql: Sql,
-  userId: number,
+  userId: string, // Changed from number to string (UUID v7)
 ): Promise<AppResult<LogoutResponse>> => {
   try {
     // Input validation
-    if (!userId || userId <= 0) {
+    if (!userId || typeof userId !== "string" || userId.trim().length === 0) {
       return createError("Valid user ID is required", 400);
     }
 
@@ -275,8 +275,8 @@ export const handleUserLogout = async (
  */
 export const getUserStats = async (
   sql: Sql,
-  userId: number,
-  requestingUserId: number,
+  userId: string, // Changed from number to string (UUID v7)
+  requestingUserId: string, // Changed from number to string (UUID v7)
 ): Promise<
   AppResult<{
     total_reports: number;
@@ -287,11 +287,11 @@ export const getUserStats = async (
 > => {
   try {
     // Input validation
-    if (!userId || userId <= 0) {
+    if (!userId || typeof userId !== "string" || userId.trim().length === 0) {
       return createError("Valid user ID is required", 400);
     }
 
-    if (!requestingUserId || requestingUserId <= 0) {
+    if (!requestingUserId || typeof requestingUserId !== "string" || requestingUserId.trim().length === 0) {
       return createError("Valid requesting user ID is required", 400);
     }
 

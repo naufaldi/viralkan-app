@@ -13,7 +13,7 @@ import { firebaseAuthMiddleware } from "./middleware";
 
 type Env = {
   Variables: {
-    user_id: number;
+    user_id: string; // Changed from number to string (UUID v7)
   };
 };
 
