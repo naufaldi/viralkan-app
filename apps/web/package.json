@@ -4,8 +4,8 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack --port 5173",
-    "build": "next build",
+    "dev": " next dev --turbopack --port 5173",
+    "build": " next build",
     "start": "next start",
     "lint": "next lint --max-warnings 0",
     "check-types": "tsc --noEmit"
@@ -15,6 +15,7 @@
     "@repo/ui": "*",
     "@tanstack/react-query": "^5.83.0",
     "@tanstack/react-query-devtools": "^5.83.0",
+    "@tanstack/react-table": "^8.21.3",
     "firebase": "^11.10.0",
     "lucide-react": "^0.525.0",
     "next": "^15.3.0",
@@ -34,5 +35,6 @@
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.11",
     "typescript": "5.8.2"
-  }
+  },
+  "packageManager": "bun@1.2.4"
 }

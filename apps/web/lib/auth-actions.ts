@@ -87,7 +87,7 @@ export async function logoutAction() {
   redirect("/");
 }
 
-// Server action for getting user reports (uses Hono GET /api/me/reports)
+// Server action for getting user reports (uses Hono GET /api/reports/me)
 export async function getUserReportsAction(searchParams?: URLSearchParams) {
   const user = await getAuthUser();
 
@@ -102,7 +102,7 @@ export async function getUserReportsAction(searchParams?: URLSearchParams) {
 
   const queryString = searchParams ? `?${searchParams.toString()}` : "";
 
-  const response = await fetch(`${API_BASE_URL}/api/me/reports${queryString}`, {
+  const response = await fetch(`${API_BASE_URL}/api/reports/me${queryString}`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,
