@@ -1,5 +1,6 @@
 import { sql } from "@/db/connection";
 import { createSuccess, createError } from "@/types";
+import { debugUuidData } from "@/utils/uuid";
 import type {
   Report,
   ReportWithUser,
@@ -84,6 +85,12 @@ export const findReportsWithPagination = async (
 
     const total = Number((countResult as any)[0]?.total || 0);
     const pages = Math.ceil(total / limit);
+
+    // Debug: Log the first report to see the data structure
+    if ((reports as any).length > 0) {
+      const firstReport = (reports as any)[0];
+      debugUuidData(firstReport, "First report from database");
+    }
 
     const paginatedResult: PaginatedReports = {
       items: reports as unknown as ReportWithUser[],

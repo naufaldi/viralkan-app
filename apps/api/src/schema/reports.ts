@@ -1,4 +1,8 @@
 import { z } from "@hono/zod-openapi";
+import { createUuidValidator, createRelaxedUuidValidator } from "@/utils/uuid";
+
+// Use relaxed validator for debugging
+const uuidValidator = createRelaxedUuidValidator("UUID");
 
 // Zod Schemas for Validation with OpenAPI metadata
 export const CreateReportSchema = z.object({
@@ -59,12 +63,7 @@ export const ReportQuerySchema = z.object({
     example: "berlubang",
     description: "Filter reports by damage category",
   }),
-  user_id: z
-    .string()
-    .regex(
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
-      "Invalid UUID format",
-    )
+  user_id: uuidValidator
     .optional()
     .openapi({
       example: "01890dd5-ea3f-7746-b3a5-e8c5e0b0f4a1",
@@ -99,40 +98,22 @@ export const MyReportsQuerySchema = z.object({
 });
 
 export const ReportParamsSchema = z.object({
-  id: z
-    .string()
-    .regex(
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
-      "Invalid UUID format",
-    )
-    .openapi({
-      example: "01890dd5-ea3f-7746-b3a5-e8c5e0b0f4a1",
-      description: "Unique identifier of the report (UUID v7)",
-    }),
+  id: uuidValidator.openapi({
+    example: "01890dd5-ea3f-7746-b3a5-e8c5e0b0f4a1",
+    description: "Unique identifier of the report (UUID v7)",
+  }),
 });
 
 // Response Schemas
 export const ReportResponseSchema = z.object({
-  id: z
-    .string()
-    .regex(
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
-      "Invalid UUID format",
-    )
-    .openapi({
-      example: "01890dd5-ea3f-7746-b3a5-e8c5e0b0f4a1",
-      description: "Report ID (UUID v7)",
-    }),
-  user_id: z
-    .string()
-    .regex(
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
-      "Invalid UUID format",
-    )
-    .openapi({
-      example: "01890dd5-1234-7746-b3a5-e8c5e0b0f4a1",
-      description: "User ID (UUID v7)",
-    }),
+  id: uuidValidator.openapi({
+    example: "01890dd5-ea3f-7746-b3a5-e8c5e0b0f4a1",
+    description: "Report ID (UUID v7)",
+  }),
+  user_id: uuidValidator.openapi({
+    example: "01890dd5-1234-7746-b3a5-e8c5e0b0f4a1",
+    description: "User ID (UUID v7)",
+  }),
   image_url: z
     .string()
     .url()
@@ -153,13 +134,7 @@ export const ReportResponseSchema = z.object({
     .nullable()
     .openapi({ example: "2024-01-15T10:30:00Z" }),
   verified_by: z
-    .union([
-      z.string().regex(
-        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
-        "Invalid UUID format",
-      ),
-      z.null(),
-    ])
+    .union([uuidValidator, z.null()])
     .openapi({ example: "01890dd5-1234-7746-b3a5-e8c5e0b0f4a1" }),
   rejection_reason: z.string().nullable().openapi({ example: "Invalid report" }),
   deleted_at: z
@@ -183,6 +158,18 @@ export const ReportWithUserResponseSchema = ReportResponseSchema.extend({
 
 export const PaginatedReportsResponseSchema = z.object({
   items: z.array(ReportWithUserResponseSchema),
+  total: z.number().openapi({ example: 150 }),
+  page: z.number().openapi({ example: 1 }),
+  limit: z.number().openapi({ example: 20 }),
+  pages: z.number().openapi({ example: 8 }),
+});
+
+// New schema for /me endpoint (without user fields)
+export const MyReportsResponseSchema = ReportResponseSchema;
+
+// New paginated schema for /me endpoint
+export const PaginatedMyReportsResponseSchema = z.object({
+  items: z.array(MyReportsResponseSchema),
   total: z.number().openapi({ example: 150 }),
   page: z.number().openapi({ example: 1 }),
   limit: z.number().openapi({ example: 20 }),

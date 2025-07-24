@@ -10,6 +10,7 @@ import {
   ReportResponseSchema,
   ReportWithUserResponseSchema,
   PaginatedReportsResponseSchema,
+  PaginatedMyReportsResponseSchema,
   ReportsErrorResponseSchema,
 } from "@/schema/reports";
 import * as shell from "./shell";
@@ -133,6 +134,39 @@ const getEnrichedReportsRoute = createRoute({
     },
     400: {
       description: "Invalid query parameters",
+      content: { "application/json": { schema: ReportsErrorResponseSchema } },
+    },
+    500: {
+      description: "Internal server error",
+      content: { "application/json": { schema: ReportsErrorResponseSchema } },
+    },
+  },
+});
+
+const getMyReportsRoute = createRoute({
+  method: "get",
+  path: "/me",
+  request: {
+    query: MyReportsQuerySchema,
+  },
+  middleware: [firebaseAuthMiddleware],
+  summary: "Get my reports",
+  description: "Get reports created by the authenticated user",
+  tags: ["Reports"],
+  security: [{ bearerAuth: [] }],
+  responses: {
+    200: {
+      description: "Successfully retrieved user reports",
+      content: {
+        "application/json": { schema: PaginatedMyReportsResponseSchema },
+      },
+    },
+    400: {
+      description: "Invalid query parameters",
+      content: { "application/json": { schema: ReportsErrorResponseSchema } },
+    },
+    401: {
+      description: "User not authenticated",
       content: { "application/json": { schema: ReportsErrorResponseSchema } },
     },
     500: {
@@ -303,39 +337,6 @@ const deleteReportRoute = createRoute({
   },
 });
 
-const getMyReportsRoute = createRoute({
-  method: "get",
-  path: "/me",
-  request: {
-    query: MyReportsQuerySchema,
-  },
-  middleware: [firebaseAuthMiddleware],
-  summary: "Get my reports",
-  description: "Get reports created by the authenticated user",
-  tags: ["Reports"],
-  security: [{ bearerAuth: [] }],
-  responses: {
-    200: {
-      description: "Successfully retrieved user reports",
-      content: {
-        "application/json": { schema: PaginatedReportsResponseSchema },
-      },
-    },
-    400: {
-      description: "Invalid query parameters",
-      content: { "application/json": { schema: ReportsErrorResponseSchema } },
-    },
-    401: {
-      description: "User not authenticated",
-      content: { "application/json": { schema: ReportsErrorResponseSchema } },
-    },
-    500: {
-      description: "Internal server error",
-      content: { "application/json": { schema: ReportsErrorResponseSchema } },
-    },
-  },
-});
-
 const validateOwnershipRoute = createRoute({
   method: "get",
   path: "/:id/ownership",
@@ -469,6 +470,55 @@ reportsRouter.openapi(getEnrichedReportsRoute, async (c) => {
         error: {
           code: "INTERNAL_ERROR",
           message: "Failed to fetch enriched reports",
+          timestamp: new Date().toISOString(),
+        },
+      },
+      500,
+    );
+  }
+});
+
+reportsRouter.openapi(getMyReportsRoute, async (c) => {
+  try {
+    const userId = c.get("user_id");
+
+    if (!userId) {
+      return c.json(
+        {
+          error: {
+            code: "UNAUTHORIZED",
+            message: "User not authenticated",
+            timestamp: new Date().toISOString(),
+          },
+        },
+        401,
+      );
+    }
+
+    const queryData = c.req.valid("query");
+    const result = await shell.getUserReports(userId, queryData);
+
+    if (result.success) {
+      return c.json(result.data, 200);
+    }
+
+    return c.json(
+      {
+        error: {
+          code: "FETCH_ERROR",
+          message: result.error,
+          timestamp: new Date().toISOString(),
+        },
+      },
+      result.statusCode as 400 | 401 | 500,
+    );
+  } catch (error) {
+    console.error("Error fetching user reports:", error);
+    return c.json(
+      {
+        error: {
+          code: "INTERNAL_ERROR",
+          message: "Failed to fetch user reports",
           timestamp: new Date().toISOString(),
         },
       },
@@ -673,61 +723,6 @@ reportsRouter.openapi(deleteReportRoute, async (c) => {
         error: {
           code: "INTERNAL_ERROR",
           message: "Failed to delete report",
-          timestamp: new Date().toISOString(),
-        },
-      },
-      500,
-    );
-  }
-});
-
-reportsRouter.openapi(getMyReportsRoute, async (c) => {
-  try {
-    const userId = c.get("user_id");
-    console.log("🔍 Debug: userId =", userId);
-
-    if (!userId) {
-      return c.json(
-        {
-          error: {
-            code: "UNAUTHORIZED",
-            message: "User not authenticated",
-            timestamp: new Date().toISOString(),
-          },
-        },
-        401,
-      );
-    }
-
-    const queryData = c.req.valid("query");
-    console.log("🔍 Debug: queryData =", queryData);
-    
-    const result = await shell.getUserReports(userId, queryData);
-    console.log("🔍 Debug: result.success =", result.success);
-    console.log("🔍 Debug: result.data =", JSON.stringify(result.data, null, 2));
-
-    if (result.success) {
-      console.log("🔍 Debug: Returning success response");
-      return c.json(result.data, 200);
-    }
-
-    return c.json(
-      {
-        error: {
-          code: "FETCH_ERROR",
-          message: result.error,
-          timestamp: new Date().toISOString(),
-        },
-      },
-      result.statusCode as 400 | 401 | 500,
-    );
-  } catch (error) {
-    console.error("Error fetching user reports:", error);
-    return c.json(
-      {
-        error: {
-          code: "INTERNAL_ERROR",
-          message: "Failed to fetch user reports",
           timestamp: new Date().toISOString(),
         },
       },
