@@ -6,19 +6,26 @@ import {
   AvatarFallback,
 } from "@repo/ui/components/ui/avatar";
 import { MapPin, Calendar, User } from "lucide-react";
-import {
-  MockReportWithUser,
-  categoryConfig,
-  getTimeAgo,
-} from "../../lib/mock-data";
+import { REPORT_CATEGORIES } from "@/constant/reports";
+import { getTimeAgo } from "@/utils/reports";
+import Image from "next/image";
 
 interface ReportCardProps {
-  report: MockReportWithUser;
+  report: {
+    id: string;
+    image_url: string;
+    category: "berlubang" | "retak" | "lainnya";
+    street_name: string;
+    location_text: string;
+    created_at: string;
+    user_name?: string | null;
+    user_avatar?: string | null;
+  };
   onClick?: () => void;
 }
 
 export function ReportCard({ report, onClick }: ReportCardProps) {
-  const categoryInfo = categoryConfig[report.category];
+  const categoryInfo = REPORT_CATEGORIES[report.category];
 
   return (
     <Card
@@ -28,12 +35,15 @@ export function ReportCard({ report, onClick }: ReportCardProps) {
       <CardContent className="p-0">
         {/* Report Image */}
         <div className="relative">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={report.image_url}
-            alt={`Kerusakan jalan di ${report.street_name}`}
-            className="w-full h-48 object-cover rounded-t-lg"
-          />
+          <div className="w-full h-48 relative">
+            <Image
+              src={report.image_url}
+              alt={`Kerusakan jalan di ${report.street_name}`}
+              fill
+              className="object-cover rounded-t-lg"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            />
+          </div>
           <div className="absolute top-3 left-3">
             <Badge className={`${categoryInfo.color} border-0 font-medium`}>
               <span className="mr-1">{categoryInfo.icon}</span>
@@ -62,15 +72,15 @@ export function ReportCard({ report, onClick }: ReportCardProps) {
             <div className="flex items-center gap-2">
               <Avatar className="h-6 w-6">
                 <AvatarImage src={report.user_avatar || undefined} />
-                <AvatarFallback className="text-xs bg-primary-100 text-primary-700">
+                <AvatarFallback className="text-xs bg-neutral-100 text-neutral-700">
                   {report.user_name
                     ?.split(" ")
-                    .map((n) => n[0])
+                    .map((n: string) => n[0])
                     .join("") || <User className="h-3 w-3" />}
                 </AvatarFallback>
               </Avatar>
               <span className="text-xs text-neutral-600 font-medium">
-                {report.user_name || "Anonymous"}
+                {report.user_name || "Anonim"}
               </span>
             </div>
 

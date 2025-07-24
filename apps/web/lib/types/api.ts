@@ -31,6 +31,11 @@ export const ReportResponseSchema = z.object({
   location_text: z.string(),
   lat: z.number().nullable(),
   lon: z.number().nullable(),
+  status: z.enum(['pending', 'verified', 'rejected', 'deleted']),
+  verified_at: z.string().datetime().nullable(),
+  verified_by: z.string().nullable(),
+  rejection_reason: z.string().nullable(),
+  deleted_at: z.string().datetime().nullable(),
   created_at: z.string().datetime(),
 });
 

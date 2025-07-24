@@ -220,7 +220,7 @@ export default async function DashboardPage() {
                     variant="outline"
                     className="border-neutral-300 px-6 py-2"
                   >
-                    <Link href="/laporan?filter=my-reports">Lihat Laporan</Link>
+                    <Link href="#my-reports">Lihat Laporan</Link>
                   </Button>
                 </div>
               </div>
@@ -229,7 +229,7 @@ export default async function DashboardPage() {
         </div>
 
         {/* Recent Reports Section */}
-        <Card className="border-0 shadow-lg">
+        <Card className="border-0 shadow-lg" id="my-reports">
           <CardHeader className="px-8 py-6">
             <div className="flex items-center justify-between">
               <div>
@@ -245,7 +245,7 @@ export default async function DashboardPage() {
                 asChild
                 className="border-neutral-300 px-6"
               >
-                <Link href="/laporan?filter=my-reports">Lihat Semua</Link>
+                <Link href="/laporan">Lihat Semua</Link>
               </Button>
             </div>
           </CardHeader>
