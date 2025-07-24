@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import { Button } from "@repo/ui/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@repo/ui/components/ui/card";
 import { Badge } from "@repo/ui/components/ui/badge";
@@ -16,6 +15,7 @@ import {
   Activity
 } from "lucide-react";
 import Link from "next/link";
+import { requireAuth } from "@/lib/auth-server";
 
 // Admin statistics interface
 interface AdminStats {
@@ -217,11 +217,35 @@ function RecentActivity() {
   );
 }
 
-export default function AdminDashboard() {
+export default async function AdminDashboard() {
+  // Auth check is handled by admin layout, just get user data for display
+  const user = await requireAuth();
+
+  console.log(`Admin dashboard accessed by user: ${user.email} with role: ${user.role}`);
+
   const stats = mockAdminStats;
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
+    <div>
+      {/* Debug Info - Remove in production */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+          <h3 className="font-semibold text-green-900 mb-2">Server-Side Auth Debug:</h3>
+          <p className="text-sm text-green-800">
+            User Role: {user.role}
+          </p>
+          <p className="text-sm text-green-800">
+            User Email: {user.email}
+          </p>
+          <p className="text-sm text-green-800">
+            User ID: {user.id}
+          </p>
+          <p className="text-sm text-green-800">
+            Auth Method: Server-side verification ✅
+          </p>
+        </div>
+      )}
+
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-neutral-900 mb-2">
@@ -387,6 +411,7 @@ export default function AdminDashboard() {
           icon={UserCheck}
         />
       </div>
-    </div>
+      </div>
+    
   );
 } 

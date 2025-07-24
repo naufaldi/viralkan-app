@@ -12,18 +12,38 @@ export const AdminRouteGuard = ({ children }: AdminRouteGuardProps) => {
   const { isAuthenticated, isLoading, backendUser } = useAuthContext();
   const router = useRouter();
 
+  // Debug logging - remove in production
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log("AdminRouteGuard Debug:", {
+        isLoading,
+        isAuthenticated,
+        backendUser,
+        userRole: backendUser?.role,
+        userEmail: backendUser?.email
+      });
+    }
+  }, [isLoading, isAuthenticated, backendUser]);
+
   useEffect(() => {
     if (!isLoading) {
       // If not authenticated, redirect to login
       if (!isAuthenticated) {
+        console.log("AdminRouteGuard: Not authenticated, redirecting to login");
         router.push("/login");
         return;
       }
 
       // If authenticated but not admin, redirect to dashboard
       if (backendUser && backendUser.role !== "admin") {
+        console.log("AdminRouteGuard: User role is not admin:", backendUser.role, "- redirecting to dashboard");
         router.push("/dashboard");
         return;
+      }
+
+      // If we have a user and they are admin
+      if (backendUser && backendUser.role === "admin") {
+        console.log("AdminRouteGuard: User is admin, allowing access");
       }
     }
   }, [isAuthenticated, isLoading, backendUser, router]);

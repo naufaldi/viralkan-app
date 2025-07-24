@@ -153,12 +153,13 @@ export const ReportResponseSchema = z.object({
     .nullable()
     .openapi({ example: "2024-01-15T10:30:00Z" }),
   verified_by: z
-    .string()
-    .regex(
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
-      "Invalid UUID format",
-    )
-    .nullable()
+    .union([
+      z.string().regex(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
+        "Invalid UUID format",
+      ),
+      z.null(),
+    ])
     .openapi({ example: "01890dd5-1234-7746-b3a5-e8c5e0b0f4a1" }),
   rejection_reason: z.string().nullable().openapi({ example: "Invalid report" }),
   deleted_at: z

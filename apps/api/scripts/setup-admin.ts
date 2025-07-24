@@ -56,10 +56,17 @@ function getAdminEmails(): string[] {
  */
 async function logAdminChange(email: string, action: 'grant' | 'revoke', success: boolean): Promise<void> {
   try {
-    await sql`
-      INSERT INTO admin_audit_log (email, action, success, executed_at, executed_by)
-      VALUES (${email}, ${action}, ${success}, NOW(), ${process.env.USER || 'unknown'})
+    // First get the user ID for the email
+    const userResult = await sql`
+      SELECT id FROM users WHERE email = ${email} LIMIT 1
     `;
+    
+    if (userResult.length > 0) {
+      await sql`
+        INSERT INTO admin_actions (admin_user_id, action_type, target_type, target_id, details, created_at)
+        VALUES (${userResult[0].id}, ${action}, 'user', ${userResult[0].id}, ${JSON.stringify({email, action, success, executed_by: process.env.USER || 'unknown'})}, NOW())
+      `;
+    }
   } catch (error) {
     console.warn("⚠️  Could not log admin change to audit trail:", error);
   }
@@ -85,7 +92,7 @@ async function setUserAsAdmin(email: string): Promise<AdminUser | null> {
   try {
     const result = await sql`
       UPDATE users 
-      SET role = 'admin', updated_at = NOW()
+      SET role = 'admin'
       WHERE email = ${email}
       RETURNING id, email, role, name
     `;

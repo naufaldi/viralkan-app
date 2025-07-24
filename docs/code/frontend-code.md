@@ -9,10 +9,11 @@ This document outlines the core code conventions, architectural patterns, and be
 3. [Layer Responsibilities](#layer-responsibilities)
 4. [Component Patterns](#component-patterns)
 5. [State Management](#state-management)
-6. [Data Fetching](#data-fetching)
-7. [Styling Guidelines](#styling-guidelines)
-8. [Testing Strategy](#testing-strategy)
-9. [Code Style Guidelines](#code-style-guidelines)
+6. [Authentication Patterns](#authentication-patterns)
+7. [Data Fetching](#data-fetching)
+8. [Styling Guidelines](#styling-guidelines)
+9. [Testing Strategy](#testing-strategy)
+10. [Code Style Guidelines](#code-style-guidelines)
 
 ## Architecture Overview
 
@@ -489,6 +490,345 @@ export const useAuth = () => {
   return context
 }
 ```
+
+## Authentication Patterns
+
+### When to Use Server-Side vs Client-Side Authentication
+
+Our authentication system follows a **hybrid server-client approach** optimized for different use cases. Understanding when to use each pattern is crucial for performance, security, and user experience.
+
+#### Decision Matrix
+
+| Use Case | Server-Side Auth | Client-Side Auth | Reasoning |
+|----------|------------------|------------------|-----------|
+| **Protected pages (dashboard, admin)** | ✅ **Recommended** | ❌ Not suitable | Fast loading, SEO-friendly, server-side protection |
+| **Navigation/header components** | ❌ Not suitable | ✅ **Recommended** | Reactive UI, login/logout state changes |
+| **Initial page loads** | ✅ **Recommended** | ❌ Not suitable | No loading delays, better performance |
+| **Interactive auth forms** | ❌ Not suitable | ✅ **Recommended** | Real-time validation, loading states |
+| **Data fetching for authenticated users** | ✅ **Recommended** | ❌ Not suitable | Secure, server-side validation |
+| **Conditional UI rendering** | ❌ Not suitable | ✅ **Recommended** | Dynamic updates, user interaction |
+
+### 1. Server-Side Authentication (Recommended for Most Cases)
+
+**Best for**: Protected pages, data fetching, initial auth checks
+
+**Characteristics**:
+- 🚀 **Fast Initial Load** - No client-side JavaScript needed for auth
+- 🔍 **SEO Friendly** - Content available in initial HTML
+- 🔒 **More Secure** - Authentication happens server-side
+- ⚡ **No Loading States** - Data is ready when page renders
+- 📊 **Perfect for Dashboards** - Static data that loads once
+
+#### Implementation Pattern
+
+```typescript
+// app/dashboard/page.tsx
+import { requireAuth, getUserStats } from "@/lib/auth-server";
+import { getUserReportsAction } from "@/lib/auth-actions";
+
+export default async function DashboardPage() {
+  // Server-side authentication check
+  const user = await requireAuth(); // Redirects to login if not authenticated
+
+  // Server-side data fetching with authenticated user
+  let userReports: any[] = [];
+  let stats: any = null;
+
+  try {
+    const searchParams = new URLSearchParams("limit=6");
+    const reportsData = await getUserReportsAction(searchParams);
+    userReports = reportsData?.items || [];
+    stats = await getUserStats();
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    // Graceful fallback with empty data
+  }
+
+  return (
+    <div className="min-h-screen bg-neutral-50">
+      <Header />
+      <main className="container mx-auto px-8 py-12">
+        <h1 className="text-4xl font-bold">
+          Welcome, {user.name}! {/* Direct server data */}
+        </h1>
+        
+        {/* Stats available immediately, no loading state */}
+        <div className="grid grid-cols-3 gap-6">
+          <div className="text-2xl font-bold">
+            {stats?.total_reports || 0}
+          </div>
+        </div>
+
+        {/* Reports table with server-fetched data */}
+        <ReportsTable data={userReports} />
+      </main>
+    </div>
+  );
+}
+```
+
+#### Admin Route Protection
+
+```typescript
+// app/admin/layout.tsx
+import { redirect } from "next/navigation";
+import { requireAuth } from "@/lib/auth-server";
+
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  // Server-side authentication and authorization
+  const user = await requireAuth();
+  
+  // Server-side admin role check
+  if (user.role !== 'admin') {
+    console.log(`User ${user.email} attempted to access admin area`);
+    redirect('/dashboard');
+  }
+
+  return (
+    <div className="min-h-screen bg-neutral-50">
+      <AdminNavigation />
+      <main>{children}</main>
+    </div>
+  );
+}
+```
+
+#### Server Actions for Data Mutations
+
+```typescript
+// lib/auth-actions.ts
+"use server";
+import { requireAuth } from "./auth-server";
+
+export async function createReportAction(formData: FormData) {
+  // Server-side auth check for mutations
+  const user = await requireAuth();
+  
+  const reportData = {
+    image_url: formData.get("image_url") as string,
+    category: formData.get("category") as string,
+    street_name: formData.get("street_name") as string,
+  };
+
+  // Direct API call with server-side token
+  const response = await fetch(`${API_BASE_URL}/api/reports`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(reportData),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to create report");
+  }
+
+  return response.json();
+}
+```
+
+### 2. Client-Side Authentication (For Interactive Components)
+
+**Best for**: Navigation, real-time UI updates, interactive components
+
+**Characteristics**:
+- ⚡ **Real-time Updates** - Responds to auth state changes immediately  
+- 🎯 **Interactive** - Loading states, error handling, user actions
+- 🌐 **Global State** - Available to any component using context
+- 🔄 **Reactive** - UI updates automatically when auth state changes
+
+#### Implementation Pattern
+
+```typescript
+// components/layout/header.tsx
+"use client";
+import { useAuthContext } from "@/contexts/AuthContext";
+
+const Header = () => {
+  // Client-side reactive auth state
+  const { isAuthenticated, isLoading, backendUser, signOut } = useAuthContext();
+
+  const handleLogout = async () => {
+    try {
+      await signOut(); // Triggers state change across app
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
+
+  // Loading state for better UX
+  if (isLoading) {
+    return (
+      <Button size="default" disabled>
+        Loading...
+      </Button>
+    );
+  }
+
+  // Reactive UI based on auth state
+  if (isAuthenticated && backendUser) {
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost">
+            <Avatar>
+              <AvatarImage src={backendUser.avatar_url || undefined} />
+              <AvatarFallback>
+                {backendUser.name?.charAt(0)?.toUpperCase() || "U"}
+              </AvatarFallback>
+            </Avatar>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuLabel>{backendUser.name}</DropdownMenuLabel>
+          <DropdownMenuItem onClick={handleLogout}>
+            <LogOut className="mr-2 h-4 w-4" />
+            Logout
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  }
+
+  return (
+    <Button asChild>
+      <Link href="/login">Login</Link>
+    </Button>
+  );
+};
+```
+
+#### Context Provider with Server Hydration
+
+```typescript
+// contexts/AuthContext.tsx
+'use client'
+export function AuthProvider({
+  children,
+  initialUser // Server-side initial state for hydration
+}: {
+  children: React.ReactNode;
+  initialUser?: AuthUser | null;
+}) {
+  // Client state synchronized with server
+  const [backendUser, setBackendUser] = useState<AuthUser | null>(initialUser || null);
+  const [isLoading, setIsLoading] = useState(!initialUser);
+
+  // Firebase client-side auth state
+  const firebaseUser = useFirebaseAuth();
+
+  // Sync server and client state
+  useEffect(() => {
+    if (firebaseUser && !backendUser) {
+      // User logged in on client, sync with backend
+      verifyWithBackend();
+    } else if (!firebaseUser && backendUser) {
+      // User logged out, clear backend state
+      setBackendUser(null);
+    }
+  }, [firebaseUser, backendUser]);
+
+  return (
+    <AuthContext.Provider value={{
+      isAuthenticated: !!backendUser,
+      isLoading,
+      backendUser,
+      signOut,
+    }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+```
+
+#### Root Layout Integration
+
+```typescript
+// app/layout.tsx
+import { AuthProvider } from "@/contexts/AuthContext";
+import { getAuthUser } from "@/lib/auth-server";
+
+export default async function RootLayout({ children }) {
+  // Server-side initial auth state (no loading on first render)
+  const initialUser = await getAuthUser();
+
+  return (
+    <html>
+      <body>
+        {/* Hydrate client context with server state */}
+        <AuthProvider initialUser={initialUser}>
+          {children}
+        </AuthProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+### 3. Hybrid Pattern: Best of Both Worlds
+
+The optimal approach combines both strategies for maximum performance and user experience:
+
+```typescript
+// Server component provides initial data + auth
+export default async function DashboardPage() {
+  const user = await requireAuth(); // Server-side auth
+  const initialReports = await getUserReportsAction(); // Server-side data
+
+  return (
+    <div>
+      {/* Client component for reactive UI */}
+      <Header /> {/* Uses client context for auth state */}
+
+      {/* Server-rendered content with initial data */}
+      <main>
+        <h1>Welcome, {user.name}!</h1>
+
+        {/* Client component that can refetch data if needed */}
+        <ReportsTable
+          initialData={initialReports}
+          userId={user.id}
+        />
+      </main>
+    </div>
+  );
+}
+```
+
+### Authentication Guidelines Summary
+
+#### ✅ DO Use Server-Side Auth When:
+- Building protected pages (dashboard, admin, profile)
+- Fetching initial page data
+- Implementing form submissions and mutations
+- Need SEO-friendly content
+- Want fast initial page loads
+- Building one-time data displays
+
+#### ✅ DO Use Client-Side Auth When:
+- Building navigation/header components
+- Need real-time auth state updates
+- Implementing login/logout flows
+- Building interactive components
+- Need loading and error states
+- Managing global auth state
+
+#### ❌ DON'T Mix Auth Patterns:
+- Don't use client-side guards on server-side protected pages
+- Don't use server-side auth for interactive components
+- Don't duplicate auth checks unnecessarily
+- Don't ignore the performance implications
+
+### Migration from Client to Server Auth
+
+If you have existing client-side protected pages, follow this pattern:
+
+1. **Remove Client Guards**: Delete `AdminRouteGuard` or similar components
+2. **Add Server Auth**: Use `requireAuth()` in page/layout components  
+3. **Update Data Fetching**: Replace client hooks with server actions
+4. **Remove Loading States**: Server components don't need auth loading states
+5. **Test Thoroughly**: Ensure redirects and permissions work correctly
 
 ## Data Fetching
 

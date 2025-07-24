@@ -78,6 +78,12 @@ export function useAuth(initialUser?: AuthUser | null) {
         const data: AuthVerificationResponse = await response.json();
         setBackendUser(data.user);
         console.log("Backend verification successful:", data.message);
+        console.log("User data received:", {
+          id: data.user.id,
+          email: data.user.email,
+          role: data.user.role,
+          name: data.user.name
+        });
       } else if (response.status === 401) {
         handleAuthError("firebase-token-invalid");
         // Force Firebase sign out if token is invalid

@@ -684,6 +684,7 @@ reportsRouter.openapi(deleteReportRoute, async (c) => {
 reportsRouter.openapi(getMyReportsRoute, async (c) => {
   try {
     const userId = c.get("user_id");
+    console.log("🔍 Debug: userId =", userId);
 
     if (!userId) {
       return c.json(
@@ -699,9 +700,14 @@ reportsRouter.openapi(getMyReportsRoute, async (c) => {
     }
 
     const queryData = c.req.valid("query");
+    console.log("🔍 Debug: queryData =", queryData);
+    
     const result = await shell.getUserReports(userId, queryData);
+    console.log("🔍 Debug: result.success =", result.success);
+    console.log("🔍 Debug: result.data =", JSON.stringify(result.data, null, 2));
 
     if (result.success) {
+      console.log("🔍 Debug: Returning success response");
       return c.json(result.data, 200);
     }
 
