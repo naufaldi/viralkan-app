@@ -3,8 +3,9 @@
 import { useState, useRef, useCallback } from "react";
 import { Card, CardContent } from "@repo/ui/components/ui/card";
 import { Button } from "@repo/ui/components/ui/button";
-import { Upload, X, Image as ImageIcon, AlertCircle } from "lucide-react";
+import { Upload, X, Image as ImageIcon, AlertCircle, RefreshCw } from "lucide-react";
 import { Alert, AlertDescription } from "@repo/ui/components/ui/alert";
+import imageCompression from "browser-image-compression";
 
 interface ImageUploadProps {
   onImageSelect: (file: File) => void;
@@ -13,10 +14,13 @@ interface ImageUploadProps {
   isUploading?: boolean;
   error?: string;
   disabled?: boolean;
+  onUploadError?: (error: string) => void;
+  onUploadSuccess?: () => void;
 }
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB - matches backend limit
 const ACCEPTED_FORMATS = ["image/jpeg", "image/png", "image/webp"];
+const MAX_RETRIES = 3;
 
 export default function ImageUpload({
   onImageSelect,
@@ -25,34 +29,97 @@ export default function ImageUpload({
   isUploading = false,
   error,
   disabled = false,
+  onUploadError,
+  onUploadSuccess,
 }: ImageUploadProps) {
   const [preview, setPreview] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
+  const [uploadError, setUploadError] = useState<string | undefined>(undefined);
+  const [retryCount, setRetryCount] = useState(0);
+  const [isCompressing, setIsCompressing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const compressImage = useCallback(async (file: File): Promise<File> => {
+    try {
+      const options = {
+        maxSizeMB: 1, // Target ~1MB
+        maxWidthOrHeight: 1200, // Only resize if larger
+        useWebWorker: true, // Better performance
+        fileType: 'image/webp', // Convert to WebP
+        quality: 0.85, // High quality
+        initialQuality: 0.9, // Start with high quality
+      };
+
+      const compressedFile = await imageCompression(file, options);
+      console.log('Image compressed:', {
+        original: `${(file.size / 1024 / 1024).toFixed(2)}MB`,
+        compressed: `${(compressedFile.size / 1024 / 1024).toFixed(2)}MB`,
+        reduction: `${((file.size - compressedFile.size) / file.size * 100).toFixed(1)}%`
+      });
+      
+      return compressedFile;
+    } catch (error) {
+      console.warn('Image compression failed, using original:', error);
+      return file; // Fallback to original file
+    }
+  }, []);
+
   const handleFileSelect = useCallback(
-    (file: File) => {
+    async (file: File) => {
+      // Clear previous errors
+      setUploadError(undefined);
+      setRetryCount(0);
+
       // Validate file size
       if (file.size > MAX_FILE_SIZE) {
+        const errorMsg = `File terlalu besar. Maksimal ${(MAX_FILE_SIZE / 1024 / 1024).toFixed(0)}MB`;
+        setUploadError(errorMsg);
+        onUploadError?.(errorMsg);
         return;
       }
 
       // Validate file type
       if (!ACCEPTED_FORMATS.includes(file.type)) {
+        const errorMsg = "Format file tidak didukung. Gunakan JPEG, PNG, atau WebP";
+        setUploadError(errorMsg);
+        onUploadError?.(errorMsg);
         return;
       }
 
-      // Create preview
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setPreview(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
+      try {
+        setIsCompressing(true);
+        
+        // Compress image
+        const compressedFile = await compressImage(file);
 
-      onImageSelect(file);
+        // Create preview
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          setPreview(e.target?.result as string);
+        };
+        reader.readAsDataURL(compressedFile);
+
+        onImageSelect(compressedFile);
+        onUploadSuccess?.();
+      } catch (error) {
+        console.error('File processing error:', error);
+        const errorMsg = "Gagal memproses gambar. Silakan coba lagi.";
+        setUploadError(errorMsg);
+        onUploadError?.(errorMsg);
+      } finally {
+        setIsCompressing(false);
+      }
     },
-    [onImageSelect],
+    [onImageSelect, onUploadError, onUploadSuccess, compressImage],
   );
+
+  const handleRetry = useCallback(() => {
+    if (retryCount < MAX_RETRIES && selectedImage) {
+      setRetryCount(prev => prev + 1);
+      setUploadError(undefined);
+      handleFileSelect(selectedImage);
+    }
+  }, [retryCount, selectedImage, handleFileSelect]);
 
   const handleDragOver = useCallback(
     (e: React.DragEvent) => {
@@ -96,6 +163,8 @@ export default function ImageUpload({
 
   const handleRemoveImage = useCallback(() => {
     setPreview(null);
+    setUploadError(undefined);
+    setRetryCount(0);
     onImageRemove();
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -107,6 +176,9 @@ export default function ImageUpload({
       fileInputRef.current.click();
     }
   }, [disabled]);
+
+  // Show error from parent component or internal upload error
+  const displayError = error || uploadError;
 
   return (
     <div className="space-y-4">
@@ -125,18 +197,22 @@ export default function ImageUpload({
           <CardContent className="p-12 text-center">
             <div className="space-y-6">
               <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto border border-border">
-                <Upload className="h-8 w-8 text-muted-foreground" />
+                {isCompressing ? (
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                ) : (
+                  <Upload className="h-8 w-8 text-muted-foreground" />
+                )}
               </div>
 
               <div className="space-y-2">
                 <h3 className="text-lg font-semibold text-foreground tracking-tight">
-                  Drag foto jalan rusak ke sini
+                  {isCompressing ? "Memproses gambar..." : "Drag foto jalan rusak ke sini"}
                 </h3>
                 <p className="text-base text-muted-foreground">
-                  atau klik untuk memilih file dari perangkat
+                  {isCompressing ? "Mengompres dan mengoptimalkan gambar" : "atau klik untuk memilih file dari perangkat"}
                 </p>
                 <p className="text-sm text-muted-foreground mt-3">
-                  Format: JPEG, PNG, WebP • Maksimal 10MB
+                  Format: JPEG, PNG, WebP • Maksimal 10MB • Otomatis dikompres ke WebP
                 </p>
               </div>
 
@@ -145,14 +221,14 @@ export default function ImageUpload({
                 variant="outline"
                 size="lg"
                 className="mt-6 px-6 py-3 text-base font-medium transition-all duration-150"
-                disabled={disabled}
+                disabled={disabled || isCompressing}
                 onClick={(e) => {
                   e.stopPropagation();
                   handleUploadClick();
                 }}
               >
                 <ImageIcon className="mr-3 h-5 w-5" />
-                Pilih Foto
+                {isCompressing ? "Memproses..." : "Pilih Foto"}
               </Button>
             </div>
           </CardContent>
@@ -170,12 +246,12 @@ export default function ImageUpload({
                     className="w-full h-72 object-cover"
                   />
 
-                  {isUploading && (
+                  {(isUploading || isCompressing) && (
                     <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center">
                       <div className="text-center">
                         <div className="spinner mx-auto mb-3"></div>
                         <p className="text-base font-medium text-foreground">
-                          Mengunggah foto...
+                          {isCompressing ? "Memproses gambar..." : "Mengunggah foto..."}
                         </p>
                         <p className="text-sm text-muted-foreground mt-1">
                           Mohon tunggu sebentar
@@ -208,7 +284,7 @@ export default function ImageUpload({
                     variant="ghost"
                     size="sm"
                     onClick={handleRemoveImage}
-                    disabled={disabled || isUploading}
+                    disabled={disabled || isUploading || isCompressing}
                     className="text-muted-foreground hover:text-foreground hover:bg-muted rounded-md p-2 transition-colors duration-150"
                   >
                     <X className="h-4 w-4" />
@@ -220,10 +296,27 @@ export default function ImageUpload({
         </Card>
       )}
 
-      {error && (
-        <Alert variant="destructive">
+      {displayError && (
+        <Alert variant="destructive" className="border-red-200 bg-red-50">
           <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
+          <AlertDescription className="text-red-800 font-medium">
+            <div className="flex items-center justify-between">
+              <span>{displayError}</span>
+              {retryCount < MAX_RETRIES && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleRetry}
+                  disabled={isCompressing}
+                  className="ml-3 h-8 px-3 text-xs border-red-300 text-red-700 hover:bg-red-100"
+                >
+                  <RefreshCw className="mr-1 h-3 w-3" />
+                  Coba Lagi ({retryCount + 1}/{MAX_RETRIES})
+                </Button>
+              )}
+            </div>
+          </AlertDescription>
         </Alert>
       )}
 

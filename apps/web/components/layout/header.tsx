@@ -142,14 +142,14 @@ const Header = () => {
       <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4">
         <div className="flex items-center justify-between">
           {/* Logo Section */}
-          <div className="flex items-center gap-3">
+          <Link href="/" className="flex items-center gap-3">
             <div className="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center shadow-sm">
               <ChevronUp className="h-6 w-6 text-white" />
             </div>
             <span className="text-xl font-bold text-neutral-900 tracking-tight">
               Viralkan
             </span>
-          </div>
+          </Link>
 
           {/* Navigation Section */}
           <nav className="hidden md:flex items-center gap-6 lg:gap-8">
@@ -160,19 +160,19 @@ const Header = () => {
               Laporan
             </Link>
             <Link
-              href="#how-it-works"
+              href="/#how-it-works"
               className="text-neutral-600 hover:text-neutral-900 font-medium transition-colors text-sm py-2 px-1 border-b-2 border-transparent hover:border-neutral-300"
             >
               Cara Kerja
             </Link>
             <Link
-              href="#community"
+              href="/#community"
               className="text-neutral-600 hover:text-neutral-900 font-medium transition-colors text-sm py-2 px-1 border-b-2 border-transparent hover:border-neutral-300"
             >
               Komunitas
             </Link>
             <Link
-              href="#about"
+              href="/#about"
               className="text-neutral-600 hover:text-neutral-900 font-medium transition-colors text-sm py-2 px-1 border-b-2 border-transparent hover:border-neutral-300"
             >
               Tentang

@@ -352,6 +352,84 @@ Viralkan 2.0 embodies **"Luxury Simplicity for Civic Purpose"** — transforming
 }
 ```
 
+#### Strategic Hover Color System
+
+Following the "Luxury Simplicity for Civic Purpose" philosophy, buttons use strategic color hints on hover to provide clear visual feedback while maintaining the monochromatic aesthetic.
+
+```css
+/* Action Buttons - Strategic Color Use (5% of interface) */
+
+/* Success/Accept Actions */
+.btn-success {
+  background: var(--color-white);
+  color: var(--color-neutral-700);
+  border: 1px solid var(--color-neutral-300);
+  
+  &:hover {
+    background: rgb(240 253 244); /* green-50 */
+    border-color: rgb(187 247 208); /* green-200 */
+    color: rgb(21 128 61); /* green-700 */
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+/* Danger/Reject Actions */
+.btn-danger {
+  background: var(--color-white);
+  color: var(--color-neutral-700);
+  border: 1px solid var(--color-neutral-300);
+  
+  &:hover {
+    background: rgb(254 242 242); /* red-50 */
+    border-color: rgb(254 202 202); /* red-200 */
+    color: rgb(185 28 28); /* red-700 */
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+/* Neutral Navigation Buttons */
+.btn-neutral {
+  background: var(--color-white);
+  color: var(--color-neutral-700);
+  border: 1px solid var(--color-neutral-300);
+  
+  &:hover {
+    background: var(--color-neutral-50);
+    border-color: var(--color-neutral-400);
+    color: var(--color-neutral-800);
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+/* Interactive Elements (Dropdowns, Sort buttons) */
+.btn-interactive {
+  background: transparent;
+  color: var(--color-neutral-600);
+  border: 1px solid transparent;
+  
+  &:hover {
+    background: var(--color-neutral-100);
+    color: var(--color-neutral-900);
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+```
+
+#### Hover Color Guidelines
+
+**Strategic Color Application:**
+- **Success Actions**: Subtle green hints (`green-50` bg, `green-200` border, `green-700` text)
+- **Danger Actions**: Subtle red hints (`red-50` bg, `red-200` border, `red-700` text)
+- **Neutral Actions**: Enhanced neutral tones (`neutral-50` bg, `neutral-400` border)
+- **Interactive Elements**: Light neutral feedback (`neutral-100` bg, `neutral-900` text)
+
+**Design Principles:**
+- Colors used only for functional feedback (5% of interface)
+- Maintains luxury monochromatic aesthetic
+- Government-appropriate and professional
+- WCAG AA compliant contrast ratios
+- Smooth transitions (200ms) for luxury feel
+
 #### Secondary & Ghost Variants
 
 ```css
@@ -363,6 +441,7 @@ Viralkan 2.0 embodies **"Luxury Simplicity for Civic Purpose"** — transforming
   &:hover {
     background: var(--color-neutral-50);
     border-color: var(--color-neutral-300);
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
@@ -374,6 +453,7 @@ Viralkan 2.0 embodies **"Luxury Simplicity for Civic Purpose"** — transforming
   &:hover {
     background: var(--color-neutral-50);
     color: var(--color-neutral-700);
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
@@ -385,6 +465,7 @@ Viralkan 2.0 embodies **"Luxury Simplicity for Civic Purpose"** — transforming
   &:hover {
     background: var(--color-error-600);
     border-color: var(--color-error-600);
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 ```
@@ -782,6 +863,10 @@ Viralkan 2.0 embodies **"Luxury Simplicity for Civic Purpose"** — transforming
     border-color var(--duration-fast) var(--ease-in-out);
   --transition-shadow: box-shadow var(--duration-normal) var(--ease-out);
   --transition-transform: transform var(--duration-normal) var(--ease-out);
+  
+  /* Button-specific transitions */
+  --transition-button: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-button-hover: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 ```
 
@@ -1180,6 +1265,8 @@ export default {
 - [ ] Components are responsive by default
 - [ ] Accessibility attributes are implemented
 - [ ] Error states are handled gracefully
+- [ ] Button hover states follow strategic color guidelines
+- [ ] Interactive elements provide clear visual feedback
 
 ### Performance Requirements
 

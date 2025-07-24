@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { requireAuth } from "@/lib/auth-server";
+import { AdminReportsTableWrapper } from "@/components/admin";
 
 // Admin statistics interface
 interface AdminStats {
@@ -53,8 +54,8 @@ const mockAdminStats: AdminStats = {
   }
 };
 
-// Mock pending reports for queue preview
-const mockPendingReports = [
+// Mock admin reports data for table
+const mockAdminReports = [
   {
     id: "1",
     category: "berlubang" as const,
@@ -62,7 +63,8 @@ const mockPendingReports = [
     locationText: "Depan RSUD Bekasi",
     userName: "Ahmad Rizki",
     submittedAt: "2024-01-24T10:30:00Z",
-    imageUrl: "/placeholder-road-damage.jpg"
+    imageUrl: "/placeholder-road-damage.jpg",
+    status: "pending" as const
   },
   {
     id: "2", 
@@ -71,7 +73,8 @@ const mockPendingReports = [
     locationText: "Persimpangan Kalimalang",
     userName: "Siti Nurhaliza",
     submittedAt: "2024-01-24T09:15:00Z",
-    imageUrl: "/placeholder-road-damage.jpg"
+    imageUrl: "/placeholder-road-damage.jpg",
+    status: "pending" as const
   },
   {
     id: "3",
@@ -80,11 +83,32 @@ const mockPendingReports = [
     locationText: "Dekat Pasar Baru",
     userName: "Budi Santoso",
     submittedAt: "2024-01-24T08:45:00Z",
-    imageUrl: "/placeholder-road-damage.jpg"
+    imageUrl: "/placeholder-road-damage.jpg",
+    status: "pending" as const
+  },
+  {
+    id: "4",
+    category: "berlubang" as const,
+    streetName: "Jl. Sudirman",
+    locationText: "Depan Mall Bekasi",
+    userName: "Dewi Sartika",
+    submittedAt: "2024-01-24T07:30:00Z",
+    imageUrl: "/placeholder-road-damage.jpg",
+    status: "verified" as const
+  },
+  {
+    id: "5",
+    category: "retak" as const,
+    streetName: "Jl. Veteran",
+    locationText: "Dekat Terminal Bekasi",
+    userName: "Rudi Hartono",
+    submittedAt: "2024-01-24T06:15:00Z",
+    imageUrl: "/placeholder-road-damage.jpg",
+    status: "rejected" as const
   }
 ];
 
-// Stat card component
+// Enhanced Stat Card component with luxury design
 function StatCard({ 
   title, 
   value, 
@@ -101,26 +125,37 @@ function StatCard({
   variant?: "default" | "warning" | "success" | "danger";
 }) {
   const variantStyles = {
-    default: "border-neutral-200 hover:border-neutral-300",
-    warning: "border-yellow-200 bg-yellow-50 hover:bg-yellow-100",
-    success: "border-green-200 bg-green-50 hover:bg-green-100", 
-    danger: "border-red-200 bg-red-50 hover:bg-red-100"
+    default: "border-neutral-200 bg-white hover:border-neutral-300 shadow-md",
+    warning: "border-neutral-300 bg-white hover:bg-neutral-25 hover:border-neutral-400 shadow-md", 
+    success: "border-neutral-200 bg-white hover:border-neutral-300 shadow-md",
+    danger: "border-neutral-200 bg-white hover:border-neutral-300 shadow-md"
+  };
+
+  const iconColors = {
+    default: "text-neutral-600",
+    warning: "text-neutral-700",
+    success: "text-neutral-600",
+    danger: "text-neutral-600"
   };
 
   return (
-    <Card className={`${variantStyles[variant]} transition-all duration-200 hover:shadow-md hover:-translate-y-0.5`}>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-neutral-600">
+    <Card className={`${variantStyles[variant]} transition-all duration-300 hover:shadow-xl hover:-translate-y-1`}>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+        <CardTitle className="text-sm font-medium text-neutral-600 tracking-wide uppercase">
           {title}
         </CardTitle>
-        <Icon className="h-4 w-4 text-neutral-500" />
+        <div className="p-2 bg-neutral-100 rounded-lg">
+          <Icon className={`h-4 w-4 ${iconColors[variant]}`} />
+        </div>
       </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold text-neutral-900">{value}</div>
-        <p className="text-xs text-neutral-500 mt-1">
+      <CardContent className="pt-0">
+        <div className="text-3xl font-bold text-neutral-900 tracking-tight mb-1">
+          {value}
+        </div>
+        <p className="text-sm text-neutral-500 leading-relaxed">
           {description}
           {trend && (
-            <span className={`ml-2 inline-flex items-center ${trend.isPositive ? 'text-green-600' : 'text-red-600'}`}>
+            <span className={`ml-2 inline-flex items-center font-medium ${trend.isPositive ? 'text-neutral-700' : 'text-neutral-600'}`}>
               <TrendingUp className={`w-3 h-3 mr-1 ${!trend.isPositive ? 'rotate-180' : ''}`} />
               {Math.abs(trend.value)}%
             </span>
@@ -131,91 +166,7 @@ function StatCard({
   );
 }
 
-// Pending report item component
-function PendingReportItem({ report }: { report: typeof mockPendingReports[0] }) {
-  const categoryColors = {
-    berlubang: "bg-red-100 text-red-800 border-red-200",
-    retak: "bg-orange-100 text-orange-800 border-orange-200", 
-    lainnya: "bg-gray-100 text-gray-800 border-gray-200"
-  };
 
-  const categoryLabels = {
-    berlubang: "Lubang",
-    retak: "Retak",
-    lainnya: "Lainnya"
-  };
-
-  const timeAgo = new Date().getTime() - new Date(report.submittedAt).getTime();
-  const hoursAgo = Math.floor(timeAgo / (1000 * 60 * 60));
-
-  return (
-    <div className="flex items-center space-x-4 p-4 rounded-lg border border-neutral-200 hover:bg-neutral-50 transition-all duration-150 group">
-      <div className="w-14 h-14 bg-neutral-200 rounded-lg flex-shrink-0 flex items-center justify-center group-hover:bg-neutral-300 transition-colors">
-        <ClipboardList className="w-6 h-6 text-neutral-500" />
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center space-x-2 mb-1">
-          <Badge variant="outline" className={`text-xs font-medium ${categoryColors[report.category]}`}>
-            {categoryLabels[report.category]}
-          </Badge>
-          <span className="text-sm text-neutral-500">
-            {hoursAgo} jam yang lalu
-          </span>
-        </div>
-        <p className="text-sm font-medium text-neutral-900 truncate mb-1">
-          {report.streetName}
-        </p>
-        <p className="text-xs text-neutral-500 truncate">
-          {report.locationText} • oleh {report.userName}
-        </p>
-      </div>
-      <div className="flex space-x-2">
-        <Button variant="outline" size="sm" className="text-green-600 border-green-200 hover:bg-green-50 hover:border-green-300">
-          <CheckCircle className="w-4 h-4" />
-          <span className="ml-1 hidden sm:inline">Setujui</span>
-        </Button>
-        <Button variant="outline" size="sm" className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300">
-          <XCircle className="w-4 h-4" />
-          <span className="ml-1 hidden sm:inline">Tolak</span>
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-// Recent activity component
-function RecentActivity() {
-  const activities = [
-    { action: "verified", label: "Disetujui", count: 12, time: "hari ini", color: "bg-green-500" },
-    { action: "rejected", label: "Ditolak", count: 3, time: "hari ini", color: "bg-red-500" },
-    { action: "submitted", label: "Laporan Baru", count: 8, time: "hari ini", color: "bg-blue-500" }
-  ];
-
-  return (
-    <Card className="hover:shadow-md transition-shadow duration-200">
-      <CardHeader>
-        <CardTitle className="text-lg font-semibold flex items-center">
-          <Activity className="w-5 h-5 mr-2" />
-          Aktivitas Hari Ini
-        </CardTitle>
-        <CardDescription>Ringkasan verifikasi dan laporan</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {activities.map((activity) => (
-          <div key={activity.action} className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className={`w-3 h-3 rounded-full ${activity.color}`} />
-              <span className="text-sm font-medium">
-                {activity.label}
-              </span>
-            </div>
-            <Badge variant="secondary" className="font-semibold">{activity.count}</Badge>
-          </div>
-        ))}
-      </CardContent>
-    </Card>
-  );
-}
 
 export default async function AdminDashboard() {
   // Auth check is handled by admin layout, just get user data for display
@@ -226,38 +177,38 @@ export default async function AdminDashboard() {
   const stats = mockAdminStats;
 
   return (
-    <div>
+    <div className="min-h-screen bg-neutral-100">
       {/* Debug Info - Remove in production */}
       {process.env.NODE_ENV === 'development' && (
-        <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-          <h3 className="font-semibold text-green-900 mb-2">Server-Side Auth Debug:</h3>
-          <p className="text-sm text-green-800">
+        <div className="mb-6 p-4 bg-white border border-neutral-200 rounded-xl shadow-sm">
+          <h3 className="font-semibold text-neutral-900 mb-2">Server-Side Auth Debug:</h3>
+          <p className="text-sm text-neutral-700">
             User Role: {user.role}
           </p>
-          <p className="text-sm text-green-800">
+          <p className="text-sm text-neutral-700">
             User Email: {user.email}
           </p>
-          <p className="text-sm text-green-800">
+          <p className="text-sm text-neutral-700">
             User ID: {user.id}
           </p>
-          <p className="text-sm text-green-800">
+          <p className="text-sm text-neutral-700">
             Auth Method: Server-side verification ✅
           </p>
         </div>
       )}
 
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-neutral-900 mb-2">
+      {/* Enhanced Header */}
+      <div className="mb-12">
+        <h1 className="text-4xl font-bold text-neutral-900 mb-3 tracking-tight">
           Dashboard Admin
         </h1>
-        <p className="text-neutral-600">
+        <p className="text-lg text-neutral-600 leading-relaxed">
           Kelola dan pantau laporan kerusakan jalan untuk Kota Bekasi
         </p>
       </div>
 
-      {/* Quick Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      {/* Enhanced Quick Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
         <StatCard
           title="Menunggu Verifikasi"
           value={stats.pendingReports}
@@ -290,107 +241,8 @@ export default async function AdminDashboard() {
         />
       </div>
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Pending Reports Queue */}
-        <div className="lg:col-span-2">
-          <Card className="hover:shadow-lg transition-shadow duration-200">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle className="text-lg font-semibold flex items-center">
-                  <ClipboardList className="w-5 h-5 mr-2" />
-                  Antrian Verifikasi
-                </CardTitle>
-                <CardDescription>
-                  Laporan yang memerlukan verifikasi admin
-                </CardDescription>
-              </div>
-              <Link href="/admin/reports?status=pending">
-                <Button variant="outline" size="sm" className="hover:bg-neutral-50">
-                  Lihat Semua
-                  <Eye className="w-4 h-4 ml-2" />
-                </Button>
-              </Link>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {mockPendingReports.length > 0 ? (
-                mockPendingReports.map((report) => (
-                  <PendingReportItem key={report.id} report={report} />
-                ))
-              ) : (
-                <div className="text-center py-12 text-neutral-500">
-                  <ClipboardList className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p className="text-lg font-medium mb-2">Tidak ada laporan pending</p>
-                  <p className="text-sm">Semua laporan telah diverifikasi</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Sidebar */}
-        <div className="space-y-6">
-          {/* Quick Actions */}
-          <Card className="hover:shadow-md transition-shadow duration-200">
-            <CardHeader>
-              <CardTitle className="text-lg font-semibold">Aksi Cepat</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Link href="/admin/reports" className="block">
-                <Button variant="outline" className="w-full justify-start hover:bg-neutral-50 transition-colors">
-                  <ClipboardList className="w-4 h-4 mr-3" />
-                  Kelola Semua Laporan
-                </Button>
-              </Link>
-              <Link href="/admin/users" className="block">
-                <Button variant="outline" className="w-full justify-start hover:bg-neutral-50 transition-colors">
-                  <Users className="w-4 h-4 mr-3" />
-                  Manajemen Pengguna
-                </Button>
-              </Link>
-              <Link href="/admin/analytics" className="block">
-                <Button variant="outline" className="w-full justify-start hover:bg-neutral-50 transition-colors">
-                  <BarChart3 className="w-4 h-4 mr-3" />
-                  Lihat Analitik
-                </Button>
-              </Link>
-              <Link href="/laporan" className="block">
-                <Button variant="ghost" className="w-full justify-start hover:bg-neutral-50 transition-colors">
-                  <Eye className="w-4 h-4 mr-3" />
-                  Lihat Laporan Publik
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-
-          {/* Recent Activity */}
-          <RecentActivity />
-
-          {/* System Stats */}
-          <Card className="hover:shadow-md transition-shadow duration-200">
-            <CardHeader>
-              <CardTitle className="text-lg font-semibold">Info Sistem</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex justify-between items-center py-2 border-b border-neutral-100 last:border-b-0">
-                <span className="text-sm text-neutral-600">Total Pengguna</span>
-                <Badge variant="secondary" className="font-semibold">{stats.totalUsers}</Badge>
-              </div>
-              <div className="flex justify-between items-center py-2 border-b border-neutral-100 last:border-b-0">
-                <span className="text-sm text-neutral-600">Admin Aktif</span>
-                <Badge variant="secondary" className="font-semibold">{stats.adminUsers}</Badge>
-              </div>
-              <div className="flex justify-between items-center py-2">
-                <span className="text-sm text-neutral-600">Rata-rata Respons</span>
-                <Badge variant="secondary" className="font-semibold">{stats.averageResponseTime}</Badge>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-
-      {/* Additional Stats Row */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+      {/* Enhanced Additional Stats Row */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
         <StatCard
           title="Laporan Ditolak"
           value={stats.rejectedReports}
@@ -411,7 +263,45 @@ export default async function AdminDashboard() {
           icon={UserCheck}
         />
       </div>
+
+      {/* Enhanced Main Content Grid */}
+      <div className="grid grid-cols-1  gap-8">
+        {/* Enhanced Reports Table */}
+        <div className="w-full">
+          <Card className="border border-neutral-200 bg-white shadow-md hover:shadow-lg transition-all duration-300">
+            <CardHeader className="flex flex-row items-center justify-between pb-6">
+              <div>
+                <CardTitle className="text-xl font-semibold flex items-center text-neutral-900 mb-2">
+                  <div className="p-2 bg-neutral-100 rounded-lg mr-3">
+                    <ClipboardList className="w-5 h-5 text-neutral-600" />
+                  </div>
+                  Semua Laporan
+                </CardTitle>
+                <CardDescription className="text-neutral-600 font-medium">
+                  Kelola dan verifikasi laporan kerusakan jalan
+                </CardDescription>
+              </div>
+              <Link href="/admin/reports">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="h-10 px-4 text-neutral-700 border-neutral-300 hover:bg-neutral-50 hover:border-neutral-400 hover:text-neutral-800 transition-all duration-200 font-medium"
+                >
+                  Lihat Semua
+                  <Eye className="w-4 h-4 ml-2" />
+                </Button>
+              </Link>
+            </CardHeader>
+            <CardContent>
+              <AdminReportsTableWrapper 
+                data={mockAdminReports}
+              />
+            </CardContent>
+          </Card>
+        </div>
+
+       
       </div>
-    
+    </div>
   );
 } 

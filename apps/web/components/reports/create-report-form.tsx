@@ -58,6 +58,7 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
   const [uploadError, setUploadError] = useState<string | undefined>(undefined);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [formError, setFormError] = useState<string | undefined>(undefined);
+  const [imageUploadFailed, setImageUploadFailed] = useState(false);
 
   const { getToken, isAuthenticated } = useAuth();
   const { invalidateAll } = useInvalidateDashboard();
@@ -106,6 +107,7 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
   const handleImageSelect = (file: File) => {
     console.log("handleImageSelect called with file:", file);
     setSelectedImage(file);
+    setImageUploadFailed(false);
     // Set a valid dummy image URL for form validation (same as our uploadImage service)
     const dummyUrl = "https://picsum.photos/800/600?random=1";
     form.setValue("image_url", dummyUrl);
@@ -117,9 +119,26 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
 
   const handleImageRemove = () => {
     setSelectedImage(null);
+    setImageUploadFailed(false);
     form.setValue("image_url", "");
     setUploadError(undefined);
     setFormError(undefined);
+  };
+
+  const handleImageUploadError = (error: string) => {
+    console.log("Image upload error:", error);
+    setUploadError(error);
+    setImageUploadFailed(true);
+    setFormError(undefined);
+    clearError();
+  };
+
+  const handleImageUploadSuccess = () => {
+    console.log("Image upload success");
+    setUploadError(undefined);
+    setImageUploadFailed(false);
+    setFormError(undefined);
+    clearError();
   };
 
   const onSubmit = async (data: CreateReportInput) => {
@@ -133,6 +152,12 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
     if (!selectedImage) {
       console.log("No image selected, showing error");
       setFormError("Silakan pilih foto jalan rusak terlebih dahulu");
+      return;
+    }
+
+    if (imageUploadFailed) {
+      console.log("Image upload failed, preventing submission");
+      setFormError("Gagal mengunggah foto. Silakan coba lagi atau pilih foto lain.");
       return;
     }
 
@@ -318,6 +343,8 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
                 selectedImage={selectedImage}
                 onImageSelect={handleImageSelect}
                 onImageRemove={handleImageRemove}
+                onUploadError={handleImageUploadError}
+                onUploadSuccess={handleImageUploadSuccess}
                 isUploading={isUploadingImage}
                 error={uploadError}
                 disabled={isLoading}
@@ -554,13 +581,15 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
               type="submit"
               size="default"
               className="w-full h-12 bg-neutral-900 hover:bg-neutral-800 text-white font-semibold text-base rounded-lg transition-all duration-150 shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0"
-              disabled={isLoading || !selectedImage}
+              disabled={isLoading || !selectedImage || imageUploadFailed}
               onClick={() =>
                 console.log(
                   "Submit button clicked, selectedImage:",
                   selectedImage,
                   "isLoading:",
                   isLoading,
+                  "imageUploadFailed:",
+                  imageUploadFailed,
                 )
               }
             >
@@ -572,6 +601,11 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
                     : isUploading
                       ? "Mengunggah..."
                       : "Membuat Laporan..."}
+                </>
+              ) : imageUploadFailed ? (
+                <>
+                  <AlertCircle className="mr-2 h-4 w-4" />
+                  Perbaiki Upload Foto
                 </>
               ) : (
                 <>
