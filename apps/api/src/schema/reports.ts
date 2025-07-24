@@ -72,6 +72,32 @@ export const ReportQuerySchema = z.object({
     }),
 });
 
+// Schema for /me endpoint - doesn't include user_id validation
+export const MyReportsQuerySchema = z.object({
+  page: z
+    .string()
+    .optional()
+    .default("1")
+    .transform((val) => Math.max(1, parseInt(val) || 1))
+    .openapi({
+      example: "1",
+      description: "Page number for pagination (starts from 1)",
+    }),
+  limit: z
+    .string()
+    .optional()
+    .default("20")
+    .transform((val) => Math.min(100, Math.max(1, parseInt(val) || 20)))
+    .openapi({
+      example: "20",
+      description: "Number of reports per page (max 100)",
+    }),
+  category: z.enum(["berlubang", "retak", "lainnya"]).optional().openapi({
+    example: "berlubang",
+    description: "Filter reports by damage category",
+  }),
+});
+
 export const ReportParamsSchema = z.object({
   id: z
     .string()
@@ -118,6 +144,28 @@ export const ReportResponseSchema = z.object({
   location_text: z.string().openapi({ example: "Depan Mall Tunjungan Plaza" }),
   lat: z.number().nullable().openapi({ example: -7.257472 }),
   lon: z.number().nullable().openapi({ example: 112.752088 }),
+  status: z
+    .enum(["pending", "verified", "rejected", "deleted"])
+    .openapi({ example: "pending" }),
+  verified_at: z
+    .string()
+    .datetime()
+    .nullable()
+    .openapi({ example: "2024-01-15T10:30:00Z" }),
+  verified_by: z
+    .string()
+    .regex(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
+      "Invalid UUID format",
+    )
+    .nullable()
+    .openapi({ example: "01890dd5-1234-7746-b3a5-e8c5e0b0f4a1" }),
+  rejection_reason: z.string().nullable().openapi({ example: "Invalid report" }),
+  deleted_at: z
+    .string()
+    .datetime()
+    .nullable()
+    .openapi({ example: "2024-01-15T10:30:00Z" }),
   created_at: z
     .string()
     .datetime()

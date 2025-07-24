@@ -5,6 +5,7 @@ import { firebaseAuthMiddleware } from "../../middleware/auth";
 import {
   CreateReportSchema,
   ReportQuerySchema,
+  MyReportsQuerySchema,
   ReportParamsSchema,
   ReportResponseSchema,
   ReportWithUserResponseSchema,
@@ -34,6 +35,58 @@ reportsRouter.use(
 );
 
 // --- Route Definitions ---
+
+// Simple test endpoint to check authentication
+const testAuthRoute = createRoute({
+  method: "get",
+  path: "/test-auth",
+  middleware: [firebaseAuthMiddleware],
+  summary: "Test authentication",
+  description: "Simple endpoint to test if authentication is working",
+  tags: ["Reports"],
+  security: [{ bearerAuth: [] }],
+  responses: {
+    200: {
+      description: "Authentication successful",
+      content: {
+        "application/json": {
+          schema: z.object({
+            message: z.string(),
+            user_id: z.string(),
+          }),
+        },
+      },
+    },
+    401: {
+      description: "User not authenticated",
+      content: { "application/json": { schema: ReportsErrorResponseSchema } },
+    },
+  },
+});
+
+// Simple test endpoint without authentication
+const testNoAuthRoute = createRoute({
+  method: "get",
+  path: "/test-no-auth",
+  summary: "Test without authentication",
+  description: "Simple endpoint to test basic functionality",
+  tags: ["Reports"],
+  responses: {
+    200: {
+      description: "Test successful",
+      content: {
+        "application/json": {
+          schema: z.object({
+            message: z.string(),
+            timestamp: z.string(),
+          }),
+        },
+      },
+    },
+  },
+});
+
+
 
 const getReportsRoute = createRoute({
   method: "get",
@@ -254,7 +307,7 @@ const getMyReportsRoute = createRoute({
   method: "get",
   path: "/me",
   request: {
-    query: ReportQuerySchema.pick({ page: true, limit: true, category: true }),
+    query: MyReportsQuerySchema,
   },
   middleware: [firebaseAuthMiddleware],
   summary: "Get my reports",
@@ -330,6 +383,31 @@ const validateOwnershipRoute = createRoute({
 });
 
 // --- Route Handlers ---
+
+reportsRouter.openapi(testAuthRoute, async (c) => {
+  try {
+    const userId = c.get("user_id");
+    return c.json({ message: "Authentication successful", user_id: userId }, 200);
+  } catch (error) {
+    console.error("Error in testAuthRoute:", error);
+    return c.json(
+      {
+        error: {
+          code: "INTERNAL_ERROR",
+          message: "Failed to test authentication",
+          timestamp: new Date().toISOString(),
+        },
+      },
+      401,
+    );
+  }
+});
+
+reportsRouter.openapi(testNoAuthRoute, async (c) => {
+  return c.json({ message: "Test successful", timestamp: new Date().toISOString() }, 200);
+});
+
+
 
 reportsRouter.openapi(getReportsRoute, async (c) => {
   try {

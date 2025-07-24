@@ -23,8 +23,10 @@ export const findReportsWithPagination = async (
     const params: any[] = [];
     let paramIndex = 1;
 
-    // Only return verified reports for public API
-    whereConditions.push(`r.status = 'verified'`);
+    // Only return verified reports for public API (when no user_id is specified)
+    if (!user_id) {
+      whereConditions.push(`r.status = 'verified'`);
+    }
 
     if (category) {
       whereConditions.push(`r.category = $${paramIndex}`);

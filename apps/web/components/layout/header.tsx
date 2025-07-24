@@ -98,6 +98,20 @@ const Header = () => {
                 <span className="font-medium">Buat Laporan</span>
               </Link>
             </DropdownMenuItem>
+            {backendUser?.role === "admin" && (
+              <>
+                <DropdownMenuSeparator className="bg-neutral-200" />
+                <DropdownMenuItem asChild className="py-2.5">
+                  <Link
+                    href="/admin"
+                    className="cursor-pointer flex items-center text-blue-600 hover:text-blue-700"
+                  >
+                    <LayoutDashboard className="mr-3 h-4 w-4" />
+                    <span className="font-medium">Admin Panel</span>
+                  </Link>
+                </DropdownMenuItem>
+              </>
+            )}
             <DropdownMenuSeparator className="bg-neutral-200" />
             <DropdownMenuItem
               onClick={handleLogout}

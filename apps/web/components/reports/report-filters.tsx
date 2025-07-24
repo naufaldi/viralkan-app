@@ -2,7 +2,8 @@ import { Button } from "@repo/ui/components/ui/button";
 import { Input } from "@repo/ui/components/ui/input";
 import { Badge } from "@repo/ui/components/ui/badge";
 import { Search, Filter, X } from "lucide-react";
-import { categoryConfig } from "../../lib/mock-data";
+import { REPORT_CATEGORIES } from "@/constant/reports";
+
 
 interface ReportFiltersProps {
   selectedCategory?: "berlubang" | "retak" | "lainnya";
@@ -17,6 +18,7 @@ export function ReportFilters({
   onCategoryChange,
   onSearchChange,
 }: ReportFiltersProps) {
+  const categoryConfig = REPORT_CATEGORIES;
   const categories = Object.entries(categoryConfig) as [
     keyof typeof categoryConfig,
     (typeof categoryConfig)[keyof typeof categoryConfig],
