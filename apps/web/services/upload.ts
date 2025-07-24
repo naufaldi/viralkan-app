@@ -3,7 +3,9 @@
  * Follows UI concept design patterns and frontend-rule.mdc
  */
 
-import { apiClient } from "../lib/api-client";
+import { apiClient } from "./api-client";
+
+
 
 // Upload response interface matching backend
 export interface UploadResponse {

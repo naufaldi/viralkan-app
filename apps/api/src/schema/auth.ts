@@ -78,6 +78,10 @@ export const UserResponseSchema = z.object({
     example: "google",
     description: "Authentication provider used",
   }),
+  role: z.enum(["user", "admin"]).default("user").openapi({
+    example: "user",
+    description: "User role in the system",
+  }),
   created_at: z.string().openapi({
     example: "2024-01-15T10:30:00Z",
     description: "Account creation timestamp",

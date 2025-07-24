@@ -824,15 +824,28 @@ adminRouter.openapi(verifyReportRoute, async (c) => {
       return c.json(result.data, 200);
     }
 
+    if (result.statusCode === 404) {
+      return c.json(
+        {
+          error: {
+            code: "NOT_FOUND",
+            message: result.error || "Report not found",
+            timestamp: new Date().toISOString(),
+          },
+        },
+        404,
+      );
+    }
+
     return c.json(
       {
         error: {
-          code: result.statusCode === 404 ? "NOT_FOUND" : "ACTION_ERROR",
+          code: "ACTION_ERROR",
           message: result.error || "Failed to verify report",
           timestamp: new Date().toISOString(),
         },
       },
-      result.statusCode as 400 | 404 | 500,
+      500,
     );
   } catch (error) {
     console.error("Error verifying report:", error);
@@ -861,15 +874,28 @@ adminRouter.openapi(rejectReportRoute, async (c) => {
       return c.json(result.data, 200);
     }
 
+    if (result.statusCode === 404) {
+      return c.json(
+        {
+          error: {
+            code: "NOT_FOUND",
+            message: result.error || "Report not found",
+            timestamp: new Date().toISOString(),
+          },
+        },
+        404,
+      );
+    }
+
     return c.json(
       {
         error: {
-          code: result.statusCode === 404 ? "NOT_FOUND" : "ACTION_ERROR",
-          message: result.error,
+          code: "ACTION_ERROR",
+          message: result.error || "Failed to reject report",
           timestamp: new Date().toISOString(),
         },
       },
-      result.statusCode as 400 | 404 | 500,
+      result.statusCode === 400 ? 400 : 500,
     );
   } catch (error) {
     console.error("Error rejecting report:", error);
@@ -898,15 +924,28 @@ adminRouter.openapi(toggleReportStatusRoute, async (c) => {
       return c.json(result.data, 200);
     }
 
+    if (result.statusCode === 404) {
+      return c.json(
+        {
+          error: {
+            code: "NOT_FOUND",
+            message: result.error || "Report not found",
+            timestamp: new Date().toISOString(),
+          },
+        },
+        404,
+      );
+    }
+
     return c.json(
       {
         error: {
-          code: result.statusCode === 404 ? "NOT_FOUND" : "ACTION_ERROR",
-          message: result.error,
+          code: "ACTION_ERROR",
+          message: result.error || "Failed to toggle report status",
           timestamp: new Date().toISOString(),
         },
       },
-      result.statusCode as 400 | 404 | 500,
+      result.statusCode === 400 ? 400 : 500,
     );
   } catch (error) {
     console.error("Error toggling report status:", error);
@@ -934,15 +973,28 @@ adminRouter.openapi(deleteReportRoute, async (c) => {
       return c.json(result.data, 200);
     }
 
+    if (result.statusCode === 404) {
+      return c.json(
+        {
+          error: {
+            code: "NOT_FOUND",
+            message: result.error || "Report not found",
+            timestamp: new Date().toISOString(),
+          },
+        },
+        404,
+      );
+    }
+
     return c.json(
       {
         error: {
-          code: result.statusCode === 404 ? "NOT_FOUND" : "ACTION_ERROR",
-          message: result.error,
+          code: "ACTION_ERROR",
+          message: result.error || "Failed to delete report",
           timestamp: new Date().toISOString(),
         },
       },
-      result.statusCode as 400 | 404 | 500,
+      500,
     );
   } catch (error) {
     console.error("Error deleting report:", error);
@@ -970,15 +1022,28 @@ adminRouter.openapi(restoreReportRoute, async (c) => {
       return c.json(result.data, 200);
     }
 
+    if (result.statusCode === 404) {
+      return c.json(
+        {
+          error: {
+            code: "NOT_FOUND",
+            message: result.error || "Report not found",
+            timestamp: new Date().toISOString(),
+          },
+        },
+        404,
+      );
+    }
+
     return c.json(
       {
         error: {
-          code: result.statusCode === 404 ? "NOT_FOUND" : "ACTION_ERROR",
-          message: result.error,
+          code: "ACTION_ERROR",
+          message: result.error || "Failed to restore report",
           timestamp: new Date().toISOString(),
         },
       },
-      result.statusCode as 400 | 404 | 500,
+      500,
     );
   } catch (error) {
     console.error("Error restoring report:", error);
@@ -1010,11 +1075,11 @@ adminRouter.openapi(getReportDetailRoute, async (c) => {
         {
           error: {
             code: "FETCH_ERROR",
-            message: result.error,
+            message: result.error || "Failed to get report detail",
             timestamp: new Date().toISOString(),
           },
         },
-        result.statusCode as 400 | 500,
+        500,
       );
     }
     

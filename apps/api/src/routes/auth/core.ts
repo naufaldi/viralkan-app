@@ -59,6 +59,7 @@ export const transformDbUserToResponse = (dbUser: DbUser): UserResponse => {
     name: dbUser.name,
     avatar_url: dbUser.avatar_url,
     provider: dbUser.provider,
+    role: dbUser.role as "user" | "admin",
     created_at: dbUser.created_at.toISOString(),
   };
 };
@@ -93,7 +94,7 @@ export const checkUserAuthorization = (
   user: DbUser,
   requiredProvider?: string,
 ): boolean => {
-  if (!user.id || user.id <= 0) {
+  if (!user.id || typeof user.id !== 'string' || user.id.trim().length === 0) {
     return false;
   }
 

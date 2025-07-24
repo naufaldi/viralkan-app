@@ -14,7 +14,7 @@ export const createUser = async (
   const insertUser = `
     INSERT INTO users(id, firebase_uid, email, name, avatar_url, provider)
     VALUES($1, $2, $3, $4, $5, $6)
-    RETURNING id, firebase_uid, email, name, avatar_url, provider, created_at;
+    RETURNING id, firebase_uid, email, name, avatar_url, provider, role, created_at;
   `;
 
   const result = await sql.unsafe(insertUser, [
@@ -42,7 +42,7 @@ export const findUserByFirebaseUid = async (
   firebaseUid: string,
 ): Promise<DbUser | null> => {
   const findUser = `
-    SELECT id, firebase_uid, email, name, avatar_url, provider, created_at
+    SELECT id, firebase_uid, email, name, avatar_url, provider, role, created_at
     FROM users 
     WHERE firebase_uid = $1;
   `;
@@ -61,7 +61,7 @@ export const findUserById = async (
   userId: string, // Changed from number to string (UUID v7)
 ): Promise<DbUser | null> => {
   const findUser = `
-    SELECT id, firebase_uid, email, name, avatar_url, provider, created_at
+    SELECT id, firebase_uid, email, name, avatar_url, provider, role, created_at
     FROM users 
     WHERE id = $1;
   `;
@@ -80,7 +80,7 @@ export const findUserByEmail = async (
   email: string,
 ): Promise<DbUser | null> => {
   const findUser = `
-    SELECT id, firebase_uid, email, name, avatar_url, provider, created_at
+    SELECT id, firebase_uid, email, name, avatar_url, provider, role, created_at
     FROM users 
     WHERE email = $1;
   `;
@@ -103,7 +103,7 @@ export const updateUser = async (
     UPDATE users 
     SET email = $2, name = $3, avatar_url = $4
     WHERE firebase_uid = $1
-    RETURNING id, firebase_uid, email, name, avatar_url, provider, created_at;
+    RETURNING id, firebase_uid, email, name, avatar_url, provider, role, created_at;
   `;
 
   const result = await sql.unsafe(updateUser, [
@@ -130,7 +130,7 @@ export const upsertUser = async (
 ): Promise<DbUser> => {
   // First, try to find existing user by firebase_uid or email
   const findExisting = `
-    SELECT id, firebase_uid, email, name, avatar_url, provider, created_at
+    SELECT id, firebase_uid, email, name, avatar_url, provider, role, created_at
     FROM users 
     WHERE firebase_uid = $1 OR email = $2;
   `;
@@ -150,7 +150,7 @@ export const upsertUser = async (
           avatar_url = $4,
           provider = $5
       WHERE id = $6
-      RETURNING id, firebase_uid, email, name, avatar_url, provider, created_at;
+      RETURNING id, firebase_uid, email, name, avatar_url, provider, role, created_at;
     `;
 
     const result = await sql.unsafe(updateUser, [
@@ -173,7 +173,7 @@ export const upsertUser = async (
     const insertUser = `
       INSERT INTO users(id, firebase_uid, email, name, avatar_url, provider)
       VALUES($1, $2, $3, $4, $5, $6)
-      RETURNING id, firebase_uid, email, name, avatar_url, provider, created_at;
+      RETURNING id, firebase_uid, email, name, avatar_url, provider, role, created_at;
     `;
 
     const result = await sql.unsafe(insertUser, [

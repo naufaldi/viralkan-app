@@ -223,6 +223,98 @@ export const {
   getReportsStats,
 } = reportsService;
 
+// Add interfaces from lib/api-client.ts for backward compatibility
+export interface ReportFilters {
+  page?: number;
+  limit?: number;
+  category?: "berlubang" | "retak" | "lainnya";
+  search?: string;
+}
+
+export interface Report {
+  id: number;
+  category: "berlubang" | "retak" | "lainnya";
+  street_name: string;
+  location_text: string;
+  image_url: string;
+  created_at: string;
+  user_id: number;
+  lat: number | null;
+  lon: number | null;
+  user_name?: string | null;
+  user_avatar?: string | null;
+}
+
+export interface ApiResponse<T> {
+  data?: T;
+  error?: {
+    code: string;
+    message: string;
+    timestamp: string;
+  };
+}
+
+// Add ApiClient class for backward compatibility
+class ApiClient {
+  async getReports(filters: ReportFilters = {}): Promise<PaginatedReports> {
+    return reportsService.getReports({
+      page: filters.page,
+      limit: filters.limit,
+      category: filters.category,
+      search: filters.search,
+    });
+  }
+
+  async getEnrichedReports(
+    filters: ReportFilters = {},
+  ): Promise<PaginatedReports> {
+    return reportsService.getEnrichedReports({
+      page: filters.page,
+      limit: filters.limit,
+      category: filters.category,
+      search: filters.search,
+    });
+  }
+
+  async getReportById(id: number): Promise<Report> {
+    return reportsService.getReportById(id);
+  }
+
+  async post<T>(
+    endpoint: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    data: any,
+    options?: RequestInit,
+  ): Promise<{ data: T }> {
+    const API_BASE_URL =
+      process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      method: "POST",
+      ...options,
+      headers: {
+        ...options?.headers,
+      },
+      body: data,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw {
+        response: {
+          data: errorData,
+          status: response.status,
+        },
+      };
+    }
+
+    const result = await response.json();
+    return { data: result };
+  }
+}
+
+export const apiClient = new ApiClient();
+
 // Re-export types for convenience
 export type {
   CreateReportInput,
