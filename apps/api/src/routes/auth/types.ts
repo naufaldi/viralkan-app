@@ -28,5 +28,6 @@ export interface DbUser {
   name: string;
   avatar_url: string | null;
   provider: string;
+  role: string; // 'user' or 'admin'
   created_at: Date;
 }

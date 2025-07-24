@@ -20,6 +20,11 @@ export interface Report {
   location_text: string;
   lat: number | null;
   lon: number | null;
+  status: 'pending' | 'verified' | 'rejected' | 'deleted';
+  verified_at: Date | null;
+  verified_by: string | null;
+  rejection_reason: string | null;
+  deleted_at: Date | null;
   created_at: Date;
 }
 

@@ -19,9 +19,12 @@ export const findReportsWithPagination = async (
     const { page, limit, category, user_id } = query;
     const offset = (page - 1) * limit;
 
-    let whereConditions: string[] = [];
-    let params: any[] = [];
+    const whereConditions: string[] = [];
+    const params: any[] = [];
     let paramIndex = 1;
+
+    // Only return verified reports for public API
+    whereConditions.push(`r.status = 'verified'`);
 
     if (category) {
       whereConditions.push(`r.category = $${paramIndex}`);
@@ -35,10 +38,7 @@ export const findReportsWithPagination = async (
       paramIndex++;
     }
 
-    const whereClause =
-      whereConditions.length > 0
-        ? `WHERE ${whereConditions.join(" AND ")}`
-        : "";
+    const whereClause = `WHERE ${whereConditions.join(" AND ")}`;
 
     // Get reports with user information
     const reportsQuery = `
@@ -51,6 +51,11 @@ export const findReportsWithPagination = async (
         r.location_text,
         r.lat,
         r.lon,
+        r.status,
+        r.verified_at,
+        r.verified_by,
+        r.rejection_reason,
+        r.deleted_at,
         r.created_at,
         u.name as user_name,
         u.avatar_url as user_avatar
@@ -107,12 +112,17 @@ export const findReportById = async (
         r.location_text,
         r.lat,
         r.lon,
+        r.status,
+        r.verified_at,
+        r.verified_by,
+        r.rejection_reason,
+        r.deleted_at,
         r.created_at,
         u.name as user_name,
         u.avatar_url as user_avatar
       FROM reports r
       LEFT JOIN users u ON r.user_id = u.id
-      WHERE r.id = $1
+      WHERE r.id = $1 AND r.status = 'verified'
     `;
 
     const result = await sql.unsafe(query, [id]);
@@ -144,9 +154,10 @@ export const createReport = async (
         street_name, 
         location_text, 
         lat, 
-        lon
+        lon,
+        status
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
       RETURNING id
     `;
 
@@ -159,6 +170,7 @@ export const createReport = async (
       reportData.location_text,
       reportData.lat || null,
       reportData.lon || null,
+      'pending', // Default status for new reports
     ];
 
     const result = await sql.unsafe(query, params);

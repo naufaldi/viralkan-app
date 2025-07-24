@@ -9,6 +9,7 @@ export {
   firebaseAuthMiddleware,
   optionalAuthMiddleware,
   requireRole,
+  requireAdmin,
 } from "./middleware";
 
 // Type exports

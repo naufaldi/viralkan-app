@@ -124,7 +124,7 @@ export const requireRole = (requiredRole: string) => {
         return c.json(errorResponse, 401);
       }
 
-      // Get user data to check role (if roles are implemented in the future)
+      // Get user data to check role
       const result = await shell.getUserById(sql, userId, userId);
 
       if (!result.success) {
@@ -136,8 +136,15 @@ export const requireRole = (requiredRole: string) => {
         return c.json(errorResponse, 403);
       }
 
-      // TODO: Implement role checking when user roles are added to the schema
-      // For now, all authenticated users have access
+      // Check if user has the required role
+      if (result.data.role !== requiredRole) {
+        const errorResponse: ErrorResponse = {
+          error: `${requiredRole} access required`,
+          statusCode: 403,
+          timestamp: new Date().toISOString(),
+        };
+        return c.json(errorResponse, 403);
+      }
 
       await next();
     } catch (error) {
@@ -152,4 +159,12 @@ export const requireRole = (requiredRole: string) => {
       return c.json(errorResponse, 500);
     }
   };
+};
+
+/**
+ * Admin authorization middleware
+ * API Layer - handles admin authorization checks
+ */
+export const requireAdmin = async (c: AuthContext, next: Next) => {
+  return requireRole('admin')(c, next);
 };

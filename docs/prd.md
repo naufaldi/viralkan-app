@@ -487,3 +487,171 @@ The platform's success should be measured by:
 - Social media virality of reports
 - Citizens successfully avoiding road damage
 - Increased public awareness leading to organic pressure on authorities
+
+---
+
+## 6 · Admin Management System (MVP 1.5)
+
+### 6.1 Admin System Overview
+
+**Purpose:** Manual verification and management of road damage reports to ensure quality and prevent abuse.
+
+**Scope:** MVP 1.5 enhancement between V1 (basic functionality) and V2 (smart metadata), focusing on content moderation and quality control.
+
+**Security Approach:** Environment-based admin configuration with database role management for open-source deployment security.
+
+---
+
+## **Epic 6: Admin Management System**
+
+### **User Story 6.1: Admin Authentication and Access**
+
+**As an** administrator  
+**I want to** access the admin dashboard securely  
+**So that** I can manage and verify road damage reports
+
+**Acceptance Criteria:**
+- [ ] Can login with admin email (naufaldi.rafif@gmail.com)
+- [ ] Admin role is verified through environment configuration
+- [ ] Access is restricted to admin users only
+- [ ] Session management is secure and time-limited
+- [ ] All admin actions are logged for audit purposes
+
+**Required Pages:**
+- **Admin Login**: Secure authentication for admin users
+- **Admin Dashboard**: `/admin/dashboard` - Main admin interface
+
+### **User Story 6.2: Admin Dashboard Overview**
+
+**As an** administrator  
+**I want to** see an overview of all reports and system statistics  
+**So that** I can understand the current state of the platform
+
+**Acceptance Criteria:**
+- [ ] Dashboard shows total reports count
+- [ ] Displays verification statistics (pending, verified, rejected)
+- [ ] Shows recent activity and admin actions
+- [ ] Provides quick access to pending reports queue
+- [ ] Includes system health indicators
+
+**Required Components:**
+- Statistics cards (total reports, pending, verified, rejected)
+- Recent activity timeline
+- Quick action buttons
+- System status indicators
+
+### **User Story 6.3: Report Verification Management**
+
+**As an** administrator  
+**I want to** review and verify pending reports  
+**So that** I can ensure only legitimate road damage reports are published
+
+**Acceptance Criteria:**
+- [ ] Can view all reports in a comprehensive table
+- [ ] Can see full report details including images
+- [ ] Can verify reports with one-click action
+- [ ] Can reject reports with reason modal
+- [ ] Can toggle verification status (verified ↔ unverified)
+- [ ] Can soft delete reports if necessary
+- [ ] All actions are logged with admin user and timestamp
+
+**Required Features:**
+- **Reports Table**: Full data display with action columns
+- **Action Buttons**: Verify, Reject, Toggle Status, Delete
+- **Rejection Modal**: Reason input with validation
+- **Detail View**: Full report information in separate page
+- **Status Management**: Toggle between verified/unverified states
+
+### **User Story 6.4: Report Status Management**
+
+**As an** administrator  
+**I want to** manage report statuses flexibly  
+**So that** I can correct mistakes and handle edge cases
+
+**Acceptance Criteria:**
+- [ ] Can change verified reports back to unverified
+- [ ] Can change rejected reports to verified
+- [ ] Can update rejection reasons
+- [ ] Can soft delete reports (mark as deleted but retain data)
+- [ ] Can restore soft-deleted reports
+- [ ] All status changes are logged with reasons
+
+**Required Features:**
+- **Status Toggle**: Switch between verification states
+- **Reason Management**: Update rejection reasons
+- **Soft Delete**: Mark reports as deleted without permanent removal
+- **Restore Function**: Recover soft-deleted reports
+
+### **User Story 6.5: Admin Statistics and Analytics**
+
+**As an** administrator  
+**I want to** view detailed statistics about reports and verification activity  
+**So that** I can monitor platform health and admin performance
+
+**Acceptance Criteria:**
+- [ ] Shows total reports by status (pending, verified, rejected, deleted)
+- [ ] Displays verification rate and average processing time
+- [ ] Shows reports by category and geographic distribution
+- [ ] Includes admin activity logs and audit trail
+- [ ] Provides export functionality for reports
+
+**Required Features:**
+- **Statistics Dashboard**: Comprehensive metrics display
+- **Activity Logs**: Admin action history
+- **Export Tools**: CSV/JSON export for reports
+- **Performance Metrics**: Verification efficiency tracking
+
+---
+
+### 6.2 Admin Security Requirements
+
+**Environment-Based Configuration:**
+- Admin emails configured via environment variables
+- Database admin role management with proper constraints
+- Secure session management with timeout
+- Audit logging for all admin actions
+- Rate limiting for admin endpoints
+- Input validation and sanitization
+
+**Open Source Security Considerations:**
+- No hardcoded admin credentials in source code
+- Environment variable documentation for deployment
+- Database-based admin role management
+- Proper error handling without exposing sensitive information
+- Secure authentication flow with Firebase integration
+
+---
+
+### 6.3 Admin User Interface Requirements
+
+**Dashboard Layout (`/admin/dashboard`):**
+- Clean, professional interface following monochromatic design
+- Statistics overview at the top
+- Pending reports queue prominently displayed
+- Quick action buttons for common tasks
+- Navigation to detailed management interfaces
+
+**Reports Management Table:**
+- All report data in sortable, filterable table
+- Action column with verify, reject, toggle, delete buttons
+- Status indicators with color coding
+- Pagination for large datasets
+- Search and filter functionality
+
+**Detail View:**
+- Full report information in dedicated page
+- Large image display with zoom capability
+- Complete metadata and user information
+- Action buttons for status management
+- Audit trail showing all changes
+
+---
+
+## 7 · Open Questions for RFC
+
+1. **Rate limits** — 10 uploads/user/day sufficient? configurable env var?
+2. **Image PII** — should V1 include simple client‑side blur for faces/plates?
+3. **Data retention** — auto‑delete older than 12 months?
+4. **Tile provider SLA** — OSM tiles vs Mapbox in V3.
+5. **Admin scalability** — How to handle multiple admin users in future?
+6. **Verification workflow** — Should there be different verification levels?

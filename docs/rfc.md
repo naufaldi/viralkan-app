@@ -624,16 +624,6 @@ Viralkan adopts a **true monochrome design system** (95% grayscale) with minimal
 - Interface doesn't compete with important content (damage photos)
 - Encourages serious engagement with infrastructure issues
 
-#### 7.1.4 Rejected Approach: Blue Primary Color
-
-We specifically **rejected** the typical "civic blue" approach used by many government websites because:
-
-- **Not People-to-People**: Blue implies top-down government authority, but Viralkan is community-driven
-- **Competes with Content**: Colored interface elements draw attention away from road damage photos
-- **Partisan Associations**: Any colored branding could imply political associations
-- **Over-Designed**: Infrastructure reporting should feel serious and functional, not "designed"
-
-The monochrome approach ensures Viralkan feels like a serious civic tool built by and for the community, not a branded government service.
 
 ## 8 · Component Library Requirements
 
@@ -1000,6 +990,316 @@ app.get("/health", async (c) => {
 - **Monitoring** — Traefik/Loki log ship later.
 - **CDN** — Cloudflare in front of R2 for faster image delivery?
 - **Backup strategy** — Automated DB backups to R2?
+
+---
+
+## 17 · Admin System Architecture (MVP 1.5)
+
+### 17.1 Admin Authentication & Authorization
+
+**Security Approach for Open Source Deployment:**
+
+```typescript
+// Environment-based admin configuration
+const ADMIN_EMAILS = process.env.ADMIN_EMAILS?.split(',') || ['naufaldi.rafif@gmail.com'];
+
+// Admin role middleware
+export const requireAdmin = async (c: AuthContext, next: Next) => {
+  const userId = c.get("user_id");
+  const user = await getUserById(userId);
+  
+  if (!user || user.role !== 'admin') {
+    return c.json({ error: "Admin access required" }, 403);
+  }
+  
+  await next();
+};
+```
+
+**Database Schema for Admin Management:**
+
+```sql
+-- Add role field to users table
+ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'admin'));
+CREATE INDEX IF NOT EXISTS users_role_idx ON users(role);
+
+-- Add verification fields to reports table
+ALTER TABLE reports ADD COLUMN status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'verified', 'rejected', 'deleted'));
+ALTER TABLE reports ADD COLUMN verified_at TIMESTAMPTZ;
+ALTER TABLE reports ADD COLUMN verified_by UUID REFERENCES users(id);
+ALTER TABLE reports ADD COLUMN rejection_reason TEXT;
+ALTER TABLE reports ADD COLUMN deleted_at TIMESTAMPTZ;
+
+-- Add indexes for verification queries
+CREATE INDEX IF NOT EXISTS reports_status_idx ON reports(status);
+CREATE INDEX IF NOT EXISTS reports_verified_at_idx ON reports(verified_at DESC);
+CREATE INDEX IF NOT EXISTS reports_verified_by_idx ON reports(verified_by);
+CREATE INDEX IF NOT EXISTS reports_deleted_at_idx ON reports(deleted_at);
+```
+
+### 17.2 Admin API Endpoints
+
+**Admin Reports Management:**
+
+```http
+# Admin Dashboard Statistics
+GET /api/admin/stats
+  -> 200 OK {totalReports, pendingCount, verifiedCount, rejectedCount, deletedCount}
+
+# Admin Reports List (with filters)
+GET /api/admin/reports?status=pending&page=1&limit=20
+  -> 200 OK {items: Report[], total: number, page: number}
+
+# Verify Report
+POST /api/admin/reports/:id/verify
+  -> 200 OK {report: Report} | 403 | 404
+
+# Reject Report
+POST /api/admin/reports/:id/reject
+  Body: {reason: string}
+  -> 200 OK {report: Report} | 403 | 404
+
+# Toggle Report Status
+POST /api/admin/reports/:id/toggle-status
+  Body: {status: 'verified' | 'rejected' | 'pending'}
+  -> 200 OK {report: Report} | 403 | 404
+
+# Soft Delete Report
+POST /api/admin/reports/:id/delete
+  -> 200 OK {report: Report} | 403 | 404
+
+# Restore Deleted Report
+POST /api/admin/reports/:id/restore
+  -> 200 OK {report: Report} | 403 | 404
+
+# Get Report Detail (Admin View)
+GET /api/admin/reports/:id
+  -> 200 OK {report: ReportWithUser} | 403 | 404
+```
+
+**Admin Activity Logging:**
+
+```typescript
+// Audit log table
+CREATE TABLE admin_actions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  admin_user_id UUID REFERENCES users(id),
+  action_type TEXT NOT NULL,
+  target_type TEXT NOT NULL, -- 'report', 'user', etc.
+  target_id UUID NOT NULL,
+  details JSONB,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS admin_actions_admin_idx ON admin_actions(admin_user_id);
+CREATE INDEX IF NOT EXISTS admin_actions_target_idx ON admin_actions(target_type, target_id);
+CREATE INDEX IF NOT EXISTS admin_actions_created_at_idx ON admin_actions(created_at DESC);
+```
+
+### 17.3 Admin Dashboard Implementation
+
+**Route Structure:**
+
+```typescript
+// apps/web/app/admin/
+├── dashboard/
+│   ├── page.tsx              # Main admin dashboard
+│   ├── reports/
+│   │   ├── page.tsx          # Reports management table
+│   │   └── [id]/
+│   │       └── page.tsx      # Report detail view
+│   ├── stats/
+│   │   └── page.tsx          # Statistics and analytics
+│   └── activity/
+│       └── page.tsx          # Admin activity logs
+```
+
+**Admin Dashboard Components:**
+
+```typescript
+// apps/web/components/admin/
+├── AdminDashboard.tsx        # Main dashboard layout
+├── AdminStats.tsx            # Statistics overview
+├── ReportsTable.tsx          # Full reports management table
+├── ReportDetail.tsx          # Detailed report view
+├── VerificationModal.tsx     # Verify/reject modal
+├── RejectionModal.tsx        # Rejection reason input
+├── AdminActivity.tsx         # Activity timeline
+└── AdminNavigation.tsx       # Admin-specific navigation
+```
+
+### 17.4 Security Considerations for Open Source
+
+**Environment Configuration:**
+
+```bash
+# .env
+ADMIN_EMAILS=naufaldi.rafif@gmail.com,other@email.com
+ADMIN_SESSION_TIMEOUT=3600
+ADMIN_RATE_LIMIT=100
+```
+
+**Security Best Practices:**
+
+1. **No Hardcoded Credentials:**
+   - Admin emails configured via environment variables
+   - Database-based role management
+   - Secure session handling
+
+2. **Access Control:**
+   - Admin role verification on every endpoint
+   - Rate limiting for admin actions
+   - Session timeout for admin sessions
+
+3. **Audit Trail:**
+   - Log all admin actions with timestamps
+   - Track admin user for each action
+   - Store action details for accountability
+
+4. **Input Validation:**
+   - Validate all admin inputs
+   - Sanitize rejection reasons
+   - Prevent SQL injection and XSS
+
+5. **Error Handling:**
+   - Don't expose sensitive information in errors
+   - Log errors for debugging
+   - Return appropriate HTTP status codes
+
+### 17.5 Admin Configuration Management
+
+**Admin User Setup:**
+
+```typescript
+// apps/api/scripts/setup-admin.ts
+export const setupAdminUser = async (email: string) => {
+  const result = await sql`
+    UPDATE users 
+    SET role = 'admin' 
+    WHERE email = ${email}
+    RETURNING id, email, role
+  `;
+  
+  if (result.length === 0) {
+    throw new Error(`User with email ${email} not found`);
+  }
+  
+  return result[0];
+};
+```
+
+**Environment Variable Validation:**
+
+```typescript
+// apps/api/src/config/admin.ts
+export const getAdminEmails = (): string[] => {
+  const adminEmails = process.env.ADMIN_EMAILS;
+  if (!adminEmails) {
+    throw new Error('ADMIN_EMAILS environment variable is required');
+  }
+  
+  return adminEmails.split(',').map(email => email.trim());
+};
+
+export const isAdminEmail = (email: string): boolean => {
+  const adminEmails = getAdminEmails();
+  return adminEmails.includes(email);
+};
+```
+
+### 17.6 Admin User Experience
+
+**Dashboard Layout (`/admin/dashboard`):**
+
+```typescript
+// Main dashboard with statistics and quick actions
+const AdminDashboard = () => {
+  return (
+    <div className="admin-dashboard">
+      <AdminStats />
+      <PendingReportsQueue />
+      <RecentActivity />
+      <QuickActions />
+    </div>
+  );
+};
+```
+
+**Reports Management Table:**
+
+```typescript
+// Full-featured table with all admin actions
+const ReportsTable = () => {
+  return (
+    <DataTable
+      data={reports}
+      columns={[
+        { key: 'image', label: 'Image', render: ImageThumbnail },
+        { key: 'category', label: 'Category', render: CategoryBadge },
+        { key: 'street_name', label: 'Street' },
+        { key: 'status', label: 'Status', render: StatusBadge },
+        { key: 'created_at', label: 'Created' },
+        { key: 'actions', label: 'Actions', render: ActionButtons }
+      ]}
+      filters={['status', 'category', 'date']}
+      pagination={true}
+    />
+  );
+};
+```
+
+**Verification Workflow:**
+
+```typescript
+// One-click verification with confirmation
+const handleVerify = async (reportId: string) => {
+  await apiCall(`/api/admin/reports/${reportId}/verify`, {
+    method: 'POST'
+  });
+  // Refresh data and show success message
+};
+
+// Rejection with reason modal
+const handleReject = async (reportId: string, reason: string) => {
+  await apiCall(`/api/admin/reports/${reportId}/reject`, {
+    method: 'POST',
+    body: JSON.stringify({ reason })
+  });
+  // Refresh data and show success message
+};
+```
+
+### 17.7 Performance & Scalability
+
+**Database Optimization:**
+
+```sql
+-- Composite indexes for common admin queries
+CREATE INDEX IF NOT EXISTS reports_admin_status_created_idx 
+ON reports(status, created_at DESC) 
+WHERE status IN ('pending', 'verified', 'rejected');
+
+CREATE INDEX IF NOT EXISTS reports_admin_user_status_idx 
+ON reports(user_id, status, created_at DESC);
+```
+
+**Caching Strategy:**
+
+```typescript
+// Cache admin statistics for 5 minutes
+const getAdminStats = async () => {
+  const cacheKey = 'admin:stats';
+  const cached = await redis.get(cacheKey);
+  
+  if (cached) {
+    return JSON.parse(cached);
+  }
+  
+  const stats = await calculateAdminStats();
+  await redis.setex(cacheKey, 300, JSON.stringify(stats));
+  return stats;
+};
+```
 
 ---
 

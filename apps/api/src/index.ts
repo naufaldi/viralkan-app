@@ -4,6 +4,7 @@ import { logger } from "hono/logger";
 import { serve } from "@hono/node-server";
 import { swaggerUI } from "@hono/swagger-ui";
 import { reportsRouter, authRouter, uploadRouter } from "@/routes";
+import { adminRouter } from "@/routes/admin/api";
 import { env, validateEnv } from "@/config/env";
 import { testConnection } from "@/db/connection";
 import { initializeFirebase } from "@/config/firebase";
@@ -60,6 +61,7 @@ app.get("/health", async (c) => {
 app.route("/api/reports", reportsRouter);
 app.route("/api/auth", authRouter);
 app.route("/api/upload", uploadRouter);
+app.route("/api/admin", adminRouter);
 
 // Configure OpenAPI documentation
 app.openAPIRegistry.registerComponent("securitySchemes", "bearerAuth", {
@@ -114,6 +116,10 @@ app.doc("/openapi", {
     {
       name: "Upload",
       description: "Image upload and file management",
+    },
+    {
+      name: "Admin",
+      description: "Admin operations for report verification and management",
     },
   ],
 });

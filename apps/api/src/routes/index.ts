@@ -5,12 +5,14 @@
 export { authRouter } from "./auth";
 export { reportsRouter } from "./reports";
 export { uploadRouter } from "./upload";
+export { adminRouter } from "./admin";
 
 // Middleware exports (for convenience)
 export {
   firebaseAuthMiddleware,
   optionalAuthMiddleware,
   requireRole,
+  requireAdmin,
 } from "./auth";
 
 // Public API type exports - these are the main types external consumers would use
