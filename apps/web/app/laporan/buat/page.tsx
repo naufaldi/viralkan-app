@@ -1,59 +1,12 @@
-"use client";
-
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useAuthContext } from "../../../contexts/AuthContext";
+import { requireAuth } from "../../../lib/auth-server";
 import CreateReportForm from "../../../components/reports/create-report-form";
-import { Card, CardContent } from "@repo/ui/components/ui/card";
-import { AlertCircle, Loader2, Share2, Users, Eye } from "lucide-react";
-import { Alert, AlertDescription } from "@repo/ui/components/ui/alert";
+
+import { Share2, Users, Eye } from "lucide-react";
 import Header from "components/layout/header";
 
-export default function CreateReportPage() {
-  const router = useRouter();
-  const { backendUser, isLoading } = useAuthContext();
-
-  useEffect(() => {
-    // Redirect to login if not authenticated
-    if (!isLoading && !backendUser) {
-      router.push("/login?redirect=/laporan/buat");
-    }
-  }, [backendUser, isLoading, router]);
-
-  // Show loading state while checking authentication
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md border-neutral-200 shadow-lg">
-          <CardContent className="p-8 text-center">
-            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-neutral-600" />
-            <h2 className="text-lg font-semibold text-neutral-900 mb-2">
-              Memuat...
-            </h2>
-            <p className="text-neutral-600">Memeriksa status autentikasi</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  // Show error if not authenticated
-  if (!backendUser) {
-    return (
-      <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md border-neutral-200 shadow-lg">
-          <CardContent className="p-8 text-center">
-            <Alert variant="destructive" className="border-red-200 bg-red-50">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription className="text-red-800">
-                Anda harus login terlebih dahulu untuk membuat laporan.
-              </AlertDescription>
-            </Alert>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+export default async function CreateReportPage() {
+  // Server-side authentication check
+  const _user = await requireAuth();
 
   return (
     <>
