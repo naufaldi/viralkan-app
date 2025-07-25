@@ -52,7 +52,10 @@ interface NominatimResponse {
     road?: string;
     suburb?: string;
     village?: string;
+    city_district?: string;
+    neighbourhood?: string;
     city?: string;
+    regency?: string;
     county?: string;
     state?: string;
     country?: string;
@@ -209,16 +212,22 @@ function parseNominatimAddress(
     result.street_name = address.road;
   }
 
-  // District (sub-district) - can be mapped from various Nominatim fields
+  // District (sub-district) - Indonesian OSM administrative mapping
   if (address.suburb) {
     result.district = address.suburb;
   } else if (address.village) {
     result.district = address.village;
+  } else if (address.city_district) {
+    result.district = address.city_district;
+  } else if (address.neighbourhood) {
+    result.district = address.neighbourhood;
   }
 
-  // City (city/regency)
+  // City (city/regency) - Indonesian OSM uses 'regency' field
   if (address.city) {
     result.city = address.city;
+  } else if (address.regency) {
+    result.city = address.regency;
   } else if (address.county) {
     result.city = address.county;
   }

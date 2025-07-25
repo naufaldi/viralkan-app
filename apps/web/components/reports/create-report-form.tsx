@@ -28,7 +28,6 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
     isGettingLocation,
     isUploadingImage,
     isExtractingExif,
-    exifError,
     hasExifWarning,
     submitError,
     handleImageSelect,
@@ -67,7 +66,7 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
             />
 
             {/* EXIF Warning - Shows when GPS metadata is missing */}
-            <ExifWarning error={exifError || ""} isVisible={hasExifWarning} />
+            <ExifWarning isVisible={hasExifWarning} />
 
             <ReportFormFields form={form} disabled={isLoading} />
 

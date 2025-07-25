@@ -95,20 +95,33 @@ export async function extractGPSFromImage(
       hasExifData: true,
     };
   } catch (error) {
-    console.error("EXIF extraction error:", error);
+    console.warn("EXIF extraction failed:", error);
 
-    // Check if it's a corrupted EXIF error
-    if (error instanceof Error && error.message.includes("Invalid EXIF")) {
-      return {
-        success: false,
-        error: "Data EXIF gambar rusak atau tidak valid",
-        hasExifData: true,
-      };
+    // Handle specific EXIF errors gracefully
+    if (error instanceof Error) {
+      const errorMessage = error.message.toLowerCase();
+
+      // Common EXIF extraction errors that should be warnings, not breaks
+      if (
+        errorMessage.includes("unknown file format") ||
+        errorMessage.includes("invalid exif") ||
+        errorMessage.includes("no exif") ||
+        errorMessage.includes("unsupported format") ||
+        errorMessage.includes("parsing failed")
+      ) {
+        return {
+          success: false,
+          error:
+            "Gambar tidak memiliki data lokasi GPS atau format tidak didukung",
+          hasExifData: false,
+        };
+      }
     }
 
+    // For any other unexpected errors, still return gracefully
     return {
       success: false,
-      error: "Gagal membaca data EXIF gambar",
+      error: "Tidak dapat membaca metadata gambar",
       hasExifData: false,
     };
   }
@@ -121,10 +134,10 @@ export function getExifErrorMessage(result: ExifExtractionResult): string {
   if (result.success) return "";
 
   if (!result.hasExifData) {
-    return "Gambar tidak memiliki metadata lokasi. Ambil foto langsung dari kamera untuk mendapatkan data lokasi otomatis.";
+    return "Gambar tidak memiliki data lokasi GPS. Ini normal untuk foto yang dikirim melalui media sosial atau aplikasi chat. Gunakan tombol lokasi atau isi koordinat secara manual.";
   }
 
-  return result.error || "Gagal mengekstrak data lokasi dari gambar";
+  return result.error || "Tidak dapat membaca data lokasi dari gambar";
 }
 
 /**

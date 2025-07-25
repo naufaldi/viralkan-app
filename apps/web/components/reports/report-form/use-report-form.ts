@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 // Icons removed - not used in this file
 import { useCreateReport } from "../../../hooks/use-create-report";
 import { uploadImage } from "../../../services/upload";
@@ -36,6 +37,7 @@ export const useReportForm = ({ onSuccess }: UseReportFormProps) => {
 
   const { getToken, isAuthenticated } = useAuth();
   const { invalidateAll } = useInvalidateDashboard();
+  const router = useRouter();
 
   const {
     submitReport,
@@ -47,6 +49,8 @@ export const useReportForm = ({ onSuccess }: UseReportFormProps) => {
     onSuccess: (reportId) => {
       invalidateAll();
       onSuccess?.(reportId);
+      // Redirect to dashboard after successful report creation
+      router.push(`/dashboard?success=true&reportId=${reportId}`);
     },
   });
 
@@ -148,11 +152,15 @@ export const useReportForm = ({ onSuccess }: UseReportFormProps) => {
         console.log("EXIF extraction failed:", errorMessage);
       }
     } catch (error) {
-      console.error("EXIF extraction error:", error);
+      console.warn("EXIF extraction error:", error);
+
+      // Set a user-friendly warning message instead of breaking
       setExifError(
-        "Gagal membaca metadata foto. Silakan tambahkan lokasi secara manual.",
+        "Gambar tidak memiliki data lokasi GPS. Silakan gunakan tombol lokasi atau isi koordinat secara manual.",
       );
       setHasExifWarning(true);
+
+      // Don't throw or break the flow - this is expected for many images
     } finally {
       setIsExtractingExif(false);
     }

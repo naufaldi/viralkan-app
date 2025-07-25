@@ -63,7 +63,18 @@ export default function ImageUpload({
         reduction: `${(((file.size - compressedFile.size) / file.size) * 100).toFixed(1)}%`,
       });
 
-      return compressedFile;
+      // Ensure the compressed file has the correct filename with .webp extension
+      const originalName = file.name;
+      const nameWithoutExt = originalName.substring(0, originalName.lastIndexOf('.'));
+      const newFileName = nameWithoutExt ? `${nameWithoutExt}.webp` : `compressed_${Date.now()}.webp`;
+      
+      // Create a new File object with the correct filename
+      const fileWithCorrectName = new File([compressedFile], newFileName, {
+        type: "image/webp",
+        lastModified: Date.now(),
+      });
+
+      return fileWithCorrectName;
     } catch (error) {
       console.warn("Image compression failed, using original:", error);
       return file; // Fallback to original file
