@@ -3,7 +3,14 @@
 import { useState, useRef, useCallback } from "react";
 import { Card, CardContent } from "@repo/ui/components/ui/card";
 import { Button } from "@repo/ui/components/ui/button";
-import { Upload, X, Image as ImageIcon, AlertCircle, RefreshCw, Camera } from "lucide-react";
+import {
+  Upload,
+  X,
+  Image as ImageIcon,
+  AlertCircle,
+  RefreshCw,
+  Camera,
+} from "lucide-react";
 import { Alert, AlertDescription } from "@repo/ui/components/ui/alert";
 import { FormLabel } from "@repo/ui/components/ui/form";
 import imageCompression from "browser-image-compression";
@@ -48,7 +55,7 @@ export default function EditImageUpload({
         maxSizeMB: 1,
         maxWidthOrHeight: 1200,
         useWebWorker: true,
-        fileType: 'image/webp',
+        fileType: "image/webp",
         quality: 0.85,
         initialQuality: 0.9,
       };
@@ -56,7 +63,7 @@ export default function EditImageUpload({
       const compressedFile = await imageCompression(file, options);
       return compressedFile;
     } catch (error) {
-      console.warn('Image compression failed, using original:', error);
+      console.warn("Image compression failed, using original:", error);
       return file;
     }
   }, []);
@@ -74,7 +81,8 @@ export default function EditImageUpload({
       }
 
       if (!ACCEPTED_FORMATS.includes(file.type)) {
-        const errorMsg = "Format file tidak didukung. Gunakan JPEG, PNG, atau WebP";
+        const errorMsg =
+          "Format file tidak didukung. Gunakan JPEG, PNG, atau WebP";
         setUploadError(errorMsg);
         onUploadError?.(errorMsg);
         return;
@@ -82,7 +90,7 @@ export default function EditImageUpload({
 
       try {
         setIsCompressing(true);
-        
+
         const compressedFile = await compressImage(file);
 
         const reader = new FileReader();
@@ -101,7 +109,7 @@ export default function EditImageUpload({
         setIsCompressing(false);
       }
     },
-    [compressImage, onImageSelect, onUploadError, onUploadSuccess]
+    [compressImage, onImageSelect, onUploadError, onUploadSuccess],
   );
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -124,7 +132,7 @@ export default function EditImageUpload({
         handleFileSelect(files[0]);
       }
     },
-    [handleFileSelect]
+    [handleFileSelect],
   );
 
   const handleUploadClick = useCallback(() => {
@@ -138,7 +146,7 @@ export default function EditImageUpload({
         handleFileSelect(file);
       }
     },
-    [handleFileSelect]
+    [handleFileSelect],
   );
 
   const handleRemoveImage = useCallback(() => {
@@ -186,13 +194,18 @@ export default function EditImageUpload({
 
               <div className="space-y-2">
                 <h3 className="text-lg font-semibold text-neutral-900 tracking-tight">
-                  {isCompressing ? "Memproses gambar..." : "Drag foto jalan rusak ke sini"}
+                  {isCompressing
+                    ? "Memproses gambar..."
+                    : "Drag foto jalan rusak ke sini"}
                 </h3>
                 <p className="text-base text-neutral-600">
-                  {isCompressing ? "Mengompres dan mengoptimalkan gambar" : "atau klik untuk memilih file dari perangkat"}
+                  {isCompressing
+                    ? "Mengompres dan mengoptimalkan gambar"
+                    : "atau klik untuk memilih file dari perangkat"}
                 </p>
                 <p className="text-sm text-neutral-600 mt-3">
-                  Format: JPEG, PNG, WebP • Maksimal 10MB • Otomatis dikompres ke WebP
+                  Format: JPEG, PNG, WebP • Maksimal 10MB • Otomatis dikompres
+                  ke WebP
                 </p>
               </div>
 
@@ -230,7 +243,9 @@ export default function EditImageUpload({
                       <div className="text-center">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-neutral-600 mx-auto mb-3"></div>
                         <p className="text-base font-medium text-neutral-900">
-                          {isCompressing ? "Memproses gambar..." : "Mengunggah foto..."}
+                          {isCompressing
+                            ? "Memproses gambar..."
+                            : "Mengunggah foto..."}
                         </p>
                         <p className="text-sm text-neutral-600 mt-1">
                           Mohon tunggu sebentar
@@ -252,10 +267,9 @@ export default function EditImageUpload({
                         {selectedImage ? selectedImage.name : "Foto saat ini"}
                       </p>
                       <p className="text-xs text-neutral-600">
-                        {selectedImage 
+                        {selectedImage
                           ? `${(selectedImage.size / 1024 / 1024).toFixed(1)} MB • Foto baru`
-                          : "Foto yang sudah ada • Klik untuk mengganti"
-                        }
+                          : "Foto yang sudah ada • Klik untuk mengganti"}
                       </p>
                     </div>
                   </div>
@@ -325,9 +339,9 @@ export default function EditImageUpload({
       />
 
       <p className="text-sm text-neutral-600">
-        Unggah foto yang jelas untuk membantu komunitas mengidentifikasi
-        lokasi jalan rusak.
+        Unggah foto yang jelas untuk membantu komunitas mengidentifikasi lokasi
+        jalan rusak.
       </p>
     </div>
   );
-} 
+}

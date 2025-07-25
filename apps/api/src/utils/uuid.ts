@@ -6,9 +6,10 @@ import { z } from "@hono/zod-openapi";
 export const createUuidValidator = (fieldName: string = "UUID") => {
   return z.string().refine(
     (val) => {
-      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      const uuidRegex =
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
       const isValid = uuidRegex.test(val);
-      
+
       if (!isValid) {
         console.log(`🔍 UUID Validation Failed for ${fieldName}:`, {
           value: val,
@@ -21,12 +22,12 @@ export const createUuidValidator = (fieldName: string = "UUID") => {
       } else {
         console.log(`✅ UUID Validation Passed for ${fieldName}:`, val);
       }
-      
+
       return isValid;
     },
     {
       message: `Invalid ${fieldName} format - must be a valid UUID v7 string`,
-    }
+    },
   );
 };
 
@@ -45,14 +46,15 @@ export const createRelaxedUuidValidator = (fieldName: string = "UUID") => {
     },
     {
       message: `Invalid ${fieldName} format`,
-    }
+    },
   );
 };
 
 /**
  * UUID validation regex pattern
  */
-export const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+export const UUID_REGEX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /**
  * Check if a string is a valid UUID
@@ -77,10 +79,10 @@ export const debugUuidData = (data: any, context: string = "UUID Data") => {
     data,
     type: typeof data,
     isArray: Array.isArray(data),
-    keys: data && typeof data === 'object' ? Object.keys(data) : null,
+    keys: data && typeof data === "object" ? Object.keys(data) : null,
   });
-  
-  if (data && typeof data === 'object' && data.id) {
+
+  if (data && typeof data === "object" && data.id) {
     console.log(`🔍 ${context} - ID field:`, {
       id: data.id,
       idType: typeof data.id,
@@ -88,4 +90,4 @@ export const debugUuidData = (data: any, context: string = "UUID Data") => {
       isValid: isValidUuid(data.id),
     });
   }
-}; 
+};

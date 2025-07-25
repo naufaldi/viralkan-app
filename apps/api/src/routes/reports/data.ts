@@ -179,7 +179,7 @@ export const createReport = async (
       reportData.location_text,
       reportData.lat || null,
       reportData.lon || null,
-      'pending', // Default status for new reports
+      "pending", // Default status for new reports
     ];
 
     const result = await sql.unsafe(query, params);

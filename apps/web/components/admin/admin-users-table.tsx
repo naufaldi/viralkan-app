@@ -40,18 +40,22 @@ import {
   AlertDialogTitle,
 } from "@repo/ui/components/ui/alert-dialog";
 import { Input } from "@repo/ui/components/ui/input";
-import { 
-  ArrowUpDown, 
-  Eye, 
-  Trash2, 
-  MoreHorizontal, 
+import {
+  ArrowUpDown,
+  Eye,
+  Trash2,
+  MoreHorizontal,
   Search,
   User,
   Mail,
   Calendar,
-  Shield
+  Shield,
 } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@repo/ui/components/ui/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@repo/ui/components/ui/avatar";
 
 interface AdminUser {
   id: string;
@@ -72,29 +76,31 @@ interface AdminUsersTableProps {
   onViewDetails?: (id: string) => void;
 }
 
-export function AdminUsersTable({ 
-  data, 
-  isLoading = false, 
-  onDelete, 
-  onViewDetails 
+export function AdminUsersTable({
+  data,
+  isLoading = false,
+  onDelete,
+  onViewDetails,
 }: AdminUsersTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([
     { id: "joinedAt", desc: true },
   ]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+    [],
+  );
+  const [columnVisibility, setColumnVisibility] =
+    React.useState<VisibilityState>({});
   const [globalFilter, setGlobalFilter] = React.useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
-  const [userToDelete, setUserToDelete] = React.useState<AdminUser | null>(null);
+  const [userToDelete, setUserToDelete] = React.useState<AdminUser | null>(
+    null,
+  );
 
   const getStatusBadge = (status: string) => {
     switch (status.toLowerCase()) {
       case "active":
         return (
-          <Badge
-            variant="secondary"
-            className="bg-neutral-900 text-white"
-          >
+          <Badge variant="secondary" className="bg-neutral-900 text-white">
             Aktif
           </Badge>
         );
@@ -198,20 +204,23 @@ export function AdminUsersTable({
       ),
       cell: ({ row }) => (
         <div className="flex items-center space-x-3">
-                       <Avatar className="h-10 w-10">
-               <AvatarImage src={row.original.avatarUrl} alt={row.getValue("name") as string} />
-               <AvatarFallback className="bg-neutral-100 text-neutral-700">
-                 {(row.getValue("name") as string).charAt(0).toUpperCase()}
-               </AvatarFallback>
-             </Avatar>
+          <Avatar className="h-10 w-10">
+            <AvatarImage
+              src={row.original.avatarUrl}
+              alt={row.getValue("name") as string}
+            />
+            <AvatarFallback className="bg-neutral-100 text-neutral-700">
+              {(row.getValue("name") as string).charAt(0).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
           <div className="space-y-1">
             <div className="font-medium text-neutral-900">
               {row.getValue("name")}
             </div>
-                         <div className="flex items-center text-sm text-neutral-500">
-               <Mail className="w-3 h-3 mr-1" />
-               {row.original.email as string}
-             </div>
+            <div className="flex items-center text-sm text-neutral-500">
+              <Mail className="w-3 h-3 mr-1" />
+              {row.original.email as string}
+            </div>
           </div>
         </div>
       ),
@@ -334,8 +343,8 @@ export function AdminUsersTable({
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   className="h-8 w-8 p-0 hover:bg-neutral-100 hover:text-neutral-900"
                 >
                   <span className="sr-only">Open menu</span>
@@ -347,7 +356,7 @@ export function AdminUsersTable({
                   <Eye className="mr-2 h-4 w-4" />
                   Lihat Detail
                 </DropdownMenuItem>
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   onClick={() => handleDeleteClick(user)}
                   className="text-red-600 focus:text-red-600"
                 >
@@ -562,14 +571,15 @@ export function AdminUsersTable({
             <AlertDialogTitle>Hapus Pengguna</AlertDialogTitle>
             <AlertDialogDescription>
               Apakah Anda yakin ingin menghapus pengguna{" "}
-              <strong>{userToDelete?.name}</strong>? Tindakan ini tidak dapat dibatalkan.
+              <strong>{userToDelete?.name}</strong>? Tindakan ini tidak dapat
+              dibatalkan.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel className="hover:bg-neutral-50 hover:border-neutral-400">
               Batal
             </AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogAction
               onClick={handleDeleteConfirm}
               className="bg-red-600 hover:bg-red-700 text-white"
             >
@@ -580,4 +590,4 @@ export function AdminUsersTable({
       </AlertDialog>
     </>
   );
-} 
+}

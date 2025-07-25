@@ -624,7 +624,6 @@ Viralkan adopts a **true monochrome design system** (95% grayscale) with minimal
 - Interface doesn't compete with important content (damage photos)
 - Encourages serious engagement with infrastructure issues
 
-
 ## 8 · Component Library Requirements
 
 ### 8.1 Shared UI Components
@@ -1001,17 +1000,19 @@ app.get("/health", async (c) => {
 
 ```typescript
 // Environment-based admin configuration
-const ADMIN_EMAILS = process.env.ADMIN_EMAILS?.split(',') || ['naufaldi.rafif@gmail.com'];
+const ADMIN_EMAILS = process.env.ADMIN_EMAILS?.split(",") || [
+  "naufaldi.rafif@gmail.com",
+];
 
 // Admin role middleware
 export const requireAdmin = async (c: AuthContext, next: Next) => {
   const userId = c.get("user_id");
   const user = await getUserById(userId);
-  
-  if (!user || user.role !== 'admin') {
+
+  if (!user || user.role !== "admin") {
     return c.json({ error: "Admin access required" }, 403);
   }
-  
+
   await next();
 };
 ```
@@ -1179,11 +1180,11 @@ export const setupAdminUser = async (email: string) => {
     WHERE email = ${email}
     RETURNING id, email, role
   `;
-  
+
   if (result.length === 0) {
     throw new Error(`User with email ${email} not found`);
   }
-  
+
   return result[0];
 };
 ```
@@ -1195,10 +1196,10 @@ export const setupAdminUser = async (email: string) => {
 export const getAdminEmails = (): string[] => {
   const adminEmails = process.env.ADMIN_EMAILS;
   if (!adminEmails) {
-    throw new Error('ADMIN_EMAILS environment variable is required');
+    throw new Error("ADMIN_EMAILS environment variable is required");
   }
-  
-  return adminEmails.split(',').map(email => email.trim());
+
+  return adminEmails.split(",").map((email) => email.trim());
 };
 
 export const isAdminEmail = (email: string): boolean => {
@@ -1254,7 +1255,7 @@ const ReportsTable = () => {
 // One-click verification with confirmation
 const handleVerify = async (reportId: string) => {
   await apiCall(`/api/admin/reports/${reportId}/verify`, {
-    method: 'POST'
+    method: "POST",
   });
   // Refresh data and show success message
 };
@@ -1262,8 +1263,8 @@ const handleVerify = async (reportId: string) => {
 // Rejection with reason modal
 const handleReject = async (reportId: string, reason: string) => {
   await apiCall(`/api/admin/reports/${reportId}/reject`, {
-    method: 'POST',
-    body: JSON.stringify({ reason })
+    method: "POST",
+    body: JSON.stringify({ reason }),
   });
   // Refresh data and show success message
 };
@@ -1275,11 +1276,11 @@ const handleReject = async (reportId: string, reason: string) => {
 
 ```sql
 -- Composite indexes for common admin queries
-CREATE INDEX IF NOT EXISTS reports_admin_status_created_idx 
-ON reports(status, created_at DESC) 
+CREATE INDEX IF NOT EXISTS reports_admin_status_created_idx
+ON reports(status, created_at DESC)
 WHERE status IN ('pending', 'verified', 'rejected');
 
-CREATE INDEX IF NOT EXISTS reports_admin_user_status_idx 
+CREATE INDEX IF NOT EXISTS reports_admin_user_status_idx
 ON reports(user_id, status, created_at DESC);
 ```
 
@@ -1288,13 +1289,13 @@ ON reports(user_id, status, created_at DESC);
 ```typescript
 // Cache admin statistics for 5 minutes
 const getAdminStats = async () => {
-  const cacheKey = 'admin:stats';
+  const cacheKey = "admin:stats";
   const cached = await redis.get(cacheKey);
-  
+
   if (cached) {
     return JSON.parse(cached);
   }
-  
+
   const stats = await calculateAdminStats();
   await redis.setex(cacheKey, 300, JSON.stringify(stats));
   return stats;

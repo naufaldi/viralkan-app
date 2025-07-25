@@ -4,7 +4,6 @@ import { Badge } from "@repo/ui/components/ui/badge";
 import { Search, Filter, X } from "lucide-react";
 import { REPORT_CATEGORIES } from "@/constant/reports";
 
-
 interface ReportFiltersProps {
   selectedCategory?: "berlubang" | "retak" | "lainnya";
   searchQuery: string;

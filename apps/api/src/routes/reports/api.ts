@@ -87,8 +87,6 @@ const testNoAuthRoute = createRoute({
   },
 });
 
-
-
 const getReportsRoute = createRoute({
   method: "get",
   path: "/",
@@ -388,7 +386,10 @@ const validateOwnershipRoute = createRoute({
 reportsRouter.openapi(testAuthRoute, async (c) => {
   try {
     const userId = c.get("user_id");
-    return c.json({ message: "Authentication successful", user_id: userId }, 200);
+    return c.json(
+      { message: "Authentication successful", user_id: userId },
+      200,
+    );
   } catch (error) {
     console.error("Error in testAuthRoute:", error);
     return c.json(
@@ -405,10 +406,11 @@ reportsRouter.openapi(testAuthRoute, async (c) => {
 });
 
 reportsRouter.openapi(testNoAuthRoute, async (c) => {
-  return c.json({ message: "Test successful", timestamp: new Date().toISOString() }, 200);
+  return c.json(
+    { message: "Test successful", timestamp: new Date().toISOString() },
+    200,
+  );
 });
-
-
 
 reportsRouter.openapi(getReportsRoute, async (c) => {
   try {

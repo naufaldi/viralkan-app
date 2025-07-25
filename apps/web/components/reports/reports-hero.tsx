@@ -106,9 +106,9 @@ export function ReportsHero({
                   </span>
                 </h1>
                 <p className="text-base sm:text-lg text-neutral-600 leading-relaxed">
-                  &ldquo;Dari masyarakat, untuk masyarakat&rdquo; — Platform komunitas untuk
-                  melaporkan dan berbagi informasi kerusakan jalan di seluruh
-                  Indonesia.
+                  &ldquo;Dari masyarakat, untuk masyarakat&rdquo; — Platform
+                  komunitas untuk melaporkan dan berbagi informasi kerusakan
+                  jalan di seluruh Indonesia.
                 </p>
               </div>
 

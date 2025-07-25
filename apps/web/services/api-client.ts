@@ -106,7 +106,7 @@ export const reportsService = {
       status?: string;
       category?: string;
       search?: string;
-    }
+    },
   ): Promise<{
     items: Array<{
       id: string;
@@ -117,7 +117,7 @@ export const reportsService = {
       location_text: string;
       lat: number | null;
       lon: number | null;
-      status: 'pending' | 'verified' | 'rejected' | 'deleted';
+      status: "pending" | "verified" | "rejected" | "deleted";
       verified_at: string | null;
       verified_by: string | null;
       rejection_reason: string | null;

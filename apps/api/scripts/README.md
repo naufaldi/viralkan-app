@@ -49,6 +49,7 @@ bun run scripts/setup-admin.ts
 #### Audit Log Schema
 
 The `admin_audit_log` table tracks:
+
 - `email`: The email address being modified
 - `action`: Either 'grant' or 'revoke'
 - `success`: Whether the operation succeeded
@@ -72,4 +73,4 @@ When adding new scripts:
 3. Add validation for all inputs
 4. Document security considerations
 5. Include usage examples
-6. Add tests where appropriate 
+6. Add tests where appropriate

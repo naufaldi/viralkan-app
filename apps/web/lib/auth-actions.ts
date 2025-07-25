@@ -148,27 +148,27 @@ export async function getPublicReportsAction(searchParams?: URLSearchParams) {
 // Enhanced server action for getting public reports with stats calculation
 export async function getPublicReportsWithStats(
   queryParams?: URLSearchParams,
-  includeStats = false
+  includeStats = false,
 ) {
   // Fetch paginated reports for display
   const displayReports = await getPublicReportsAction(queryParams);
-  
+
   if (!includeStats) {
     return { reports: displayReports, stats: null };
   }
-  
+
   // Fetch larger dataset for stats calculation (no pagination limits)
   const statsParams = new URLSearchParams();
   statsParams.set("limit", "1000"); // Get more data for accurate stats
   // Don't include search/filter params for stats - we want total counts
-  
+
   try {
     const allReports = await getPublicReportsAction(statsParams);
-    
+
     // Import stats calculation function
-    const { calculateStatsFromReports, validateReportsData, getDefaultStats } = 
+    const { calculateStatsFromReports, validateReportsData, getDefaultStats } =
       await import("../utils/stats-utils");
-    
+
     // Validate and calculate stats
     if (validateReportsData(allReports?.items)) {
       const stats = calculateStatsFromReports(allReports.items);
@@ -183,4 +183,3 @@ export async function getPublicReportsWithStats(
     return { reports: displayReports, stats: getDefaultStats() };
   }
 }
-

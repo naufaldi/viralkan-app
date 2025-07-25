@@ -11,36 +11,42 @@ export const AdminStatsResponseSchema = z.object({
   adminUsers: z.number(),
   verificationRate: z.number(), // reports per day
   averageVerificationTime: z.number(), // in hours
-  recentActivity: z.array(z.object({
-    action: z.string(),
-    timestamp: z.string(),
-    adminUser: z.string(),
-  })),
+  recentActivity: z.array(
+    z.object({
+      action: z.string(),
+      timestamp: z.string(),
+      adminUser: z.string(),
+    }),
+  ),
 });
 
 // Admin Reports Response
 export const AdminReportsResponseSchema = z.object({
-  items: z.array(z.object({
-    id: z.string(),
-    user_id: z.string(),
-    image_url: z.string(),
-    category: z.string(),
-    street_name: z.string(),
-    location_text: z.string(),
-    lat: z.number().nullable(),
-    lon: z.number().nullable(),
-    status: z.enum(['pending', 'verified', 'rejected', 'deleted']),
-    verified_at: z.string().nullable(),
-    verified_by: z.string().nullable(),
-    rejection_reason: z.string().nullable(),
-    deleted_at: z.string().nullable(),
-    created_at: z.string(),
-    user: z.object({
+  items: z.array(
+    z.object({
       id: z.string(),
-      name: z.string(),
-      email: z.string(),
-    }).optional(),
-  })),
+      user_id: z.string(),
+      image_url: z.string(),
+      category: z.string(),
+      street_name: z.string(),
+      location_text: z.string(),
+      lat: z.number().nullable(),
+      lon: z.number().nullable(),
+      status: z.enum(["pending", "verified", "rejected", "deleted"]),
+      verified_at: z.string().nullable(),
+      verified_by: z.string().nullable(),
+      rejection_reason: z.string().nullable(),
+      deleted_at: z.string().nullable(),
+      created_at: z.string(),
+      user: z
+        .object({
+          id: z.string(),
+          name: z.string(),
+          email: z.string(),
+        })
+        .optional(),
+    }),
+  ),
   total: z.number(),
   page: z.number(),
   limit: z.number(),
@@ -49,7 +55,7 @@ export const AdminReportsResponseSchema = z.object({
 // Admin Report Action Request
 export const AdminReportActionRequestSchema = z.object({
   reason: z.string().optional(),
-  status: z.enum(['pending', 'verified', 'rejected', 'deleted']).optional(),
+  status: z.enum(["pending", "verified", "rejected", "deleted"]).optional(),
 });
 
 // Admin Report Action Response
@@ -73,15 +79,19 @@ export const AdminActionLogSchema = z.object({
   action_type: z.string(),
   target_type: z.string(),
   target_id: z.string(),
-      details: z.any().nullable(),
+  details: z.any().nullable(),
   created_at: z.string(),
 });
 
 // TypeScript types from Zod schemas
 export type AdminStatsResponse = z.infer<typeof AdminStatsResponseSchema>;
 export type AdminReportsResponse = z.infer<typeof AdminReportsResponseSchema>;
-export type AdminReportActionRequest = z.infer<typeof AdminReportActionRequestSchema>;
-export type AdminReportActionResponse = z.infer<typeof AdminReportActionResponseSchema>;
+export type AdminReportActionRequest = z.infer<
+  typeof AdminReportActionRequestSchema
+>;
+export type AdminReportActionResponse = z.infer<
+  typeof AdminReportActionResponseSchema
+>;
 export type AdminActionLog = z.infer<typeof AdminActionLogSchema>;
 
 // Database interfaces
@@ -104,7 +114,7 @@ export interface ReportWithUser {
   location_text: string;
   lat: number | null;
   lon: number | null;
-  status: 'pending' | 'verified' | 'rejected' | 'deleted';
+  status: "pending" | "verified" | "rejected" | "deleted";
   verified_at: Date | null;
   verified_by: string | null;
   rejection_reason: string | null;
@@ -115,4 +125,4 @@ export interface ReportWithUser {
     name: string;
     email: string;
   };
-} 
+}

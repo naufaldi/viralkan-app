@@ -19,7 +19,10 @@ interface AdminUsersTableWrapperProps {
   isLoading?: boolean;
 }
 
-export function AdminUsersTableWrapper({ data, isLoading }: AdminUsersTableWrapperProps) {
+export function AdminUsersTableWrapper({
+  data,
+  isLoading,
+}: AdminUsersTableWrapperProps) {
   const handleDelete = (userId: string) => {
     console.log("Delete user:", userId);
     // TODO: Implement delete logic with API call
@@ -38,4 +41,4 @@ export function AdminUsersTableWrapper({ data, isLoading }: AdminUsersTableWrapp
       onViewDetails={handleViewDetails}
     />
   );
-} 
+}

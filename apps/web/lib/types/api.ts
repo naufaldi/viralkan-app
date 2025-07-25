@@ -18,8 +18,24 @@ export const CreateReportSchema = z.object({
     .string()
     .min(1, "Location text is required")
     .max(500, "Location text too long"),
-  lat: z.number().min(-90).max(90).optional(),
-  lon: z.number().min(-180).max(180).optional(),
+  lat: z
+    .number()
+    .min(-90, "Latitude must be between -90 and 90")
+    .max(90, "Latitude must be between -90 and 90"),
+  lon: z
+    .number()
+    .min(-180, "Longitude must be between -180 and 180")
+    .max(180, "Longitude must be between -180 and 180"),
+  // Administrative boundaries (required - will be auto-filled by geocoding or manual input)
+  district: z
+    .string()
+    .min(1, "District is required")
+    .max(100, "District name too long"),
+  city: z.string().min(1, "City is required").max(100, "City name too long"),
+  province: z
+    .string()
+    .min(1, "Province is required")
+    .max(100, "Province name too long"),
 });
 
 export const ReportResponseSchema = z.object({
@@ -29,9 +45,12 @@ export const ReportResponseSchema = z.object({
   category: z.enum(["berlubang", "retak", "lainnya"]),
   street_name: z.string(),
   location_text: z.string(),
-  lat: z.number().nullable(),
-  lon: z.number().nullable(),
-  status: z.enum(['pending', 'verified', 'rejected', 'deleted']),
+  lat: z.number(),
+  lon: z.number(),
+  district: z.string(),
+  city: z.string(),
+  province: z.string(),
+  status: z.enum(["pending", "verified", "rejected", "deleted"]),
   verified_at: z.string().datetime().nullable(),
   verified_by: z.string().nullable(),
   rejection_reason: z.string().nullable(),

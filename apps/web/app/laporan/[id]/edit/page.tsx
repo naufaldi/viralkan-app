@@ -2,15 +2,20 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@repo/ui/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@repo/ui/components/ui/card";
 import { Separator } from "@repo/ui/components/ui/separator";
-import { 
-  ArrowLeft, 
+import {
+  ArrowLeft,
   AlertCircle,
   Edit3,
   FileText,
   MapPin,
-  Calendar
+  Calendar,
 } from "lucide-react";
 import Link from "next/link";
 import { useReport } from "@/hooks/reports";
@@ -22,7 +27,7 @@ export default function EditReportPage() {
   const params = useParams();
   const router = useRouter();
   const reportId = params.id as string;
-  
+
   const { data: report, isLoading, error } = useReport(reportId);
 
   const handleEditSuccess = (reportId: string) => {
@@ -42,10 +47,13 @@ export default function EditReportPage() {
           <div className="text-center">
             <AlertCircle className="h-16 w-16 text-neutral-400 mx-auto mb-4" />
             <h1 className="text-2xl font-semibold text-neutral-900 mb-2">
-              {error instanceof Error ? error.message : "Laporan tidak ditemukan"}
+              {error instanceof Error
+                ? error.message
+                : "Laporan tidak ditemukan"}
             </h1>
             <p className="text-neutral-600 mb-6">
-              Laporan yang Anda cari tidak dapat ditemukan atau Anda tidak memiliki izin untuk mengeditnya.
+              Laporan yang Anda cari tidak dapat ditemukan atau Anda tidak
+              memiliki izin untuk mengeditnya.
             </p>
             <Link href="/laporan">
               <Button variant="outline" className="mr-4">
@@ -92,7 +100,7 @@ export default function EditReportPage() {
           {/* Breadcrumb Navigation */}
           <nav className="mb-8">
             <div className="flex items-center gap-4 text-sm text-neutral-600">
-              <Link 
+              <Link
                 href="/laporan"
                 className="inline-flex items-center hover:text-neutral-900 transition-colors"
               >
@@ -100,7 +108,7 @@ export default function EditReportPage() {
                 Daftar Laporan
               </Link>
               <span>/</span>
-              <Link 
+              <Link
                 href={`/laporan/${report.id}`}
                 className="hover:text-neutral-900 transition-colors"
               >
@@ -207,10 +215,7 @@ export default function EditReportPage() {
           </Card>
 
           {/* Edit Form */}
-          <EditReportForm 
-            report={report} 
-            onSuccess={handleEditSuccess}
-          />
+          <EditReportForm report={report} onSuccess={handleEditSuccess} />
         </div>
       </div>
     </>

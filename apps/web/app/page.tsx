@@ -50,9 +50,10 @@ export default function Home() {
                     </h1>
 
                     <p className="text-xl text-neutral-600 leading-relaxed max-w-lg">
-                      Unggah foto, isi detail lokasi, dan bagikan informasi kerusakan jalan 
-                      di seluruh Indonesia. Platform sederhana untuk dokumentasi infrastruktur 
-                      yang dapat diakses semua warga.
+                      Unggah foto, isi detail lokasi, dan bagikan informasi
+                      kerusakan jalan di seluruh Indonesia. Platform sederhana
+                      untuk dokumentasi infrastruktur yang dapat diakses semua
+                      warga.
                     </p>
                   </div>
                 </div>
@@ -85,15 +86,21 @@ export default function Home() {
                 <div className="flex items-center gap-8 pt-8 border-t border-neutral-200">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-neutral-800 rounded-full"></div>
-                    <span className="text-sm text-neutral-600">Upload Foto Sederhana</span>
+                    <span className="text-sm text-neutral-600">
+                      Upload Foto Sederhana
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-neutral-800 rounded-full"></div>
-                    <span className="text-sm text-neutral-600">Lokasi Manual</span>
+                    <span className="text-sm text-neutral-600">
+                      Lokasi Manual
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-neutral-800 rounded-full"></div>
-                    <span className="text-sm text-neutral-600">Akses Terbuka</span>
+                    <span className="text-sm text-neutral-600">
+                      Akses Terbuka
+                    </span>
                   </div>
                 </div>
               </div>
@@ -144,7 +151,10 @@ export default function Home() {
                           <Share2 className="mr-2 h-4 w-4" />
                           Simpan Draft
                         </Button>
-                        <Button variant="outline" className="flex-1 border-neutral-300 text-neutral-700 hover:bg-neutral-50">
+                        <Button
+                          variant="outline"
+                          className="flex-1 border-neutral-300 text-neutral-700 hover:bg-neutral-50"
+                        >
                           Preview
                         </Button>
                       </div>
@@ -164,11 +174,11 @@ export default function Home() {
                 Platform Sederhana untuk Dokumentasi
               </h2>
               <p className="text-xl text-neutral-600 max-w-2xl mx-auto">
-                Unggah foto, isi detail, dan bagikan informasi kerusakan jalan 
+                Unggah foto, isi detail, dan bagikan informasi kerusakan jalan
                 dengan mudah dan cepat.
               </p>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {[
                 {
@@ -183,9 +193,9 @@ export default function Home() {
                   description: "Oleh warga Indonesia",
                   icon: TrendingUp,
                 },
-                { 
-                  number: "23", 
-                  label: "Kota Terjangkau", 
+                {
+                  number: "23",
+                  label: "Kota Terjangkau",
                   description: "Dari Sabang sampai Merauke",
                   icon: MapPin,
                 },
@@ -201,8 +211,12 @@ export default function Home() {
                     <div className="text-display-md font-bold text-neutral-900 mb-3">
                       {stat.number}
                     </div>
-                    <p className="text-neutral-600 font-medium text-lg mb-2">{stat.label}</p>
-                    <p className="text-neutral-500 text-sm">{stat.description}</p>
+                    <p className="text-neutral-600 font-medium text-lg mb-2">
+                      {stat.label}
+                    </p>
+                    <p className="text-neutral-500 text-sm">
+                      {stat.description}
+                    </p>
                   </CardContent>
                 </Card>
               ))}
@@ -226,8 +240,8 @@ export default function Home() {
                     Proses Sederhana dalam 3 Langkah
                   </h2>
                   <p className="text-xl text-neutral-600 leading-relaxed">
-                    Platform dokumentasi infrastruktur yang mudah digunakan. 
-                    Unggah foto, isi detail lokasi, dan bagikan informasi 
+                    Platform dokumentasi infrastruktur yang mudah digunakan.
+                    Unggah foto, isi detail lokasi, dan bagikan informasi
                     kerusakan jalan dengan komunitas.
                   </p>
                 </div>
@@ -262,14 +276,18 @@ export default function Home() {
                           <step.icon className="h-8 w-8 text-white" />
                         </div>
                         <div className="absolute -top-2 -right-2 w-6 h-6 bg-neutral-100 rounded-full flex items-center justify-center border-2 border-white">
-                          <span className="text-xs font-bold text-neutral-800">{step.step}</span>
+                          <span className="text-xs font-bold text-neutral-800">
+                            {step.step}
+                          </span>
                         </div>
                       </div>
                       <div>
                         <h3 className="font-semibold text-neutral-900 mb-3 text-xl">
                           {step.title}
                         </h3>
-                        <p className="text-neutral-600 leading-relaxed text-lg">{step.description}</p>
+                        <p className="text-neutral-600 leading-relaxed text-lg">
+                          {step.description}
+                        </p>
                       </div>
                     </div>
                   ))}
@@ -287,7 +305,9 @@ export default function Home() {
                         <span className="text-sm font-medium text-neutral-900">
                           Lubang Besar - Jl. Gatot Subroto
                         </span>
-                        <p className="text-xs text-neutral-500 mt-1">Dilaporkan oleh warga</p>
+                        <p className="text-xs text-neutral-500 mt-1">
+                          Dilaporkan oleh warga
+                        </p>
                       </div>
                     </div>
                     <div className="bg-neutral-100 rounded-xl h-32 mb-4"></div>
@@ -307,7 +327,9 @@ export default function Home() {
                         <span className="text-sm font-medium text-neutral-900">
                           Retak Permukaan - Jl. Sudirman
                         </span>
-                        <p className="text-xs text-neutral-500 mt-1">Dilaporkan oleh warga</p>
+                        <p className="text-xs text-neutral-500 mt-1">
+                          Dilaporkan oleh warga
+                        </p>
                       </div>
                     </div>
                     <div className="bg-neutral-100 rounded-xl h-32 mb-4"></div>
@@ -335,7 +357,7 @@ export default function Home() {
                 Platform Sederhana untuk Semua
               </h2>
               <p className="text-xl text-neutral-600 max-w-3xl mx-auto leading-relaxed">
-                Ribuan warga Indonesia sudah menggunakan platform ini untuk 
+                Ribuan warga Indonesia sudah menggunakan platform ini untuk
                 mendokumentasikan kerusakan jalan di sekitar mereka.
               </p>
             </div>
@@ -428,8 +450,8 @@ export default function Home() {
                     Sederhana dan Mudah Digunakan
                   </h2>
                   <p className="text-xl text-neutral-600 leading-relaxed">
-                    Platform dokumentasi infrastruktur yang dirancang untuk 
-                    kemudahan penggunaan. Upload foto, isi detail, dan bagikan 
+                    Platform dokumentasi infrastruktur yang dirancang untuk
+                    kemudahan penggunaan. Upload foto, isi detail, dan bagikan
                     informasi dengan cepat.
                   </p>
                 </div>
@@ -445,7 +467,8 @@ export default function Home() {
                     {
                       icon: Shield,
                       title: "Akses Terbuka",
-                      description: "Platform dapat diakses oleh semua warga tanpa batasan",
+                      description:
+                        "Platform dapat diakses oleh semua warga tanpa batasan",
                     },
                     {
                       icon: Zap,
@@ -480,8 +503,9 @@ export default function Home() {
                     Bergabung dengan Komunitas
                   </h3>
                   <p className="text-neutral-700 mb-10 leading-relaxed text-xl">
-                    Ribuan warga Indonesia sudah menggunakan platform ini untuk 
-                    mendokumentasikan kerusakan jalan. Mulai berkontribusi sekarang.
+                    Ribuan warga Indonesia sudah menggunakan platform ini untuk
+                    mendokumentasikan kerusakan jalan. Mulai berkontribusi
+                    sekarang.
                   </p>
                   <Button
                     className="bg-neutral-800 hover:bg-neutral-900 text-white shadow-button hover:shadow-button-hover transition-all duration-200 px-8 py-4 text-lg"
@@ -510,9 +534,9 @@ export default function Home() {
               </h2>
 
               <p className="text-xl text-neutral-300 leading-relaxed">
-                Bergabunglah dengan ribuan warga Indonesia yang sudah 
-                mendokumentasikan kerusakan jalan. Upload foto, isi detail, 
-                dan bagikan informasi dengan mudah.
+                Bergabunglah dengan ribuan warga Indonesia yang sudah
+                mendokumentasikan kerusakan jalan. Upload foto, isi detail, dan
+                bagikan informasi dengan mudah.
               </p>
 
               <Button

@@ -2,17 +2,22 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { CheckCircle, MapPin, AlertTriangle } from "lucide-react";
+// Icons removed - not used in this file
 import { useCreateReport } from "../../../hooks/use-create-report";
 import { uploadImage } from "../../../services/upload";
 import { useAuth } from "../../../hooks/useAuth";
 import { useInvalidateDashboard } from "../../../hooks/dashboard";
-import { cleanFormData, getLocationErrorMessage, geolocationOptions } from "../../../utils/report-form-utils";
-import { extractGPSFromImage, getExifErrorMessage, getExifSuccessMessage } from "../../../lib/utils/exif-extraction";
 import {
-  CreateReportSchema,
-  CreateReportInput,
-} from "../../../lib/types/api";
+  cleanFormData,
+  getLocationErrorMessage,
+  geolocationOptions,
+} from "../../../utils/report-form-utils";
+import {
+  extractGPSFromImage,
+  getExifErrorMessage,
+} from "../../../lib/utils/exif-extraction";
+import { reverseGeocode } from "../../../lib/services/geocoding";
+import { CreateReportSchema, CreateReportInput } from "../../../lib/types/api";
 
 interface UseReportFormProps {
   onSuccess?: (reportId: number) => void;
@@ -53,8 +58,11 @@ export const useReportForm = ({ onSuccess }: UseReportFormProps) => {
       category: undefined,
       location_text: "",
       image_url: "",
-      lat: undefined,
-      lon: undefined,
+      lat: 0,
+      lon: 0,
+      district: "",
+      city: "",
+      province: "",
     },
   });
 
@@ -79,32 +87,71 @@ export const useReportForm = ({ onSuccess }: UseReportFormProps) => {
 
     // Extract EXIF GPS data from the image
     setIsExtractingExif(true);
-    
+
     try {
       const exifResult = await extractGPSFromImage(file);
-      
+
       if (exifResult.success && exifResult.gpsData) {
         // Auto-fill coordinates from EXIF data
         form.setValue("lat", exifResult.gpsData.lat);
         form.setValue("lon", exifResult.gpsData.lon);
-        
-        // Show success message with coordinates
-        toast.success("Lokasi berhasil diekstrak dari foto", {
-          description: `Lat: ${exifResult.gpsData.lat.toFixed(6)}, Lon: ${exifResult.gpsData.lon.toFixed(6)}`,
-          duration: 4000,
-        });
+
+        // Perform reverse geocoding to auto-fill administrative boundaries
+        try {
+          const geocodingResult = await reverseGeocode(
+            exifResult.gpsData.lat,
+            exifResult.gpsData.lon,
+          );
+
+          if (geocodingResult.success && geocodingResult.data) {
+            // Auto-fill administrative boundary fields
+            if (geocodingResult.data.street_name) {
+              form.setValue("street_name", geocodingResult.data.street_name);
+            }
+            if (geocodingResult.data.district) {
+              form.setValue("district", geocodingResult.data.district);
+            }
+            if (geocodingResult.data.city) {
+              form.setValue("city", geocodingResult.data.city);
+            }
+            if (geocodingResult.data.province) {
+              form.setValue("province", geocodingResult.data.province);
+            }
+
+            // Show success message with all auto-filled data
+            toast.success("Lokasi dan alamat berhasil diekstrak dari foto", {
+              description: `${geocodingResult.data.district || ""}, ${geocodingResult.data.city || ""}, ${geocodingResult.data.province || ""}`,
+              duration: 5000,
+            });
+          } else {
+            // Only coordinates extracted, show partial success
+            toast.success("Koordinat berhasil diekstrak dari foto", {
+              description: `Lat: ${exifResult.gpsData.lat.toFixed(6)}, Lon: ${exifResult.gpsData.lon.toFixed(6)}. Silakan isi alamat secara manual.`,
+              duration: 4000,
+            });
+          }
+        } catch (geocodingError) {
+          console.error("Geocoding error:", geocodingError);
+          // Show coordinates only on geocoding failure
+          toast.success("Koordinat berhasil diekstrak dari foto", {
+            description: `Lat: ${exifResult.gpsData.lat.toFixed(6)}, Lon: ${exifResult.gpsData.lon.toFixed(6)}. Silakan isi alamat secara manual.`,
+            duration: 4000,
+          });
+        }
       } else {
         // Show warning for missing GPS data
         const errorMessage = getExifErrorMessage(exifResult);
         setExifError(errorMessage);
         setHasExifWarning(true);
-        
+
         // Don't show toast error immediately, let user see the warning in the form
         console.log("EXIF extraction failed:", errorMessage);
       }
     } catch (error) {
       console.error("EXIF extraction error:", error);
-      setExifError("Gagal membaca metadata foto. Silakan tambahkan lokasi secara manual.");
+      setExifError(
+        "Gagal membaca metadata foto. Silakan tambahkan lokasi secara manual.",
+      );
       setHasExifWarning(true);
     } finally {
       setIsExtractingExif(false);
@@ -133,7 +180,7 @@ export const useReportForm = ({ onSuccess }: UseReportFormProps) => {
     clearError();
   };
 
-  const getCurrentLocation = () => {
+  const getCurrentLocation = async () => {
     setIsGettingLocation(true);
 
     if (!navigator.geolocation) {
@@ -149,18 +196,55 @@ export const useReportForm = ({ onSuccess }: UseReportFormProps) => {
     });
 
     navigator.geolocation.getCurrentPosition(
-      (position) => {
+      async (position) => {
         const lat = position.coords.latitude;
         const lon = position.coords.longitude;
 
         form.setValue("lat", lat);
         form.setValue("lon", lon);
 
-        toast.success("Lokasi berhasil diperoleh", {
-          id: "location",
-          description: `Lat: ${lat.toFixed(6)}, Lon: ${lon.toFixed(6)}`,
-          duration: 3000,
-        });
+        // Perform reverse geocoding to auto-fill administrative boundaries
+        try {
+          const geocodingResult = await reverseGeocode(lat, lon);
+
+          if (geocodingResult.success && geocodingResult.data) {
+            // Auto-fill administrative boundary fields
+            if (geocodingResult.data.street_name) {
+              form.setValue("street_name", geocodingResult.data.street_name);
+            }
+            if (geocodingResult.data.district) {
+              form.setValue("district", geocodingResult.data.district);
+            }
+            if (geocodingResult.data.city) {
+              form.setValue("city", geocodingResult.data.city);
+            }
+            if (geocodingResult.data.province) {
+              form.setValue("province", geocodingResult.data.province);
+            }
+
+            toast.success("Lokasi dan alamat berhasil diperoleh", {
+              id: "location",
+              description: `${geocodingResult.data.district || ""}, ${geocodingResult.data.city || ""}, ${geocodingResult.data.province || ""}`,
+              duration: 4000,
+            });
+          } else {
+            // Only coordinates obtained
+            toast.success("Lokasi berhasil diperoleh", {
+              id: "location",
+              description: `Lat: ${lat.toFixed(6)}, Lon: ${lon.toFixed(6)}. Silakan isi alamat secara manual.`,
+              duration: 3000,
+            });
+          }
+        } catch (geocodingError) {
+          console.error("Geocoding error:", geocodingError);
+          // Show coordinates only on geocoding failure
+          toast.success("Lokasi berhasil diperoleh", {
+            id: "location",
+            description: `Lat: ${lat.toFixed(6)}, Lon: ${lon.toFixed(6)}. Silakan isi alamat secara manual.`,
+            duration: 3000,
+          });
+        }
+
         setIsGettingLocation(false);
       },
       (error) => {
@@ -185,7 +269,9 @@ export const useReportForm = ({ onSuccess }: UseReportFormProps) => {
     }
 
     if (imageUploadFailed) {
-      setFormError("Gagal mengunggah foto. Silakan coba lagi atau pilih foto lain.");
+      setFormError(
+        "Gagal mengunggah foto. Silakan coba lagi atau pilih foto lain.",
+      );
       return;
     }
 
@@ -238,7 +324,12 @@ export const useReportForm = ({ onSuccess }: UseReportFormProps) => {
     }
   };
 
-  const isLoading = isSubmitting || isUploading || isUploadingImage || isGettingLocation || isExtractingExif;
+  const isLoading =
+    isSubmitting ||
+    isUploading ||
+    isUploadingImage ||
+    isGettingLocation ||
+    isExtractingExif;
 
   return {
     form,
@@ -260,4 +351,4 @@ export const useReportForm = ({ onSuccess }: UseReportFormProps) => {
     getCurrentLocation,
     onSubmit,
   };
-}; 
+};

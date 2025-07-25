@@ -3,11 +3,11 @@
 import { useState } from "react";
 import { AdminReportsTable } from "./admin-reports-table";
 import { RejectionReasonModal } from "./rejection-reason-modal";
-import { 
-  useAdminReportsQuery, 
-  useVerifyReport, 
-  useRejectReport, 
-  useDeleteReport 
+import {
+  useAdminReportsQuery,
+  useVerifyReport,
+  useRejectReport,
+  useDeleteReport,
 } from "../../hooks/admin";
 import { toast } from "sonner";
 
@@ -54,16 +54,17 @@ export function AdminReportsTableWrapper({}: AdminReportsTableWrapperProps) {
   const deleteReport = useDeleteReport();
 
   // Transform API data to match the expected interface
-  const transformedData: AdminReport[] = data?.items?.map((item) => ({
-    id: item.id,
-    category: item.category as "berlubang" | "retak" | "lainnya",
-    streetName: item.street_name,
-    locationText: item.location_text,
-    userName: item.user?.name || "Unknown User",
-    submittedAt: item.created_at,
-    imageUrl: item.image_url,
-    status: item.status as "pending" | "verified" | "rejected",
-  })) || [];
+  const transformedData: AdminReport[] =
+    data?.items?.map((item) => ({
+      id: item.id,
+      category: item.category as "berlubang" | "retak" | "lainnya",
+      streetName: item.street_name,
+      locationText: item.location_text,
+      userName: item.user?.name || "Unknown User",
+      submittedAt: item.created_at,
+      imageUrl: item.image_url,
+      status: item.status as "pending" | "verified" | "rejected",
+    })) || [];
 
   // Client-side handlers for table actions
   const handleVerify = async (id: string) => {
@@ -71,12 +72,14 @@ export function AdminReportsTableWrapper({}: AdminReportsTableWrapperProps) {
       await verifyReport.mutateAsync(id);
       toast.success("Laporan berhasil diverifikasi!");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Gagal memverifikasi laporan");
+      toast.error(
+        error instanceof Error ? error.message : "Gagal memverifikasi laporan",
+      );
     }
   };
 
   const handleReject = (id: string) => {
-    const report = transformedData.find(r => r.id === id);
+    const report = transformedData.find((r) => r.id === id);
     setRejectionModal({
       isOpen: true,
       reportId: id,
@@ -93,7 +96,9 @@ export function AdminReportsTableWrapper({}: AdminReportsTableWrapperProps) {
       toast.success("Laporan berhasil ditolak");
       setRejectionModal({ isOpen: false, reportId: "", reportTitle: "" });
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Gagal menolak laporan");
+      toast.error(
+        error instanceof Error ? error.message : "Gagal menolak laporan",
+      );
     }
   };
 
@@ -102,7 +107,9 @@ export function AdminReportsTableWrapper({}: AdminReportsTableWrapperProps) {
       await deleteReport.mutateAsync(id);
       toast.success("Laporan berhasil dihapus");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Gagal menghapus laporan");
+      toast.error(
+        error instanceof Error ? error.message : "Gagal menghapus laporan",
+      );
     }
   };
 
@@ -124,21 +131,23 @@ export function AdminReportsTableWrapper({}: AdminReportsTableWrapperProps) {
 
   return (
     <>
-      <AdminReportsTable 
+      <AdminReportsTable
         data={transformedData}
         isLoading={isLoading}
         onVerify={handleVerify}
         onReject={handleReject}
         onDelete={handleDelete}
       />
-      
+
       <RejectionReasonModal
         isOpen={rejectionModal.isOpen}
-        onClose={() => setRejectionModal({ isOpen: false, reportId: "", reportTitle: "" })}
+        onClose={() =>
+          setRejectionModal({ isOpen: false, reportId: "", reportTitle: "" })
+        }
         onConfirm={handleRejectConfirm}
         isLoading={rejectReport.isPending}
         reportTitle={rejectionModal.reportTitle}
       />
     </>
   );
-} 
+}

@@ -82,7 +82,7 @@ export function useAuth(initialUser?: AuthUser | null) {
           id: data.user.id,
           email: data.user.email,
           role: data.user.role,
-          name: data.user.name
+          name: data.user.name,
         });
       } else if (response.status === 401) {
         handleAuthError("firebase-token-invalid");

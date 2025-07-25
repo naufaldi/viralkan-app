@@ -80,7 +80,11 @@ export function UniformReportCard({ report, onClick }: UniformReportCardProps) {
               </span>
             </div>
             <span className="text-xs text-neutral-500">
-              {getTimeAgo(typeof report.created_at === 'string' ? report.created_at : report.created_at.toISOString())}
+              {getTimeAgo(
+                typeof report.created_at === "string"
+                  ? report.created_at
+                  : report.created_at.toISOString(),
+              )}
             </span>
           </div>
         </div>

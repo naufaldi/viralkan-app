@@ -1,9 +1,5 @@
 import { FileText } from "lucide-react";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-} from "@repo/ui/components/ui/card";
+import { Card, CardHeader, CardTitle } from "@repo/ui/components/ui/card";
 
 export const ReportFormHeader = () => {
   return (
@@ -24,4 +20,4 @@ export const ReportFormHeader = () => {
       </CardTitle>
     </CardHeader>
   );
-}; 
+};

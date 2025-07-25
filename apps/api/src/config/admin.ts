@@ -1,6 +1,6 @@
 /**
  * Admin Configuration Utilities
- * 
+ *
  * This module provides utilities for managing admin users based on environment configuration.
  * It ensures secure admin access control for open-source deployment.
  */
@@ -10,12 +10,15 @@
  */
 export function getAdminEmails(): string[] {
   const adminEmails = process.env.ADMIN_EMAILS;
-  
+
   if (!adminEmails) {
-    throw new Error('ADMIN_EMAILS environment variable is required');
+    throw new Error("ADMIN_EMAILS environment variable is required");
   }
-  
-  return adminEmails.split(',').map(email => email.trim()).filter(email => email.length > 0);
+
+  return adminEmails
+    .split(",")
+    .map((email) => email.trim())
+    .filter((email) => email.length > 0);
 }
 
 /**
@@ -26,7 +29,7 @@ export function isAdminEmail(email: string): boolean {
     const adminEmails = getAdminEmails();
     return adminEmails.includes(email);
   } catch (error) {
-    console.error('Error checking admin email:', error);
+    console.error("Error checking admin email:", error);
     return false;
   }
 }
@@ -53,22 +56,26 @@ export function getAdminRateLimit(): number {
 export function validateAdminConfig(): void {
   try {
     const adminEmails = getAdminEmails();
-    
+
     if (adminEmails.length === 0) {
-      throw new Error('No admin emails configured');
+      throw new Error("No admin emails configured");
     }
-    
+
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const invalidEmails = adminEmails.filter(email => !emailRegex.test(email));
-    
+    const invalidEmails = adminEmails.filter(
+      (email) => !emailRegex.test(email),
+    );
+
     if (invalidEmails.length > 0) {
-      throw new Error(`Invalid email format: ${invalidEmails.join(', ')}`);
+      throw new Error(`Invalid email format: ${invalidEmails.join(", ")}`);
     }
-    
-    console.log(`✅ Admin configuration validated: ${adminEmails.length} admin(s) configured`);
+
+    console.log(
+      `✅ Admin configuration validated: ${adminEmails.length} admin(s) configured`,
+    );
   } catch (error) {
-    console.error('❌ Admin configuration validation failed:', error);
+    console.error("❌ Admin configuration validation failed:", error);
     throw error;
   }
 }
@@ -91,4 +98,4 @@ export function getAdminConfig(): AdminConfig {
     sessionTimeout: getAdminSessionTimeout(),
     rateLimit: getAdminRateLimit(),
   };
-} 
+}

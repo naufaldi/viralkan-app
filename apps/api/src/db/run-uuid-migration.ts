@@ -12,18 +12,20 @@ const runUuidMigration = async () => {
     }
 
     console.log("📋 Applying UUID migration...");
-    
+
     // Step 1: Check if UUID migration is already applied
-    const checkUsers = await sql`SELECT data_type FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'id'`;
-    const checkReports = await sql`SELECT data_type FROM information_schema.columns WHERE table_name = 'reports' AND column_name = 'id'`;
-    
+    const checkUsers =
+      await sql`SELECT data_type FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'id'`;
+    const checkReports =
+      await sql`SELECT data_type FROM information_schema.columns WHERE table_name = 'reports' AND column_name = 'id'`;
+
     const usersIdType = checkUsers[0]?.data_type;
     const reportsIdType = checkReports[0]?.data_type;
-    
+
     console.log(`Current users.id type: ${usersIdType}`);
     console.log(`Current reports.id type: ${reportsIdType}`);
-    
-    if (usersIdType === 'uuid' && reportsIdType === 'uuid') {
+
+    if (usersIdType === "uuid" && reportsIdType === "uuid") {
       console.log("✅ UUID migration already applied");
       return;
     }
@@ -84,7 +86,6 @@ const runUuidMigration = async () => {
     await sql`CREATE INDEX IF NOT EXISTS reports_category_idx ON reports(category)`;
 
     console.log("✅ UUID migration completed successfully");
-
   } catch (error) {
     console.error("❌ UUID migration failed:", error);
     process.exit(1);
@@ -98,4 +99,4 @@ if (import.meta.main) {
   runUuidMigration();
 }
 
-export { runUuidMigration }; 
+export { runUuidMigration };

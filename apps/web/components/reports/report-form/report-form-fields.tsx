@@ -89,8 +89,8 @@ export const ReportFormFields = ({ form, disabled }: ReportFormFieldsProps) => {
                 </SelectContent>
               </Select>
               <FormDescription className="text-sm text-neutral-600">
-                Pilih jenis kerusakan jalan yang paling sesuai dengan
-                kondisi yang Anda temukan.
+                Pilih jenis kerusakan jalan yang paling sesuai dengan kondisi
+                yang Anda temukan.
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -125,6 +125,87 @@ export const ReportFormFields = ({ form, disabled }: ReportFormFieldsProps) => {
         />
       </div>
 
+      {/* Administrative Boundaries - Three columns on large screens */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* District */}
+        <FormField
+          control={form.control}
+          name="district"
+          render={({ field }) => (
+            <FormItem className="space-y-3">
+              <FormLabel className="text-base font-semibold text-neutral-900">
+                District *
+              </FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Example: Bekasi Utara"
+                  disabled={disabled}
+                  size="lg"
+                  className="border-neutral-300 focus:border-neutral-600 focus:ring-neutral-600/20 bg-white"
+                  {...field}
+                />
+              </FormControl>
+              <FormDescription className="text-sm text-neutral-600">
+                District name where the damage is located.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* City */}
+        <FormField
+          control={form.control}
+          name="city"
+          render={({ field }) => (
+            <FormItem className="space-y-3">
+              <FormLabel className="text-base font-semibold text-neutral-900">
+                City *
+              </FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Example: Kota Bekasi"
+                  disabled={disabled}
+                  size="lg"
+                  className="border-neutral-300 focus:border-neutral-600 focus:ring-neutral-600/20 bg-white"
+                  {...field}
+                />
+              </FormControl>
+              <FormDescription className="text-sm text-neutral-600">
+                City or regency name where the damage is located.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Province */}
+        <FormField
+          control={form.control}
+          name="province"
+          render={({ field }) => (
+            <FormItem className="space-y-3">
+              <FormLabel className="text-base font-semibold text-neutral-900">
+                Province *
+              </FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Example: Jawa Barat"
+                  disabled={disabled}
+                  size="lg"
+                  className="border-neutral-300 focus:border-neutral-600 focus:ring-neutral-600/20 bg-white"
+                  {...field}
+                />
+              </FormControl>
+              <FormDescription className="text-sm text-neutral-600">
+                Province name where the damage is located.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+
       {/* Location Description - Full Width */}
       <FormField
         control={form.control}
@@ -144,8 +225,8 @@ export const ReportFormFields = ({ form, disabled }: ReportFormFieldsProps) => {
               />
             </FormControl>
             <FormDescription className="text-sm text-neutral-600">
-              Deskripsi detail lokasi kerusakan jalan untuk memudahkan
-              komunitas menemukan lokasi (maksimal 500 karakter).
+              Deskripsi detail lokasi kerusakan jalan untuk memudahkan komunitas
+              menemukan lokasi (maksimal 500 karakter).
             </FormDescription>
             <FormMessage />
           </FormItem>
@@ -160,7 +241,7 @@ export const ReportFormFields = ({ form, disabled }: ReportFormFieldsProps) => {
           render={({ field }) => (
             <FormItem className="space-y-3">
               <FormLabel className="text-base font-semibold text-neutral-900">
-                Latitude
+                Latitude *
               </FormLabel>
               <FormControl>
                 <Input
@@ -173,11 +254,9 @@ export const ReportFormFields = ({ form, disabled }: ReportFormFieldsProps) => {
                   {...field}
                   onChange={(e) => {
                     const value = e.target.value;
-                    field.onChange(
-                      value === "" ? undefined : parseFloat(value),
-                    );
+                    field.onChange(value === "" ? 0 : parseFloat(value));
                   }}
-                  value={field.value || ""}
+                  value={field.value === 0 ? "" : field.value}
                 />
               </FormControl>
               <FormDescription className="text-sm text-neutral-600">
@@ -193,7 +272,7 @@ export const ReportFormFields = ({ form, disabled }: ReportFormFieldsProps) => {
           render={({ field }) => (
             <FormItem className="space-y-3">
               <FormLabel className="text-base font-semibold text-neutral-900">
-                Longitude
+                Longitude *
               </FormLabel>
               <FormControl>
                 <Input
@@ -206,11 +285,9 @@ export const ReportFormFields = ({ form, disabled }: ReportFormFieldsProps) => {
                   {...field}
                   onChange={(e) => {
                     const value = e.target.value;
-                    field.onChange(
-                      value === "" ? undefined : parseFloat(value),
-                    );
+                    field.onChange(value === "" ? 0 : parseFloat(value));
                   }}
-                  value={field.value || ""}
+                  value={field.value === 0 ? "" : field.value}
                 />
               </FormControl>
               <FormDescription className="text-sm text-neutral-600">
@@ -223,4 +300,4 @@ export const ReportFormFields = ({ form, disabled }: ReportFormFieldsProps) => {
       </div>
     </>
   );
-}; 
+};

@@ -1,4 +1,10 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@repo/ui/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@repo/ui/components/ui/card";
 import { AdminUsersTableWrapper } from "@/components/admin";
 
 // Mock data for users - in real app this would come from API
@@ -12,7 +18,8 @@ const mockAdminUsers = [
     joinedAt: "2024-01-10T08:30:00Z",
     lastActive: "2024-01-15T14:20:00Z",
     reportsCount: 5,
-    avatarUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+    avatarUrl:
+      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
   },
   {
     id: "2",
@@ -23,7 +30,8 @@ const mockAdminUsers = [
     joinedAt: "2024-01-08T12:15:00Z",
     lastActive: "2024-01-15T16:45:00Z",
     reportsCount: 3,
-    avatarUrl: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
+    avatarUrl:
+      "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
   },
   {
     id: "3",
@@ -34,7 +42,8 @@ const mockAdminUsers = [
     joinedAt: "2024-01-05T09:00:00Z",
     lastActive: "2024-01-15T17:30:00Z",
     reportsCount: 0,
-    avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+    avatarUrl:
+      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
   },
   {
     id: "4",
@@ -45,7 +54,8 @@ const mockAdminUsers = [
     joinedAt: "2024-01-03T11:20:00Z",
     lastActive: "2024-01-10T13:15:00Z",
     reportsCount: 2,
-    avatarUrl: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
+    avatarUrl:
+      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
   },
   {
     id: "5",
@@ -56,7 +66,8 @@ const mockAdminUsers = [
     joinedAt: "2024-01-01T14:45:00Z",
     lastActive: "2024-01-08T10:30:00Z",
     reportsCount: 1,
-    avatarUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
+    avatarUrl:
+      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
   },
 ];
 
@@ -91,4 +102,4 @@ export default function AdminUsersPage() {
       </div>
     </div>
   );
-} 
+}

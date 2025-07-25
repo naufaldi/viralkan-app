@@ -37,7 +37,7 @@ export function RejectionReasonModal({
 
     // Validation
     const trimmedReason = reason.trim();
-    
+
     if (!trimmedReason) {
       setError("Alasan penolakan harus diisi");
       return;
@@ -80,7 +80,7 @@ export function RejectionReasonModal({
           <DialogHeader>
             <DialogTitle>Tolak Laporan</DialogTitle>
             <DialogDescription>
-              Berikan alasan mengapa Anda menolak {reportTitle}. Alasan ini akan 
+              Berikan alasan mengapa Anda menolak {reportTitle}. Alasan ini akan
               ditampilkan kepada pengguna yang melaporkan.
             </DialogDescription>
           </DialogHeader>
@@ -94,14 +94,12 @@ export function RejectionReasonModal({
                 placeholder="Contoh: Foto tidak jelas, lokasi tidak spesifik, atau kerusakan sudah diperbaiki..."
                 value={reason}
                 onChange={handleReasonChange}
-                className={`min-h-[100px] ${error ? 'border-red-300 focus:border-red-500' : ''}`}
+                className={`min-h-[100px] ${error ? "border-red-300 focus:border-red-500" : ""}`}
                 required
                 disabled={isLoading}
                 maxLength={500}
               />
-              {error && (
-                <p className="text-sm text-red-600 mt-1">{error}</p>
-              )}
+              {error && <p className="text-sm text-red-600 mt-1">{error}</p>}
               <div className="flex justify-between text-xs text-neutral-500">
                 <span>Minimal 10 karakter</span>
                 <span>{reason.length}/500</span>
@@ -131,4 +129,4 @@ export function RejectionReasonModal({
       </DialogContent>
     </Dialog>
   );
-} 
+}

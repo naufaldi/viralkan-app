@@ -38,7 +38,7 @@ export default async function DashboardPage() {
     // Fetch user reports with limit for dashboard
     const searchParams = new URLSearchParams("limit=6");
     const reportsData = await getUserReportsAction(searchParams);
-    
+
     // Transform API data to match ReportsTable expected format
     userReports = (reportsData?.items || []).map((report: any) => ({
       ...report,
@@ -67,10 +67,7 @@ export default async function DashboardPage() {
         <div className="mb-16">
           <div className="flex items-center gap-8 mb-6">
             <Avatar className="h-24 w-24 ring-4 ring-white shadow-lg">
-              <AvatarImage
-                src={user.avatar_url || undefined}
-                alt={user.name}
-              />
+              <AvatarImage src={user.avatar_url || undefined} alt={user.name} />
               <AvatarFallback className="text-2xl font-semibold bg-neutral-100">
                 {user.name?.charAt(0)?.toUpperCase() || "U"}
               </AvatarFallback>
@@ -92,13 +89,10 @@ export default async function DashboardPage() {
                 </Badge>
                 <Badge variant="outline" className="px-3 py-1">
                   Bergabung{" "}
-                  {new Date(user.created_at).toLocaleDateString(
-                    "id-ID",
-                    {
-                      year: "numeric",
-                      month: "long",
-                    },
-                  )}
+                  {new Date(user.created_at).toLocaleDateString("id-ID", {
+                    year: "numeric",
+                    month: "long",
+                  })}
                 </Badge>
               </div>
             </div>

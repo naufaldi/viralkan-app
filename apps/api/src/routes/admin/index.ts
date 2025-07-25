@@ -20,4 +20,4 @@ export type {
 export * as adminShell from "./shell";
 
 // Core layer exports (for use by other features)
-export * as adminCore from "./core"; 
+export * as adminCore from "./core";

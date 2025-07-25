@@ -1,4 +1,10 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@repo/ui/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@repo/ui/components/ui/card";
 import { AdminReportsTableWrapper } from "@/components/admin";
 
 // Mock data for reports - in real app this would come from API
@@ -10,7 +16,8 @@ const mockAdminReports = [
     locationText: "Jakarta Pusat, DKI Jakarta",
     userName: "Ahmad Rizki",
     submittedAt: "2024-01-15T10:30:00Z",
-    imageUrl: "https://images.unsplash.com/photo-1545454675-3531b543be5d?w=400&h=300&fit=crop",
+    imageUrl:
+      "https://images.unsplash.com/photo-1545454675-3531b543be5d?w=400&h=300&fit=crop",
     status: "pending" as const,
   },
   {
@@ -20,7 +27,8 @@ const mockAdminReports = [
     locationText: "Jakarta Pusat, DKI Jakarta",
     userName: "Siti Nurhaliza",
     submittedAt: "2024-01-14T15:45:00Z",
-    imageUrl: "https://images.unsplash.com/photo-1545454675-3531b543be5d?w=400&h=300&fit=crop",
+    imageUrl:
+      "https://images.unsplash.com/photo-1545454675-3531b543be5d?w=400&h=300&fit=crop",
     status: "verified" as const,
   },
   {
@@ -30,7 +38,8 @@ const mockAdminReports = [
     locationText: "Jakarta Selatan, DKI Jakarta",
     userName: "Budi Santoso",
     submittedAt: "2024-01-13T09:15:00Z",
-    imageUrl: "https://images.unsplash.com/photo-1545454675-3531b543be5d?w=400&h=300&fit=crop",
+    imageUrl:
+      "https://images.unsplash.com/photo-1545454675-3531b543be5d?w=400&h=300&fit=crop",
     status: "rejected" as const,
   },
   {
@@ -40,7 +49,8 @@ const mockAdminReports = [
     locationText: "Jakarta Selatan, DKI Jakarta",
     userName: "Dewi Sartika",
     submittedAt: "2024-01-12T14:20:00Z",
-    imageUrl: "https://images.unsplash.com/photo-1545454675-3531b543be5d?w=400&h=300&fit=crop",
+    imageUrl:
+      "https://images.unsplash.com/photo-1545454675-3531b543be5d?w=400&h=300&fit=crop",
     status: "pending" as const,
   },
   {
@@ -50,7 +60,8 @@ const mockAdminReports = [
     locationText: "Jakarta Pusat, DKI Jakarta",
     userName: "Rudi Hartono",
     submittedAt: "2024-01-11T11:30:00Z",
-    imageUrl: "https://images.unsplash.com/photo-1545454675-3531b543be5d?w=400&h=300&fit=crop",
+    imageUrl:
+      "https://images.unsplash.com/photo-1545454675-3531b543be5d?w=400&h=300&fit=crop",
     status: "verified" as const,
   },
 ];
@@ -86,4 +97,4 @@ export default function AdminReportsPage() {
       </div>
     </div>
   );
-} 
+}

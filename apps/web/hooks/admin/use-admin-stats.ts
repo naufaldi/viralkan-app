@@ -66,11 +66,12 @@ export const useAdminStatsQuery = () => {
       }
 
       // Call the real admin stats API
-      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+      const API_BASE_URL =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
       const response = await fetch(`${API_BASE_URL}/api/admin/stats`, {
         method: "GET",
         headers: {
-          "Authorization": `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
@@ -81,7 +82,7 @@ export const useAdminStatsQuery = () => {
       }
 
       const apiResponse = await response.json();
-      
+
       // Map API response to frontend interface
       return {
         totalReports: apiResponse.totalReports,
@@ -96,12 +97,12 @@ export const useAdminStatsQuery = () => {
         todayActivity: {
           verified: 0, // TODO: Calculate from recentActivity
           rejected: 0, // TODO: Calculate from recentActivity
-          submitted: 0 // TODO: Calculate from recentActivity
-        }
+          submitted: 0, // TODO: Calculate from recentActivity
+        },
       } as AdminStats;
     },
     enabled: isAuthenticated && !!backendUser,
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
   });
-}; 
+};

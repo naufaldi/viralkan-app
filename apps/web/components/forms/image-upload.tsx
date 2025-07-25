@@ -3,7 +3,13 @@
 import { useState, useRef, useCallback } from "react";
 import { Card, CardContent } from "@repo/ui/components/ui/card";
 import { Button } from "@repo/ui/components/ui/button";
-import { Upload, X, Image as ImageIcon, AlertCircle, RefreshCw } from "lucide-react";
+import {
+  Upload,
+  X,
+  Image as ImageIcon,
+  AlertCircle,
+  RefreshCw,
+} from "lucide-react";
 import { Alert, AlertDescription } from "@repo/ui/components/ui/alert";
 import imageCompression from "browser-image-compression";
 
@@ -45,21 +51,21 @@ export default function ImageUpload({
         maxSizeMB: 1, // Target ~1MB
         maxWidthOrHeight: 1200, // Only resize if larger
         useWebWorker: true, // Better performance
-        fileType: 'image/webp', // Convert to WebP
+        fileType: "image/webp", // Convert to WebP
         quality: 0.85, // High quality
         initialQuality: 0.9, // Start with high quality
       };
 
       const compressedFile = await imageCompression(file, options);
-      console.log('Image compressed:', {
+      console.log("Image compressed:", {
         original: `${(file.size / 1024 / 1024).toFixed(2)}MB`,
         compressed: `${(compressedFile.size / 1024 / 1024).toFixed(2)}MB`,
-        reduction: `${((file.size - compressedFile.size) / file.size * 100).toFixed(1)}%`
+        reduction: `${(((file.size - compressedFile.size) / file.size) * 100).toFixed(1)}%`,
       });
-      
+
       return compressedFile;
     } catch (error) {
-      console.warn('Image compression failed, using original:', error);
+      console.warn("Image compression failed, using original:", error);
       return file; // Fallback to original file
     }
   }, []);
@@ -80,7 +86,8 @@ export default function ImageUpload({
 
       // Validate file type
       if (!ACCEPTED_FORMATS.includes(file.type)) {
-        const errorMsg = "Format file tidak didukung. Gunakan JPEG, PNG, atau WebP";
+        const errorMsg =
+          "Format file tidak didukung. Gunakan JPEG, PNG, atau WebP";
         setUploadError(errorMsg);
         onUploadError?.(errorMsg);
         return;
@@ -88,7 +95,7 @@ export default function ImageUpload({
 
       try {
         setIsCompressing(true);
-        
+
         // Compress image
         const compressedFile = await compressImage(file);
 
@@ -102,7 +109,7 @@ export default function ImageUpload({
         onImageSelect(compressedFile);
         onUploadSuccess?.();
       } catch (error) {
-        console.error('File processing error:', error);
+        console.error("File processing error:", error);
         const errorMsg = "Gagal memproses gambar. Silakan coba lagi.";
         setUploadError(errorMsg);
         onUploadError?.(errorMsg);
@@ -115,7 +122,7 @@ export default function ImageUpload({
 
   const handleRetry = useCallback(() => {
     if (retryCount < MAX_RETRIES && selectedImage) {
-      setRetryCount(prev => prev + 1);
+      setRetryCount((prev) => prev + 1);
       setUploadError(undefined);
       handleFileSelect(selectedImage);
     }
@@ -206,13 +213,18 @@ export default function ImageUpload({
 
               <div className="space-y-2">
                 <h3 className="text-lg font-semibold text-foreground tracking-tight">
-                  {isCompressing ? "Memproses gambar..." : "Drag foto jalan rusak ke sini"}
+                  {isCompressing
+                    ? "Memproses gambar..."
+                    : "Drag foto jalan rusak ke sini"}
                 </h3>
                 <p className="text-base text-muted-foreground">
-                  {isCompressing ? "Mengompres dan mengoptimalkan gambar" : "atau klik untuk memilih file dari perangkat"}
+                  {isCompressing
+                    ? "Mengompres dan mengoptimalkan gambar"
+                    : "atau klik untuk memilih file dari perangkat"}
                 </p>
                 <p className="text-sm text-muted-foreground mt-3">
-                  Format: JPEG, PNG, WebP • Maksimal 10MB • Otomatis dikompres ke WebP
+                  Format: JPEG, PNG, WebP • Maksimal 10MB • Otomatis dikompres
+                  ke WebP
                 </p>
               </div>
 
@@ -266,7 +278,9 @@ export default function ImageUpload({
                       <div className="text-center">
                         <div className="spinner mx-auto mb-3"></div>
                         <p className="text-base font-medium text-foreground">
-                          {isCompressing ? "Memproses gambar..." : "Mengunggah foto..."}
+                          {isCompressing
+                            ? "Memproses gambar..."
+                            : "Mengunggah foto..."}
                         </p>
                         <p className="text-sm text-muted-foreground mt-1">
                           Mohon tunggu sebentar
@@ -285,18 +299,21 @@ export default function ImageUpload({
                       <ImageIcon className="h-4 w-4 text-green-600" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground line-clamp-1" title={selectedImage.name}>
-                        {selectedImage.name.length > 25 
-                          ? `${selectedImage.name.substring(0, 22)}...${selectedImage.name.split('.').pop()}`
-                          : selectedImage.name
-                        }
+                      <p
+                        className="text-sm font-medium text-foreground line-clamp-1"
+                        title={selectedImage.name}
+                      >
+                        {selectedImage.name.length > 25
+                          ? `${selectedImage.name.substring(0, 22)}...${selectedImage.name.split(".").pop()}`
+                          : selectedImage.name}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {(selectedImage.size / 1024 / 1024).toFixed(1)} MB • Foto siap digunakan
+                        {(selectedImage.size / 1024 / 1024).toFixed(1)} MB •
+                        Foto siap digunakan
                       </p>
                     </div>
                   </div>
-                  
+
                   {/* Mobile Action Buttons */}
                   <div className="flex gap-2">
                     <Button
@@ -330,11 +347,15 @@ export default function ImageUpload({
                       <ImageIcon className="h-4 w-4 text-green-600" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate" title={selectedImage.name}>
+                      <p
+                        className="text-sm font-medium text-foreground truncate"
+                        title={selectedImage.name}
+                      >
                         {selectedImage.name}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {(selectedImage.size / 1024 / 1024).toFixed(1)} MB • Foto siap digunakan
+                        {(selectedImage.size / 1024 / 1024).toFixed(1)} MB •
+                        Foto siap digunakan
                       </p>
                     </div>
                   </div>

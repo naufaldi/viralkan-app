@@ -1,17 +1,17 @@
 /**
  * Admin Shell Layer
- * 
+ *
  * Interfaces between API layer and core layer for admin operations.
  * Handles error handling and response formatting.
  */
 
 import { sql } from "../../db/connection";
-import type { 
+import type {
   AdminStatsResponse,
   AdminReportsResponse,
   AdminReportActionRequest,
   AdminReportActionResponse,
-  ReportWithUser
+  ReportWithUser,
 } from "./types";
 
 /**
@@ -73,7 +73,9 @@ export async function getAdminStats(): Promise<{
       totalUsers: parseInt(userStats[0]?.total_users as string) || 0,
       adminUsers: parseInt(userStats[0]?.admin_users as string) || 0,
       verificationRate: 0, // Will be calculated after we have the counts
-      averageVerificationTime: Math.round(avgVerificationTime[0]?.avg_hours || 0),
+      averageVerificationTime: Math.round(
+        avgVerificationTime[0]?.avg_hours || 0,
+      ),
       recentActivity: recentActivity.map((activity: any) => ({
         action: activity.action,
         timestamp: activity.timestamp.toISOString(),
@@ -85,27 +87,28 @@ export async function getAdminStats(): Promise<{
     statusCounts.forEach((row: any) => {
       const count = parseInt(row.count as string);
       stats.totalReports += count;
-      
+
       switch (row.status) {
-        case 'pending':
+        case "pending":
           stats.pendingCount = count;
           break;
-        case 'verified':
+        case "verified":
           stats.verifiedCount = count;
           break;
-        case 'rejected':
+        case "rejected":
           stats.rejectedCount = count;
           break;
-        case 'deleted':
+        case "deleted":
           stats.deletedCount = count;
           break;
       }
     });
 
     // Calculate verification rate as percentage of total reports that are verified
-    stats.verificationRate = stats.totalReports > 0 
-      ? Math.round((stats.verifiedCount / stats.totalReports) * 100) 
-      : 0;
+    stats.verificationRate =
+      stats.totalReports > 0
+        ? Math.round((stats.verifiedCount / stats.totalReports) * 100)
+        : 0;
 
     return {
       success: true,
@@ -124,13 +127,15 @@ export async function getAdminStats(): Promise<{
 /**
  * Get reports for admin management
  */
-export async function getAdminReports(options: {
-  page?: number;
-  limit?: number;
-  status?: string;
-  category?: string;
-  search?: string;
-} = {}): Promise<{
+export async function getAdminReports(
+  options: {
+    page?: number;
+    limit?: number;
+    status?: string;
+    category?: string;
+    search?: string;
+  } = {},
+): Promise<{
   success: boolean;
   data?: AdminReportsResponse;
   error?: string;
@@ -144,12 +149,12 @@ export async function getAdminReports(options: {
     let whereClause = "WHERE r.deleted_at IS NULL";
     const params: any[] = [];
 
-    if (status && status !== 'all') {
+    if (status && status !== "all") {
       whereClause += " AND r.status = $1";
       params.push(status);
     }
 
-    if (category && category !== 'all') {
+    if (category && category !== "all") {
       whereClause += ` AND r.category = $${params.length + 1}`;
       params.push(category);
     }
@@ -165,7 +170,7 @@ export async function getAdminReports(options: {
       FROM reports r
       ${whereClause}
     `;
-    
+
     const totalResult = await sql.unsafe(countQuery, params);
     const total = parseInt(totalResult[0]?.total as string);
 
@@ -201,11 +206,13 @@ export async function getAdminReports(options: {
       rejection_reason: report.rejection_reason,
       deleted_at: report.deleted_at?.toISOString() || null,
       created_at: report.created_at.toISOString(),
-      user: report.user_id ? {
-        id: report.user_id,
-        name: report.user_name,
-        email: report.user_email,
-      } : undefined,
+      user: report.user_id
+        ? {
+            id: report.user_id,
+            name: report.user_name,
+            email: report.user_email,
+          }
+        : undefined,
     }));
 
     return {
@@ -259,7 +266,7 @@ async function logAdminAction(action: {
  */
 export async function verifyReport(
   reportId: string,
-  adminUserId: string
+  adminUserId: string,
 ): Promise<{
   success: boolean;
   data?: AdminReportActionResponse;
@@ -292,10 +299,10 @@ export async function verifyReport(
     // Log admin action
     await logAdminAction({
       admin_user_id: adminUserId,
-      action_type: 'verify_report',
-      target_type: 'report',
+      action_type: "verify_report",
+      target_type: "report",
       target_id: reportId,
-      details: { previous_status: 'pending' },
+      details: { previous_status: "pending" },
     });
 
     return {
@@ -329,7 +336,7 @@ export async function verifyReport(
 export async function rejectReport(
   reportId: string,
   adminUserId: string,
-  reason: string
+  reason: string,
 ): Promise<{
   success: boolean;
   data?: AdminReportActionResponse;
@@ -362,10 +369,10 @@ export async function rejectReport(
     // Log admin action
     await logAdminAction({
       admin_user_id: adminUserId,
-      action_type: 'reject_report',
-      target_type: 'report',
+      action_type: "reject_report",
+      target_type: "report",
       target_id: reportId,
-      details: { reason, previous_status: 'pending' },
+      details: { reason, previous_status: "pending" },
     });
 
     return {
@@ -399,7 +406,7 @@ export async function rejectReport(
 export async function toggleReportStatus(
   reportId: string,
   adminUserId: string,
-  newStatus: 'pending' | 'verified' | 'rejected'
+  newStatus: "pending" | "verified" | "rejected",
 ): Promise<{
   success: boolean;
   data?: AdminReportActionResponse;
@@ -426,7 +433,7 @@ export async function toggleReportStatus(
 
     // Update report status
     let updateQuery;
-    if (newStatus === 'verified') {
+    if (newStatus === "verified") {
       updateQuery = sql`
         UPDATE reports 
         SET 
@@ -437,7 +444,7 @@ export async function toggleReportStatus(
         WHERE id = ${reportId}
         RETURNING *
       `;
-    } else if (newStatus === 'rejected') {
+    } else if (newStatus === "rejected") {
       updateQuery = sql`
         UPDATE reports 
         SET 
@@ -476,10 +483,10 @@ export async function toggleReportStatus(
     // Log admin action
     await logAdminAction({
       admin_user_id: adminUserId,
-      action_type: 'toggle_report_status',
-      target_type: 'report',
+      action_type: "toggle_report_status",
+      target_type: "report",
       target_id: reportId,
-      details: { 
+      details: {
         previous_status: previousStatus,
         new_status: newStatus,
       },
@@ -515,7 +522,7 @@ export async function toggleReportStatus(
  */
 export async function softDeleteReport(
   reportId: string,
-  adminUserId: string
+  adminUserId: string,
 ): Promise<{
   success: boolean;
   data?: AdminReportActionResponse;
@@ -546,8 +553,8 @@ export async function softDeleteReport(
     // Log admin action
     await logAdminAction({
       admin_user_id: adminUserId,
-      action_type: 'delete_report',
-      target_type: 'report',
+      action_type: "delete_report",
+      target_type: "report",
       target_id: reportId,
       details: { previous_status: report.status },
     });
@@ -582,7 +589,7 @@ export async function softDeleteReport(
  */
 export async function restoreReport(
   reportId: string,
-  adminUserId: string
+  adminUserId: string,
 ): Promise<{
   success: boolean;
   data?: AdminReportActionResponse;
@@ -613,10 +620,10 @@ export async function restoreReport(
     // Log admin action
     await logAdminAction({
       admin_user_id: adminUserId,
-      action_type: 'restore_report',
-      target_type: 'report',
+      action_type: "restore_report",
+      target_type: "report",
       target_id: reportId,
-      details: { new_status: 'pending' },
+      details: { new_status: "pending" },
     });
 
     return {
@@ -642,4 +649,4 @@ export async function restoreReport(
       statusCode: 500,
     };
   }
-} 
+}

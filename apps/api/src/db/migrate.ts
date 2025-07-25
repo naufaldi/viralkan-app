@@ -15,7 +15,7 @@ const runMigrations = async () => {
 
     // Run admin system migration
     console.log("📋 Applying admin system migration...");
-    
+
     // Step 1: Add role field to users table
     await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'admin'))`;
     console.log("✅ Added role column to users table");

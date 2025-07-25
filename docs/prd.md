@@ -511,6 +511,7 @@ The platform's success should be measured by:
 **So that** I can manage and verify road damage reports
 
 **Acceptance Criteria:**
+
 - [ ] Can login with admin email (naufaldi.rafif@gmail.com)
 - [ ] Admin role is verified through environment configuration
 - [ ] Access is restricted to admin users only
@@ -518,6 +519,7 @@ The platform's success should be measured by:
 - [ ] All admin actions are logged for audit purposes
 
 **Required Pages:**
+
 - **Admin Login**: Secure authentication for admin users
 - **Admin Dashboard**: `/admin/dashboard` - Main admin interface
 
@@ -528,6 +530,7 @@ The platform's success should be measured by:
 **So that** I can understand the current state of the platform
 
 **Acceptance Criteria:**
+
 - [ ] Dashboard shows total reports count
 - [ ] Displays verification statistics (pending, verified, rejected)
 - [ ] Shows recent activity and admin actions
@@ -535,6 +538,7 @@ The platform's success should be measured by:
 - [ ] Includes system health indicators
 
 **Required Components:**
+
 - Statistics cards (total reports, pending, verified, rejected)
 - Recent activity timeline
 - Quick action buttons
@@ -547,6 +551,7 @@ The platform's success should be measured by:
 **So that** I can ensure only legitimate road damage reports are published
 
 **Acceptance Criteria:**
+
 - [ ] Can view all reports in a comprehensive table
 - [ ] Can see full report details including images
 - [ ] Can verify reports with one-click action
@@ -556,6 +561,7 @@ The platform's success should be measured by:
 - [ ] All actions are logged with admin user and timestamp
 
 **Required Features:**
+
 - **Reports Table**: Full data display with action columns
 - **Action Buttons**: Verify, Reject, Toggle Status, Delete
 - **Rejection Modal**: Reason input with validation
@@ -569,6 +575,7 @@ The platform's success should be measured by:
 **So that** I can correct mistakes and handle edge cases
 
 **Acceptance Criteria:**
+
 - [ ] Can change verified reports back to unverified
 - [ ] Can change rejected reports to verified
 - [ ] Can update rejection reasons
@@ -577,6 +584,7 @@ The platform's success should be measured by:
 - [ ] All status changes are logged with reasons
 
 **Required Features:**
+
 - **Status Toggle**: Switch between verification states
 - **Reason Management**: Update rejection reasons
 - **Soft Delete**: Mark reports as deleted without permanent removal
@@ -589,6 +597,7 @@ The platform's success should be measured by:
 **So that** I can monitor platform health and admin performance
 
 **Acceptance Criteria:**
+
 - [ ] Shows total reports by status (pending, verified, rejected, deleted)
 - [ ] Displays verification rate and average processing time
 - [ ] Shows reports by category and geographic distribution
@@ -596,6 +605,7 @@ The platform's success should be measured by:
 - [ ] Provides export functionality for reports
 
 **Required Features:**
+
 - **Statistics Dashboard**: Comprehensive metrics display
 - **Activity Logs**: Admin action history
 - **Export Tools**: CSV/JSON export for reports
@@ -606,6 +616,7 @@ The platform's success should be measured by:
 ### 6.2 Admin Security Requirements
 
 **Environment-Based Configuration:**
+
 - Admin emails configured via environment variables
 - Database admin role management with proper constraints
 - Secure session management with timeout
@@ -614,6 +625,7 @@ The platform's success should be measured by:
 - Input validation and sanitization
 
 **Open Source Security Considerations:**
+
 - No hardcoded admin credentials in source code
 - Environment variable documentation for deployment
 - Database-based admin role management
@@ -625,6 +637,7 @@ The platform's success should be measured by:
 ### 6.3 Admin User Interface Requirements
 
 **Dashboard Layout (`/admin/dashboard`):**
+
 - Clean, professional interface following monochromatic design
 - Statistics overview at the top
 - Pending reports queue prominently displayed
@@ -632,6 +645,7 @@ The platform's success should be measured by:
 - Navigation to detailed management interfaces
 
 **Reports Management Table:**
+
 - All report data in sortable, filterable table
 - Action column with verify, reject, toggle, delete buttons
 - Status indicators with color coding
@@ -639,6 +653,7 @@ The platform's success should be measured by:
 - Search and filter functionality
 
 **Detail View:**
+
 - Full report information in dedicated page
 - Large image display with zoom capability
 - Complete metadata and user information

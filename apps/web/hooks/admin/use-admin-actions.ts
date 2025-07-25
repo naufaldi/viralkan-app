@@ -70,7 +70,7 @@ export const useVerifyReport = () => {
         token,
         {
           method: "POST",
-        }
+        },
       );
     },
     onMutate: async (reportId) => {
@@ -83,13 +83,17 @@ export const useVerifyReport = () => {
       // Optimistically update to the new value
       queryClient.setQueryData(["adminReports"], (old: any) => {
         if (!old?.items) return old;
-        
+
         return {
           ...old,
           items: old.items.map((report: any) =>
             report.id === reportId
-              ? { ...report, status: "verified", verified_at: new Date().toISOString() }
-              : report
+              ? {
+                  ...report,
+                  status: "verified",
+                  verified_at: new Date().toISOString(),
+                }
+              : report,
           ),
         };
       });
@@ -115,7 +119,13 @@ export const useRejectReport = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ reportId, reason }: { reportId: string; reason: string }) => {
+    mutationFn: async ({
+      reportId,
+      reason,
+    }: {
+      reportId: string;
+      reason: string;
+    }) => {
       const token = await getToken();
       if (!token) {
         throw new Error("Authentication required");
@@ -127,7 +137,7 @@ export const useRejectReport = () => {
         {
           method: "POST",
           body: JSON.stringify({ reason }),
-        }
+        },
       );
     },
     onMutate: async ({ reportId }) => {
@@ -137,13 +147,17 @@ export const useRejectReport = () => {
 
       queryClient.setQueryData(["adminReports"], (old: any) => {
         if (!old?.items) return old;
-        
+
         return {
           ...old,
           items: old.items.map((report: any) =>
             report.id === reportId
-              ? { ...report, status: "rejected", rejection_reason: "Pending..." }
-              : report
+              ? {
+                  ...report,
+                  status: "rejected",
+                  rejection_reason: "Pending...",
+                }
+              : report,
           ),
         };
       });
@@ -178,7 +192,7 @@ export const useDeleteReport = () => {
         token,
         {
           method: "POST",
-        }
+        },
       );
     },
     onMutate: async (reportId) => {
@@ -188,13 +202,17 @@ export const useDeleteReport = () => {
 
       queryClient.setQueryData(["adminReports"], (old: any) => {
         if (!old?.items) return old;
-        
+
         return {
           ...old,
           items: old.items.map((report: any) =>
             report.id === reportId
-              ? { ...report, status: "deleted", deleted_at: new Date().toISOString() }
-              : report
+              ? {
+                  ...report,
+                  status: "deleted",
+                  deleted_at: new Date().toISOString(),
+                }
+              : report,
           ),
         };
       });
@@ -210,4 +228,4 @@ export const useDeleteReport = () => {
       queryClient.invalidateQueries({ queryKey: ["adminReports"] });
     },
   });
-}; 
+};

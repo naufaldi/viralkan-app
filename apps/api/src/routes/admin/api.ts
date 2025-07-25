@@ -1,6 +1,6 @@
 /**
  * Admin API Layer
- * 
+ *
  * HTTP endpoints for admin functionality including:
  * - Admin statistics
  * - Report management (verify, reject, toggle, delete, restore)
@@ -107,8 +107,14 @@ const getAdminReportsRoute = createRoute({
   middleware: [requireAdmin],
   request: {
     query: z.object({
-      page: z.string().optional().transform(val => parseInt(val || "1")),
-      limit: z.string().optional().transform(val => parseInt(val || "20")),
+      page: z
+        .string()
+        .optional()
+        .transform((val) => parseInt(val || "1")),
+      limit: z
+        .string()
+        .optional()
+        .transform((val) => parseInt(val || "20")),
       status: z.string().optional(),
       category: z.string().optional(),
       search: z.string().optional(),
@@ -749,7 +755,7 @@ const healthCheckRoute = createRoute({
 adminRouter.openapi(getAdminStatsRoute, async (c) => {
   try {
     const result = await adminShell.getAdminStats();
-    
+
     if (result.success) {
       return c.json(result.data, 200);
     }
@@ -783,7 +789,7 @@ adminRouter.openapi(getAdminReportsRoute, async (c) => {
   try {
     const userId = c.get("user_id");
     console.log(`[DEBUG] getAdminReportsRoute - userId: ${userId}`);
-    
+
     if (!userId) {
       console.log(`[DEBUG] getAdminReportsRoute - No userId found in context`);
       return c.json(
@@ -800,15 +806,15 @@ adminRouter.openapi(getAdminReportsRoute, async (c) => {
 
     const queryData = c.req.valid("query");
     console.log(`[DEBUG] getAdminReportsRoute - queryData:`, queryData);
-    
+
     const result = await adminShell.getAdminReports(queryData);
-    
+
     console.log(`[DEBUG] getAdminReportsRoute - result:`, {
       success: result.success,
-      error: result.success ? 'N/A' : result.error,
-      dataLength: result.success ? result.data?.items?.length : 'N/A'
+      error: result.success ? "N/A" : result.error,
+      dataLength: result.success ? result.data?.items?.length : "N/A",
     });
-    
+
     if (result.success) {
       return c.json(result.data, 200);
     }
@@ -842,9 +848,9 @@ adminRouter.openapi(verifyReportRoute, async (c) => {
   try {
     const paramData = c.req.valid("param");
     const adminUserId = c.get("user_id");
-    
+
     const result = await adminShell.verifyReport(paramData.id, adminUserId);
-    
+
     if (result.success) {
       return c.json(result.data, 200);
     }
@@ -892,9 +898,13 @@ adminRouter.openapi(rejectReportRoute, async (c) => {
     const paramData = c.req.valid("param");
     const bodyData = c.req.valid("json");
     const adminUserId = c.get("user_id");
-    
-    const result = await adminShell.rejectReport(paramData.id, adminUserId, bodyData.reason);
-    
+
+    const result = await adminShell.rejectReport(
+      paramData.id,
+      adminUserId,
+      bodyData.reason,
+    );
+
     if (result.success) {
       return c.json(result.data, 200);
     }
@@ -942,9 +952,13 @@ adminRouter.openapi(toggleReportStatusRoute, async (c) => {
     const paramData = c.req.valid("param");
     const bodyData = c.req.valid("json");
     const adminUserId = c.get("user_id");
-    
-    const result = await adminShell.toggleReportStatus(paramData.id, adminUserId, bodyData.status);
-    
+
+    const result = await adminShell.toggleReportStatus(
+      paramData.id,
+      adminUserId,
+      bodyData.status,
+    );
+
     if (result.success) {
       return c.json(result.data, 200);
     }
@@ -991,9 +1005,9 @@ adminRouter.openapi(deleteReportRoute, async (c) => {
   try {
     const paramData = c.req.valid("param");
     const adminUserId = c.get("user_id");
-    
+
     const result = await adminShell.softDeleteReport(paramData.id, adminUserId);
-    
+
     if (result.success) {
       return c.json(result.data, 200);
     }
@@ -1040,9 +1054,9 @@ adminRouter.openapi(restoreReportRoute, async (c) => {
   try {
     const paramData = c.req.valid("param");
     const adminUserId = c.get("user_id");
-    
+
     const result = await adminShell.restoreReport(paramData.id, adminUserId);
-    
+
     if (result.success) {
       return c.json(result.data, 200);
     }
@@ -1088,13 +1102,13 @@ adminRouter.openapi(restoreReportRoute, async (c) => {
 adminRouter.openapi(getReportDetailRoute, async (c) => {
   try {
     const paramData = c.req.valid("param");
-    
+
     // Get single report with user information
     const result = await adminShell.getAdminReports({
       page: 1,
       limit: 1,
     });
-    
+
     if (!result.success) {
       return c.json(
         {
@@ -1107,9 +1121,9 @@ adminRouter.openapi(getReportDetailRoute, async (c) => {
         500,
       );
     }
-    
-    const report = result.data?.items.find(r => r.id === paramData.id);
-    
+
+    const report = result.data?.items.find((r) => r.id === paramData.id);
+
     if (!report) {
       return c.json(
         {
@@ -1122,7 +1136,7 @@ adminRouter.openapi(getReportDetailRoute, async (c) => {
         404,
       );
     }
-    
+
     return c.json(report, 200);
   } catch (error) {
     console.error("Error getting report detail:", error);
@@ -1140,9 +1154,12 @@ adminRouter.openapi(getReportDetailRoute, async (c) => {
 });
 
 adminRouter.openapi(healthCheckRoute, async (c) => {
-  return c.json({
-    status: "healthy",
-    timestamp: new Date().toISOString(),
-    message: "Admin API is operational",
-  }, 200);
-}); 
+  return c.json(
+    {
+      status: "healthy",
+      timestamp: new Date().toISOString(),
+      message: "Admin API is operational",
+    },
+    200,
+  );
+});

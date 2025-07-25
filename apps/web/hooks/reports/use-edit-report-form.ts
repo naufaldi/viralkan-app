@@ -12,7 +12,10 @@ interface UseEditReportFormOptions {
   onSuccess?: (reportId: string) => void;
 }
 
-export function useEditReportForm({ report, onSuccess }: UseEditReportFormOptions) {
+export function useEditReportForm({
+  report,
+  onSuccess,
+}: UseEditReportFormOptions) {
   const router = useRouter();
   const { backendUser, apiCall, getToken } = useAuthContext();
 
@@ -50,19 +53,23 @@ export function useEditReportForm({ report, onSuccess }: UseEditReportFormOption
     try {
       // If there's a new image file, upload it first
       let finalImageUrl = data.image_url;
-      if (data.image_url && data.image_url.startsWith('blob:')) {
+      if (data.image_url && data.image_url.startsWith("blob:")) {
         // This is a new image file, upload it
         const response = await fetch(data.image_url);
         const blob = await response.blob();
-        const file = new File([blob], 'report-image.jpg', { type: 'image/jpeg' });
-        
+        const file = new File([blob], "report-image.jpg", {
+          type: "image/jpeg",
+        });
+
         const token = await getToken();
         if (!token) {
-          throw new Error('Authentication token not available');
+          throw new Error("Authentication token not available");
         }
         const uploadResult = await uploadImage(file, token);
         if (!uploadResult.success || !uploadResult.data) {
-          throw new Error(uploadResult.error?.message || 'Failed to upload image');
+          throw new Error(
+            uploadResult.error?.message || "Failed to upload image",
+          );
         }
         finalImageUrl = uploadResult.data.imageUrl;
       }
@@ -103,4 +110,4 @@ export function useEditReportForm({ report, onSuccess }: UseEditReportFormOption
     onSubmit,
     isLoading: form.formState.isSubmitting,
   };
-} 
+}

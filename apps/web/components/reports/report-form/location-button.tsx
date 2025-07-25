@@ -7,7 +7,11 @@ interface LocationButtonProps {
   disabled?: boolean;
 }
 
-export const LocationButton = ({ onGetLocation, isLoading, disabled }: LocationButtonProps) => {
+export const LocationButton = ({
+  onGetLocation,
+  isLoading,
+  disabled,
+}: LocationButtonProps) => {
   return (
     <div className="flex justify-center pt-2">
       <Button
@@ -31,4 +35,4 @@ export const LocationButton = ({ onGetLocation, isLoading, disabled }: LocationB
       </Button>
     </div>
   );
-}; 
+};

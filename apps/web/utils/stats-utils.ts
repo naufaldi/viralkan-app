@@ -33,7 +33,9 @@ export interface ReportWithUser {
  * @param reports - Array of reports with user data
  * @returns StatsData object with calculated statistics
  */
-export function calculateStatsFromReports(reports: ReportWithUser[]): StatsData {
+export function calculateStatsFromReports(
+  reports: ReportWithUser[],
+): StatsData {
   if (!reports || reports.length === 0) {
     return {
       totalReports: 0,
@@ -68,7 +70,8 @@ export function calculateStatsFromReports(reports: ReportWithUser[]): StatsData 
 
   // Calculate reports by category
   const byCategory = {
-    berlubang: reports.filter((report) => report.category === "berlubang").length,
+    berlubang: reports.filter((report) => report.category === "berlubang")
+      .length,
     retak: reports.filter((report) => report.category === "retak").length,
     lainnya: reports.filter((report) => report.category === "lainnya").length,
   };
@@ -103,7 +106,9 @@ export function getDefaultStats(): StatsData {
  * @param reports - Data to validate
  * @returns boolean indicating if data is valid
  */
-export function validateReportsData(reports: unknown): reports is ReportWithUser[] {
+export function validateReportsData(
+  reports: unknown,
+): reports is ReportWithUser[] {
   if (!Array.isArray(reports)) {
     return false;
   }

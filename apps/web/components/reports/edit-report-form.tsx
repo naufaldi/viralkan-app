@@ -18,12 +18,14 @@ interface EditReportFormProps {
   onSuccess?: (reportId: string) => void;
 }
 
-export default function EditReportForm({ report, onSuccess }: EditReportFormProps) {
-  const {
-    form,
-    onSubmit,
-    isLoading,
-  } = useEditReportForm({ report, onSuccess });
+export default function EditReportForm({
+  report,
+  onSuccess,
+}: EditReportFormProps) {
+  const { form, onSubmit, isLoading } = useEditReportForm({
+    report,
+    onSuccess,
+  });
 
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null);
@@ -88,7 +90,7 @@ export default function EditReportForm({ report, onSuccess }: EditReportFormProp
         enableHighAccuracy: true,
         timeout: 10000,
         maximumAge: 60000,
-      }
+      },
     );
   };
 
@@ -165,4 +167,4 @@ export default function EditReportForm({ report, onSuccess }: EditReportFormProp
       </CardContent>
     </Card>
   );
-} 
+}

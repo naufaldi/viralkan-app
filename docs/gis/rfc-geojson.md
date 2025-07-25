@@ -7,6 +7,7 @@
 ## 1 · Scope
 
 ### **IN**
+
 - EXIF metadata extraction from uploaded images
 - Bidirectional geocoding (coordinates ↔ address) via Nominatim
 - Auto-fill location data from coordinates or address input
@@ -16,6 +17,7 @@
 - Map visualization with custom markers
 
 ### **OUT**
+
 - Real-time geocoding during form input (V3)
 - Advanced GIS spatial queries (V3)
 - Map clustering and advanced filtering (V3)
@@ -25,14 +27,14 @@
 
 ## 2 · Tech Stack
 
-| Component | Technology | Purpose |
-|-----------|------------|---------|
-| **Geocoding** | OpenStreetMap Nominatim | Free, good Indonesia coverage |
-| **EXIF Extraction** | `exifr` library | Extract GPS metadata from images |
-| **Map Visualization** | Leaflet.js | Interactive map display |
-| **Data Format** | GeoJSON | Standard geographic data format |
-| **Spatial Database** | PostgreSQL + PostGIS | GIS-ready storage |
-| **Rate Limiting** | Custom middleware | Nominatim rate limit compliance |
+| Component             | Technology              | Purpose                          |
+| --------------------- | ----------------------- | -------------------------------- |
+| **Geocoding**         | OpenStreetMap Nominatim | Free, good Indonesia coverage    |
+| **EXIF Extraction**   | `exifr` library         | Extract GPS metadata from images |
+| **Map Visualization** | Leaflet.js              | Interactive map display          |
+| **Data Format**       | GeoJSON                 | Standard geographic data format  |
+| **Spatial Database**  | PostgreSQL + PostGIS    | GIS-ready storage                |
+| **Rate Limiting**     | Custom middleware       | Nominatim rate limit compliance  |
 
 ---
 
@@ -49,6 +51,7 @@ Form Submission → Database Storage → GeoJSON API → Leaflet Map Display
 ### **3.1 User Experience Flow**
 
 **Flow A: Image with GPS Metadata**
+
 1. User uploads photo with GPS data
 2. System extracts lat/lng from EXIF
 3. System calls Nominatim reverse geocoding
@@ -57,6 +60,7 @@ Form Submission → Database Storage → GeoJSON API → Leaflet Map Display
 6. Submit report
 
 **Flow B: Image without GPS Metadata**
+
 1. User uploads photo without GPS data
 2. System shows warning: "No location data found in image"
 3. User manually enters coordinates OR address
@@ -65,6 +69,7 @@ Form Submission → Database Storage → GeoJSON API → Leaflet Map Display
 6. Submit report
 
 **Flow C: Manual Location Input**
+
 1. User enters coordinates → System reverse geocodes → Auto-fills address fields
 2. User enters address → System forward geocodes → Auto-fills coordinate fields
 3. User can override any auto-filled data
@@ -86,7 +91,7 @@ POST /api/geocoding/reverse
 Body: { lat: number, lon: number }
 → 200 OK { address: LocationData } | 400 Invalid Coordinates
 
-POST /api/geocoding/forward  
+POST /api/geocoding/forward
 Body: { address: string }
 → 200 OK { lat: number, lon: number, address: LocationData } | 400 Address Not Found
 
@@ -106,13 +111,13 @@ interface LocationData {
   provinsi?: string;
   country?: string;
   geocoded_at?: string;
-  geocoding_source?: 'exif' | 'nominatim' | 'manual';
+  geocoding_source?: "exif" | "nominatim" | "manual";
 }
 
 interface GeoJSONFeature {
-  type: 'Feature';
+  type: "Feature";
   geometry: {
-    type: 'Point';
+    type: "Point";
     coordinates: [number, number]; // [lon, lat]
   };
   properties: {
@@ -154,6 +159,7 @@ CREATE INDEX reports_location_filter_idx ON reports(provinsi, kota, kecamatan);
 ```
 
 ### **5.2 Spatial Index (Already Exists)**
+
 ```sql
 -- PostGIS spatial index for map queries
 CREATE INDEX reports_geo_idx ON reports USING GIST (geography(ST_MakePoint(lon,lat)))
@@ -169,6 +175,7 @@ WHERE lat IS NOT NULL AND lon IS NOT NULL;
 **Purpose:** Extract GPS coordinates from uploaded images
 
 **Process:**
+
 1. Receive uploaded image file
 2. Use `exifr` library to parse EXIF data
 3. Extract GPS coordinates (lat/lng)
@@ -176,6 +183,7 @@ WHERE lat IS NOT NULL AND lon IS NOT NULL;
 5. Log extraction success/failure for analytics
 
 **Error Handling:**
+
 - No EXIF data: Return null with warning
 - Corrupted EXIF: Return null with error
 - Invalid coordinates: Validate range (-90 to 90, -180 to 180)
@@ -185,17 +193,20 @@ WHERE lat IS NOT NULL AND lon IS NOT NULL;
 **Purpose:** Bidirectional geocoding with rate limiting
 
 **Configuration:**
+
 - Base URL: `https://nominatim.openstreetmap.org`
 - Rate limit: 1 request per second
 - Language: Indonesian (`accept-language=id`)
 - Format: JSON with address details
 
 **Caching Strategy:**
+
 - Cache successful geocoding results
 - Cache key: `geocoding:${lat}:${lon}` or `geocoding:${address_hash}`
 - TTL: 24 hours (addresses don't change frequently)
 
 **Error Handling:**
+
 - Rate limit exceeded: Queue request with exponential backoff
 - Network error: Retry with circuit breaker
 - Invalid response: Log error and return null
@@ -205,12 +216,14 @@ WHERE lat IS NOT NULL AND lon IS NOT NULL;
 **Purpose:** Serve reports data in GeoJSON format for maps
 
 **Features:**
+
 - Filter by status, category, date range
 - Pagination for large datasets
 - Custom marker properties
 - Spatial queries using PostGIS
 
 **Performance:**
+
 - Database query optimization with indexes
 - Response caching for public data
 - Compression for large GeoJSON responses
@@ -222,12 +235,14 @@ WHERE lat IS NOT NULL AND lon IS NOT NULL;
 ### **7.1 Form Auto-fill Behavior**
 
 **Smart Field Population:**
+
 - If coordinates provided: Auto-fill address fields
 - If address provided: Auto-fill coordinate fields
 - If EXIF data available: Auto-fill all location fields
 - User can override any auto-filled field
 
 **Visual Feedback:**
+
 - Loading indicators during geocoding
 - Success indicators for auto-filled fields
 - Warning messages for missing metadata
@@ -236,11 +251,13 @@ WHERE lat IS NOT NULL AND lon IS NOT NULL;
 ### **7.2 Metadata Validation**
 
 **Image Requirements:**
+
 - Minimum resolution: 800x600 pixels
 - Supported formats: JPEG, PNG, HEIC
 - Maximum file size: 10MB
 
 **GPS Metadata:**
+
 - Required for automatic location detection
 - Warning if missing: "Add location data to your photos for automatic location detection"
 - Manual input fallback always available
@@ -248,14 +265,16 @@ WHERE lat IS NOT NULL AND lon IS NOT NULL;
 ### **7.3 Map Integration**
 
 **Leaflet Map Features:**
+
 - Custom markers by damage category
 - Rich popups with report details
 - Administrative boundary filtering
 - Responsive design for mobile
 
 **Marker Styling:**
+
 - Berlubang (holes): Red circles
-- Retak (cracks): Orange circles  
+- Retak (cracks): Orange circles
 - Lainnya (others): Gray circles
 - Size based on zoom level
 
@@ -276,12 +295,14 @@ const RATE_LIMITS = {
 ### **8.2 Input Validation**
 
 **Coordinate Validation:**
+
 - Latitude: -90 to 90 degrees
 - Longitude: -180 to 180 degrees
 - Precision: Maximum 6 decimal places
 - Indonesia bounds checking (optional)
 
 **Address Validation:**
+
 - Minimum length: 3 characters
 - Maximum length: 500 characters
 - Sanitize special characters
@@ -290,12 +311,14 @@ const RATE_LIMITS = {
 ### **8.3 Caching Strategy**
 
 **Geocoding Cache:**
+
 - Redis or in-memory cache
 - Key: `geocoding:${input_hash}`
 - TTL: 24 hours for successful results
 - No cache for failed requests
 
 **GeoJSON Cache:**
+
 - Cache public reports data
 - Invalidate on new report creation
 - TTL: 5 minutes for fresh data
@@ -308,26 +331,31 @@ const RATE_LIMITS = {
 ### **9.1 User-Friendly Messages**
 
 **EXIF Extraction Errors:**
+
 - "No location data found in this image. Please add GPS data to your photos or enter location manually."
 - "Unable to read image metadata. Please try a different image or enter location manually."
 
 **Geocoding Errors:**
+
 - "Location not found. Please check your address or coordinates."
 - "Service temporarily unavailable. Please try again in a moment."
 - "Rate limit exceeded. Please wait a moment before trying again."
 
 **Validation Errors:**
+
 - "Invalid coordinates. Please check latitude and longitude values."
 - "Address too short. Please provide a more specific location."
 
 ### **9.2 Fallback Strategies**
 
 **Primary Fallback:**
+
 1. EXIF extraction fails → Manual input
 2. Nominatim unavailable → Manual coordinates only
 3. Geocoding fails → Partial form with available data
 
 **Secondary Fallback:**
+
 1. Cache previous successful geocoding results
 2. Use approximate location based on user's last known location
 3. Provide location suggestions from recent reports
@@ -339,12 +367,14 @@ const RATE_LIMITS = {
 ### **10.1 Unit Tests**
 
 **EXIF Extraction:**
+
 - Test with images containing GPS data
 - Test with images without GPS data
 - Test with corrupted image files
 - Test coordinate validation
 
 **Geocoding Service:**
+
 - Test forward geocoding with valid addresses
 - Test reverse geocoding with valid coordinates
 - Test rate limiting behavior
@@ -353,12 +383,14 @@ const RATE_LIMITS = {
 ### **10.2 Integration Tests**
 
 **End-to-End Flow:**
+
 - Complete report creation with EXIF data
 - Complete report creation with manual input
 - Map display with GeoJSON data
 - Form auto-fill behavior
 
 **API Testing:**
+
 - GeoJSON endpoint with various filters
 - Geocoding endpoints with valid/invalid inputs
 - Rate limiting compliance
@@ -367,6 +399,7 @@ const RATE_LIMITS = {
 ### **10.3 Performance Tests**
 
 **Load Testing:**
+
 - Concurrent geocoding requests
 - Large GeoJSON response handling
 - Database query performance
@@ -379,12 +412,14 @@ const RATE_LIMITS = {
 ### **11.1 Key Metrics**
 
 **Geocoding Performance:**
+
 - Success rate by input type (EXIF vs manual)
 - Average response time for Nominatim calls
 - Cache hit rate for geocoding results
 - Error rates by error type
 
 **User Behavior:**
+
 - Percentage of reports with EXIF data
 - Manual input vs auto-fill usage
 - Map interaction patterns
@@ -393,6 +428,7 @@ const RATE_LIMITS = {
 ### **11.2 Health Checks**
 
 **Service Health:**
+
 - Nominatim API availability
 - EXIF extraction success rate
 - GeoJSON API response times
@@ -438,6 +474,7 @@ MAX_ADDRESS_LENGTH=500
 ## 13 · Future Enhancements (V3)
 
 ### **13.1 Advanced Features**
+
 - Real-time address autocomplete
 - Map clustering for performance
 - Spatial queries (reports within radius)
@@ -445,6 +482,7 @@ MAX_ADDRESS_LENGTH=500
 - Advanced GIS analytics
 
 ### **13.2 Performance Optimizations**
+
 - CDN for GeoJSON responses
 - Database query optimization
 - Advanced caching strategies
@@ -455,18 +493,21 @@ MAX_ADDRESS_LENGTH=500
 ## 14 · Success Criteria
 
 ### **14.1 Functional Requirements**
+
 - ✅ EXIF extraction works for 95% of GPS-enabled images
 - ✅ Bidirectional geocoding accuracy > 90% for Indonesian addresses
 - ✅ Map displays all reports with correct markers
 - ✅ Form auto-fill reduces manual input by 70%
 
 ### **14.2 Performance Requirements**
+
 - ✅ Geocoding response time < 2 seconds
 - ✅ GeoJSON API response time < 1 second
 - ✅ Map loads within 3 seconds
 - ✅ 99.9% uptime for geocoding services
 
 ### **14.3 User Experience Requirements**
+
 - ✅ Users can create reports with minimal location input
 - ✅ Clear feedback for missing metadata
 - ✅ Intuitive map interaction

@@ -45,9 +45,10 @@ export const ReportImageUpload = ({
         disabled={disabled}
       />
       <p className="text-sm text-neutral-600">
-        Unggah foto yang jelas untuk membantu komunitas mengidentifikasi
-        lokasi jalan rusak. <strong>Ambil foto langsung</strong> untuk data lokasi otomatis.
+        Unggah foto yang jelas untuk membantu komunitas mengidentifikasi lokasi
+        jalan rusak. <strong>Ambil foto langsung</strong> untuk data lokasi
+        otomatis.
       </p>
     </div>
   );
-}; 
+};

@@ -94,7 +94,7 @@ export const checkUserAuthorization = (
   user: DbUser,
   requiredProvider?: string,
 ): boolean => {
-  if (!user.id || typeof user.id !== 'string' || user.id.trim().length === 0) {
+  if (!user.id || typeof user.id !== "string" || user.id.trim().length === 0) {
     return false;
   }
 

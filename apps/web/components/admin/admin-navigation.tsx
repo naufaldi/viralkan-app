@@ -16,13 +16,13 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@repo/ui/components/ui/avatar";
-import { 
-  LayoutDashboard, 
-  FileText, 
-  Users, 
+import {
+  LayoutDashboard,
+  FileText,
+  Users,
   Settings,
   ChevronUp,
-  LogOut
+  LogOut,
 } from "lucide-react";
 import { useAuthContext } from "../../contexts/AuthContext";
 
@@ -182,4 +182,4 @@ export const AdminNavigation = () => {
       </div>
     </nav>
   );
-}; 
+};

@@ -47,17 +47,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@repo/ui/components/ui/select";
-import { 
-  ArrowUpDown, 
-  Eye, 
-  CheckCircle, 
-  XCircle, 
-  MoreHorizontal, 
+import {
+  ArrowUpDown,
+  Eye,
+  CheckCircle,
+  XCircle,
+  MoreHorizontal,
   Search,
   Clock,
   User,
   Trash2,
-  Filter
+  Filter,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -81,27 +81,32 @@ interface AdminReportsTableProps {
   onDelete?: (id: string) => void;
 }
 
-export function AdminReportsTable({ 
-  data, 
-  isLoading = false, 
-  onVerify, 
+export function AdminReportsTable({
+  data,
+  isLoading = false,
+  onVerify,
   onReject,
-  onDelete
+  onDelete,
 }: AdminReportsTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([
     { id: "submittedAt", desc: true },
   ]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({
-    imageUrl: false, // Hide thumbnail on mobile by default
-    category: false, // Hide category on mobile by default
-  });
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+    [],
+  );
+  const [columnVisibility, setColumnVisibility] =
+    React.useState<VisibilityState>({
+      imageUrl: false, // Hide thumbnail on mobile by default
+      category: false, // Hide category on mobile by default
+    });
   const [globalFilter, setGlobalFilter] = React.useState("");
   const [statusFilter, setStatusFilter] = React.useState<string>("all");
   const [verifyDialogOpen, setVerifyDialogOpen] = React.useState(false);
-  const [reportToVerify, setReportToVerify] = React.useState<AdminReport | null>(null);
+  const [reportToVerify, setReportToVerify] =
+    React.useState<AdminReport | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
-  const [reportToDelete, setReportToDelete] = React.useState<AdminReport | null>(null);
+  const [reportToDelete, setReportToDelete] =
+    React.useState<AdminReport | null>(null);
 
   // Responsive column visibility
   React.useEffect(() => {
@@ -258,9 +263,21 @@ export function AdminReportsTable({
   // Get status filter options
   const statusFilterOptions = [
     { value: "all", label: "Semua Status", count: data.length },
-    { value: "pending", label: "Menunggu", count: data.filter(r => r.status === "pending").length },
-    { value: "verified", label: "Disetujui", count: data.filter(r => r.status === "verified").length },
-    { value: "rejected", label: "Ditolak", count: data.filter(r => r.status === "rejected").length },
+    {
+      value: "pending",
+      label: "Menunggu",
+      count: data.filter((r) => r.status === "pending").length,
+    },
+    {
+      value: "verified",
+      label: "Disetujui",
+      count: data.filter((r) => r.status === "verified").length,
+    },
+    {
+      value: "rejected",
+      label: "Ditolak",
+      count: data.filter((r) => r.status === "rejected").length,
+    },
   ];
 
   const columns: ColumnDef<AdminReport>[] = [
@@ -404,8 +421,8 @@ export function AdminReportsTable({
             )}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   className="h-8 w-8 p-0 hover:bg-neutral-100 hover:text-neutral-900"
                 >
                   <span className="sr-only">Open menu</span>
@@ -424,14 +441,14 @@ export function AdminReportsTable({
                 </DropdownMenuItem>
                 {isPending && (
                   <>
-                    <DropdownMenuItem 
+                    <DropdownMenuItem
                       onClick={() => handleVerifyClick(report)}
                       className="hover:bg-green-50 hover:text-green-700 focus:bg-green-50 focus:text-green-700"
                     >
                       <CheckCircle className="mr-2 h-4 w-4" />
                       Setujui Laporan
                     </DropdownMenuItem>
-                    <DropdownMenuItem 
+                    <DropdownMenuItem
                       onClick={() => handleRejectClick(report)}
                       className="hover:bg-red-50 hover:text-red-700 focus:bg-red-50 focus:text-red-700"
                     >
@@ -440,7 +457,7 @@ export function AdminReportsTable({
                     </DropdownMenuItem>
                   </>
                 )}
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   onClick={() => handleDeleteClick(report)}
                   className="text-red-600 focus:text-red-600"
                 >
@@ -525,8 +542,8 @@ export function AdminReportsTable({
             </SelectTrigger>
             <SelectContent className="border-neutral-200 bg-white shadow-lg">
               {statusFilterOptions.map((option) => (
-                <SelectItem 
-                  key={option.value} 
+                <SelectItem
+                  key={option.value}
                   value={option.value}
                   className="hover:bg-neutral-50 focus:bg-neutral-50 cursor-pointer"
                 >
@@ -681,15 +698,15 @@ export function AdminReportsTable({
             <AlertDialogTitle>Setujui Laporan</AlertDialogTitle>
             <AlertDialogDescription>
               Apakah Anda yakin ingin menyetujui laporan{" "}
-              <strong>{reportToVerify?.streetName}</strong>? 
-              Laporan ini akan ditandai sebagai terverifikasi dan dapat diproses lebih lanjut.
+              <strong>{reportToVerify?.streetName}</strong>? Laporan ini akan
+              ditandai sebagai terverifikasi dan dapat diproses lebih lanjut.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel className="hover:bg-neutral-50 hover:border-neutral-400">
               Batal
             </AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogAction
               onClick={handleVerifyConfirm}
               className="bg-neutral-800 text-white hover:bg-neutral-900 hover:text-white border-neutral-800"
             >
@@ -706,15 +723,15 @@ export function AdminReportsTable({
             <AlertDialogTitle>Hapus Laporan</AlertDialogTitle>
             <AlertDialogDescription>
               Apakah Anda yakin ingin menghapus laporan{" "}
-              <strong>{reportToDelete?.streetName}</strong>? 
-              Tindakan ini tidak dapat dibatalkan dan laporan akan dihapus secara permanen.
+              <strong>{reportToDelete?.streetName}</strong>? Tindakan ini tidak
+              dapat dibatalkan dan laporan akan dihapus secara permanen.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel className="hover:bg-neutral-50 hover:border-neutral-400">
               Batal
             </AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogAction
               onClick={handleDeleteConfirm}
               className="bg-neutral-800 text-white hover:bg-red-600 hover:text-white border-neutral-800"
             >
@@ -725,4 +742,4 @@ export function AdminReportsTable({
       </AlertDialog>
     </div>
   );
-} 
+}

@@ -5,8 +5,6 @@
 
 import { apiClient } from "./api-client";
 
-
-
 // Upload response interface matching backend
 export interface UploadResponse {
   imageUrl: string;

@@ -364,7 +364,7 @@ Following the "Luxury Simplicity for Civic Purpose" philosophy, buttons use stra
   background: var(--color-white);
   color: var(--color-neutral-700);
   border: 1px solid var(--color-neutral-300);
-  
+
   &:hover {
     background: rgb(240 253 244); /* green-50 */
     border-color: rgb(187 247 208); /* green-200 */
@@ -378,7 +378,7 @@ Following the "Luxury Simplicity for Civic Purpose" philosophy, buttons use stra
   background: var(--color-white);
   color: var(--color-neutral-700);
   border: 1px solid var(--color-neutral-300);
-  
+
   &:hover {
     background: rgb(254 242 242); /* red-50 */
     border-color: rgb(254 202 202); /* red-200 */
@@ -392,7 +392,7 @@ Following the "Luxury Simplicity for Civic Purpose" philosophy, buttons use stra
   background: var(--color-white);
   color: var(--color-neutral-700);
   border: 1px solid var(--color-neutral-300);
-  
+
   &:hover {
     background: var(--color-neutral-50);
     border-color: var(--color-neutral-400);
@@ -406,7 +406,7 @@ Following the "Luxury Simplicity for Civic Purpose" philosophy, buttons use stra
   background: transparent;
   color: var(--color-neutral-600);
   border: 1px solid transparent;
-  
+
   &:hover {
     background: var(--color-neutral-100);
     color: var(--color-neutral-900);
@@ -418,12 +418,14 @@ Following the "Luxury Simplicity for Civic Purpose" philosophy, buttons use stra
 #### Hover Color Guidelines
 
 **Strategic Color Application:**
+
 - **Success Actions**: Subtle green hints (`green-50` bg, `green-200` border, `green-700` text)
 - **Danger Actions**: Subtle red hints (`red-50` bg, `red-200` border, `red-700` text)
 - **Neutral Actions**: Enhanced neutral tones (`neutral-50` bg, `neutral-400` border)
 - **Interactive Elements**: Light neutral feedback (`neutral-100` bg, `neutral-900` text)
 
 **Design Principles:**
+
 - Colors used only for functional feedback (5% of interface)
 - Maintains luxury monochromatic aesthetic
 - Government-appropriate and professional
@@ -863,7 +865,7 @@ Following the "Luxury Simplicity for Civic Purpose" philosophy, buttons use stra
     border-color var(--duration-fast) var(--ease-in-out);
   --transition-shadow: box-shadow var(--duration-normal) var(--ease-out);
   --transition-transform: transform var(--duration-normal) var(--ease-out);
-  
+
   /* Button-specific transitions */
   --transition-button: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-button-hover: all 200ms cubic-bezier(0.4, 0, 0.2, 1);

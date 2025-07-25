@@ -8,7 +8,9 @@ export const cleanFormData = (data: CreateReportInput): CreateReportInput => {
   };
 };
 
-export const getLocationErrorMessage = (error: GeolocationPositionError): string => {
+export const getLocationErrorMessage = (
+  error: GeolocationPositionError,
+): string => {
   switch (error.code) {
     case error.PERMISSION_DENIED:
       return "Izin lokasi ditolak. Silakan izinkan akses lokasi di browser Anda.";
@@ -25,4 +27,4 @@ export const geolocationOptions: PositionOptions = {
   enableHighAccuracy: true,
   timeout: 10000,
   maximumAge: 60000,
-}; 
+};

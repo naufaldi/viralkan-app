@@ -62,12 +62,10 @@ export const ReportQuerySchema = z.object({
     example: "berlubang",
     description: "Filter reports by damage category",
   }),
-  user_id: uuidValidator
-    .optional()
-    .openapi({
-      example: "01890dd5-ea3f-7746-b3a5-e8c5e0b0f4a1",
-      description: "Filter reports by user ID (UUID)",
-    }),
+  user_id: uuidValidator.optional().openapi({
+    example: "01890dd5-ea3f-7746-b3a5-e8c5e0b0f4a1",
+    description: "Filter reports by user ID (UUID)",
+  }),
 });
 
 // Schema for /me endpoint - doesn't include user_id validation
@@ -144,7 +142,10 @@ export const ReportResponseSchema = z.object({
   verified_by: z
     .union([uuidValidator, z.null()])
     .openapi({ example: "01890dd5-1234-7746-b3a5-e8c5e0b0f4a1" }),
-  rejection_reason: z.string().nullable().openapi({ example: "Invalid report" }),
+  rejection_reason: z
+    .string()
+    .nullable()
+    .openapi({ example: "Invalid report" }),
   deleted_at: z
     .string()
     .datetime()

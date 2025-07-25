@@ -9,7 +9,7 @@ interface AuthUser {
   name: string;
   avatar_url: string | null;
   provider: string;
-  role: 'user' | 'admin'; // Added role field for admin access control
+  role: "user" | "admin"; // Added role field for admin access control
   created_at: string;
 }
 

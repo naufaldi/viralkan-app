@@ -1,18 +1,24 @@
 import { Button } from "@repo/ui/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@repo/ui/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@repo/ui/components/ui/card";
 import { Badge } from "@repo/ui/components/ui/badge";
-import { 
-  ClipboardList, 
-  CheckCircle, 
-  XCircle, 
-  Clock, 
+import {
+  ClipboardList,
+  CheckCircle,
+  XCircle,
+  Clock,
   BarChart3,
   Users,
   AlertTriangle,
   Eye,
   UserCheck,
   TrendingUp,
-  Activity
+  Activity,
 } from "lucide-react";
 import Link from "next/link";
 import { requireAuth } from "@/lib/auth-server";
@@ -64,16 +70,17 @@ const getAuthToken = async (): Promise<string | null> => {
 // Function to call the real admin stats API
 const fetchAdminStats = async (): Promise<AdminStatsApiResponse> => {
   const token = await getAuthToken();
-  
+
   if (!token) {
     throw new Error("Authentication token not found");
   }
 
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+  const API_BASE_URL =
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
   const response = await fetch(`${API_BASE_URL}/api/admin/stats`, {
     method: "GET",
     headers: {
-      "Authorization": `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
     cache: "no-store", // Always fetch fresh data
@@ -81,33 +88,38 @@ const fetchAdminStats = async (): Promise<AdminStatsApiResponse> => {
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.error?.message || `HTTP ${response.status}: ${response.statusText}`);
+    throw new Error(
+      errorData.error?.message ||
+        `HTTP ${response.status}: ${response.statusText}`,
+    );
   }
 
   return response.json();
 };
 
 // Function to map API response to frontend interface
-const mapApiResponseToFrontend = (apiResponse: AdminStatsApiResponse): AdminStats => {
+const mapApiResponseToFrontend = (
+  apiResponse: AdminStatsApiResponse,
+): AdminStats => {
   // Calculate today's activity from recent activity
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  
+
   const todayActivity = {
     verified: 0,
     rejected: 0,
-    submitted: 0
+    submitted: 0,
   };
 
   // Count today's activities from recent activity
-  apiResponse.recentActivity.forEach(activity => {
+  apiResponse.recentActivity.forEach((activity) => {
     const activityDate = new Date(activity.timestamp);
     if (activityDate >= today) {
-      if (activity.action.includes('verify')) {
+      if (activity.action.includes("verify")) {
         todayActivity.verified++;
-      } else if (activity.action.includes('reject')) {
+      } else if (activity.action.includes("reject")) {
         todayActivity.rejected++;
-      } else if (activity.action.includes('create')) {
+      } else if (activity.action.includes("create")) {
         todayActivity.submitted++;
       }
     }
@@ -123,7 +135,7 @@ const mapApiResponseToFrontend = (apiResponse: AdminStatsApiResponse): AdminStat
     adminUsers: apiResponse.adminUsers,
     verificationRate: apiResponse.verificationRate,
     averageResponseTime: `${apiResponse.averageVerificationTime} jam`,
-    todayActivity
+    todayActivity,
   };
 };
 
@@ -133,20 +145,20 @@ const getAdminStats = async (): Promise<AdminStats> => {
     console.log("Fetching admin stats from API...");
     const apiResponse = await fetchAdminStats();
     console.log("API Response:", apiResponse);
-    
+
     const mappedStats = mapApiResponseToFrontend(apiResponse);
     console.log("Mapped Stats:", mappedStats);
-    
+
     return mappedStats;
   } catch (error) {
-    console.error('Error fetching admin stats:', error);
-    
+    console.error("Error fetching admin stats:", error);
+
     // Log more details for debugging
     if (error instanceof Error) {
-      console.error('Error message:', error.message);
-      console.error('Error stack:', error.stack);
+      console.error("Error message:", error.message);
+      console.error("Error stack:", error.stack);
     }
-    
+
     // Return fallback data on error
     return {
       totalReports: 0,
@@ -161,20 +173,20 @@ const getAdminStats = async (): Promise<AdminStats> => {
       todayActivity: {
         verified: 0,
         rejected: 0,
-        submitted: 0
-      }
+        submitted: 0,
+      },
     };
   }
 };
 
 // Enhanced Stat Card component with luxury design
-function StatCard({ 
-  title, 
-  value, 
-  description, 
-  icon: Icon, 
+function StatCard({
+  title,
+  value,
+  description,
+  icon: Icon,
   trend,
-  variant = "default"
+  variant = "default",
 }: {
   title: string;
   value: string | number;
@@ -185,20 +197,23 @@ function StatCard({
 }) {
   const variantStyles = {
     default: "border-neutral-200 bg-white hover:border-neutral-300 shadow-md",
-    warning: "border-neutral-300 bg-white hover:bg-neutral-25 hover:border-neutral-400 shadow-md", 
+    warning:
+      "border-neutral-300 bg-white hover:bg-neutral-25 hover:border-neutral-400 shadow-md",
     success: "border-neutral-200 bg-white hover:border-neutral-300 shadow-md",
-    danger: "border-neutral-200 bg-white hover:border-neutral-300 shadow-md"
+    danger: "border-neutral-200 bg-white hover:border-neutral-300 shadow-md",
   };
 
   const iconColors = {
     default: "text-neutral-600",
     warning: "text-neutral-700",
     success: "text-neutral-600",
-    danger: "text-neutral-600"
+    danger: "text-neutral-600",
   };
 
   return (
-    <Card className={`${variantStyles[variant]} transition-all duration-300 hover:shadow-xl hover:-translate-y-1`}>
+    <Card
+      className={`${variantStyles[variant]} transition-all duration-300 hover:shadow-xl hover:-translate-y-1`}
+    >
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
         <CardTitle className="text-sm font-medium text-neutral-600 tracking-wide uppercase">
           {title}
@@ -214,8 +229,12 @@ function StatCard({
         <p className="text-sm text-neutral-500 leading-relaxed">
           {description}
           {trend && (
-            <span className={`ml-2 inline-flex items-center font-medium ${trend.isPositive ? 'text-neutral-700' : 'text-neutral-600'}`}>
-              <TrendingUp className={`w-3 h-3 mr-1 ${!trend.isPositive ? 'rotate-180' : ''}`} />
+            <span
+              className={`ml-2 inline-flex items-center font-medium ${trend.isPositive ? "text-neutral-700" : "text-neutral-600"}`}
+            >
+              <TrendingUp
+                className={`w-3 h-3 mr-1 ${!trend.isPositive ? "rotate-180" : ""}`}
+              />
               {Math.abs(trend.value)}%
             </span>
           )}
@@ -229,7 +248,9 @@ export default async function AdminDashboard() {
   // Auth check is handled by admin layout, just get user data for display
   const user = await requireAuth();
 
-  console.log(`Admin dashboard accessed by user: ${user.email} with role: ${user.role}`);
+  console.log(
+    `Admin dashboard accessed by user: ${user.email} with role: ${user.role}`,
+  );
 
   // Fetch real admin statistics
   const stats = await getAdminStats();
@@ -237,18 +258,14 @@ export default async function AdminDashboard() {
   return (
     <div className="min-h-screen bg-neutral-100">
       {/* Debug Info - Remove in production */}
-      {process.env.NODE_ENV === 'development' && (
+      {process.env.NODE_ENV === "development" && (
         <div className="mb-6 p-4 bg-white border border-neutral-200 rounded-xl shadow-sm">
-          <h3 className="font-semibold text-neutral-900 mb-2">Server-Side Auth Debug:</h3>
-          <p className="text-sm text-neutral-700">
-            User Role: {user.role}
-          </p>
-          <p className="text-sm text-neutral-700">
-            User Email: {user.email}
-          </p>
-          <p className="text-sm text-neutral-700">
-            User ID: {user.id}
-          </p>
+          <h3 className="font-semibold text-neutral-900 mb-2">
+            Server-Side Auth Debug:
+          </h3>
+          <p className="text-sm text-neutral-700">User Role: {user.role}</p>
+          <p className="text-sm text-neutral-700">User Email: {user.email}</p>
+          <p className="text-sm text-neutral-700">User ID: {user.id}</p>
           <p className="text-sm text-neutral-700">
             Auth Method: Server-side verification ✅
           </p>
@@ -285,7 +302,7 @@ export default async function AdminDashboard() {
         />
         <StatCard
           title="Total Laporan"
-          value={stats.totalReports.toLocaleString('id-ID')}
+          value={stats.totalReports.toLocaleString("id-ID")}
           description="Semua laporan masuk"
           icon={ClipboardList}
           trend={{ value: 15, isPositive: true }}
@@ -340,9 +357,9 @@ export default async function AdminDashboard() {
                 </CardDescription>
               </div>
               <Link href="/admin/reports">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  variant="outline"
+                  size="sm"
                   className="h-10 px-4 text-neutral-700 border-neutral-300 hover:bg-neutral-50 hover:border-neutral-400 hover:text-neutral-800 transition-all duration-200 font-medium"
                 >
                   Lihat Semua
@@ -354,8 +371,8 @@ export default async function AdminDashboard() {
               <AdminReportsTableWrapper />
             </CardContent>
           </Card>
-        </div>       
+        </div>
       </div>
     </div>
   );
-} 
+}

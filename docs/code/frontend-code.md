@@ -80,12 +80,14 @@ packages/ui/               # Shared UI components
 **Purpose**: Route-level components using Next.js App Router
 
 **Responsibilities**:
+
 - Route definitions and layouts
 - Server-side data fetching
 - SEO and metadata
 - Error boundaries
 
 **Should NOT**:
+
 - Contain complex business logic
 - Handle client-side state management
 - Include styling details
@@ -116,6 +118,7 @@ export default async function DashboardPage() {
 **Purpose**: Business logic components specific to features
 
 **Responsibilities**:
+
 - Feature-specific business logic
 - Component composition
 - State management coordination
@@ -159,6 +162,7 @@ export const CreateReportForm = () => {
 **Purpose**: Reusable UI elements built with shadcn/ui
 
 **Responsibilities**:
+
 - Atomic UI components
 - Consistent styling
 - Accessibility features
@@ -221,6 +225,7 @@ export { Button, buttonVariants }
 **Purpose**: Encapsulate state logic and data fetching
 
 **Responsibilities**:
+
 - State management
 - Data fetching with React Query
 - Business logic coordination
@@ -228,31 +233,31 @@ export { Button, buttonVariants }
 
 ```typescript
 // hooks/reports/use-reports.ts
-import { useQuery } from '@tanstack/react-query'
-import { api } from '@/services/api'
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@/services/api";
 
 export const useReports = (filters?: ReportFilters) => {
   return useQuery({
-    queryKey: ['reports', filters],
+    queryKey: ["reports", filters],
     queryFn: () => api.reports.list(filters),
     staleTime: 5 * 60 * 1000, // 5 minutes
-  })
-}
+  });
+};
 
 // hooks/use-create-report.ts
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { api } from '@/services/api'
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { api } from "@/services/api";
 
 export const useCreateReport = () => {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (data: CreateReportData) => api.reports.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['reports'] })
+      queryClient.invalidateQueries({ queryKey: ["reports"] });
     },
-  })
-}
+  });
+};
 ```
 
 ### 5. Services (`services/`)
@@ -260,6 +265,7 @@ export const useCreateReport = () => {
 **Purpose**: External API communication and data access
 
 **Responsibilities**:
+
 - API client configuration
 - HTTP request handling
 - Data transformation
@@ -267,40 +273,39 @@ export const useCreateReport = () => {
 
 ```typescript
 // services/api-client.ts
-import axios from 'axios'
+import axios from "axios";
 
 export const apiClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
   timeout: 10000,
-})
+});
 
 apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('auth-token')
+  const token = localStorage.getItem("auth-token");
   if (token) {
-    config.headers.Authorization = `Bearer ${token}`
+    config.headers.Authorization = `Bearer ${token}`;
   }
-  return config
-})
+  return config;
+});
 
 // services/api.ts
-import { apiClient } from './api-client'
+import { apiClient } from "./api-client";
 
 export const api = {
   reports: {
-    list: (filters?: ReportFilters) => 
-      apiClient.get('/reports', { params: filters }).then(res => res.data),
-    create: (data: CreateReportData) => 
-      apiClient.post('/reports', data).then(res => res.data),
-    getById: (id: string) => 
-      apiClient.get(`/reports/${id}`).then(res => res.data),
+    list: (filters?: ReportFilters) =>
+      apiClient.get("/reports", { params: filters }).then((res) => res.data),
+    create: (data: CreateReportData) =>
+      apiClient.post("/reports", data).then((res) => res.data),
+    getById: (id: string) =>
+      apiClient.get(`/reports/${id}`).then((res) => res.data),
   },
   auth: {
-    login: (credentials: LoginCredentials) => 
-      apiClient.post('/auth/login', credentials).then(res => res.data),
-    logout: () => 
-      apiClient.post('/auth/logout').then(res => res.data),
+    login: (credentials: LoginCredentials) =>
+      apiClient.post("/auth/login", credentials).then((res) => res.data),
+    logout: () => apiClient.post("/auth/logout").then((res) => res.data),
   },
-}
+};
 ```
 
 ## Component Patterns
@@ -382,7 +387,7 @@ export const ReportForm = ({ onSubmit }: { onSubmit: (data: ReportFormData) => v
           <p className="text-sm text-red-600">{errors.title.message}</p>
         )}
       </div>
-      
+
       <Button type="submit" disabled={isSubmitting}>
         {isSubmitting ? 'Submitting...' : 'Submit Report'}
       </Button>
@@ -397,33 +402,33 @@ export const ReportForm = ({ onSubmit }: { onSubmit: (data: ReportFormData) => v
 
 ```typescript
 // hooks/use-reports-stats.ts
-import { useQuery } from '@tanstack/react-query'
-import { api } from '@/services/api'
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@/services/api";
 
 export const useReportsStats = () => {
   return useQuery({
-    queryKey: ['reports', 'stats'],
+    queryKey: ["reports", "stats"],
     queryFn: () => api.reports.getStats(),
     staleTime: 10 * 60 * 1000, // 10 minutes
-  })
-}
+  });
+};
 
 // hooks/use-reports-mutations.ts
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { api } from '@/services/api'
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { api } from "@/services/api";
 
 export const useUpdateReport = () => {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: UpdateReportData }) =>
       api.reports.update(id, data),
     onSuccess: (_, { id }) => {
-      queryClient.invalidateQueries({ queryKey: ['reports'] })
-      queryClient.invalidateQueries({ queryKey: ['reports', id] })
+      queryClient.invalidateQueries({ queryKey: ["reports"] });
+      queryClient.invalidateQueries({ queryKey: ["reports", id] });
     },
-  })
-}
+  });
+};
 ```
 
 ### Context for Global State
@@ -499,20 +504,21 @@ Our authentication system follows a **hybrid server-client approach** optimized 
 
 #### Decision Matrix
 
-| Use Case | Server-Side Auth | Client-Side Auth | Reasoning |
-|----------|------------------|------------------|-----------|
-| **Protected pages (dashboard, admin)** | ✅ **Recommended** | ❌ Not suitable | Fast loading, SEO-friendly, server-side protection |
-| **Navigation/header components** | ❌ Not suitable | ✅ **Recommended** | Reactive UI, login/logout state changes |
-| **Initial page loads** | ✅ **Recommended** | ❌ Not suitable | No loading delays, better performance |
-| **Interactive auth forms** | ❌ Not suitable | ✅ **Recommended** | Real-time validation, loading states |
-| **Data fetching for authenticated users** | ✅ **Recommended** | ❌ Not suitable | Secure, server-side validation |
-| **Conditional UI rendering** | ❌ Not suitable | ✅ **Recommended** | Dynamic updates, user interaction |
+| Use Case                                  | Server-Side Auth   | Client-Side Auth   | Reasoning                                          |
+| ----------------------------------------- | ------------------ | ------------------ | -------------------------------------------------- |
+| **Protected pages (dashboard, admin)**    | ✅ **Recommended** | ❌ Not suitable    | Fast loading, SEO-friendly, server-side protection |
+| **Navigation/header components**          | ❌ Not suitable    | ✅ **Recommended** | Reactive UI, login/logout state changes            |
+| **Initial page loads**                    | ✅ **Recommended** | ❌ Not suitable    | No loading delays, better performance              |
+| **Interactive auth forms**                | ❌ Not suitable    | ✅ **Recommended** | Real-time validation, loading states               |
+| **Data fetching for authenticated users** | ✅ **Recommended** | ❌ Not suitable    | Secure, server-side validation                     |
+| **Conditional UI rendering**              | ❌ Not suitable    | ✅ **Recommended** | Dynamic updates, user interaction                  |
 
 ### 1. Server-Side Authentication (Recommended for Most Cases)
 
 **Best for**: Protected pages, data fetching, initial auth checks
 
 **Characteristics**:
+
 - 🚀 **Fast Initial Load** - No client-side JavaScript needed for auth
 - 🔍 **SEO Friendly** - Content available in initial HTML
 - 🔒 **More Secure** - Authentication happens server-side
@@ -551,7 +557,7 @@ export default async function DashboardPage() {
         <h1 className="text-4xl font-bold">
           Welcome, {user.name}! {/* Direct server data */}
         </h1>
-        
+
         {/* Stats available immediately, no loading state */}
         <div className="grid grid-cols-3 gap-6">
           <div className="text-2xl font-bold">
@@ -577,7 +583,7 @@ import { requireAuth } from "@/lib/auth-server";
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   // Server-side authentication and authorization
   const user = await requireAuth();
-  
+
   // Server-side admin role check
   if (user.role !== 'admin') {
     console.log(`User ${user.email} attempted to access admin area`);
@@ -603,7 +609,7 @@ import { requireAuth } from "./auth-server";
 export async function createReportAction(formData: FormData) {
   // Server-side auth check for mutations
   const user = await requireAuth();
-  
+
   const reportData = {
     image_url: formData.get("image_url") as string,
     category: formData.get("category") as string,
@@ -633,7 +639,8 @@ export async function createReportAction(formData: FormData) {
 **Best for**: Navigation, real-time UI updates, interactive components
 
 **Characteristics**:
-- ⚡ **Real-time Updates** - Responds to auth state changes immediately  
+
+- ⚡ **Real-time Updates** - Responds to auth state changes immediately
 - 🎯 **Interactive** - Loading states, error handling, user actions
 - 🌐 **Global State** - Available to any component using context
 - 🔄 **Reactive** - UI updates automatically when auth state changes
@@ -799,6 +806,7 @@ export default async function DashboardPage() {
 ### Authentication Guidelines Summary
 
 #### ✅ DO Use Server-Side Auth When:
+
 - Building protected pages (dashboard, admin, profile)
 - Fetching initial page data
 - Implementing form submissions and mutations
@@ -807,6 +815,7 @@ export default async function DashboardPage() {
 - Building one-time data displays
 
 #### ✅ DO Use Client-Side Auth When:
+
 - Building navigation/header components
 - Need real-time auth state updates
 - Implementing login/logout flows
@@ -815,6 +824,7 @@ export default async function DashboardPage() {
 - Managing global auth state
 
 #### ❌ DON'T Mix Auth Patterns:
+
 - Don't use client-side guards on server-side protected pages
 - Don't use server-side auth for interactive components
 - Don't duplicate auth checks unnecessarily
@@ -825,7 +835,7 @@ export default async function DashboardPage() {
 If you have existing client-side protected pages, follow this pattern:
 
 1. **Remove Client Guards**: Delete `AdminRouteGuard` or similar components
-2. **Add Server Auth**: Use `requireAuth()` in page/layout components  
+2. **Add Server Auth**: Use `requireAuth()` in page/layout components
 3. **Update Data Fetching**: Replace client hooks with server actions
 4. **Remove Loading States**: Server components don't need auth loading states
 5. **Test Thoroughly**: Ensure redirects and permissions work correctly
@@ -861,40 +871,40 @@ export default async function DashboardPage() {
 
 ```typescript
 // lib/auth-actions.ts
-'use server'
+"use server";
 
-import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
-import { z } from 'zod'
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { z } from "zod";
 
 const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
-})
+});
 
 export async function loginAction(formData: FormData) {
   const validatedFields = loginSchema.safeParse({
-    email: formData.get('email'),
-    password: formData.get('password'),
-  })
+    email: formData.get("email"),
+    password: formData.get("password"),
+  });
 
   if (!validatedFields.success) {
-    return { error: 'Invalid fields' }
+    return { error: "Invalid fields" };
   }
 
-  const { email, password } = validatedFields.data
+  const { email, password } = validatedFields.data;
 
   try {
     // Authenticate user
-    const user = await authenticateUser(email, password)
-    
+    const user = await authenticateUser(email, password);
+
     // Set session
-    await setSession(user)
-    
-    revalidatePath('/dashboard')
-    redirect('/dashboard')
+    await setSession(user);
+
+    revalidatePath("/dashboard");
+    redirect("/dashboard");
   } catch (error) {
-    return { error: 'Invalid credentials' }
+    return { error: "Invalid credentials" };
   }
 }
 ```
@@ -903,18 +913,18 @@ export async function loginAction(formData: FormData) {
 
 ```typescript
 // hooks/use-reports.ts
-import { useQuery } from '@tanstack/react-query'
-import { api } from '@/services/api'
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@/services/api";
 
 export const useReports = (filters?: ReportFilters) => {
   return useQuery({
-    queryKey: ['reports', filters],
+    queryKey: ["reports", filters],
     queryFn: () => api.reports.list(filters),
     staleTime: 5 * 60 * 1000,
     retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-  })
-}
+  });
+};
 ```
 
 ## Styling Guidelines
@@ -980,7 +990,7 @@ describe('ReportCard', () => {
 
   it('renders report information', () => {
     render(<ReportCard report={mockReport} />)
-    
+
     expect(screen.getByText('Test Report')).toBeInTheDocument()
     expect(screen.getByText('Test description')).toBeInTheDocument()
   })
@@ -988,7 +998,7 @@ describe('ReportCard', () => {
   it('calls onEdit when edit button is clicked', () => {
     const onEdit = jest.fn()
     render(<ReportCard report={mockReport} onEdit={onEdit} />)
-    
+
     fireEvent.click(screen.getByText('Edit'))
     expect(onEdit).toHaveBeenCalledWith('1')
   })
@@ -999,20 +1009,20 @@ describe('ReportCard', () => {
 
 ```typescript
 // e2e/reports.spec.ts
-import { test, expect } from '@playwright/test'
+import { test, expect } from "@playwright/test";
 
-test('create report flow', async ({ page }) => {
-  await page.goto('/reports/create')
-  
-  await page.fill('[name="title"]', 'New Report')
-  await page.fill('[name="description"]', 'Report description')
-  await page.selectOption('[name="category"]', 'berlubang')
-  
-  await page.click('button[type="submit"]')
-  
-  await expect(page).toHaveURL('/reports')
-  await expect(page.locator('text=New Report')).toBeVisible()
-})
+test("create report flow", async ({ page }) => {
+  await page.goto("/reports/create");
+
+  await page.fill('[name="title"]', "New Report");
+  await page.fill('[name="description"]', "Report description");
+  await page.selectOption('[name="category"]', "berlubang");
+
+  await page.click('button[type="submit"]');
+
+  await expect(page).toHaveURL("/reports");
+  await expect(page.locator("text=New Report")).toBeVisible();
+});
 ```
 
 ## Code Style Guidelines
@@ -1022,26 +1032,26 @@ test('create report flow', async ({ page }) => {
 ```typescript
 // Strict typing - no any types
 interface Report {
-  id: string
-  title: string
-  description: string
-  category: 'berlubang' | 'retak' | 'lainnya'
-  userId: string
-  createdAt: Date
-  updatedAt: Date
+  id: string;
+  title: string;
+  description: string;
+  category: "berlubang" | "retak" | "lainnya";
+  userId: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 // Function types
 const handleSubmit = (data: ReportFormData): void => {
   // Implementation
-}
+};
 
 // Component props
 interface ReportCardProps {
-  report: Report
-  onEdit?: (id: string) => void
-  onDelete?: (id: string) => void
-  className?: string
+  report: Report;
+  onEdit?: (id: string) => void;
+  onDelete?: (id: string) => void;
+  className?: string;
 }
 ```
 
@@ -1049,19 +1059,19 @@ interface ReportCardProps {
 
 ```typescript
 // Components: PascalCase
-export const ReportCard = () => {}
-export const CreateReportForm = () => {}
+export const ReportCard = () => {};
+export const CreateReportForm = () => {};
 
 // Functions: camelCase with descriptive verbs
-const handleSubmit = () => {}
-const validateEmail = () => {}
-const fetchReports = () => {}
+const handleSubmit = () => {};
+const validateEmail = () => {};
+const fetchReports = () => {};
 
 // Constants: UPPER_SNAKE_CASE
 const API_ENDPOINTS = {
-  REPORTS: '/api/reports',
-  AUTH: '/api/auth',
-}
+  REPORTS: "/api/reports",
+  AUTH: "/api/auth",
+};
 
 // Files: kebab-case
 // report-card.tsx
@@ -1073,25 +1083,25 @@ const API_ENDPOINTS = {
 
 ```typescript
 // 1. React and Next.js
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 // 2. External libraries
-import { useQuery } from '@tanstack/react-query'
-import { z } from 'zod'
+import { useQuery } from "@tanstack/react-query";
+import { z } from "zod";
 
 // 3. UI components
-import { Button } from '@/ui/button'
-import { Input } from '@/ui/input'
+import { Button } from "@/ui/button";
+import { Input } from "@/ui/input";
 
 // 4. Internal components
-import { ReportCard } from '@/components/reports/ReportCard'
+import { ReportCard } from "@/components/reports/ReportCard";
 
 // 5. Hooks
-import { useReports } from '@/hooks/use-reports'
+import { useReports } from "@/hooks/use-reports";
 
 // 6. Utilities
-import { formatDate } from '@/utils/date'
+import { formatDate } from "@/utils/date";
 ```
 
 ## Development Checklist
