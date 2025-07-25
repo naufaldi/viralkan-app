@@ -2,12 +2,13 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, MapPin, AlertTriangle } from "lucide-react";
 import { useCreateReport } from "../../../hooks/use-create-report";
 import { uploadImage } from "../../../services/upload";
 import { useAuth } from "../../../hooks/useAuth";
 import { useInvalidateDashboard } from "../../../hooks/dashboard";
 import { cleanFormData, getLocationErrorMessage, geolocationOptions } from "../../../utils/report-form-utils";
+import { extractGPSFromImage, getExifErrorMessage, getExifSuccessMessage } from "../../../lib/utils/exif-extraction";
 import {
   CreateReportSchema,
   CreateReportInput,
@@ -24,6 +25,9 @@ export const useReportForm = ({ onSuccess }: UseReportFormProps) => {
   const [formError, setFormError] = useState<string | undefined>(undefined);
   const [imageUploadFailed, setImageUploadFailed] = useState(false);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
+  const [isExtractingExif, setIsExtractingExif] = useState(false);
+  const [exifError, setExifError] = useState<string | undefined>(undefined);
+  const [hasExifWarning, setHasExifWarning] = useState(false);
 
   const { getToken, isAuthenticated } = useAuth();
   const { invalidateAll } = useInvalidateDashboard();
@@ -62,14 +66,49 @@ export const useReportForm = ({ onSuccess }: UseReportFormProps) => {
     }
   }, [watchedValues, formError]);
 
-  const handleImageSelect = (file: File) => {
+  const handleImageSelect = async (file: File) => {
     setSelectedImage(file);
     setImageUploadFailed(false);
     const dummyUrl = "https://picsum.photos/800/600?random=1";
     form.setValue("image_url", dummyUrl);
     setUploadError(undefined);
     setFormError(undefined);
+    setExifError(undefined);
+    setHasExifWarning(false);
     clearError();
+
+    // Extract EXIF GPS data from the image
+    setIsExtractingExif(true);
+    
+    try {
+      const exifResult = await extractGPSFromImage(file);
+      
+      if (exifResult.success && exifResult.gpsData) {
+        // Auto-fill coordinates from EXIF data
+        form.setValue("lat", exifResult.gpsData.lat);
+        form.setValue("lon", exifResult.gpsData.lon);
+        
+        // Show success message with coordinates
+        toast.success("Lokasi berhasil diekstrak dari foto", {
+          description: `Lat: ${exifResult.gpsData.lat.toFixed(6)}, Lon: ${exifResult.gpsData.lon.toFixed(6)}`,
+          duration: 4000,
+        });
+      } else {
+        // Show warning for missing GPS data
+        const errorMessage = getExifErrorMessage(exifResult);
+        setExifError(errorMessage);
+        setHasExifWarning(true);
+        
+        // Don't show toast error immediately, let user see the warning in the form
+        console.log("EXIF extraction failed:", errorMessage);
+      }
+    } catch (error) {
+      console.error("EXIF extraction error:", error);
+      setExifError("Gagal membaca metadata foto. Silakan tambahkan lokasi secara manual.");
+      setHasExifWarning(true);
+    } finally {
+      setIsExtractingExif(false);
+    }
   };
 
   const handleImageRemove = () => {
@@ -199,7 +238,7 @@ export const useReportForm = ({ onSuccess }: UseReportFormProps) => {
     }
   };
 
-  const isLoading = isSubmitting || isUploading || isUploadingImage || isGettingLocation;
+  const isLoading = isSubmitting || isUploading || isUploadingImage || isGettingLocation || isExtractingExif;
 
   return {
     form,
@@ -210,6 +249,9 @@ export const useReportForm = ({ onSuccess }: UseReportFormProps) => {
     isLoading,
     isGettingLocation,
     isUploadingImage,
+    isExtractingExif,
+    exifError,
+    hasExifWarning,
     submitError,
     handleImageSelect,
     handleImageRemove,

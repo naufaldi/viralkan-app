@@ -28,6 +28,11 @@ export const ReportImageUpload = ({
       <FormLabel className="text-base font-semibold text-neutral-900 flex items-center gap-2">
         <Upload className="h-4 w-4 text-neutral-600" />
         Foto Jalan Rusak *
+        {isUploading && (
+          <span className="text-xs text-neutral-500 font-normal">
+            • Mengekstrak lokasi dari foto...
+          </span>
+        )}
       </FormLabel>
       <ImageUpload
         selectedImage={selectedImage}
@@ -41,7 +46,7 @@ export const ReportImageUpload = ({
       />
       <p className="text-sm text-neutral-600">
         Unggah foto yang jelas untuk membantu komunitas mengidentifikasi
-        lokasi jalan rusak.
+        lokasi jalan rusak. <strong>Ambil foto langsung</strong> untuk data lokasi otomatis.
       </p>
     </div>
   );

@@ -238,13 +238,28 @@ export default function ImageUpload({
           <CardContent className="p-0">
             <div className="relative">
               {preview && (
-                <div className="relative">
+                <div className="relative group">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={preview}
                     alt="Preview foto jalan rusak"
                     className="w-full h-72 object-cover"
                   />
+
+                  {/* Overlay Change Photo Button - Both Desktop and Mobile */}
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      onClick={handleUploadClick}
+                      disabled={disabled || isUploading || isCompressing}
+                      className="bg-white/90 text-neutral-800 hover:bg-white border-0 shadow-lg"
+                    >
+                      <Upload className="mr-2 h-4 w-4" />
+                      Ganti Foto
+                    </Button>
+                  </div>
 
                   {(isUploading || isCompressing) && (
                     <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center">
@@ -263,32 +278,90 @@ export default function ImageUpload({
               )}
 
               <div className="p-4 bg-muted/30 border-t border-border">
-                <div className="flex items-center justify-between">
+                {/* Mobile Layout - Stack vertically */}
+                <div className="sm:hidden space-y-4">
                   <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
                       <ImageIcon className="h-4 w-4 text-green-600" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">
+                      <p className="text-sm font-medium text-foreground line-clamp-1" title={selectedImage.name}>
+                        {selectedImage.name.length > 25 
+                          ? `${selectedImage.name.substring(0, 22)}...${selectedImage.name.split('.').pop()}`
+                          : selectedImage.name
+                        }
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {(selectedImage.size / 1024 / 1024).toFixed(1)} MB • Foto siap digunakan
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {/* Mobile Action Buttons */}
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleUploadClick}
+                      disabled={disabled || isUploading || isCompressing}
+                      className="flex-1 h-9 text-sm border-neutral-300 text-neutral-700 hover:bg-neutral-50"
+                    >
+                      <Upload className="mr-2 h-4 w-4" />
+                      Ganti Foto
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleRemoveImage}
+                      disabled={disabled || isUploading || isCompressing}
+                      className="flex-shrink-0 h-9 w-9 text-muted-foreground hover:text-red-600 hover:bg-red-50 rounded-md transition-colors duration-150"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Desktop Layout - Horizontal */}
+                <div className="hidden sm:flex items-center justify-between">
+                  <div className="flex items-center space-x-3 flex-1 min-w-0">
+                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                      <ImageIcon className="h-4 w-4 text-green-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate" title={selectedImage.name}>
                         {selectedImage.name}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {(selectedImage.size / 1024 / 1024).toFixed(1)} MB •
-                        Foto siap digunakan
+                        {(selectedImage.size / 1024 / 1024).toFixed(1)} MB • Foto siap digunakan
                       </p>
                     </div>
                   </div>
 
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleRemoveImage}
-                    disabled={disabled || isUploading || isCompressing}
-                    className="text-muted-foreground hover:text-foreground hover:bg-muted rounded-md p-2 transition-colors duration-150"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
+                  <div className="flex items-center gap-2 ml-4">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleUploadClick}
+                      disabled={disabled || isUploading || isCompressing}
+                      className="h-8 px-3 text-xs border-neutral-300 text-neutral-700 hover:bg-neutral-50"
+                    >
+                      <Upload className="mr-1 h-3 w-3" />
+                      Ganti
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleRemoveImage}
+                      disabled={disabled || isUploading || isCompressing}
+                      className="h-8 w-8 text-muted-foreground hover:text-red-600 hover:bg-red-50 rounded-md transition-colors duration-150"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>

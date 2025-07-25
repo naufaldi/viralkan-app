@@ -9,6 +9,7 @@ import {
   ReportFormFields,
   LocationButton,
   ReportFormActions,
+  ExifWarning,
   useReportForm,
 } from "./report-form";
 
@@ -26,6 +27,9 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
     isLoading,
     isGettingLocation,
     isUploadingImage,
+    isExtractingExif,
+    exifError,
+    hasExifWarning,
     submitError,
     handleImageSelect,
     handleImageRemove,
@@ -57,9 +61,15 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
               onImageRemove={handleImageRemove}
               onUploadError={handleImageUploadError}
               onUploadSuccess={handleImageUploadSuccess}
-              isUploading={isUploadingImage}
+              isUploading={isUploadingImage || isExtractingExif}
               error={uploadError}
               disabled={isLoading}
+            />
+
+            {/* EXIF Warning - Shows when GPS metadata is missing */}
+            <ExifWarning 
+              error={exifError || ""}
+              isVisible={hasExifWarning}
             />
 
             <ReportFormFields form={form} disabled={isLoading} />
