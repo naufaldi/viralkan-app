@@ -98,9 +98,8 @@ export function AdminReportsTable({
   });
   const [globalFilter, setGlobalFilter] = React.useState("");
   const [statusFilter, setStatusFilter] = React.useState<string>("all");
-  const [actionDialogOpen, setActionDialogOpen] = React.useState(false);
-  const [actionType, setActionType] = React.useState<"verify" | "reject" | null>(null);
-  const [reportToAction, setReportToAction] = React.useState<AdminReport | null>(null);
+  const [verifyDialogOpen, setVerifyDialogOpen] = React.useState(false);
+  const [reportToVerify, setReportToVerify] = React.useState<AdminReport | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
   const [reportToDelete, setReportToDelete] = React.useState<AdminReport | null>(null);
 
@@ -127,7 +126,7 @@ export function AdminReportsTable({
         return (
           <Badge
             variant="secondary"
-            className="bg-neutral-100 text-neutral-700 border-neutral-200"
+            className="bg-neutral-100 text-neutral-600 border-neutral-200"
           >
             <Clock className="w-3 h-3 mr-1" />
             Menunggu
@@ -137,7 +136,7 @@ export function AdminReportsTable({
         return (
           <Badge
             variant="secondary"
-            className="bg-neutral-900 text-white"
+            className="bg-neutral-900 text-white border-neutral-900"
           >
             <CheckCircle className="w-3 h-3 mr-1" />
             Disetujui
@@ -147,7 +146,7 @@ export function AdminReportsTable({
         return (
           <Badge
             variant="secondary"
-            className="bg-neutral-200 text-neutral-800"
+            className="bg-neutral-200 text-neutral-800 border-neutral-300"
           >
             <XCircle className="w-3 h-3 mr-1" />
             Ditolak
@@ -164,7 +163,7 @@ export function AdminReportsTable({
         return (
           <Badge
             variant="outline"
-            className="border-neutral-300 text-neutral-700 bg-neutral-50"
+            className="border-red-200 text-red-700 bg-red-50"
           >
             Lubang
           </Badge>
@@ -173,7 +172,7 @@ export function AdminReportsTable({
         return (
           <Badge
             variant="outline"
-            className="border-neutral-300 text-neutral-700 bg-neutral-50"
+            className="border-neutral-300 text-neutral-600 bg-neutral-50"
           >
             Retak
           </Badge>
@@ -182,7 +181,7 @@ export function AdminReportsTable({
         return (
           <Badge
             variant="outline"
-            className="border-neutral-300 text-neutral-700 bg-neutral-50"
+            className="border-neutral-200 text-neutral-500 bg-neutral-25"
           >
             Lainnya
           </Badge>
@@ -216,23 +215,23 @@ export function AdminReportsTable({
     }
   };
 
-  const handleActionClick = (report: AdminReport, type: "verify" | "reject") => {
-    setReportToAction(report);
-    setActionType(type);
-    setActionDialogOpen(true);
+  const handleVerifyClick = (report: AdminReport) => {
+    setReportToVerify(report);
+    setVerifyDialogOpen(true);
   };
 
-  const handleActionConfirm = () => {
-    if (reportToAction && actionType) {
-      if (actionType === "verify" && onVerify) {
-        onVerify(reportToAction.id);
-      } else if (actionType === "reject" && onReject) {
-        onReject(reportToAction.id);
-      }
+  const handleVerifyConfirm = () => {
+    if (reportToVerify && onVerify) {
+      onVerify(reportToVerify.id);
     }
-    setActionDialogOpen(false);
-    setReportToAction(null);
-    setActionType(null);
+    setVerifyDialogOpen(false);
+    setReportToVerify(null);
+  };
+
+  const handleRejectClick = (report: AdminReport) => {
+    if (onReject) {
+      onReject(report.id);
+    }
   };
 
   const handleDeleteClick = (report: AdminReport) => {
@@ -386,7 +385,7 @@ export function AdminReportsTable({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handleActionClick(report, "verify")}
+                  onClick={() => handleVerifyClick(report)}
                   className="h-8 px-3 text-neutral-700 border-neutral-300 hover:bg-green-50 hover:border-green-200 hover:text-green-700 transition-all duration-200"
                 >
                   <CheckCircle className="w-4 h-4 mr-1" />
@@ -395,7 +394,7 @@ export function AdminReportsTable({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handleActionClick(report, "reject")}
+                  onClick={() => handleRejectClick(report)}
                   className="h-8 px-3 text-neutral-700 border-neutral-300 hover:bg-red-50 hover:border-red-200 hover:text-red-700 transition-all duration-200"
                 >
                   <XCircle className="w-4 h-4 mr-1" />
@@ -425,11 +424,17 @@ export function AdminReportsTable({
                 </DropdownMenuItem>
                 {isPending && (
                   <>
-                    <DropdownMenuItem onClick={() => handleActionClick(report, "verify")}>
+                    <DropdownMenuItem 
+                      onClick={() => handleVerifyClick(report)}
+                      className="hover:bg-green-50 hover:text-green-700 focus:bg-green-50 focus:text-green-700"
+                    >
                       <CheckCircle className="mr-2 h-4 w-4" />
                       Setujui Laporan
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleActionClick(report, "reject")}>
+                    <DropdownMenuItem 
+                      onClick={() => handleRejectClick(report)}
+                      className="hover:bg-red-50 hover:text-red-700 focus:bg-red-50 focus:text-red-700"
+                    >
                       <XCircle className="mr-2 h-4 w-4" />
                       Tolak Laporan
                     </DropdownMenuItem>
@@ -669,27 +674,15 @@ export function AdminReportsTable({
         </div>
       )}
 
-      {/* Action Confirmation Dialog */}
-      <AlertDialog open={actionDialogOpen} onOpenChange={setActionDialogOpen}>
+      {/* Verify Confirmation Dialog */}
+      <AlertDialog open={verifyDialogOpen} onOpenChange={setVerifyDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>
-              {actionType === "verify" ? "Setujui Laporan" : "Tolak Laporan"}
-            </AlertDialogTitle>
+            <AlertDialogTitle>Setujui Laporan</AlertDialogTitle>
             <AlertDialogDescription>
-              {actionType === "verify" ? (
-                <>
-                  Apakah Anda yakin ingin menyetujui laporan{" "}
-                  <strong>{reportToAction?.streetName}</strong>? 
-                  Laporan ini akan ditandai sebagai terverifikasi dan dapat diproses lebih lanjut.
-                </>
-              ) : (
-                <>
-                  Apakah Anda yakin ingin menolak laporan{" "}
-                  <strong>{reportToAction?.streetName}</strong>? 
-                  Laporan ini akan ditandai sebagai ditolak dan tidak akan diproses lebih lanjut.
-                </>
-              )}
+              Apakah Anda yakin ingin menyetujui laporan{" "}
+              <strong>{reportToVerify?.streetName}</strong>? 
+              Laporan ini akan ditandai sebagai terverifikasi dan dapat diproses lebih lanjut.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -697,14 +690,10 @@ export function AdminReportsTable({
               Batal
             </AlertDialogCancel>
             <AlertDialogAction 
-              onClick={handleActionConfirm}
-              className={
-                actionType === "verify" 
-                  ? "bg-green-600 hover:bg-green-700 text-white" 
-                  : "bg-red-600 hover:bg-red-700 text-white"
-              }
+              onClick={handleVerifyConfirm}
+              className="bg-neutral-800 text-white hover:bg-neutral-900 hover:text-white border-neutral-800"
             >
-              {actionType === "verify" ? "Setujui" : "Tolak"}
+              Setujui
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -727,7 +716,7 @@ export function AdminReportsTable({
             </AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleDeleteConfirm}
-              className="bg-red-600 hover:bg-red-700 text-white"
+              className="bg-neutral-800 text-white hover:bg-red-600 hover:text-white border-neutral-800"
             >
               Hapus
             </AlertDialogAction>

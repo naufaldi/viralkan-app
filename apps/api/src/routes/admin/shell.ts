@@ -34,14 +34,6 @@ export async function getAdminStats(): Promise<{
       GROUP BY status
     `;
 
-    // Calculate verification rate (reports verified in last 7 days)
-    const verificationRate = await sql`
-      SELECT COUNT(*) as count
-      FROM reports 
-      WHERE status = 'verified' 
-      AND verified_at >= NOW() - INTERVAL '7 days'
-    `;
-
     // Calculate average verification time
     const avgVerificationTime = await sql`
       SELECT 
@@ -49,6 +41,14 @@ export async function getAdminStats(): Promise<{
       FROM reports 
       WHERE status = 'verified' 
       AND verified_at IS NOT NULL
+    `;
+
+    // Get user statistics
+    const userStats = await sql`
+      SELECT 
+        COUNT(*) as total_users,
+        COUNT(CASE WHEN role = 'admin' THEN 1 END) as admin_users
+      FROM users
     `;
 
     // Get recent admin activity
@@ -70,7 +70,9 @@ export async function getAdminStats(): Promise<{
       verifiedCount: 0,
       rejectedCount: 0,
       deletedCount: 0,
-      verificationRate: Math.round((verificationRate[0]?.count || 0) / 7), // per day
+      totalUsers: parseInt(userStats[0]?.total_users as string) || 0,
+      adminUsers: parseInt(userStats[0]?.admin_users as string) || 0,
+      verificationRate: 0, // Will be calculated after we have the counts
       averageVerificationTime: Math.round(avgVerificationTime[0]?.avg_hours || 0),
       recentActivity: recentActivity.map((activity: any) => ({
         action: activity.action,
@@ -99,6 +101,11 @@ export async function getAdminStats(): Promise<{
           break;
       }
     });
+
+    // Calculate verification rate as percentage of total reports that are verified
+    stats.verificationRate = stats.totalReports > 0 
+      ? Math.round((stats.verifiedCount / stats.totalReports) * 100) 
+      : 0;
 
     return {
       success: true,

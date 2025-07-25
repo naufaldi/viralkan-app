@@ -97,6 +97,54 @@ export const reportsService = {
     return apiRequest<PaginatedReports>(endpoint);
   },
 
+  // Get admin reports with authentication and filtering
+  getAdminReports: async (
+    token: string,
+    params?: {
+      page?: number;
+      limit?: number;
+      status?: string;
+      category?: string;
+      search?: string;
+    }
+  ): Promise<{
+    items: Array<{
+      id: string;
+      user_id: string;
+      image_url: string;
+      category: string;
+      street_name: string;
+      location_text: string;
+      lat: number | null;
+      lon: number | null;
+      status: 'pending' | 'verified' | 'rejected' | 'deleted';
+      verified_at: string | null;
+      verified_by: string | null;
+      rejection_reason: string | null;
+      deleted_at: string | null;
+      created_at: string;
+      user?: {
+        id: string;
+        name: string;
+        email: string;
+      };
+    }>;
+    total: number;
+    page: number;
+    limit: number;
+  }> => {
+    const searchParams = new URLSearchParams();
+
+    if (params?.page) searchParams.append("page", params.page.toString());
+    if (params?.limit) searchParams.append("limit", params.limit.toString());
+    if (params?.status) searchParams.append("status", params.status);
+    if (params?.category) searchParams.append("category", params.category);
+    if (params?.search) searchParams.append("search", params.search);
+
+    const endpoint = `/api/admin/reports${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
+    return authenticatedApiRequest(endpoint, token);
+  },
+
   // Get individual report by ID
   getReportById: async (id: string): Promise<ReportWithUser> => {
     return apiRequest<ReportWithUser>(`/api/reports/${id}`);
@@ -214,6 +262,7 @@ export const reportsService = {
 export const {
   getReports,
   getEnrichedReports,
+  getAdminReports,
   getReportById,
   createReport,
   getUserReports,

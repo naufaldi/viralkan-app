@@ -14,9 +14,13 @@ interface AuthContext extends Context {
  */
 export const firebaseAuthMiddleware = async (c: AuthContext, next: Next) => {
   try {
+    console.log(`[DEBUG] firebaseAuthMiddleware - Starting authentication check`);
+    
     const authHeader = c.req.header("Authorization");
+    console.log(`[DEBUG] firebaseAuthMiddleware - Auth header: ${authHeader ? 'Present' : 'Missing'}`);
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      console.log(`[DEBUG] firebaseAuthMiddleware - Invalid auth header format`);
       const errorResponse: ErrorResponse = {
         error: "Missing or invalid Authorization header",
         statusCode: 401,
@@ -26,8 +30,10 @@ export const firebaseAuthMiddleware = async (c: AuthContext, next: Next) => {
     }
 
     const idToken = authHeader.substring(7); // Remove 'Bearer ' prefix
+    console.log(`[DEBUG] firebaseAuthMiddleware - Token extracted: ${idToken ? 'Present' : 'Missing'}`);
 
     if (!idToken) {
+      console.log(`[DEBUG] firebaseAuthMiddleware - No token after extraction`);
       const errorResponse: ErrorResponse = {
         error: "ID token is required",
         statusCode: 401,
@@ -37,9 +43,17 @@ export const firebaseAuthMiddleware = async (c: AuthContext, next: Next) => {
     }
 
     // Use shell layer for authentication logic
+    console.log(`[DEBUG] firebaseAuthMiddleware - Calling shell.verifyTokenAndGetUser`);
     const result = await shell.verifyTokenAndGetUser(sql, idToken);
+    
+    console.log(`[DEBUG] firebaseAuthMiddleware - Shell result:`, {
+      success: result.success,
+      error: result.success ? 'N/A' : result.error,
+      userId: result.success ? result.data?.user_id : 'N/A'
+    });
 
     if (!result.success) {
+      console.log(`[DEBUG] firebaseAuthMiddleware - Authentication failed: ${result.error}`);
       const errorResponse: ErrorResponse = {
         error: result.error,
         statusCode: result.statusCode,
@@ -52,8 +66,10 @@ export const firebaseAuthMiddleware = async (c: AuthContext, next: Next) => {
     }
 
     // Store user_id in context for use in route handlers
+    console.log(`[DEBUG] firebaseAuthMiddleware - Setting user_id in context: ${result.data.user_id}`);
     c.set("user_id", result.data.user_id);
 
+    console.log(`[DEBUG] firebaseAuthMiddleware - Authentication successful, calling next()`);
     await next();
   } catch (error) {
     console.error("Firebase auth middleware error:", error);
@@ -114,8 +130,11 @@ export const requireRole = (requiredRole: string) => {
   return async (c: AuthContext, next: Next) => {
     try {
       const userId = c.get("user_id");
+      
+      console.log(`[DEBUG] requireRole middleware - userId: ${userId}, requiredRole: ${requiredRole}`);
 
       if (!userId) {
+        console.log(`[DEBUG] requireRole middleware - No userId found in context`);
         const errorResponse: ErrorResponse = {
           error: "Authentication required",
           statusCode: 401,
@@ -126,6 +145,12 @@ export const requireRole = (requiredRole: string) => {
 
       // Get user data to check role
       const result = await shell.getUserById(sql, userId, userId);
+      
+      console.log(`[DEBUG] requireRole middleware - getUserById result:`, {
+        success: result.success,
+        error: result.success ? 'N/A' : result.error,
+        userRole: result.success ? result.data?.role : 'N/A'
+      });
 
       if (!result.success) {
         const errorResponse: ErrorResponse = {
@@ -138,6 +163,7 @@ export const requireRole = (requiredRole: string) => {
 
       // Check if user has the required role
       if (result.data.role !== requiredRole) {
+        console.log(`[DEBUG] requireRole middleware - Role mismatch. Expected: ${requiredRole}, Got: ${result.data.role}`);
         const errorResponse: ErrorResponse = {
           error: `${requiredRole} access required`,
           statusCode: 403,
@@ -146,6 +172,7 @@ export const requireRole = (requiredRole: string) => {
         return c.json(errorResponse, 403);
       }
 
+      console.log(`[DEBUG] requireRole middleware - Authorization successful for user ${userId} with role ${result.data.role}`);
       await next();
     } catch (error) {
       console.error("Role authorization middleware error:", error);
@@ -166,5 +193,11 @@ export const requireRole = (requiredRole: string) => {
  * API Layer - handles admin authorization checks
  */
 export const requireAdmin = async (c: AuthContext, next: Next) => {
-  return requireRole('admin')(c, next);
+  console.log(`[DEBUG] requireAdmin middleware - Starting admin check`);
+  
+  // First, authenticate the user
+  await firebaseAuthMiddleware(c, async () => {
+    // Then check if they have admin role
+    await requireRole('admin')(c, next);
+  });
 };

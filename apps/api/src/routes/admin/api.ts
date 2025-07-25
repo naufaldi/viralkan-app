@@ -9,7 +9,7 @@
 
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { cors } from "hono/cors";
-import { requireAdmin } from "../auth/middleware";
+import { requireAdmin, firebaseAuthMiddleware } from "../auth/middleware";
 import * as adminShell from "./shell";
 import {
   AdminStatsResponseSchema,
@@ -781,8 +781,33 @@ adminRouter.openapi(getAdminStatsRoute, async (c) => {
 
 adminRouter.openapi(getAdminReportsRoute, async (c) => {
   try {
+    const userId = c.get("user_id");
+    console.log(`[DEBUG] getAdminReportsRoute - userId: ${userId}`);
+    
+    if (!userId) {
+      console.log(`[DEBUG] getAdminReportsRoute - No userId found in context`);
+      return c.json(
+        {
+          error: {
+            code: "UNAUTHORIZED",
+            message: "Authentication required",
+            timestamp: new Date().toISOString(),
+          },
+        },
+        401,
+      );
+    }
+
     const queryData = c.req.valid("query");
+    console.log(`[DEBUG] getAdminReportsRoute - queryData:`, queryData);
+    
     const result = await adminShell.getAdminReports(queryData);
+    
+    console.log(`[DEBUG] getAdminReportsRoute - result:`, {
+      success: result.success,
+      error: result.success ? 'N/A' : result.error,
+      dataLength: result.success ? result.data?.items?.length : 'N/A'
+    });
     
     if (result.success) {
       return c.json(result.data, 200);

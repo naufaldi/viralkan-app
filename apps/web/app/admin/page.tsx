@@ -17,8 +17,27 @@ import {
 import Link from "next/link";
 import { requireAuth } from "@/lib/auth-server";
 import { AdminReportsTableWrapper } from "@/components/admin";
+import { cookies } from "next/headers";
 
-// Admin statistics interface
+// API Response interface (matches the backend AdminStatsResponseSchema)
+interface AdminStatsApiResponse {
+  totalReports: number;
+  pendingCount: number;
+  verifiedCount: number;
+  rejectedCount: number;
+  deletedCount: number;
+  totalUsers: number;
+  adminUsers: number;
+  verificationRate: number; // reports per day
+  averageVerificationTime: number; // in hours
+  recentActivity: Array<{
+    action: string;
+    timestamp: string;
+    adminUser: string;
+  }>;
+}
+
+// Frontend Admin statistics interface (current interface)
 interface AdminStats {
   totalReports: number;
   pendingReports: number;
@@ -36,77 +55,117 @@ interface AdminStats {
   };
 }
 
-// Mock admin statistics - would be fetched from API
-const mockAdminStats: AdminStats = {
-  totalReports: 1247,
-  pendingReports: 23,
-  verifiedReports: 1089,
-  rejectedReports: 127,
-  deletedReports: 8,
-  totalUsers: 342,
-  adminUsers: 3,
-  verificationRate: 87.4,
-  averageResponseTime: "4.2 jam",
-  todayActivity: {
-    verified: 12,
-    rejected: 3,
-    submitted: 8
-  }
+// Helper function to get authentication token from cookies
+const getAuthToken = async (): Promise<string | null> => {
+  const cookieStore = await cookies();
+  return cookieStore.get("firebase-token")?.value || null;
 };
 
-// Mock admin reports data for table
-const mockAdminReports = [
-  {
-    id: "1",
-    category: "berlubang" as const,
-    streetName: "Jl. Ahmad Yani",
-    locationText: "Depan RSUD Bekasi",
-    userName: "Ahmad Rizki",
-    submittedAt: "2024-01-24T10:30:00Z",
-    imageUrl: "/placeholder-road-damage.jpg",
-    status: "pending" as const
-  },
-  {
-    id: "2", 
-    category: "retak" as const,
-    streetName: "Jl. Raya Kalimalang",
-    locationText: "Persimpangan Kalimalang",
-    userName: "Siti Nurhaliza",
-    submittedAt: "2024-01-24T09:15:00Z",
-    imageUrl: "/placeholder-road-damage.jpg",
-    status: "pending" as const
-  },
-  {
-    id: "3",
-    category: "lainnya" as const,
-    streetName: "Jl. Cut Meutia",
-    locationText: "Dekat Pasar Baru",
-    userName: "Budi Santoso",
-    submittedAt: "2024-01-24T08:45:00Z",
-    imageUrl: "/placeholder-road-damage.jpg",
-    status: "pending" as const
-  },
-  {
-    id: "4",
-    category: "berlubang" as const,
-    streetName: "Jl. Sudirman",
-    locationText: "Depan Mall Bekasi",
-    userName: "Dewi Sartika",
-    submittedAt: "2024-01-24T07:30:00Z",
-    imageUrl: "/placeholder-road-damage.jpg",
-    status: "verified" as const
-  },
-  {
-    id: "5",
-    category: "retak" as const,
-    streetName: "Jl. Veteran",
-    locationText: "Dekat Terminal Bekasi",
-    userName: "Rudi Hartono",
-    submittedAt: "2024-01-24T06:15:00Z",
-    imageUrl: "/placeholder-road-damage.jpg",
-    status: "rejected" as const
+// Function to call the real admin stats API
+const fetchAdminStats = async (): Promise<AdminStatsApiResponse> => {
+  const token = await getAuthToken();
+  
+  if (!token) {
+    throw new Error("Authentication token not found");
   }
-];
+
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+  const response = await fetch(`${API_BASE_URL}/api/admin/stats`, {
+    method: "GET",
+    headers: {
+      "Authorization": `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    cache: "no-store", // Always fetch fresh data
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error?.message || `HTTP ${response.status}: ${response.statusText}`);
+  }
+
+  return response.json();
+};
+
+// Function to map API response to frontend interface
+const mapApiResponseToFrontend = (apiResponse: AdminStatsApiResponse): AdminStats => {
+  // Calculate today's activity from recent activity
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  const todayActivity = {
+    verified: 0,
+    rejected: 0,
+    submitted: 0
+  };
+
+  // Count today's activities from recent activity
+  apiResponse.recentActivity.forEach(activity => {
+    const activityDate = new Date(activity.timestamp);
+    if (activityDate >= today) {
+      if (activity.action.includes('verify')) {
+        todayActivity.verified++;
+      } else if (activity.action.includes('reject')) {
+        todayActivity.rejected++;
+      } else if (activity.action.includes('create')) {
+        todayActivity.submitted++;
+      }
+    }
+  });
+
+  return {
+    totalReports: apiResponse.totalReports,
+    pendingReports: apiResponse.pendingCount,
+    verifiedReports: apiResponse.verifiedCount,
+    rejectedReports: apiResponse.rejectedCount,
+    deletedReports: apiResponse.deletedCount,
+    totalUsers: apiResponse.totalUsers,
+    adminUsers: apiResponse.adminUsers,
+    verificationRate: apiResponse.verificationRate,
+    averageResponseTime: `${apiResponse.averageVerificationTime} jam`,
+    todayActivity
+  };
+};
+
+// Enhanced getAdminStats function that uses real API
+const getAdminStats = async (): Promise<AdminStats> => {
+  try {
+    console.log("Fetching admin stats from API...");
+    const apiResponse = await fetchAdminStats();
+    console.log("API Response:", apiResponse);
+    
+    const mappedStats = mapApiResponseToFrontend(apiResponse);
+    console.log("Mapped Stats:", mappedStats);
+    
+    return mappedStats;
+  } catch (error) {
+    console.error('Error fetching admin stats:', error);
+    
+    // Log more details for debugging
+    if (error instanceof Error) {
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+    }
+    
+    // Return fallback data on error
+    return {
+      totalReports: 0,
+      pendingReports: 0,
+      verifiedReports: 0,
+      rejectedReports: 0,
+      deletedReports: 0,
+      totalUsers: 0,
+      adminUsers: 0,
+      verificationRate: 0,
+      averageResponseTime: "0 jam",
+      todayActivity: {
+        verified: 0,
+        rejected: 0,
+        submitted: 0
+      }
+    };
+  }
+};
 
 // Enhanced Stat Card component with luxury design
 function StatCard({ 
@@ -166,15 +225,14 @@ function StatCard({
   );
 }
 
-
-
 export default async function AdminDashboard() {
   // Auth check is handled by admin layout, just get user data for display
   const user = await requireAuth();
 
   console.log(`Admin dashboard accessed by user: ${user.email} with role: ${user.role}`);
 
-  const stats = mockAdminStats;
+  // Fetch real admin statistics
+  const stats = await getAdminStats();
 
   return (
     <div className="min-h-screen bg-neutral-100">
@@ -265,7 +323,7 @@ export default async function AdminDashboard() {
       </div>
 
       {/* Enhanced Main Content Grid */}
-      <div className="grid grid-cols-1  gap-8">
+      <div className="grid grid-cols-1 gap-8">
         {/* Enhanced Reports Table */}
         <div className="w-full">
           <Card className="border border-neutral-200 bg-white shadow-md hover:shadow-lg transition-all duration-300">
@@ -293,14 +351,10 @@ export default async function AdminDashboard() {
               </Link>
             </CardHeader>
             <CardContent>
-              <AdminReportsTableWrapper 
-                data={mockAdminReports}
-              />
+              <AdminReportsTableWrapper />
             </CardContent>
           </Card>
-        </div>
-
-       
+        </div>       
       </div>
     </div>
   );

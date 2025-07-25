@@ -7,6 +7,8 @@ export const AdminStatsResponseSchema = z.object({
   verifiedCount: z.number(),
   rejectedCount: z.number(),
   deletedCount: z.number(),
+  totalUsers: z.number(),
+  adminUsers: z.number(),
   verificationRate: z.number(), // reports per day
   averageVerificationTime: z.number(), // in hours
   recentActivity: z.array(z.object({
