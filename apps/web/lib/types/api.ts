@@ -23,8 +23,8 @@ export const CreateReportSchema = z.object({
 });
 
 export const ReportResponseSchema = z.object({
-  id: z.number(),
-  user_id: z.number(),
+  id: z.string(),
+  user_id: z.string(),
   image_url: z.string().url(),
   category: z.enum(["berlubang", "retak", "lainnya"]),
   street_name: z.string(),

@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { reportsService } from "../../services/api-client";
-import type { PaginatedReports } from "../../lib/types/api";
 
 export interface ReportQueryParams {
   page?: number;
@@ -50,7 +49,7 @@ export const useEnrichedReports = (params: ReportQueryParams = {}) => {
 /**
  * Hook for fetching a single report by ID
  */
-export const useReport = (id: number | undefined) => {
+export const useReport = (id: string | undefined) => {
   return useQuery({
     queryKey: ["report", id],
     queryFn: () => reportsService.getReportById(id!),

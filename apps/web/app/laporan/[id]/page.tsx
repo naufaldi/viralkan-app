@@ -26,7 +26,7 @@ import Header from "@/components/layout/header";
 
 export default function ReportDetailPage() {
   const params = useParams();
-  const reportId = parseInt(params.id as string, 10);
+  const reportId = params.id as string;
   
   const { data: report, isLoading, error } = useReport(reportId);
 
@@ -311,6 +311,15 @@ export default function ReportDetailPage() {
                 >
                   <Link href="/laporan">
                     Lihat Semua Laporan
+                  </Link>
+                </Button>
+                
+                <Button 
+                  className="w-full bg-neutral-900 hover:bg-neutral-800 text-white"
+                  asChild
+                >
+                  <Link href={`/laporan/${report.id}/edit`}>
+                    Edit Laporan
                   </Link>
                 </Button>
                 

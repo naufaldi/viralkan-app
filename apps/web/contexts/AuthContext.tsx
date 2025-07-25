@@ -30,6 +30,9 @@ interface AuthContextType {
   // API helper
   apiCall: (url: string, options?: RequestInit) => Promise<Response>;
 
+  // Token access
+  getToken: () => Promise<string | null>;
+
   // Manual verification
   verifyWithBackend: () => Promise<void>;
   refreshAuth: () => Promise<void>; // New: refresh server auth state

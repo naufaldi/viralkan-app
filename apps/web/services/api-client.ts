@@ -98,7 +98,7 @@ export const reportsService = {
   },
 
   // Get individual report by ID
-  getReportById: async (id: number): Promise<ReportWithUser> => {
+  getReportById: async (id: string): Promise<ReportWithUser> => {
     return apiRequest<ReportWithUser>(`/api/reports/${id}`);
   },
 
@@ -106,9 +106,9 @@ export const reportsService = {
   createReport: async (
     data: CreateReportInput,
     token: string,
-  ): Promise<{ id: number; message: string; success: boolean }> => {
+  ): Promise<{ id: string; message: string; success: boolean }> => {
     return authenticatedApiRequest<{
-      id: number;
+      id: string;
       message: string;
       success: boolean;
     }>("/api/reports", token, {
@@ -138,7 +138,7 @@ export const reportsService = {
 
   // Update existing report (authenticated)
   updateReport: async (
-    id: number,
+    id: string,
     data: Partial<CreateReportInput>,
     token: string,
   ): Promise<ReportResponse> => {
@@ -154,7 +154,7 @@ export const reportsService = {
 
   // Delete report (authenticated)
   deleteReport: async (
-    id: number,
+    id: string,
     token: string,
   ): Promise<{ success: boolean }> => {
     return authenticatedApiRequest<{ success: boolean }>(
@@ -168,7 +168,7 @@ export const reportsService = {
 
   // Validate report ownership (authenticated)
   validateOwnership: async (
-    id: number,
+    id: string,
     token: string,
   ): Promise<{ canEdit: boolean; report: ReportResponse }> => {
     return authenticatedApiRequest<{
@@ -232,13 +232,13 @@ export interface ReportFilters {
 }
 
 export interface Report {
-  id: number;
+  id: string;
   category: "berlubang" | "retak" | "lainnya";
   street_name: string;
   location_text: string;
   image_url: string;
   created_at: string;
-  user_id: number;
+  user_id: string;
   lat: number | null;
   lon: number | null;
   user_name?: string | null;
@@ -276,7 +276,7 @@ class ApiClient {
     });
   }
 
-  async getReportById(id: number): Promise<Report> {
+  async getReportById(id: string): Promise<Report> {
     return reportsService.getReportById(id);
   }
 

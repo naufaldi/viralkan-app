@@ -131,7 +131,7 @@ export const findReportById = async (
         u.avatar_url as user_avatar
       FROM reports r
       LEFT JOIN users u ON r.user_id = u.id
-      WHERE r.id = $1 AND r.status = 'verified'
+      WHERE r.id = $1 AND r.status != 'deleted'
     `;
 
     const result = await sql.unsafe(query, [id]);

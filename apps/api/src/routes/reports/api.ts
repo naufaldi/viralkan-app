@@ -178,7 +178,7 @@ const getMyReportsRoute = createRoute({
 
 const getReportByIdRoute = createRoute({
   method: "get",
-  path: "/:id",
+  path: "/{id}",
   request: {
     params: ReportParamsSchema,
   },
@@ -252,7 +252,7 @@ const createReportRoute = createRoute({
 
 const updateReportRoute = createRoute({
   method: "put",
-  path: "/:id",
+  path: "/{id}",
   request: {
     params: ReportParamsSchema,
     body: {
@@ -298,7 +298,7 @@ const updateReportRoute = createRoute({
 
 const deleteReportRoute = createRoute({
   method: "delete",
-  path: "/:id",
+  path: "/{id}",
   request: {
     params: ReportParamsSchema,
   },
@@ -339,7 +339,7 @@ const deleteReportRoute = createRoute({
 
 const validateOwnershipRoute = createRoute({
   method: "get",
-  path: "/:id/ownership",
+  path: "/{id}/ownership",
   request: {
     params: ReportParamsSchema,
   },

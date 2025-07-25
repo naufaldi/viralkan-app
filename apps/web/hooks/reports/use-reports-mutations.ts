@@ -36,7 +36,7 @@ export const useUpdateReport = () => {
       data,
       token,
     }: {
-      id: number;
+      id: string;
       data: Partial<CreateReportInput>;
       token: string;
     }) => reportsService.updateReport(id, data, token),
@@ -62,7 +62,7 @@ export const useDeleteReport = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, token }: { id: number; token: string }) =>
+    mutationFn: ({ id, token }: { id: string; token: string }) =>
       reportsService.deleteReport(id, token),
     onSuccess: (_, variables) => {
       // Remove the report from cache
@@ -85,7 +85,7 @@ export const useDeleteReport = () => {
  */
 export const useValidateReportOwnership = () => {
   return useMutation({
-    mutationFn: ({ id, token }: { id: number; token: string }) =>
+    mutationFn: ({ id, token }: { id: string; token: string }) =>
       reportsService.validateOwnership(id, token),
     onError: (error) => {
       console.error("Failed to validate report ownership:", error);

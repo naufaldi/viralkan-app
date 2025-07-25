@@ -7,7 +7,7 @@ import type { AuthUser } from "../lib/auth-server";
 
 interface AuthVerificationResponse {
   message: string;
-  user_id: number;
+  user_id: string;
   user: AuthUser;
 }
 
