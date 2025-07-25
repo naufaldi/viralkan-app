@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 // Icons removed - not used in this file
 import { useCreateReport } from "../../../hooks/use-create-report";
+import { useGeocoding } from "../../../hooks/use-geocoding";
 import { uploadImage } from "../../../services/upload";
 import { useAuth } from "../../../hooks/useAuth";
 import { useInvalidateDashboard } from "../../../hooks/dashboard";
@@ -38,6 +39,32 @@ export const useReportForm = ({ onSuccess }: UseReportFormProps) => {
   const { getToken, isAuthenticated } = useAuth();
   const { invalidateAll } = useInvalidateDashboard();
   const router = useRouter();
+
+  // Geocoding hook for manual address/coordinates filling
+  const {
+    isGeocodingFromCoords,
+    isGeocodingFromAddress,
+    lastGeocodingSource,
+    geocodingError,
+    geocodeFromCoordinatesManual,
+    geocodeFromAddress,
+    clearError: clearGeocodingError,
+    isValidCoordinates,
+    isValidAddress,
+  } = useGeocoding({
+    onAddressFilled: (addressData) => {
+      // Auto-fill address fields when coordinates are geocoded
+      form.setValue("street_name", addressData.street_name);
+      form.setValue("district", addressData.district);
+      form.setValue("city", addressData.city);
+      form.setValue("province", addressData.province);
+    },
+    onCoordinatesFilled: (coordData) => {
+      // Auto-fill coordinates when address is geocoded
+      form.setValue("lat", coordData.lat);
+      form.setValue("lon", coordData.lon);
+    },
+  });
 
   const {
     submitReport,
@@ -211,47 +238,12 @@ export const useReportForm = ({ onSuccess }: UseReportFormProps) => {
         form.setValue("lat", lat);
         form.setValue("lon", lon);
 
-        // Perform reverse geocoding to auto-fill administrative boundaries
-        try {
-          const geocodingResult = await reverseGeocode(lat, lon);
-
-          if (geocodingResult.success && geocodingResult.data) {
-            // Auto-fill administrative boundary fields
-            if (geocodingResult.data.street_name) {
-              form.setValue("street_name", geocodingResult.data.street_name);
-            }
-            if (geocodingResult.data.district) {
-              form.setValue("district", geocodingResult.data.district);
-            }
-            if (geocodingResult.data.city) {
-              form.setValue("city", geocodingResult.data.city);
-            }
-            if (geocodingResult.data.province) {
-              form.setValue("province", geocodingResult.data.province);
-            }
-
-            toast.success("Lokasi dan alamat berhasil diperoleh", {
-              id: "location",
-              description: `${geocodingResult.data.district || ""}, ${geocodingResult.data.city || ""}, ${geocodingResult.data.province || ""}`,
-              duration: 4000,
-            });
-          } else {
-            // Only coordinates obtained
-            toast.success("Lokasi berhasil diperoleh", {
-              id: "location",
-              description: `Lat: ${lat.toFixed(6)}, Lon: ${lon.toFixed(6)}. Silakan isi alamat secara manual.`,
-              duration: 3000,
-            });
-          }
-        } catch (geocodingError) {
-          console.error("Geocoding error:", geocodingError);
-          // Show coordinates only on geocoding failure
-          toast.success("Lokasi berhasil diperoleh", {
-            id: "location",
-            description: `Lat: ${lat.toFixed(6)}, Lon: ${lon.toFixed(6)}. Silakan isi alamat secara manual.`,
-            duration: 3000,
-          });
-        }
+        // The geocoding will be handled automatically by the useGeocoding hook
+        toast.success("Lokasi berhasil diperoleh", {
+          id: "location",
+          description: `Lat: ${lat.toFixed(6)}, Lon: ${lon.toFixed(6)}. Mencari alamat...`,
+          duration: 3000,
+        });
 
         setIsGettingLocation(false);
       },
@@ -265,6 +257,40 @@ export const useReportForm = ({ onSuccess }: UseReportFormProps) => {
       },
       geolocationOptions,
     );
+  };
+
+  // Manual geocoding from coordinates
+  const handleGetAddressFromCoordinates = async () => {
+    const lat = form.getValues("lat");
+    const lon = form.getValues("lon");
+
+    if (!isValidCoordinates(lat, lon)) {
+      toast.error("Koordinat tidak valid", {
+        description: "Silakan masukkan koordinat yang valid",
+        duration: 4000,
+      });
+      return;
+    }
+
+    await geocodeFromCoordinatesManual(lat, lon);
+  };
+
+  // Manual geocoding from address
+  const handleGetCoordinatesFromAddress = async () => {
+    const street = form.getValues("street_name");
+    const district = form.getValues("district");
+    const city = form.getValues("city");
+    const province = form.getValues("province");
+
+    if (!isValidAddress(street, city)) {
+      toast.error("Alamat tidak lengkap", {
+        description: "Silakan isi nama jalan dan kota terlebih dahulu",
+        duration: 4000,
+      });
+      return;
+    }
+
+    await geocodeFromAddress(street, district, city, province);
   };
 
   const onSubmit = async (data: CreateReportInput) => {
@@ -337,7 +363,9 @@ export const useReportForm = ({ onSuccess }: UseReportFormProps) => {
     isUploading ||
     isUploadingImage ||
     isGettingLocation ||
-    isExtractingExif;
+    isExtractingExif ||
+    isGeocodingFromCoords ||
+    isGeocodingFromAddress;
 
   return {
     form,
@@ -352,11 +380,20 @@ export const useReportForm = ({ onSuccess }: UseReportFormProps) => {
     exifError,
     hasExifWarning,
     submitError,
+    // Geocoding states
+    isGeocodingFromCoords,
+    isGeocodingFromAddress,
+    lastGeocodingSource,
+    geocodingError,
+    // Handlers
     handleImageSelect,
     handleImageRemove,
     handleImageUploadError,
     handleImageUploadSuccess,
     getCurrentLocation,
+    handleGetAddressFromCoordinates,
+    handleGetCoordinatesFromAddress,
+    clearGeocodingError,
     onSubmit,
   };
 };

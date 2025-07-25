@@ -30,11 +30,20 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
     isExtractingExif,
     hasExifWarning,
     submitError,
+    // Geocoding states
+    isGeocodingFromCoords,
+    isGeocodingFromAddress,
+    lastGeocodingSource,
+    geocodingError,
+    // Handlers
     handleImageSelect,
     handleImageRemove,
     handleImageUploadError,
     handleImageUploadSuccess,
     getCurrentLocation,
+    handleGetAddressFromCoordinates,
+    handleGetCoordinatesFromAddress,
+    clearGeocodingError,
     onSubmit,
   } = useReportForm({ onSuccess });
 
@@ -68,7 +77,17 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
             {/* EXIF Warning - Shows when GPS metadata is missing */}
             <ExifWarning isVisible={hasExifWarning} />
 
-            <ReportFormFields form={form} disabled={isLoading} />
+            <ReportFormFields 
+              form={form} 
+              disabled={isLoading}
+              isGeocodingFromCoords={isGeocodingFromCoords}
+              isGeocodingFromAddress={isGeocodingFromAddress}
+              lastGeocodingSource={lastGeocodingSource}
+              geocodingError={geocodingError}
+              onGetAddress={handleGetAddressFromCoordinates}
+              onGetCoordinates={handleGetCoordinatesFromAddress}
+              onClearGeocodingError={clearGeocodingError}
+            />
 
             <LocationButton
               onGetLocation={getCurrentLocation}

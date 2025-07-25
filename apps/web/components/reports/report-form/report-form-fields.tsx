@@ -17,13 +17,34 @@ import {
   SelectValue,
 } from "@repo/ui/components/ui/select";
 import { CreateReportInput, REPORT_CATEGORIES } from "../../../lib/types/api";
+import { GetCoordinatesButton } from "./get-coordinates-button";
+import { GetAddressButton } from "./get-address-button";
+import { Loader2, MapPin } from "lucide-react";
 
 interface ReportFormFieldsProps {
   form: UseFormReturn<CreateReportInput>;
   disabled?: boolean;
+  // Geocoding props
+  isGeocodingFromCoords?: boolean;
+  isGeocodingFromAddress?: boolean;
+  lastGeocodingSource?: "coordinates" | "address" | null;
+  geocodingError?: string | null;
+  onGetAddress?: () => void;
+  onGetCoordinates?: () => void;
+  onClearGeocodingError?: () => void;
 }
 
-export const ReportFormFields = ({ form, disabled }: ReportFormFieldsProps) => {
+export const ReportFormFields = ({ 
+  form, 
+  disabled,
+  isGeocodingFromCoords = false,
+  isGeocodingFromAddress = false,
+  lastGeocodingSource = null,
+  geocodingError = null,
+  onGetAddress,
+  onGetCoordinates,
+  onClearGeocodingError,
+}: ReportFormFieldsProps) => {
   return (
     <>
       {/* Form Fields Grid - Responsive Layout */}
@@ -103,16 +124,28 @@ export const ReportFormFields = ({ form, disabled }: ReportFormFieldsProps) => {
           name="street_name"
           render={({ field }) => (
             <FormItem className="space-y-3">
-              <FormLabel className="text-base font-semibold text-neutral-900">
+              <FormLabel className="text-base font-semibold text-neutral-900 flex items-center gap-2">
                 Nama Jalan *
+                {isGeocodingFromCoords && (
+                  <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                )}
+                {lastGeocodingSource === "coordinates" && (
+                  <MapPin className="h-4 w-4 text-green-600" />
+                )}
               </FormLabel>
               <FormControl>
                 <Input
                   placeholder="Contoh: Jl. Sudirman"
-                  disabled={disabled}
+                  disabled={disabled || isGeocodingFromCoords}
                   size="lg"
-                  className="border-neutral-300 focus:border-neutral-600 focus:ring-neutral-600/20 bg-white"
+                  className={`border-neutral-300 focus:border-neutral-600 focus:ring-neutral-600/20 bg-white ${
+                    lastGeocodingSource === "coordinates" ? "border-green-300 bg-green-50/30" : ""
+                  }`}
                   {...field}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    onClearGeocodingError?.();
+                  }}
                 />
               </FormControl>
               <FormDescription className="text-sm text-neutral-600">
@@ -133,16 +166,28 @@ export const ReportFormFields = ({ form, disabled }: ReportFormFieldsProps) => {
           name="district"
           render={({ field }) => (
             <FormItem className="space-y-3">
-              <FormLabel className="text-base font-semibold text-neutral-900">
+              <FormLabel className="text-base font-semibold text-neutral-900 flex items-center gap-2">
                 District *
+                {isGeocodingFromCoords && (
+                  <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                )}
+                {lastGeocodingSource === "coordinates" && (
+                  <MapPin className="h-4 w-4 text-green-600" />
+                )}
               </FormLabel>
               <FormControl>
                 <Input
                   placeholder="Example: Bekasi Utara"
-                  disabled={disabled}
+                  disabled={disabled || isGeocodingFromCoords}
                   size="lg"
-                  className="border-neutral-300 focus:border-neutral-600 focus:ring-neutral-600/20 bg-white"
+                  className={`border-neutral-300 focus:border-neutral-600 focus:ring-neutral-600/20 bg-white ${
+                    lastGeocodingSource === "coordinates" ? "border-green-300 bg-green-50/30" : ""
+                  }`}
                   {...field}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    onClearGeocodingError?.();
+                  }}
                 />
               </FormControl>
               <FormDescription className="text-sm text-neutral-600">
@@ -159,16 +204,28 @@ export const ReportFormFields = ({ form, disabled }: ReportFormFieldsProps) => {
           name="city"
           render={({ field }) => (
             <FormItem className="space-y-3">
-              <FormLabel className="text-base font-semibold text-neutral-900">
+              <FormLabel className="text-base font-semibold text-neutral-900 flex items-center gap-2">
                 City *
+                {isGeocodingFromCoords && (
+                  <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                )}
+                {lastGeocodingSource === "coordinates" && (
+                  <MapPin className="h-4 w-4 text-green-600" />
+                )}
               </FormLabel>
               <FormControl>
                 <Input
                   placeholder="Example: Kota Bekasi"
-                  disabled={disabled}
+                  disabled={disabled || isGeocodingFromCoords}
                   size="lg"
-                  className="border-neutral-300 focus:border-neutral-600 focus:ring-neutral-600/20 bg-white"
+                  className={`border-neutral-300 focus:border-neutral-600 focus:ring-neutral-600/20 bg-white ${
+                    lastGeocodingSource === "coordinates" ? "border-green-300 bg-green-50/30" : ""
+                  }`}
                   {...field}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    onClearGeocodingError?.();
+                  }}
                 />
               </FormControl>
               <FormDescription className="text-sm text-neutral-600">
@@ -185,16 +242,28 @@ export const ReportFormFields = ({ form, disabled }: ReportFormFieldsProps) => {
           name="province"
           render={({ field }) => (
             <FormItem className="space-y-3">
-              <FormLabel className="text-base font-semibold text-neutral-900">
+              <FormLabel className="text-base font-semibold text-neutral-900 flex items-center gap-2">
                 Province *
+                {isGeocodingFromCoords && (
+                  <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                )}
+                {lastGeocodingSource === "coordinates" && (
+                  <MapPin className="h-4 w-4 text-green-600" />
+                )}
               </FormLabel>
               <FormControl>
                 <Input
                   placeholder="Example: Jawa Barat"
-                  disabled={disabled}
+                  disabled={disabled || isGeocodingFromCoords}
                   size="lg"
-                  className="border-neutral-300 focus:border-neutral-600 focus:ring-neutral-600/20 bg-white"
+                  className={`border-neutral-300 focus:border-neutral-600 focus:ring-neutral-600/20 bg-white ${
+                    lastGeocodingSource === "coordinates" ? "border-green-300 bg-green-50/30" : ""
+                  }`}
                   {...field}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    onClearGeocodingError?.();
+                  }}
                 />
               </FormControl>
               <FormDescription className="text-sm text-neutral-600">
@@ -205,6 +274,25 @@ export const ReportFormFields = ({ form, disabled }: ReportFormFieldsProps) => {
           )}
         />
       </div>
+
+      {/* Get Coordinates Button */}
+      {onGetCoordinates && (
+        <div className="flex justify-center">
+          <GetCoordinatesButton
+            onClick={onGetCoordinates}
+            isLoading={isGeocodingFromAddress}
+            disabled={disabled}
+            isValidAddress={!!(form.watch("street_name") && form.watch("city"))}
+          />
+        </div>
+      )}
+
+      {/* Geocoding Error Display */}
+      {geocodingError && (
+        <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-sm text-red-800">{geocodingError}</p>
+        </div>
+      )}
 
       {/* Location Description - Full Width */}
       <FormField
@@ -233,70 +321,103 @@ export const ReportFormFields = ({ form, disabled }: ReportFormFieldsProps) => {
         )}
       />
 
-      {/* Latitude and Longitude Inputs */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <FormField
-          control={form.control}
-          name="lat"
-          render={({ field }) => (
-            <FormItem className="space-y-3">
-              <FormLabel className="text-base font-semibold text-neutral-900">
-                Latitude *
-              </FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  step="any"
-                  placeholder="Contoh: -7.260000"
-                  disabled={disabled}
-                  size="lg"
-                  className="border-neutral-300 focus:border-neutral-600 focus:ring-neutral-600/20 bg-white"
-                  {...field}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    field.onChange(value === "" ? 0 : parseFloat(value));
-                  }}
-                  value={field.value === 0 ? "" : field.value}
-                />
-              </FormControl>
-              <FormDescription className="text-sm text-neutral-600">
-                Koordinat latitude lokasi kerusakan.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="lon"
-          render={({ field }) => (
-            <FormItem className="space-y-3">
-              <FormLabel className="text-base font-semibold text-neutral-900">
-                Longitude *
-              </FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  step="any"
-                  placeholder="Contoh: 112.780000"
-                  disabled={disabled}
-                  size="lg"
-                  className="border-neutral-300 focus:border-neutral-600 focus:ring-neutral-600/20 bg-white"
-                  {...field}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    field.onChange(value === "" ? 0 : parseFloat(value));
-                  }}
-                  value={field.value === 0 ? "" : field.value}
-                />
-              </FormControl>
-              <FormDescription className="text-sm text-neutral-600">
-                Koordinat longitude lokasi kerusakan.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+      {/* Latitude and Longitude Inputs with Get Address Button */}
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <FormField
+            control={form.control}
+            name="lat"
+            render={({ field }) => (
+              <FormItem className="space-y-3">
+                <FormLabel className="text-base font-semibold text-neutral-900 flex items-center gap-2">
+                  Latitude *
+                  {isGeocodingFromAddress && (
+                    <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                  )}
+                  {lastGeocodingSource === "address" && (
+                    <MapPin className="h-4 w-4 text-green-600" />
+                  )}
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    step="any"
+                    placeholder="Contoh: -7.260000"
+                    disabled={disabled || isGeocodingFromAddress}
+                    size="lg"
+                    className={`border-neutral-300 focus:border-neutral-600 focus:ring-neutral-600/20 bg-white ${
+                      lastGeocodingSource === "address" ? "border-green-300 bg-green-50/30" : ""
+                    }`}
+                    {...field}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      field.onChange(value === "" ? 0 : parseFloat(value));
+                      onClearGeocodingError?.();
+                    }}
+                    value={field.value === 0 ? "" : field.value}
+                  />
+                </FormControl>
+                <FormDescription className="text-sm text-neutral-600">
+                  Koordinat latitude lokasi kerusakan.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="lon"
+            render={({ field }) => (
+              <FormItem className="space-y-3">
+                <FormLabel className="text-base font-semibold text-neutral-900 flex items-center gap-2">
+                  Longitude *
+                  {isGeocodingFromAddress && (
+                    <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                  )}
+                  {lastGeocodingSource === "address" && (
+                    <MapPin className="h-4 w-4 text-green-600" />
+                  )}
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    step="any"
+                    placeholder="Contoh: 112.780000"
+                    disabled={disabled || isGeocodingFromAddress}
+                    size="lg"
+                    className={`border-neutral-300 focus:border-neutral-600 focus:ring-neutral-600/20 bg-white ${
+                      lastGeocodingSource === "address" ? "border-green-300 bg-green-50/30" : ""
+                    }`}
+                    {...field}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      field.onChange(value === "" ? 0 : parseFloat(value));
+                      onClearGeocodingError?.();
+                    }}
+                    value={field.value === 0 ? "" : field.value}
+                  />
+                </FormControl>
+                <FormDescription className="text-sm text-neutral-600">
+                  Koordinat longitude lokasi kerusakan.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* Get Address Button */}
+        {onGetAddress && (
+          <div className="flex justify-center">
+            <GetAddressButton
+              onClick={onGetAddress}
+              isLoading={isGeocodingFromCoords}
+              disabled={disabled}
+              isValidCoordinates={!!(form.watch("lat") && form.watch("lon") && 
+                form.watch("lat") !== 0 && form.watch("lon") !== 0)}
+            />
+          </div>
+        )}
       </div>
     </>
   );
