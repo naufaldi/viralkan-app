@@ -1,4 +1,3 @@
-import { notFound } from "next/navigation";
 import {
   Card,
   CardContent,
@@ -10,36 +9,36 @@ import { Button } from "@repo/ui/components/ui/button";
 import { Separator } from "@repo/ui/components/ui/separator";
 import {
   ArrowLeft,
-  MapPin,
   Calendar,
   User,
-  Crosshair,
   AlertCircle,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { REPORT_CATEGORIES } from "@/constant/reports";
-import { getTimeAgo, formatCoordinates } from "@/utils/reports";
-import { ReportDetailSkeleton } from "@/components/reports";
+import { getTimeAgo } from "@/utils/reports";
 import {
   ReportActions,
   ReportStatus,
   ReportStatusBadge,
+  LocationHierarchy,
+  ShareCount,
 } from "@/components/details";
 import { getReportByIdAction } from "@/lib/report-actions";
 import { getAuthUser } from "@/lib/auth-server";
 import Header from "@/components/layout/header";
+import { ReportDetailClient } from "./report-detail-client";
 
 interface ReportDetailPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default async function ReportDetailPage({
   params,
 }: ReportDetailPageProps) {
-  const reportId = params.id;
+  const { id: reportId } = await params;
 
   try {
     // Fetch report data server-side
@@ -97,7 +96,7 @@ export default async function ReportDetailPage({
                 {isOwner && <ReportStatusBadge status={report.status} />}
 
                 {/* Category Badge Overlay */}
-                <div className="absolute top-4 right-4">
+                <div className="absolute top-4 left-4">
                   <Badge
                     className={`${categoryInfo.color} border-0 font-medium`}
                   >
@@ -105,6 +104,8 @@ export default async function ReportDetailPage({
                     {categoryInfo.label}
                   </Badge>
                 </div>
+
+                {/* Share Button will be rendered by client component */}
               </div>
             </div>
 
@@ -120,28 +121,30 @@ export default async function ReportDetailPage({
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-6">
-                    {/* Location Information */}
-                    <div className="space-y-4">
-                      <h3 className="text-lg font-medium text-neutral-900">
-                        {report.street_name}
-                      </h3>
-                      <div className="flex items-start gap-3">
-                        <MapPin className="h-5 w-5 text-neutral-500 mt-0.5 flex-shrink-0" />
-                        <p className="text-neutral-700 leading-relaxed">
+                    {/* Enhanced Location Information */}
+                    <LocationHierarchy
+                      province={report.province}
+                      city={report.city}
+                      district={report.district}
+                      streetName={report.street_name}
+                      coordinates={
+                        report.lat && report.lon
+                          ? { lat: report.lat, lon: report.lon }
+                          : undefined
+                      }
+                    />
+
+                    {/* Additional Location Details */}
+                    {report.location_text && (
+                      <div className="bg-neutral-50 rounded-lg p-4 border border-neutral-200">
+                        <h4 className="text-sm font-medium text-neutral-900 mb-2">
+                          Deskripsi Lokasi
+                        </h4>
+                        <p className="text-neutral-700 leading-relaxed text-sm">
                           {report.location_text}
                         </p>
                       </div>
-
-                      {/* Coordinates if available */}
-                      {report.lat && report.lon && (
-                        <div className="flex items-center gap-3">
-                          <Crosshair className="h-4 w-4 text-neutral-400 flex-shrink-0" />
-                          <span className="text-sm text-neutral-600 font-mono">
-                            {formatCoordinates(report.lat, report.lon)}
-                          </span>
-                        </div>
-                      )}
-                    </div>
+                    )}
 
                     <Separator className="bg-neutral-200" />
 
@@ -207,6 +210,11 @@ export default async function ReportDetailPage({
                         {categoryInfo.label}
                       </Badge>
                     </div>
+
+                    {/* Share Count */}
+                    <div data-share-count>
+                      <ShareCount count={0} />
+                    </div>
                   </CardContent>
                 </Card>
 
@@ -216,6 +224,9 @@ export default async function ReportDetailPage({
             </div>
           </div>
         </div>
+
+        {/* Client-side sharing components */}
+        <ReportDetailClient report={report} />
       </>
     );
   } catch (error) {

@@ -1,6 +1,6 @@
 import { Badge } from "@repo/ui/components/ui/badge";
 import { Card, CardContent } from "@repo/ui/components/ui/card";
-import { MapPin, Crosshair } from "lucide-react";
+import { MapPin, Crosshair, Building } from "lucide-react";
 import Image from "next/image";
 import type { ReportWithUser } from "../../utils/stats-utils";
 import { formatCoordinates, getTimeAgo } from "@/utils/reports";
@@ -11,9 +11,36 @@ interface UniformReportCardProps {
   onClick?: () => void;
 }
 
+// Administrative Area Component
+function AdministrativeArea({
+  district,
+  city,
+  province,
+}: {
+  district: string;
+  city: string;
+  province: string;
+}) {
+  return (
+    <div className="flex items-start gap-2">
+      <Building className="text-neutral-500 mt-0.5 flex-shrink-0 h-4 w-4" />
+      <div className="space-y-0.5 min-w-0 flex-1">
+        <p className="text-sm text-neutral-600 font-medium truncate">
+          {district}
+        </p>
+        <p className="text-xs text-neutral-500 truncate">
+          {city}, {province}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export function UniformReportCard({ report, onClick }: UniformReportCardProps) {
   const categoryInfo = REPORT_CATEGORIES[report.category];
   const hasCoordinates = report.lat !== null && report.lon !== null;
+  const hasAdministrativeData =
+    report.district && report.city && report.province;
 
   return (
     <Card
@@ -38,8 +65,8 @@ export function UniformReportCard({ report, onClick }: UniformReportCardProps) {
         </div>
       </div>
 
-      <CardContent className="p-4">
-        <div className="space-y-3">
+      <CardContent className="p-4 flex flex-col h-full">
+        <div className="flex-1 space-y-3">
           <h3 className="font-semibold text-neutral-900 line-clamp-2 text-base">
             {report.street_name}
           </h3>
@@ -53,6 +80,15 @@ export function UniformReportCard({ report, onClick }: UniformReportCardProps) {
               </p>
             </div>
 
+            {/* Administrative Area */}
+            {hasAdministrativeData && (
+              <AdministrativeArea
+                district={report.district}
+                city={report.city}
+                province={report.province}
+              />
+            )}
+
             {/* Coordinates (Optional) */}
             {hasCoordinates && (
               <div className="flex items-center gap-2">
@@ -63,30 +99,30 @@ export function UniformReportCard({ report, onClick }: UniformReportCardProps) {
               </div>
             )}
           </div>
+        </div>
 
-          <div className="flex items-center justify-between pt-1">
-            <div className="flex items-center gap-2">
-              {report.user_avatar && (
-                <Image
-                  src={report.user_avatar}
-                  alt={report.user_name || "User"}
-                  width={24}
-                  height={24}
-                  className="w-6 h-6 rounded-full"
-                />
-              )}
-              <span className="text-xs text-neutral-600">
-                {report.user_name || "Anonim"}
-              </span>
-            </div>
-            <span className="text-xs text-neutral-500">
-              {getTimeAgo(
-                typeof report.created_at === "string"
-                  ? report.created_at
-                  : report.created_at.toISOString(),
-              )}
+        <div className="flex items-center justify-between pt-3 mt-auto">
+          <div className="flex items-center gap-2">
+            {report.user_avatar && (
+              <Image
+                src={report.user_avatar}
+                alt={report.user_name || "User"}
+                width={24}
+                height={24}
+                className="w-6 h-6 rounded-full"
+              />
+            )}
+            <span className="text-xs text-neutral-600">
+              {report.user_name || "Anonim"}
             </span>
           </div>
+          <span className="text-xs text-neutral-500">
+            {getTimeAgo(
+              typeof report.created_at === "string"
+                ? report.created_at
+                : report.created_at.toISOString(),
+            )}
+          </span>
         </div>
       </CardContent>
     </Card>

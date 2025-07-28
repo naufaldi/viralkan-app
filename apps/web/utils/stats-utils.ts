@@ -23,6 +23,9 @@ export interface ReportWithUser {
   location_text: string;
   lat: number | null;
   lon: number | null;
+  district: string;
+  city: string;
+  province: string;
   created_at: string | Date;
   user_name: string | null;
   user_avatar: string | null;

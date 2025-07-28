@@ -80,6 +80,14 @@
 
 ### **Data Display**
 
+- [x] ✅ **COMPLETED: Add administrative area display to uniform report cards**
+  - [x] Create administrative area component with district > city > province hierarchy
+  - [x] Follow monochrome design system with neutral color hierarchy
+  - [x] Use Building icon to indicate administrative boundaries
+  - [x] Implement responsive design for mobile/desktop
+  - [x] Ensure accessibility with proper ARIA labels
+  - [x] Update ReportWithUser interface to include district, city, province fields
+  - [ ] Test with Indonesian administrative data structure
 - [ ] Update report detail pages to show administrative boundaries
 - [ ] Add geocoding source and timestamp to report metadata
 - [ ] Implement map markers with custom styling per damage category
