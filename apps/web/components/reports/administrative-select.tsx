@@ -52,13 +52,8 @@ export const AdministrativeSelect = ({
   const selectedAllDistrict = !searchParams.get("kecamatan");
 
   // Fetch data using our custom hook
-  const {
-    data,
-    loading,
-    error,
-    refetchRegencies,
-    refetchDistricts,
-  } = useAdministrative();
+  const { data, loading, error, refetchRegencies, refetchDistricts } =
+    useAdministrative();
 
   // Fetch dependent data when parent selection changes
   React.useEffect(() => {
@@ -73,20 +68,16 @@ export const AdministrativeSelect = ({
     }
   }, [selectedRegencyCode, refetchDistricts]);
 
-
-
   // Helper function to truncate long text
   const truncateText = (text: string, maxLength: number = 20) => {
     if (!text) return text;
     return text.length > maxLength ? `${text.slice(0, maxLength)}...` : text;
   };
 
-
-
   // Transform data for ComboboxField
   const provinceOptions: ComboboxOption[] = React.useMemo(() => {
     const options: ComboboxOption[] = [];
-    
+
     // Add "all" option if enabled
     if (enableAllOptions) {
       options.push({
@@ -95,22 +86,24 @@ export const AdministrativeSelect = ({
         searchValue: "semua provinsi",
       });
     }
-    
+
     // Add province options
     if (data.provinces) {
-      options.push(...data.provinces.map((province: Province) => ({
-        value: province.code,
-        label: truncateText(province.name),
-        searchValue: province.name.toLowerCase(),
-      })));
+      options.push(
+        ...data.provinces.map((province: Province) => ({
+          value: province.code,
+          label: truncateText(province.name),
+          searchValue: province.name.toLowerCase(),
+        })),
+      );
     }
-    
+
     return options;
   }, [data.provinces, enableAllOptions]);
 
   const regencyOptions: ComboboxOption[] = React.useMemo(() => {
     const options: ComboboxOption[] = [];
-    
+
     // Add "all" option if enabled
     if (enableAllOptions) {
       options.push({
@@ -119,22 +112,24 @@ export const AdministrativeSelect = ({
         searchValue: "semua kabupaten kota",
       });
     }
-    
+
     // Add regency options
     if (data.regencies) {
-      options.push(...data.regencies.map((regency: Regency) => ({
-        value: regency.code,
-        label: truncateText(regency.name),
-        searchValue: regency.name.toLowerCase(),
-      })));
+      options.push(
+        ...data.regencies.map((regency: Regency) => ({
+          value: regency.code,
+          label: truncateText(regency.name),
+          searchValue: regency.name.toLowerCase(),
+        })),
+      );
     }
-    
+
     return options;
   }, [data.regencies, enableAllOptions]);
 
   const districtOptions: ComboboxOption[] = React.useMemo(() => {
     const options: ComboboxOption[] = [];
-    
+
     // Add "all" option if enabled
     if (enableAllOptions) {
       options.push({
@@ -143,29 +138,31 @@ export const AdministrativeSelect = ({
         searchValue: "semua kecamatan",
       });
     }
-    
+
     // Add district options
     if (data.districts) {
-      options.push(...data.districts.map((district: District) => ({
-        value: district.code,
-        label: truncateText(district.name),
-        searchValue: district.name.toLowerCase(),
-      })));
+      options.push(
+        ...data.districts.map((district: District) => ({
+          value: district.code,
+          label: truncateText(district.name),
+          searchValue: district.name.toLowerCase(),
+        })),
+      );
     }
-    
+
     return options;
   }, [data.districts, enableAllOptions]);
 
   // Handle province selection - reset dependent fields
   const handleProvinceChange = (provinceCode: string) => {
     const params = new URLSearchParams(searchParams);
-    
+
     if (provinceCode === "all") {
       // Handle "all" selection - remove URL parameter (default state)
       params.delete("provinsi");
       form.setValue("province_code", "");
       form.setValue("province", "");
-      
+
       // Reset dependent fields
       form.setValue("regency_code", "");
       form.setValue("city", "");
@@ -177,7 +174,7 @@ export const AdministrativeSelect = ({
       // Handle specific province selection
       params.set("provinsi", provinceCode);
       const selectedProvince = data.provinces?.find(
-        (p: Province) => p.code === provinceCode
+        (p: Province) => p.code === provinceCode,
       );
 
       if (selectedProvince) {
@@ -203,13 +200,13 @@ export const AdministrativeSelect = ({
   // Handle regency selection - reset dependent fields
   const handleRegencyChange = (regencyCode: string) => {
     const params = new URLSearchParams(searchParams);
-    
+
     if (regencyCode === "all") {
       // Handle "all" selection - remove URL parameter (default state)
       params.delete("kabupaten_kota");
       form.setValue("regency_code", "");
       form.setValue("city", "");
-      
+
       // Reset dependent fields
       form.setValue("district_code", "");
       form.setValue("district", "");
@@ -218,7 +215,7 @@ export const AdministrativeSelect = ({
       // Handle specific regency selection
       params.set("kabupaten_kota", regencyCode);
       const selectedRegency = data.regencies?.find(
-        (r: Regency) => r.code === regencyCode
+        (r: Regency) => r.code === regencyCode,
       );
 
       if (selectedRegency) {
@@ -241,7 +238,7 @@ export const AdministrativeSelect = ({
   // Handle district selection
   const handleDistrictChange = (districtCode: string) => {
     const params = new URLSearchParams(searchParams);
-    
+
     if (districtCode === "all") {
       // Handle "all" selection - remove URL parameter (default state)
       params.delete("kecamatan");
@@ -251,7 +248,7 @@ export const AdministrativeSelect = ({
       // Handle specific district selection
       params.set("kecamatan", districtCode);
       const selectedDistrict = data.districts?.find(
-        (d: District) => d.code === districtCode
+        (d: District) => d.code === districtCode,
       );
 
       if (selectedDistrict) {
@@ -267,7 +264,9 @@ export const AdministrativeSelect = ({
   };
 
   const isFromGeocoding = lastGeocodingSource === "coordinates";
-  const geocodingClasses = isFromGeocoding ? "border-green-300 bg-green-50/30" : "";
+  const geocodingClasses = isFromGeocoding
+    ? "border-green-300 bg-green-50/30"
+    : "";
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -290,12 +289,16 @@ export const AdministrativeSelect = ({
               <FormControl>
                 <ComboboxField
                   options={provinceOptions}
-                  value={selectedAllProvince ? "all" : selectedProvinceCode || "all"}
+                  value={
+                    selectedAllProvince ? "all" : selectedProvinceCode || "all"
+                  }
                   onValueChange={handleProvinceChange}
                   placeholder="Pilih provinsi..."
                   emptyMessage="Tidak ada provinsi ditemukan."
                   searchPlaceholder="Cari provinsi..."
-                  disabled={disabled || isGeocodingFromCoords || loading.provinces}
+                  disabled={
+                    disabled || isGeocodingFromCoords || loading.provinces
+                  }
                   loading={loading.provinces}
                   size="lg"
                   error={!!form.formState.errors.province}
@@ -335,7 +338,9 @@ export const AdministrativeSelect = ({
               <FormControl>
                 <ComboboxField
                   options={regencyOptions}
-                  value={selectedAllRegency ? "all" : selectedRegencyCode || "all"}
+                  value={
+                    selectedAllRegency ? "all" : selectedRegencyCode || "all"
+                  }
                   onValueChange={handleRegencyChange}
                   placeholder={
                     !selectedProvinceCode
@@ -393,7 +398,9 @@ export const AdministrativeSelect = ({
               <FormControl>
                 <ComboboxField
                   options={districtOptions}
-                  value={selectedAllDistrict ? "all" : selectedDistrictCode || "all"}
+                  value={
+                    selectedAllDistrict ? "all" : selectedDistrictCode || "all"
+                  }
                   onValueChange={handleDistrictChange}
                   placeholder={
                     !selectedRegencyCode

@@ -10,7 +10,11 @@ interface ReportStatusProps {
   rejectionReason?: string | null;
 }
 
-export function ReportStatus({ status, verifiedAt, rejectionReason }: ReportStatusProps) {
+export function ReportStatus({
+  status,
+  verifiedAt,
+  rejectionReason,
+}: ReportStatusProps) {
   const getStatusConfig = (status: string) => {
     switch (status) {
       case "verified":
@@ -59,18 +63,14 @@ export function ReportStatus({ status, verifiedAt, rejectionReason }: ReportStat
 
   return (
     <div className="space-y-4">
-      <h4 className="font-medium text-neutral-900">
-        Status Laporan
-      </h4>
+      <h4 className="font-medium text-neutral-900">Status Laporan</h4>
       <div
         className={`p-4 rounded-lg ${statusConfig.bgColor} border border-neutral-200`}
       >
         <div className="flex items-center gap-3">
           <StatusIcon className="h-5 w-5 text-neutral-600" />
           <div>
-            <p className="font-medium text-neutral-900">
-              {statusConfig.label}
-            </p>
+            <p className="font-medium text-neutral-900">{statusConfig.label}</p>
             <p className="text-sm text-neutral-600">
               {status === "verified" &&
                 verifiedAt &&
@@ -78,12 +78,11 @@ export function ReportStatus({ status, verifiedAt, rejectionReason }: ReportStat
               {status === "rejected" &&
                 rejectionReason &&
                 `Ditolak: ${rejectionReason}`}
-              {status === "pending" &&
-                "Laporan sedang menunggu verifikasi"}
+              {status === "pending" && "Laporan sedang menunggu verifikasi"}
             </p>
           </div>
         </div>
       </div>
     </div>
   );
-} 
+}

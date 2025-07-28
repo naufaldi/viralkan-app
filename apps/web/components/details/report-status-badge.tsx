@@ -48,4 +48,4 @@ export function ReportStatusBadge({ status }: ReportStatusBadgeProps) {
       </Badge>
     </div>
   );
-} 
+}

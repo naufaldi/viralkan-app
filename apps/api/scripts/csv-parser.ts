@@ -1,6 +1,6 @@
-import { parse } from 'csv-parse';
-import { readFile } from 'fs/promises';
-import { join } from 'path';
+import { parse } from "csv-parse";
+import { readFile } from "fs/promises";
+import { join } from "path";
 
 // TypeScript interfaces for CSV row data
 export interface ProvinceCSVRow {
@@ -23,17 +23,17 @@ export interface DistrictCSVRow {
 export class CsvParserService {
   private readonly csvDirectory = join(
     process.cwd(),
-    '..',
-    '..',
-    'docs',
-    'admin-id'
+    "..",
+    "..",
+    "docs",
+    "admin-id",
   );
 
   /**
    * Parse provinces CSV file
    */
   async parseProvincesCSV(): Promise<ProvinceCSVRow[]> {
-    const filePath = join(this.csvDirectory, 'Provinces (1).csv');
+    const filePath = join(this.csvDirectory, "Provinces (1).csv");
     return this.parseCSV<ProvinceCSVRow>(filePath);
   }
 
@@ -41,7 +41,7 @@ export class CsvParserService {
    * Parse regencies CSV file
    */
   async parseRegenciesCSV(): Promise<RegencyCSVRow[]> {
-    const filePath = join(this.csvDirectory, 'Regencies Data.csv');
+    const filePath = join(this.csvDirectory, "Regencies Data.csv");
     return this.parseCSV<RegencyCSVRow>(filePath);
   }
 
@@ -49,7 +49,7 @@ export class CsvParserService {
    * Parse districts CSV file
    */
   async parseDistrictsCSV(): Promise<DistrictCSVRow[]> {
-    const filePath = join(this.csvDirectory, 'Districts Data.csv');
+    const filePath = join(this.csvDirectory, "Districts Data.csv");
     return this.parseCSV<DistrictCSVRow>(filePath);
   }
 
@@ -58,7 +58,7 @@ export class CsvParserService {
    */
   private async parseCSV<T>(filePath: string): Promise<T[]> {
     try {
-      const fileContent = await readFile(filePath, 'utf-8');
+      const fileContent = await readFile(filePath, "utf-8");
 
       return new Promise((resolve, reject) => {
         const records: T[] = [];
@@ -68,31 +68,31 @@ export class CsvParserService {
           skip_empty_lines: true,
           trim: true,
         })
-          .on('data', (record) => {
+          .on("data", (record) => {
             // Remove dots from codes to match database format (e.g., 11.01 -> 1101)
             if (record.code) {
-              record.code = record.code.replace(/\./g, '');
+              record.code = record.code.replace(/\./g, "");
             }
             if (record.province_code) {
-              record.province_code = record.province_code.replace(/\./g, '');
+              record.province_code = record.province_code.replace(/\./g, "");
             }
             if (record.regency_code) {
-              record.regency_code = record.regency_code.replace(/\./g, '');
+              record.regency_code = record.regency_code.replace(/\./g, "");
             }
             records.push(record);
           })
-          .on('error', (error) => {
+          .on("error", (error) => {
             reject(
-              new Error(`CSV parsing error in ${filePath}: ${error.message}`)
+              new Error(`CSV parsing error in ${filePath}: ${error.message}`),
             );
           })
-          .on('end', () => {
+          .on("end", () => {
             resolve(records);
           });
       });
     } catch (error) {
       throw new Error(
-        `Failed to read CSV file ${filePath}: ${error instanceof Error ? error.message : 'Unknown error'}`
+        `Failed to read CSV file ${filePath}: ${error instanceof Error ? error.message : "Unknown error"}`,
       );
     }
   }

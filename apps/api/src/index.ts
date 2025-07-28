@@ -3,7 +3,12 @@ import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { serve } from "@hono/node-server";
 import { swaggerUI } from "@hono/swagger-ui";
-import { reportsRouter, authRouter, uploadRouter, administrativeRouter } from "@/routes";
+import {
+  reportsRouter,
+  authRouter,
+  uploadRouter,
+  administrativeRouter,
+} from "@/routes";
 import { adminRouter } from "@/routes/admin/api";
 import { env, validateEnv } from "@/config/env";
 import { testConnection } from "@/db/connection";
@@ -124,7 +129,8 @@ app.doc("/openapi", {
     },
     {
       name: "Administrative",
-      description: "Indonesian administrative data (provinces, regencies, districts)",
+      description:
+        "Indonesian administrative data (provinces, regencies, districts)",
     },
   ],
 });

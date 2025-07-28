@@ -31,4 +31,4 @@ export function GetCoordinatesButton({
       {isLoading ? "Mencari Koordinat..." : "Dapatkan Koordinat"}
     </Button>
   );
-} 
+}

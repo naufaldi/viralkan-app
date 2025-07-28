@@ -1,9 +1,9 @@
 /**
  * Administrative Shell Layer
- * 
+ *
  * Business logic orchestration for Indonesian administrative data endpoints.
  * Coordinates between core validation logic and data access operations.
- * 
+ *
  * Following clean architecture: Shell orchestrates between API ← Shell → Core ← Data
  */
 
@@ -11,35 +11,35 @@ import { createSuccess, createError } from "@/types";
 import type { AppResult } from "@/types";
 import * as core from "./core";
 import * as data from "./data";
-import type {
-  Province,
-  Regency,
-  District,
-  SyncStatus,
-} from "./types";
+import type { Province, Regency, District, SyncStatus } from "./types";
 
 /**
  * Get all provinces
- * 
+ *
  * Returns all Indonesian provinces (should be 38 total).
  * This is a read-only operation with no business logic required.
  */
 export const getAllProvinces = async (): Promise<AppResult<Province[]>> => {
   try {
     const result = await data.findAllProvinces();
-    
+
     if (!result.success) {
       return result;
     }
 
     // Business rule: Validate expected number of provinces
     if (result.data.length === 0) {
-      return createError("No provinces found. Administrative data may not be synced.", 500);
+      return createError(
+        "No provinces found. Administrative data may not be synced.",
+        500,
+      );
     }
 
     // Business rule: Log warning if province count seems low
     if (result.data.length < 30) {
-      console.warn(`⚠️ Only ${result.data.length} provinces found. Expected 38 Indonesian provinces.`);
+      console.warn(
+        `⚠️ Only ${result.data.length} provinces found. Expected 38 Indonesian provinces.`,
+      );
     }
 
     return createSuccess(result.data);
@@ -51,17 +51,20 @@ export const getAllProvinces = async (): Promise<AppResult<Province[]>> => {
 
 /**
  * Get regencies by province code
- * 
+ *
  * Returns all regencies/cities within a specific province.
  * Validates province code format and existence.
  */
 export const getRegenciesByProvince = async (
-  provinceCode: string
+  provinceCode: string,
 ): Promise<AppResult<Regency[]>> => {
   try {
     // Core validation: Check province code format
     if (!core.isValidProvinceCode(provinceCode)) {
-      return createError("Invalid province code format. Must be 2 digits.", 400);
+      return createError(
+        "Invalid province code format. Must be 2 digits.",
+        400,
+      );
     }
 
     // Data validation: Check if province exists
@@ -76,14 +79,16 @@ export const getRegenciesByProvince = async (
 
     // Fetch regencies for the province
     const result = await data.findRegenciesByProvince(provinceCode);
-    
+
     if (!result.success) {
       return result;
     }
 
     // Business rule: Log warning if no regencies found for existing province
     if (result.data.length === 0) {
-      console.warn(`⚠️ No regencies found for province ${provinceCode}. This may indicate incomplete data.`);
+      console.warn(
+        `⚠️ No regencies found for province ${provinceCode}. This may indicate incomplete data.`,
+      );
     }
 
     return createSuccess(result.data);
@@ -95,12 +100,12 @@ export const getRegenciesByProvince = async (
 
 /**
  * Get districts by regency code
- * 
+ *
  * Returns all districts within a specific regency/city.
  * Validates regency code format and existence.
  */
 export const getDistrictsByRegency = async (
-  regencyCode: string
+  regencyCode: string,
 ): Promise<AppResult<District[]>> => {
   try {
     // Core validation: Check regency code format
@@ -120,14 +125,16 @@ export const getDistrictsByRegency = async (
 
     // Fetch districts for the regency
     const result = await data.findDistrictsByRegency(regencyCode);
-    
+
     if (!result.success) {
       return result;
     }
 
     // Business rule: Log warning if no districts found for existing regency
     if (result.data.length === 0) {
-      console.warn(`⚠️ No districts found for regency ${regencyCode}. This may indicate incomplete data.`);
+      console.warn(
+        `⚠️ No districts found for regency ${regencyCode}. This may indicate incomplete data.`,
+      );
     }
 
     return createSuccess(result.data);
@@ -139,14 +146,14 @@ export const getDistrictsByRegency = async (
 
 /**
  * Get administrative data sync status
- * 
+ *
  * Returns current counts and last sync timestamp for monitoring purposes.
  * No business logic required - pure data reporting.
  */
 export const getSyncStatus = async (): Promise<AppResult<SyncStatus>> => {
   try {
     const result = await data.getAdministrativeCounts();
-    
+
     if (!result.success) {
       return result;
     }
@@ -160,14 +167,14 @@ export const getSyncStatus = async (): Promise<AppResult<SyncStatus>> => {
 
 /**
  * Validate administrative hierarchy
- * 
- * Business logic to validate that district belongs to regency, 
+ *
+ * Business logic to validate that district belongs to regency,
  * and regency belongs to province. Used by report creation.
  */
 export const validateAdministrativeHierarchy = async (
   provinceCode: string,
   regencyCode: string,
-  districtCode: string
+  districtCode: string,
 ): Promise<AppResult<boolean>> => {
   try {
     // Core validation: Check all code formats
@@ -187,7 +194,7 @@ export const validateAdministrativeHierarchy = async (
     const hierarchyValid = await data.validateHierarchy(
       provinceCode,
       regencyCode,
-      districtCode
+      districtCode,
     );
 
     if (!hierarchyValid.success) {
@@ -197,7 +204,7 @@ export const validateAdministrativeHierarchy = async (
     if (!hierarchyValid.data) {
       return createError(
         "Invalid administrative hierarchy. District does not belong to the specified regency/province.",
-        400
+        400,
       );
     }
 
@@ -210,25 +217,27 @@ export const validateAdministrativeHierarchy = async (
 
 /**
  * Get administrative names by codes
- * 
+ *
  * Utility function to get human-readable names for administrative codes.
  * Used for enriching report data.
  */
 export const getAdministrativeNames = async (
   provinceCode: string,
   regencyCode: string,
-  districtCode: string
-): Promise<AppResult<{
-  province: string;
-  regency: string;
-  district: string;
-}>> => {
+  districtCode: string,
+): Promise<
+  AppResult<{
+    province: string;
+    regency: string;
+    district: string;
+  }>
+> => {
   try {
     // Validate codes first
     const hierarchyValidation = await validateAdministrativeHierarchy(
       provinceCode,
       regencyCode,
-      districtCode
+      districtCode,
     );
 
     if (!hierarchyValidation.success) {
@@ -239,7 +248,7 @@ export const getAdministrativeNames = async (
     const result = await data.getAdministrativeNames(
       provinceCode,
       regencyCode,
-      districtCode
+      districtCode,
     );
 
     return result;

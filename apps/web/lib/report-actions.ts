@@ -3,7 +3,8 @@
 import { cookies } from "next/headers";
 
 export async function getReportByIdAction(reportId: string) {
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+  const API_BASE_URL =
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
   try {
     const response = await fetch(`${API_BASE_URL}/api/reports/${reportId}`, {
@@ -26,4 +27,4 @@ export async function getReportByIdAction(reportId: string) {
     console.error("Error fetching report:", error);
     throw error;
   }
-} 
+}

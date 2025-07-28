@@ -17,7 +17,15 @@ export const findReportsWithPagination = async (
   query: ReportQuery,
 ): Promise<AppResult<PaginatedReports>> => {
   try {
-    const { page, limit, category, user_id, province_code, regency_code, district_code } = query;
+    const {
+      page,
+      limit,
+      category,
+      user_id,
+      province_code,
+      regency_code,
+      district_code,
+    } = query;
     const offset = (page - 1) * limit;
 
     const whereConditions: string[] = [];

@@ -35,7 +35,7 @@ export function ReportsFilterSection({
           onCategoryChange={onCategoryChange}
           onSearchChange={onSearchChange}
         />
-        
+
         <AdministrativeFilters
           provinsi={provinsi}
           kabupaten_kota={kabupaten_kota}

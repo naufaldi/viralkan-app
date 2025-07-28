@@ -5,6 +5,7 @@
 The current free text input approach for address fields (street, district, city, province) has several issues:
 
 ### Issues with Free Text Input:
+
 1. **Typos and spelling errors** - "Jakarta" vs "Djakarta" vs "Jakarta Pusat"
 2. **Inconsistent naming** - "Jawa Barat" vs "West Java" vs "Jabar"
 3. **Missing or incomplete data** - Users might not know exact administrative boundaries
@@ -12,8 +13,9 @@ The current free text input approach for address fields (street, district, city,
 5. **User confusion** - Users don't know what format to use
 
 ### Current Flow Problems:
+
 ```
-User types: "Jl Sudirman, Jakarta" 
+User types: "Jl Sudirman, Jakarta"
 → Nominatim gets: "Jl Sudirman, Jakarta"
 → Result: Might fail or return inaccurate results
 ```
@@ -23,11 +25,13 @@ User types: "Jl Sudirman, Jakarta"
 ### **Solution 1: Indonesian Administrative Autocomplete (What I Started)**
 
 **How it works:**
+
 - Cascading dropdowns: Province → City → District → Street
 - Pre-defined Indonesian administrative data
 - Users select from valid options only
 
 **Pros:**
+
 - ✅ No typos or spelling errors
 - ✅ Consistent naming for Nominatim
 - ✅ High geocoding success rate
@@ -36,6 +40,7 @@ User types: "Jl Sudirman, Jakarta"
 - ✅ Fast implementation with static data
 
 **Cons:**
+
 - ❌ Limited to pre-defined data only
 - ❌ Requires maintaining large dataset
 - ❌ Not scalable for all Indonesian locations
@@ -50,11 +55,13 @@ User types: "Jl Sudirman, Jakarta"
 ### **Solution 2: Smart Address Autocomplete with Nominatim Search**
 
 **How it works:**
+
 - Real-time search using Nominatim API
 - Autocomplete suggestions as user types
 - Fallback to manual input if no matches
 
 **Pros:**
+
 - ✅ Covers all Indonesian locations
 - ✅ Always up-to-date data
 - ✅ No data maintenance required
@@ -63,6 +70,7 @@ User types: "Jl Sudirman, Jakarta"
 - ✅ Real-time validation
 
 **Cons:**
+
 - ❌ API rate limiting (1 request/second)
 - ❌ Slower user experience (API calls)
 - ❌ Network dependency
@@ -77,12 +85,14 @@ User types: "Jl Sudirman, Jakarta"
 ### **Solution 3: Hybrid Approach (Recommended)**
 
 **How it works:**
+
 - Start with autocomplete for major cities (fast, reliable)
 - Fallback to Nominatim search for other locations
 - Cache successful results for future use
 - Allow manual input as last resort
 
 **Pros:**
+
 - ✅ Best of both worlds
 - ✅ Fast for common locations
 - ✅ Covers all Indonesian locations
@@ -91,6 +101,7 @@ User types: "Jl Sudirman, Jakarta"
 - ✅ Scalable and maintainable
 
 **Cons:**
+
 - ❌ More complex implementation
 - ❌ Requires both static data and API integration
 - ❌ Need to manage cache invalidation
@@ -103,11 +114,13 @@ User types: "Jl Sudirman, Jakarta"
 ### **Solution 4: Google Maps Geocoding API**
 
 **How it works:**
+
 - Replace Nominatim with Google Maps API
 - Better accuracy and coverage
 - More reliable service
 
 **Pros:**
+
 - ✅ Highest accuracy
 - ✅ Global coverage
 - ✅ Reliable service
@@ -116,6 +129,7 @@ User types: "Jl Sudirman, Jakarta"
 - ✅ Rich metadata
 
 **Cons:**
+
 - ❌ Expensive ($5 per 1000 requests)
 - ❌ Requires API key and billing
 - ❌ Rate limiting (10 requests/second)
@@ -130,11 +144,13 @@ User types: "Jl Sudirman, Jakarta"
 ### **Solution 5: Multi-Provider Geocoding**
 
 **How it works:**
+
 - Try multiple providers: Nominatim → Google → Here Maps
 - Use best result or combine results
 - Fallback chain for reliability
 
 **Pros:**
+
 - ✅ Maximum reliability
 - ✅ Best accuracy through competition
 - ✅ Redundancy if one service fails
@@ -142,6 +158,7 @@ User types: "Jl Sudirman, Jakarta"
 - ✅ Flexible provider selection
 
 **Cons:**
+
 - ❌ Very expensive
 - ❌ Complex implementation
 - ❌ Multiple API keys required
@@ -155,6 +172,7 @@ User types: "Jl Sudirman, Jakarta"
 ## **Street-Level Data Challenge**
 
 ### **The Street Problem:**
+
 - **No API for Indonesian streets** - Unlike provinces/cities/districts
 - **Street data is massive** - Millions of streets across Indonesia
 - **Dynamic and changing** - New streets, name changes, etc.
@@ -163,12 +181,15 @@ User types: "Jl Sudirman, Jakarta"
 ### **Street Data Solutions:**
 
 #### **Option A: Nominatim Street Search (Recommended)**
+
 **How it works:**
+
 - Use Nominatim's search API for street suggestions
 - Search within selected district/city
 - Real-time street suggestions as user types
 
 **Pros:**
+
 - ✅ Covers all Indonesian streets
 - ✅ Always up-to-date
 - ✅ No data maintenance
@@ -176,41 +197,48 @@ User types: "Jl Sudirman, Jakarta"
 - ✅ Free to use
 
 **Cons:**
+
 - ❌ Rate limited (1 request/second)
 - ❌ Slower than static data
 - ❌ Network dependency
 - ❌ Quality varies by location
 
 **Implementation:**
+
 ```typescript
 // Search streets in selected district
 const searchStreets = async (query: string, districtId: string) => {
   const district = getDistrictById(districtId);
   const searchQuery = `${query}, ${district.name}, Indonesia`;
-  
+
   return await nominatimSearch(searchQuery);
 };
 ```
 
 #### **Option B: OpenStreetMap Overpass API**
+
 **How it works:**
+
 - Query OpenStreetMap directly for street data
 - More detailed street information
 - Better filtering options
 
 **Pros:**
+
 - ✅ More detailed street data
 - ✅ Better filtering (by district, road type, etc.)
 - ✅ Includes road metadata (type, surface, etc.)
 - ✅ Free to use
 
 **Cons:**
+
 - ❌ More complex queries
 - ❌ Rate limited
 - ❌ Requires understanding of OSM data structure
 - ❌ Slower than Nominatim
 
 **Implementation:**
+
 ```typescript
 // Overpass query for streets in district
 const overpassQuery = `
@@ -224,30 +252,35 @@ const overpassQuery = `
 ```
 
 #### **Option C: Hybrid Street Approach (Best)**
+
 **How it works:**
+
 - Static data for major streets in major cities
 - Nominatim search for other streets
 - Cache successful street searches
 
 **Pros:**
+
 - ✅ Fast for common streets
 - ✅ Full coverage for all streets
 - ✅ Reduces API calls
 - ✅ Best user experience
 
 **Cons:**
+
 - ❌ More complex implementation
 - ❌ Requires street data maintenance
 
 **Implementation:**
+
 ```typescript
 interface StreetSearch {
   // Static data for major streets
   staticStreets: StreetData[];
-  
+
   // Nominatim search for other streets
   nominatimSearch: (query: string, district: string) => Promise<Street[]>;
-  
+
   // Cache for performance
   streetCache: Map<string, Street[]>;
 }
@@ -260,18 +293,22 @@ interface StreetSearch {
 ```
 
 #### **Option D: Manual Street Input with Validation**
+
 **How it works:**
+
 - Users type street names manually
 - Basic validation (not empty, reasonable length)
 - Let Nominatim handle the geocoding
 
 **Pros:**
+
 - ✅ Simple implementation
 - ✅ No street data maintenance
 - ✅ Users can enter any street name
 - ✅ Works for all locations
 
 **Cons:**
+
 - ❌ No autocomplete/validation
 - ❌ Users can make typos
 - ❌ Lower geocoding success rate
@@ -301,17 +338,20 @@ interface StreetSearch {
 ### **Street Data Strategy:**
 
 **Phase 1: Major Streets Only (MVP)**
+
 - Jakarta: Jl. Sudirman, Jl. Thamrin, Jl. Gatot Subroto, etc.
 - Bandung: Jl. Asia Afrika, Jl. Braga, Jl. Dago, etc.
 - Surabaya: Jl. Tunjungan, Jl. Basuki Rahmat, etc.
 - ~100-200 major streets total
 
 **Phase 2: Add Nominatim Street Search**
+
 - For streets not in static data
 - Cached results for performance
 - Fallback for all other streets
 
 **Phase 3: Expand Static Data**
+
 - Add more streets based on user feedback
 - Focus on high-traffic areas
 - Community-driven expansion
@@ -322,13 +362,13 @@ interface StreetSearch {
 interface StreetAutocomplete {
   // Static data for major streets
   staticStreets: Map<string, Street[]>; // districtId -> streets
-  
+
   // Nominatim search for other streets
   searchStreets: (query: string, district: District) => Promise<Street[]>;
-  
+
   // Cache for performance
   streetCache: Map<string, Street[]>;
-  
+
   // Fallback to manual input
   manualInput: () => void;
 }
@@ -343,6 +383,7 @@ interface StreetAutocomplete {
 ```
 
 ### **Expected Results:**
+
 - **< 200ms response time** for major streets
 - **< 1s response time** for all streets
 - **90%+ street autocomplete coverage** for major cities

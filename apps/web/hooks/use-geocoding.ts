@@ -33,162 +33,187 @@ export function useGeocoding(options: UseGeocodingOptions = {}) {
 
   // Clear error when user starts typing
   const clearError = useCallback(() => {
-    setState(prev => ({ ...prev, geocodingError: null }));
+    setState((prev) => ({ ...prev, geocodingError: null }));
   }, []);
 
   // Validate coordinates
-  const isValidCoordinates = useCallback((lat: number, lon: number): boolean => {
-    return !isNaN(lat) && !isNaN(lon) && 
-           lat >= -90 && lat <= 90 && 
-           lon >= -180 && lon <= 180;
-  }, []);
+  const isValidCoordinates = useCallback(
+    (lat: number, lon: number): boolean => {
+      return (
+        !isNaN(lat) &&
+        !isNaN(lon) &&
+        lat >= -90 &&
+        lat <= 90 &&
+        lon >= -180 &&
+        lon <= 180
+      );
+    },
+    [],
+  );
 
   // Validate address (at least street + city)
-  const isValidAddress = useCallback((street: string, city: string): boolean => {
-    return street?.trim().length > 0 && city?.trim().length > 0;
-  }, []);
+  const isValidAddress = useCallback(
+    (street: string, city: string): boolean => {
+      return street?.trim().length > 0 && city?.trim().length > 0;
+    },
+    [],
+  );
 
   // Reverse geocoding: Coordinates → Address
-  const geocodeFromCoordinates = useCallback(async (lat: number, lon: number) => {
-    if (!autoFillEnabled) return;
+  const geocodeFromCoordinates = useCallback(
+    async (lat: number, lon: number) => {
+      if (!autoFillEnabled) return;
 
-    setState(prev => ({ 
-      ...prev, 
-      isGeocodingFromCoords: true, 
-      geocodingError: null 
-    }));
+      setState((prev) => ({
+        ...prev,
+        isGeocodingFromCoords: true,
+        geocodingError: null,
+      }));
 
-    try {
-      const result = await reverseGeocode(lat, lon);
+      try {
+        const result = await reverseGeocode(lat, lon);
 
-      if (result.success && result.data) {
-        // Auto-fill address fields
-        const addressData = {
-          street_name: result.data.street_name || "",
-          district: result.data.district || "",
-          city: result.data.city || "",
-          province: result.data.province || "",
-        };
+        if (result.success && result.data) {
+          // Auto-fill address fields
+          const addressData = {
+            street_name: result.data.street_name || "",
+            district: result.data.district || "",
+            city: result.data.city || "",
+            province: result.data.province || "",
+          };
 
-        onAddressFilled?.(addressData);
+          onAddressFilled?.(addressData);
 
-        // Show success message
-        const location = [
-          result.data.district,
-          result.data.city,
-          result.data.province
-        ].filter(Boolean).join(", ");
+          // Show success message
+          const location = [
+            result.data.district,
+            result.data.city,
+            result.data.province,
+          ]
+            .filter(Boolean)
+            .join(", ");
 
-        toast.success("Alamat berhasil ditemukan", {
-          description: location || "Data lokasi berhasil diekstrak",
+          toast.success("Alamat berhasil ditemukan", {
+            description: location || "Data lokasi berhasil diekstrak",
+            duration: 4000,
+          });
+
+          setState((prev) => ({
+            ...prev,
+            lastGeocodingSource: "coordinates",
+          }));
+        } else {
+          const errorMsg = result.error?.message || "Gagal menemukan alamat";
+          setState((prev) => ({ ...prev, geocodingError: errorMsg }));
+
+          toast.error("Gagal menemukan alamat", {
+            description: "Silakan isi alamat secara manual",
+            duration: 4000,
+          });
+        }
+      } catch (error) {
+        console.error("Geocoding error:", error);
+        const errorMsg = "Terjadi kesalahan saat mencari alamat";
+        setState((prev) => ({ ...prev, geocodingError: errorMsg }));
+
+        toast.error("Gagal mencari alamat", {
+          description: "Silakan coba lagi atau isi secara manual",
           duration: 4000,
         });
-
-        setState(prev => ({ 
-          ...prev, 
-          lastGeocodingSource: "coordinates" 
-        }));
-      } else {
-        const errorMsg = result.error?.message || "Gagal menemukan alamat";
-        setState(prev => ({ ...prev, geocodingError: errorMsg }));
-        
-        toast.error("Gagal menemukan alamat", {
-          description: "Silakan isi alamat secara manual",
-          duration: 4000,
-        });
+      } finally {
+        setState((prev) => ({ ...prev, isGeocodingFromCoords: false }));
       }
-    } catch (error) {
-      console.error("Geocoding error:", error);
-      const errorMsg = "Terjadi kesalahan saat mencari alamat";
-      setState(prev => ({ ...prev, geocodingError: errorMsg }));
-      
-      toast.error("Gagal mencari alamat", {
-        description: "Silakan coba lagi atau isi secara manual",
-        duration: 4000,
-      });
-    } finally {
-      setState(prev => ({ ...prev, isGeocodingFromCoords: false }));
-    }
-  }, [autoFillEnabled, onAddressFilled]);
+    },
+    [autoFillEnabled, onAddressFilled],
+  );
 
   // Forward geocoding: Address → Coordinates
-  const geocodeFromAddress = useCallback(async (
-    street: string,
-    district: string,
-    city: string,
-    province: string
-  ) => {
-    setState(prev => ({ 
-      ...prev, 
-      isGeocodingFromAddress: true, 
-      geocodingError: null 
-    }));
+  const geocodeFromAddress = useCallback(
+    async (
+      street: string,
+      district: string,
+      city: string,
+      province: string,
+    ) => {
+      setState((prev) => ({
+        ...prev,
+        isGeocodingFromAddress: true,
+        geocodingError: null,
+      }));
 
-    try {
-      // Build address string
-      const addressParts = [street, district, city, province].filter(Boolean);
-      const address = addressParts.join(", ");
+      try {
+        // Build address string
+        const addressParts = [street, district, city, province].filter(Boolean);
+        const address = addressParts.join(", ");
 
-      if (address.trim().length < 10) {
-        throw new Error("Alamat terlalu pendek untuk pencarian");
-      }
+        if (address.trim().length < 10) {
+          throw new Error("Alamat terlalu pendek untuk pencarian");
+        }
 
-      const result = await forwardGeocode(address);
+        const result = await forwardGeocode(address);
 
-      if (result.success && result.data) {
-        // Auto-fill coordinates
-        const coordData = {
-          lat: result.data.lat || 0,
-          lon: result.data.lon || 0,
-        };
+        if (result.success && result.data) {
+          // Auto-fill coordinates
+          const coordData = {
+            lat: result.data.lat || 0,
+            lon: result.data.lon || 0,
+          };
 
-        onCoordinatesFilled?.(coordData);
+          onCoordinatesFilled?.(coordData);
 
-        // Show success message
-        toast.success("Koordinat berhasil ditemukan", {
-          description: `Lat: ${coordData.lat.toFixed(6)}, Lon: ${coordData.lon.toFixed(6)}`,
+          // Show success message
+          toast.success("Koordinat berhasil ditemukan", {
+            description: `Lat: ${coordData.lat.toFixed(6)}, Lon: ${coordData.lon.toFixed(6)}`,
+            duration: 4000,
+          });
+
+          setState((prev) => ({
+            ...prev,
+            lastGeocodingSource: "address",
+          }));
+        } else {
+          const errorMsg = result.error?.message || "Gagal menemukan koordinat";
+          setState((prev) => ({ ...prev, geocodingError: errorMsg }));
+
+          toast.error("Gagal menemukan koordinat", {
+            description: "Silakan masukkan koordinat secara manual",
+            duration: 4000,
+          });
+        }
+      } catch (error) {
+        console.error("Geocoding error:", error);
+        const errorMsg =
+          error instanceof Error
+            ? error.message
+            : "Terjadi kesalahan saat mencari koordinat";
+        setState((prev) => ({ ...prev, geocodingError: errorMsg }));
+
+        toast.error("Gagal mencari koordinat", {
+          description: "Silakan coba lagi atau masukkan secara manual",
           duration: 4000,
         });
-
-        setState(prev => ({ 
-          ...prev, 
-          lastGeocodingSource: "address" 
-        }));
-      } else {
-        const errorMsg = result.error?.message || "Gagal menemukan koordinat";
-        setState(prev => ({ ...prev, geocodingError: errorMsg }));
-        
-        toast.error("Gagal menemukan koordinat", {
-          description: "Silakan masukkan koordinat secara manual",
-          duration: 4000,
-        });
+      } finally {
+        setState((prev) => ({ ...prev, isGeocodingFromAddress: false }));
       }
-    } catch (error) {
-      console.error("Geocoding error:", error);
-      const errorMsg = error instanceof Error ? error.message : "Terjadi kesalahan saat mencari koordinat";
-      setState(prev => ({ ...prev, geocodingError: errorMsg }));
-      
-      toast.error("Gagal mencari koordinat", {
-        description: "Silakan coba lagi atau masukkan secara manual",
-        duration: 4000,
-      });
-    } finally {
-      setState(prev => ({ ...prev, isGeocodingFromAddress: false }));
-    }
-  }, [onCoordinatesFilled]);
+    },
+    [onCoordinatesFilled],
+  );
 
   // Manual coordinates geocoding (removed auto-trigger for better UX)
-  const geocodeFromCoordinatesManual = useCallback(async (lat: number, lon: number) => {
-    if (!isValidCoordinates(lat, lon)) {
-      toast.error("Koordinat tidak valid", {
-        description: "Silakan masukkan koordinat yang valid",
-        duration: 4000,
-      });
-      return;
-    }
+  const geocodeFromCoordinatesManual = useCallback(
+    async (lat: number, lon: number) => {
+      if (!isValidCoordinates(lat, lon)) {
+        toast.error("Koordinat tidak valid", {
+          description: "Silakan masukkan koordinat yang valid",
+          duration: 4000,
+        });
+        return;
+      }
 
-    await geocodeFromCoordinates(lat, lon);
-  }, [isValidCoordinates, geocodeFromCoordinates]);
+      await geocodeFromCoordinates(lat, lon);
+    },
+    [isValidCoordinates, geocodeFromCoordinates],
+  );
 
   // Cleanup on unmount
   useEffect(() => {
@@ -205,14 +230,14 @@ export function useGeocoding(options: UseGeocodingOptions = {}) {
     isGeocodingFromAddress: state.isGeocodingFromAddress,
     lastGeocodingSource: state.lastGeocodingSource,
     geocodingError: state.geocodingError,
-    
+
     // Actions
     geocodeFromCoordinatesManual,
     geocodeFromAddress,
     clearError,
-    
+
     // Utilities
     isValidCoordinates,
     isValidAddress,
   };
-} 
+}

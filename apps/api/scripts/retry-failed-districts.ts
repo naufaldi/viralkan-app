@@ -9,10 +9,10 @@
  * Usage: bun run scripts/retry-failed-districts.ts
  */
 
-import { sql } from '../src/db/connection';
+import { sql } from "../src/db/connection";
 
 // Failed regency codes from your error message
-const FAILED_REGENCY_CODES = ['1204', '1401', '1507', '1508', '1709', '1771'];
+const FAILED_REGENCY_CODES = ["1204", "1401", "1507", "1508", "1709", "1771"];
 
 interface ApiResponse<T> {
   statusCode: number;
@@ -40,7 +40,7 @@ interface ApiDistrict {
 }
 
 class DistrictRetryService {
-  private readonly baseUrl = 'https://api-idnarea.fityan.tech';
+  private readonly baseUrl = "https://api-idnarea.fityan.tech";
   private readonly requestDelay = 5000; // 5 seconds between requests
   private readonly maxRetries = 5; // More retries for failed ones
   private readonly retryDelay = 15000; // 15 seconds on rate limit
@@ -50,11 +50,11 @@ class DistrictRetryService {
    */
   async retryFailedDistricts(regencyCodes: string[]): Promise<void> {
     console.log(
-      `🔄 Retrying districts for ${regencyCodes.length} failed regencies...`
+      `🔄 Retrying districts for ${regencyCodes.length} failed regencies...`,
     );
-    console.log(`📝 Regency codes: ${regencyCodes.join(', ')}`);
+    console.log(`📝 Regency codes: ${regencyCodes.join(", ")}`);
     console.log(
-      `⏳ This will take ~${Math.ceil((regencyCodes.length * 5) / 60)} minutes with delays\n`
+      `⏳ This will take ~${Math.ceil((regencyCodes.length * 5) / 60)} minutes with delays\n`,
     );
 
     let successCount = 0;
@@ -64,7 +64,7 @@ class DistrictRetryService {
     for (let i = 0; i < regencyCodes.length; i++) {
       const regencyCode = regencyCodes[i];
       console.log(
-        `[${i + 1}/${regencyCodes.length}] Retrying districts for regency ${regencyCode}...`
+        `[${i + 1}/${regencyCodes.length}] Retrying districts for regency ${regencyCode}...`,
       );
 
       try {
@@ -75,7 +75,7 @@ class DistrictRetryService {
 
         if (regencyInfo.length === 0) {
           console.log(
-            `  ⚠️ Regency ${regencyCode} not found in database, skipping...`
+            `  ⚠️ Regency ${regencyCode} not found in database, skipping...`,
           );
           continue;
         }
@@ -117,7 +117,7 @@ class DistrictRetryService {
           } catch (error) {
             console.error(
               `    ❌ Error saving district ${district.code}:`,
-              error
+              error,
             );
           }
         }
@@ -126,13 +126,13 @@ class DistrictRetryService {
         successCount++;
 
         console.log(
-          `  ✅ Success: ${districts.length} districts (${insertedCount} new, ${updatedCount} updated)`
+          `  ✅ Success: ${districts.length} districts (${insertedCount} new, ${updatedCount} updated)`,
         );
 
         // Delay before next regency (except for the last one)
         if (i < regencyCodes.length - 1) {
           console.log(
-            `  ⏳ Waiting ${this.requestDelay}ms before next regency...\n`
+            `  ⏳ Waiting ${this.requestDelay}ms before next regency...\n`,
           );
           await this.delay(this.requestDelay);
         }
@@ -142,8 +142,8 @@ class DistrictRetryService {
       }
     }
 
-    console.log('\n📊 Retry Results:');
-    console.log('================');
+    console.log("\n📊 Retry Results:");
+    console.log("================");
     console.log(`Regencies processed: ${regencyCodes.length}`);
     console.log(`Successful: ${successCount}`);
     console.log(`Failed: ${errorCount}`);
@@ -154,21 +154,21 @@ class DistrictRetryService {
    * Fetch districts for a specific regency with retry logic
    */
   private async fetchDistrictsWithRetry(
-    regencyCode: string
+    regencyCode: string,
   ): Promise<ApiDistrict[]> {
     for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
       try {
         console.log(
-          `    📡 Fetching districts (attempt ${attempt}/${this.maxRetries})`
+          `    📡 Fetching districts (attempt ${attempt}/${this.maxRetries})`,
         );
 
         const response = await fetch(
-          `${this.baseUrl}/districts?regencyCode=${regencyCode}`
+          `${this.baseUrl}/districts?regencyCode=${regencyCode}`,
         );
 
         if (response.status === 429) {
           console.warn(
-            `    ⚠️ Rate limited, waiting ${this.retryDelay}ms before retry...`
+            `    ⚠️ Rate limited, waiting ${this.retryDelay}ms before retry...`,
           );
           if (attempt < this.maxRetries) {
             await this.delay(this.retryDelay);
@@ -183,19 +183,19 @@ class DistrictRetryService {
 
         const data: ApiResponse<ApiDistrict> = await response.json();
         console.log(
-          `    ✅ Successfully fetched ${data.data.length} districts`
+          `    ✅ Successfully fetched ${data.data.length} districts`,
         );
         return data.data;
       } catch (error) {
         if (attempt === this.maxRetries) {
           console.error(
             `    ❌ Failed after ${this.maxRetries} attempts:`,
-            error
+            error,
           );
           throw error;
         }
         console.warn(
-          `    ⚠️ Attempt ${attempt} failed, retrying in ${this.retryDelay}ms...`
+          `    ⚠️ Attempt ${attempt} failed, retrying in ${this.retryDelay}ms...`,
         );
         await this.delay(this.retryDelay);
       }
@@ -213,13 +213,13 @@ class DistrictRetryService {
 }
 
 async function main() {
-  console.log('🔄 Starting retry for failed district fetches...\n');
+  console.log("🔄 Starting retry for failed district fetches...\n");
 
   try {
     const retryService = new DistrictRetryService();
 
     // Check current status
-    console.log('📊 Current database status:');
+    console.log("📊 Current database status:");
     const [provincesResult, regenciesResult, districtsResult] =
       await Promise.all([
         sql`SELECT COUNT(*) as count FROM provinces`,
@@ -235,22 +235,22 @@ async function main() {
     await retryService.retryFailedDistricts(FAILED_REGENCY_CODES);
 
     // Check final status
-    console.log('\n📊 Final database status:');
+    console.log("\n📊 Final database status:");
     const [finalDistrictsResult] = await Promise.all([
       sql`SELECT COUNT(*) as count FROM districts`,
     ]);
 
     console.log(`  Districts: ${finalDistrictsResult[0].count}`);
 
-    console.log('\n✅ Retry completed!');
-    console.log('\n💡 If you still get rate limited, you can:');
-    console.log('  1. Wait longer and run this script again');
+    console.log("\n✅ Retry completed!");
+    console.log("\n💡 If you still get rate limited, you can:");
+    console.log("  1. Wait longer and run this script again");
     console.log(
-      '  2. Add more failed regency codes to FAILED_REGENCY_CODES array'
+      "  2. Add more failed regency codes to FAILED_REGENCY_CODES array",
     );
-    console.log('  3. Increase the delays in the script');
+    console.log("  3. Increase the delays in the script");
   } catch (error) {
-    console.error('❌ Retry failed:', error);
+    console.error("❌ Retry failed:", error);
     process.exit(1);
   } finally {
     await sql.end();
@@ -259,6 +259,6 @@ async function main() {
 
 // Run the script
 main().catch((error) => {
-  console.error('❌ Script failed:', error);
+  console.error("❌ Script failed:", error);
   process.exit(1);
 });

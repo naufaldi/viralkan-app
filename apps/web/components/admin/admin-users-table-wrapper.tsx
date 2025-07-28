@@ -32,30 +32,32 @@ export function AdminUsersTableWrapper({}: AdminUsersTableWrapperProps) {
   const { data: statsData, isLoading, error } = useAdminStatsQuery();
 
   // For now, create mock data based on stats since there's no admin users API yet
-  const transformedData: AdminUser[] = statsData ? [
-    {
-      id: "1",
-      name: "Admin User",
-      email: "admin@viralkan.com",
-      role: "admin" as const,
-      status: "active" as const,
-      joinedAt: "2024-01-01T00:00:00Z",
-      lastActive: new Date().toISOString(),
-      reportsCount: 0,
-      avatarUrl: undefined,
-    },
-    {
-      id: "2",
-      name: "Regular User",
-      email: "user@viralkan.com",
-      role: "user" as const,
-      status: "active" as const,
-      joinedAt: "2024-01-02T00:00:00Z",
-      lastActive: new Date().toISOString(),
-      reportsCount: statsData.totalReports,
-      avatarUrl: undefined,
-    }
-  ] : [];
+  const transformedData: AdminUser[] = statsData
+    ? [
+        {
+          id: "1",
+          name: "Admin User",
+          email: "admin@viralkan.com",
+          role: "admin" as const,
+          status: "active" as const,
+          joinedAt: "2024-01-01T00:00:00Z",
+          lastActive: new Date().toISOString(),
+          reportsCount: 0,
+          avatarUrl: undefined,
+        },
+        {
+          id: "2",
+          name: "Regular User",
+          email: "user@viralkan.com",
+          role: "user" as const,
+          status: "active" as const,
+          joinedAt: "2024-01-02T00:00:00Z",
+          lastActive: new Date().toISOString(),
+          reportsCount: statsData.totalReports,
+          avatarUrl: undefined,
+        },
+      ]
+    : [];
 
   const handleDelete = async (userId: string) => {
     try {

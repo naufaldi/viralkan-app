@@ -37,7 +37,7 @@ export const CreateReportSchema = z.object({
     example: 112.752088,
     description: "Longitude coordinate of the damage location",
   }),
-  
+
   // Administrative boundary fields (hybrid approach)
   // Text fields for backward compatibility and performance
   district: z
@@ -64,7 +64,7 @@ export const CreateReportSchema = z.object({
       example: "Jawa Barat",
       description: "Province name (provinsi)",
     }),
-  
+
   // Code fields for data integrity and validation (optional for backward compatibility)
   province_code: z
     .string()
@@ -215,7 +215,7 @@ export const ReportResponseSchema = z.object({
   location_text: z.string().openapi({ example: "Depan Mall Tunjungan Plaza" }),
   lat: z.number().nullable().openapi({ example: -7.257472 }),
   lon: z.number().nullable().openapi({ example: 112.752088 }),
-  
+
   // Administrative boundary fields in responses
   district: z.string().openapi({ example: "Sukasari" }),
   city: z.string().openapi({ example: "Kota Bandung" }),
@@ -223,7 +223,7 @@ export const ReportResponseSchema = z.object({
   province_code: z.string().nullable().openapi({ example: "32" }),
   regency_code: z.string().nullable().openapi({ example: "3273" }),
   district_code: z.string().nullable().openapi({ example: "327301" }),
-  
+
   status: z
     .enum(["pending", "verified", "rejected", "deleted"])
     .openapi({ example: "pending" }),

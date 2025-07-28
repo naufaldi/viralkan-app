@@ -1,16 +1,19 @@
 # Administrative Information & Filters Implementation Plan
 
 ## 🎯 Overview
+
 Add kecamatan, kabupaten/kota, and provinsi information to report cards and implement corresponding filters in the reports section.
 
 ## 📋 Implementation Phases
 
 ### Phase 1: UI Implementation (Current)
+
 **Focus:** UI components and visual design only, no data integration
 
 #### 1.1 Report Card Enhancement (`report-card.tsx`)
 
 **Current Structure:**
+
 ```
 ┌─────────────────────────────────────┐
 │ [Image with Category Badge]         │
@@ -23,6 +26,7 @@ Add kecamatan, kabupaten/kota, and provinsi information to report cards and impl
 ```
 
 **New Structure:**
+
 ```
 ┌─────────────────────────────────────┐
 │ [Image with Category Badge]         │
@@ -40,6 +44,7 @@ Add kecamatan, kabupaten/kota, and provinsi information to report cards and impl
 ```
 
 **Design Specifications:**
+
 - **Typography:** `text-sm text-neutral-500` for administrative info
 - **Spacing:** `space-y-2` between administrative items, `space-y-3` for sections
 - **Icons:** Building icon (`🏛️`) for administrative section
@@ -49,6 +54,7 @@ Add kecamatan, kabupaten/kota, and provinsi information to report cards and impl
 #### 1.2 Filter Section Enhancement (`reports-filter-section.tsx`)
 
 **Current Structure:**
+
 ```
 ┌─────────────────────────────────────┐
 │ Category Filter | Search Input      │
@@ -56,6 +62,7 @@ Add kecamatan, kabupaten/kota, and provinsi information to report cards and impl
 ```
 
 **New Structure:**
+
 ```
 ┌─────────────────────────────────────┐
 │ Category Filter | Search Input      │
@@ -66,6 +73,7 @@ Add kecamatan, kabupaten/kota, and provinsi information to report cards and impl
 ```
 
 **Design Specifications:**
+
 - **Layout:** Responsive grid with proper breakpoints
 - **Spacing:** `space-x-4` between filters, `space-y-4` for sections
 - **Styling:** Consistent with existing filter components
@@ -75,6 +83,7 @@ Add kecamatan, kabupaten/kota, and provinsi information to report cards and impl
 #### 1.3 Component Updates Required
 
 **Files to Modify:**
+
 1. `apps/web/components/reports/report-card.tsx`
    - Add administrative info section
    - Update TypeScript interfaces
@@ -89,6 +98,7 @@ Add kecamatan, kabupaten/kota, and provinsi information to report cards and impl
    - Implement filter state management
 
 **New Components to Create:**
+
 1. `apps/web/components/reports/administrative-info.tsx`
    - Reusable administrative info display component
    - Consistent styling and layout
@@ -98,9 +108,11 @@ Add kecamatan, kabupaten/kota, and provinsi information to report cards and impl
    - Dropdown/select components
 
 ### Phase 2: Data Integration (Future)
+
 **Focus:** Connect UI to actual data
 
 #### 2.1 Data Structure Updates
+
 ```typescript
 interface Report {
   // Existing fields...
@@ -119,14 +131,17 @@ interface FilterState {
 ```
 
 #### 2.2 API Integration
+
 - Update API endpoints to include administrative data
 - Implement filter logic on backend
 - Add data fetching for administrative options
 
 ### Phase 3: Filter Logic (Future)
+
 **Focus:** Implement actual filtering functionality
 
 #### 3.1 Filter Implementation
+
 - Hierarchical filtering (Provinsi → Kabupaten → Kecamatan)
 - Search integration with administrative filters
 - URL state management for filters
@@ -134,6 +149,7 @@ interface FilterState {
 ## 🎨 Design System Compliance
 
 ### Color Palette (Following ui-concept.md)
+
 ```css
 /* Administrative Info Colors */
 --text-administrative: var(--color-neutral-500);
@@ -142,6 +158,7 @@ interface FilterState {
 ```
 
 ### Typography Hierarchy
+
 ```css
 /* Administrative Info Typography */
 .administrative-info {
@@ -152,6 +169,7 @@ interface FilterState {
 ```
 
 ### Spacing System
+
 ```css
 /* Component Spacing */
 .administrative-section {
@@ -164,12 +182,14 @@ interface FilterState {
 ## ♿ Accessibility Standards
 
 ### WCAG AA Compliance
+
 - **Color Contrast:** Minimum 4.5:1 for administrative text
 - **Focus Management:** Proper focus indicators for filter controls
 - **Screen Reader:** Semantic HTML structure for administrative info
 - **Keyboard Navigation:** Full keyboard accessibility for filters
 
 ### Semantic HTML Structure
+
 ```html
 <section aria-label="Administrative Information">
   <dl>
@@ -186,6 +206,7 @@ interface FilterState {
 ## 📱 Responsive Design Strategy
 
 ### Mobile-First Approach
+
 ```css
 /* Mobile (default) */
 .administrative-filters {
@@ -204,6 +225,7 @@ interface FilterState {
 ```
 
 ### Breakpoint Strategy
+
 - **Mobile (320px-767px):** Stacked layout, full-width filters
 - **Tablet (768px-1023px):** Horizontal layout, medium-width filters
 - **Desktop (1024px+):** Horizontal layout, optimized spacing
@@ -211,12 +233,14 @@ interface FilterState {
 ## 🧪 Testing Strategy
 
 ### Component Testing
+
 - **Unit Tests:** Administrative info display
 - **Integration Tests:** Filter interactions
 - **Visual Tests:** Responsive behavior
 - **Accessibility Tests:** Screen reader compatibility
 
 ### Test Cases
+
 1. **Report Card:**
    - Displays administrative info correctly
    - Handles missing administrative data gracefully
@@ -231,6 +255,7 @@ interface FilterState {
 ## 📋 Implementation Checklist
 
 ### Phase 1: UI Implementation ✅ COMPLETED
+
 - [x] Create `administrative-info.tsx` component
 - [x] Create `administrative-filters.tsx` component
 - [x] Update `report-card.tsx` with administrative info
@@ -243,12 +268,14 @@ interface FilterState {
 - [x] Fix scroll-to-top issue with filters
 
 ### Phase 2: Data Integration ✅ COMPLETED
+
 - [x] Update API data structure
 - [x] Implement data fetching for administrative options
 - [x] Connect UI components to real data
 - [x] Add loading states for administrative data
 
 ### Phase 3: Filter Logic (Future)
+
 - [ ] Implement hierarchical filtering
 - [ ] Add URL state management
 - [ ] Integrate with search functionality
@@ -257,18 +284,21 @@ interface FilterState {
 ## 🚀 Success Criteria
 
 ### Visual Design
+
 - [ ] Administrative info follows design system
 - [ ] Filters are visually consistent with existing UI
 - [ ] Responsive design works on all devices
 - [ ] Accessibility standards are met
 
 ### User Experience
+
 - [ ] Administrative info is easy to scan
 - [ ] Filters are intuitive to use
 - [ ] Mobile experience is optimized
 - [ ] Loading states provide good feedback
 
 ### Technical Quality
+
 - [ ] Components are reusable
 - [ ] TypeScript types are properly defined
 - [ ] Code follows project conventions
@@ -277,12 +307,14 @@ interface FilterState {
 ## 📝 Notes
 
 ### Design Decisions
+
 1. **Administrative Info Placement:** Below location text, above user info
 2. **Filter Organization:** Hierarchical (Provinsi → Kabupaten → Kecamatan)
 3. **Icon Usage:** Building icon for administrative section
 4. **Color Strategy:** Neutral colors for secondary information
 
 ### Future Considerations
+
 1. **Data Source:** Administrative data may come from external APIs
 2. **Caching:** Administrative options should be cached for performance
 3. **Internationalization:** Support for different administrative structures
@@ -290,4 +322,4 @@ interface FilterState {
 
 ---
 
-**Next Steps:** Review this plan and approve for implementation. Phase 1 (UI) can begin immediately while data integration planning continues. 
+**Next Steps:** Review this plan and approve for implementation. Phase 1 (UI) can begin immediately while data integration planning continues.

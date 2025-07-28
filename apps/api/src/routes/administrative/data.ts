@@ -1,9 +1,9 @@
 /**
  * Administrative Data Layer
- * 
+ *
  * Database operations for Indonesian administrative data.
  * Pure data access with no business logic.
- * 
+ *
  * Following clean architecture: Data layer only handles database operations
  * and external API calls - no business logic or HTTP concerns.
  */
@@ -11,16 +11,11 @@
 import { sql } from "@/db/connection";
 import { createSuccess, createError } from "@/types";
 import type { AppResult } from "@/types";
-import type {
-  Province,
-  Regency,
-  District,
-  SyncStatus,
-} from "./types";
+import type { Province, Regency, District, SyncStatus } from "./types";
 
 /**
  * Find all provinces
- * 
+ *
  * Returns all provinces ordered by code for consistent ordering.
  */
 export const findAllProvinces = async (): Promise<AppResult<Province[]>> => {
@@ -41,11 +36,11 @@ export const findAllProvinces = async (): Promise<AppResult<Province[]>> => {
 
 /**
  * Check if province exists
- * 
+ *
  * Validates that a province code exists in the database.
  */
 export const checkProvinceExists = async (
-  provinceCode: string
+  provinceCode: string,
 ): Promise<AppResult<boolean>> => {
   try {
     const query = `
@@ -65,11 +60,11 @@ export const checkProvinceExists = async (
 
 /**
  * Find regencies by province
- * 
+ *
  * Returns all regencies/cities within a specific province.
  */
 export const findRegenciesByProvince = async (
-  provinceCode: string
+  provinceCode: string,
 ): Promise<AppResult<Regency[]>> => {
   try {
     const query = `
@@ -89,11 +84,11 @@ export const findRegenciesByProvince = async (
 
 /**
  * Check if regency exists
- * 
+ *
  * Validates that a regency code exists in the database.
  */
 export const checkRegencyExists = async (
-  regencyCode: string
+  regencyCode: string,
 ): Promise<AppResult<boolean>> => {
   try {
     const query = `
@@ -113,11 +108,11 @@ export const checkRegencyExists = async (
 
 /**
  * Find districts by regency
- * 
+ *
  * Returns all districts within a specific regency/city.
  */
 export const findDistrictsByRegency = async (
-  regencyCode: string
+  regencyCode: string,
 ): Promise<AppResult<District[]>> => {
   try {
     const query = `
@@ -137,10 +132,12 @@ export const findDistrictsByRegency = async (
 
 /**
  * Get administrative counts and sync status
- * 
+ *
  * Returns current counts of all administrative units and last sync timestamp.
  */
-export const getAdministrativeCounts = async (): Promise<AppResult<SyncStatus>> => {
+export const getAdministrativeCounts = async (): Promise<
+  AppResult<SyncStatus>
+> => {
   try {
     // Get counts from all administrative tables
     const countsQuery = `
@@ -186,14 +183,14 @@ export const getAdministrativeCounts = async (): Promise<AppResult<SyncStatus>> 
 
 /**
  * Validate administrative hierarchy
- * 
+ *
  * Checks that district belongs to regency and regency belongs to province
  * by validating the relationships exist in the database.
  */
 export const validateHierarchy = async (
   provinceCode: string,
   regencyCode: string,
-  districtCode: string
+  districtCode: string,
 ): Promise<AppResult<boolean>> => {
   try {
     const query = `
@@ -207,7 +204,11 @@ export const validateHierarchy = async (
       LIMIT 1
     `;
 
-    const result = await sql.unsafe(query, [provinceCode, regencyCode, districtCode]);
+    const result = await sql.unsafe(query, [
+      provinceCode,
+      regencyCode,
+      districtCode,
+    ]);
     return createSuccess(result.length > 0);
   } catch (error) {
     console.error("Database error in validateHierarchy:", error);
@@ -217,19 +218,21 @@ export const validateHierarchy = async (
 
 /**
  * Get administrative names by codes
- * 
+ *
  * Fetches human-readable names for administrative codes.
  * Used for enriching report data and validation messages.
  */
 export const getAdministrativeNames = async (
   provinceCode: string,
   regencyCode: string,
-  districtCode: string
-): Promise<AppResult<{
-  province: string;
-  regency: string;
-  district: string;
-}>> => {
+  districtCode: string,
+): Promise<
+  AppResult<{
+    province: string;
+    regency: string;
+    district: string;
+  }>
+> => {
   try {
     const query = `
       SELECT 
@@ -245,7 +248,11 @@ export const getAdministrativeNames = async (
       LIMIT 1
     `;
 
-    const result = await sql.unsafe(query, [provinceCode, regencyCode, districtCode]);
+    const result = await sql.unsafe(query, [
+      provinceCode,
+      regencyCode,
+      districtCode,
+    ]);
 
     if (result.length === 0) {
       return createError("Administrative hierarchy not found", 404);
@@ -265,12 +272,12 @@ export const getAdministrativeNames = async (
 
 /**
  * Find province by name (fuzzy search)
- * 
+ *
  * Searches for provinces by name using case-insensitive partial matching.
  * Useful for geocoding validation and name resolution.
  */
 export const findProvinceByName = async (
-  name: string
+  name: string,
 ): Promise<AppResult<Province | null>> => {
   try {
     const query = `
@@ -289,8 +296,12 @@ export const findProvinceByName = async (
 
     const searchPattern = `%${name}%`;
     const startsWithPattern = `${name}%`;
-    
-    const result = await sql.unsafe(query, [searchPattern, name, startsWithPattern]);
+
+    const result = await sql.unsafe(query, [
+      searchPattern,
+      name,
+      startsWithPattern,
+    ]);
 
     if (result.length === 0) {
       return createSuccess(null);
@@ -305,12 +316,12 @@ export const findProvinceByName = async (
 
 /**
  * Find regency by name within province
- * 
+ *
  * Searches for regencies by name within a specific province.
  */
 export const findRegencyByName = async (
   name: string,
-  provinceCode: string
+  provinceCode: string,
 ): Promise<AppResult<Regency | null>> => {
   try {
     const query = `
@@ -330,7 +341,7 @@ export const findRegencyByName = async (
 
     const searchPattern = `%${name}%`;
     const startsWithPattern = `${name}%`;
-    
+
     const result = await sql.unsafe(query, [
       provinceCode,
       searchPattern,
@@ -351,12 +362,12 @@ export const findRegencyByName = async (
 
 /**
  * Find district by name within regency
- * 
+ *
  * Searches for districts by name within a specific regency.
  */
 export const findDistrictByName = async (
   name: string,
-  regencyCode: string
+  regencyCode: string,
 ): Promise<AppResult<District | null>> => {
   try {
     const query = `
@@ -376,7 +387,7 @@ export const findDistrictByName = async (
 
     const searchPattern = `%${name}%`;
     const startsWithPattern = `${name}%`;
-    
+
     const result = await sql.unsafe(query, [
       regencyCode,
       searchPattern,
@@ -397,7 +408,7 @@ export const findDistrictByName = async (
 
 /**
  * Bulk check administrative codes existence
- * 
+ *
  * Efficiently checks if multiple administrative codes exist.
  * Used for batch validation operations.
  */
@@ -405,11 +416,13 @@ export const checkCodesExist = async (codes: {
   provinces?: string[];
   regencies?: string[];
   districts?: string[];
-}): Promise<AppResult<{
-  provinces: string[];
-  regencies: string[];
-  districts: string[];
-}>> => {
+}): Promise<
+  AppResult<{
+    provinces: string[];
+    regencies: string[];
+    districts: string[];
+  }>
+> => {
   try {
     const results = {
       provinces: [] as string[],

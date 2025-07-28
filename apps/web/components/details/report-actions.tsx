@@ -1,7 +1,12 @@
 "use client";
 
 import { Button } from "@repo/ui/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@repo/ui/components/ui/card";
 import Link from "next/link";
 
 interface ReportActionsProps {
@@ -31,9 +36,7 @@ export function ReportActions({ reportId, canEdit }: ReportActionsProps) {
             className="w-full bg-neutral-900 hover:bg-neutral-800 text-white"
             asChild
           >
-            <Link href={`/laporan/${reportId}/edit`}>
-              Edit Laporan
-            </Link>
+            <Link href={`/laporan/${reportId}/edit`}>Edit Laporan</Link>
           </Button>
         )}
 
@@ -47,4 +50,4 @@ export function ReportActions({ reportId, canEdit }: ReportActionsProps) {
       </CardContent>
     </Card>
   );
-} 
+}

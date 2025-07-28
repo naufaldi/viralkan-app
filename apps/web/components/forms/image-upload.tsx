@@ -65,9 +65,14 @@ export default function ImageUpload({
 
       // Ensure the compressed file has the correct filename with .webp extension
       const originalName = file.name;
-      const nameWithoutExt = originalName.substring(0, originalName.lastIndexOf('.'));
-      const newFileName = nameWithoutExt ? `${nameWithoutExt}.webp` : `compressed_${Date.now()}.webp`;
-      
+      const nameWithoutExt = originalName.substring(
+        0,
+        originalName.lastIndexOf("."),
+      );
+      const newFileName = nameWithoutExt
+        ? `${nameWithoutExt}.webp`
+        : `compressed_${Date.now()}.webp`;
+
       // Create a new File object with the correct filename
       const fileWithCorrectName = new File([compressedFile], newFileName, {
         type: "image/webp",

@@ -30,7 +30,16 @@ import {
   DropdownMenuTrigger,
 } from "@repo/ui/components/ui/dropdown-menu";
 import { Input } from "@repo/ui/components/ui/input";
-import { ArrowUpDown, Eye, Edit, MoreHorizontal, Search, Clock, CheckCircle, XCircle } from "lucide-react";
+import {
+  ArrowUpDown,
+  Eye,
+  Edit,
+  MoreHorizontal,
+  Search,
+  Clock,
+  CheckCircle,
+  XCircle,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -368,9 +377,9 @@ export function ReportsTable({ data, isLoading = false }: ReportsTableProps) {
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext(),
-                      )}
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
                   </TableHead>
                 ))}
               </TableRow>
@@ -426,7 +435,7 @@ export function ReportsTable({ data, isLoading = false }: ReportsTableProps) {
             hingga{" "}
             {Math.min(
               (table.getState().pagination.pageIndex + 1) *
-              table.getState().pagination.pageSize,
+                table.getState().pagination.pageSize,
               table.getFilteredRowModel().rows.length,
             )}{" "}
             dari {table.getFilteredRowModel().rows.length} laporan

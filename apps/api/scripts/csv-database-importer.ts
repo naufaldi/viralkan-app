@@ -1,9 +1,9 @@
-import { sql } from '../src/db/connection';
+import { sql } from "../src/db/connection";
 import type {
   ProvinceCSVRow,
   RegencyCSVRow,
   DistrictCSVRow,
-} from './csv-parser';
+} from "./csv-parser";
 
 export interface ImportResult {
   total: number;
@@ -59,7 +59,7 @@ export class DatabaseImporter {
         result.errorDetails.push({
           code: province.code,
           name: province.name,
-          error: error instanceof Error ? error.message : 'Unknown error',
+          error: error instanceof Error ? error.message : "Unknown error",
         });
       }
     }
@@ -121,7 +121,7 @@ export class DatabaseImporter {
         result.errorDetails.push({
           code: regency.code,
           name: regency.name,
-          error: error instanceof Error ? error.message : 'Unknown error',
+          error: error instanceof Error ? error.message : "Unknown error",
         });
       }
     }
@@ -183,7 +183,7 @@ export class DatabaseImporter {
         result.errorDetails.push({
           code: district.code,
           name: district.name,
-          error: error instanceof Error ? error.message : 'Unknown error',
+          error: error instanceof Error ? error.message : "Unknown error",
         });
       }
     }

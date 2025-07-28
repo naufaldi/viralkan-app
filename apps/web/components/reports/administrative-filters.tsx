@@ -1,4 +1,10 @@
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@repo/ui/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@repo/ui/components/ui/select";
 import { Building, Loader2 } from "lucide-react";
 import { useAdministrative } from "../../hooks/reports/use-administrative";
 import { useEffect } from "react";
@@ -22,7 +28,8 @@ export function AdministrativeFilters({
   onKecamatanChange,
   className = "",
 }: AdministrativeFiltersProps) {
-  const { data, loading, error, refetchRegencies, refetchDistricts } = useAdministrative();
+  const { data, loading, refetchRegencies, refetchDistricts } =
+    useAdministrative();
 
   // Fetch dependent data when parent selection changes
   useEffect(() => {
@@ -39,11 +46,15 @@ export function AdministrativeFilters({
 
   // Filter options based on selected values
   const filteredRegencies = data.regencies.filter(
-    (item) => !provinsi || provinsi === "all" || item.province_code === provinsi
+    (item) =>
+      !provinsi || provinsi === "all" || item.province_code === provinsi,
   );
-  
+
   const filteredDistricts = data.districts.filter(
-    (item) => !kabupaten_kota || kabupaten_kota === "all" || item.regency_code === kabupaten_kota
+    (item) =>
+      !kabupaten_kota ||
+      kabupaten_kota === "all" ||
+      item.regency_code === kabupaten_kota,
   );
 
   return (
@@ -54,14 +65,17 @@ export function AdministrativeFilters({
           Administrative Filters
         </h3>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Provinsi Filter */}
         <div className="space-y-2">
-          <label htmlFor="provinsi-filter" className="text-sm font-medium text-neutral-600">
+          <label
+            htmlFor="provinsi-filter"
+            className="text-sm font-medium text-neutral-600"
+          >
             Provinsi
           </label>
-          <Select value={provinsi} onValueChange={onProvinsiChange}>
+          <Select value={provinsi || "all"} onValueChange={onProvinsiChange}>
             <SelectTrigger id="provinsi-filter" className="w-full">
               <SelectValue placeholder="Pilih Provinsi" />
             </SelectTrigger>
@@ -87,11 +101,14 @@ export function AdministrativeFilters({
 
         {/* Kabupaten/Kota Filter */}
         <div className="space-y-2">
-          <label htmlFor="kabupaten-filter" className="text-sm font-medium text-neutral-600">
+          <label
+            htmlFor="kabupaten-filter"
+            className="text-sm font-medium text-neutral-600"
+          >
             Kabupaten/Kota
           </label>
-          <Select 
-            value={kabupaten_kota} 
+          <Select
+            value={kabupaten_kota || "all"}
             onValueChange={onKabupatenKotaChange}
             disabled={!provinsi || provinsi === "all"}
           >
@@ -120,11 +137,14 @@ export function AdministrativeFilters({
 
         {/* Kecamatan Filter */}
         <div className="space-y-2">
-          <label htmlFor="kecamatan-filter" className="text-sm font-medium text-neutral-600">
+          <label
+            htmlFor="kecamatan-filter"
+            className="text-sm font-medium text-neutral-600"
+          >
             Kecamatan
           </label>
-          <Select 
-            value={kecamatan} 
+          <Select
+            value={kecamatan || "all"}
             onValueChange={onKecamatanChange}
             disabled={!kabupaten_kota || kabupaten_kota === "all"}
           >
@@ -153,4 +173,4 @@ export function AdministrativeFilters({
       </div>
     </section>
   );
-} 
+}

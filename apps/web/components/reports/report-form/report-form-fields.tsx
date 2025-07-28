@@ -35,8 +35,8 @@ interface ReportFormFieldsProps {
   onClearGeocodingError?: () => void;
 }
 
-export const ReportFormFields = ({ 
-  form, 
+export const ReportFormFields = ({
+  form,
   disabled,
   isGeocodingFromCoords = false,
   isGeocodingFromAddress = false,
@@ -140,7 +140,9 @@ export const ReportFormFields = ({
                   disabled={disabled || isGeocodingFromCoords}
                   size="lg"
                   className={`border-neutral-300 focus:border-neutral-600 focus:ring-neutral-600/20 bg-white ${
-                    lastGeocodingSource === "coordinates" ? "border-green-300 bg-green-50/30" : ""
+                    lastGeocodingSource === "coordinates"
+                      ? "border-green-300 bg-green-50/30"
+                      : ""
                   }`}
                   {...field}
                   onChange={(e) => {
@@ -239,7 +241,9 @@ export const ReportFormFields = ({
                     disabled={disabled || isGeocodingFromAddress}
                     size="lg"
                     className={`border-neutral-300 focus:border-neutral-600 focus:ring-neutral-600/20 bg-white ${
-                      lastGeocodingSource === "address" ? "border-green-300 bg-green-50/30" : ""
+                      lastGeocodingSource === "address"
+                        ? "border-green-300 bg-green-50/30"
+                        : ""
                     }`}
                     {...field}
                     onChange={(e) => {
@@ -279,7 +283,9 @@ export const ReportFormFields = ({
                     disabled={disabled || isGeocodingFromAddress}
                     size="lg"
                     className={`border-neutral-300 focus:border-neutral-600 focus:ring-neutral-600/20 bg-white ${
-                      lastGeocodingSource === "address" ? "border-green-300 bg-green-50/30" : ""
+                      lastGeocodingSource === "address"
+                        ? "border-green-300 bg-green-50/30"
+                        : ""
                     }`}
                     {...field}
                     onChange={(e) => {
@@ -306,8 +312,14 @@ export const ReportFormFields = ({
               onClick={onGetAddress}
               isLoading={isGeocodingFromCoords}
               disabled={disabled}
-              isValidCoordinates={!!(form.watch("lat") && form.watch("lon") && 
-                form.watch("lat") !== 0 && form.watch("lon") !== 0)}
+              isValidCoordinates={
+                !!(
+                  form.watch("lat") &&
+                  form.watch("lon") &&
+                  form.watch("lat") !== 0 &&
+                  form.watch("lon") !== 0
+                )
+              }
             />
           </div>
         )}

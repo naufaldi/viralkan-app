@@ -65,15 +65,15 @@ interface DistrictCSVRow {
 ```typescript
 interface DataValidator {
   validateProvinceData(
-    data: ProvinceCSVRow[]
+    data: ProvinceCSVRow[],
   ): ValidationResult<ProvinceCSVRow>;
   validateRegencyData(
     data: RegencyCSVRow[],
-    provinces: ProvinceCSVRow[]
+    provinces: ProvinceCSVRow[],
   ): ValidationResult<RegencyCSVRow>;
   validateDistrictData(
     data: DistrictCSVRow[],
-    regencies: RegencyCSVRow[]
+    regencies: RegencyCSVRow[],
   ): ValidationResult<DistrictCSVRow>;
 }
 

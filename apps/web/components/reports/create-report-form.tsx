@@ -77,8 +77,8 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
             {/* EXIF Warning - Shows when GPS metadata is missing */}
             <ExifWarning isVisible={hasExifWarning} />
 
-            <ReportFormFields 
-              form={form} 
+            <ReportFormFields
+              form={form}
               disabled={isLoading}
               isGeocodingFromCoords={isGeocodingFromCoords}
               isGeocodingFromAddress={isGeocodingFromAddress}

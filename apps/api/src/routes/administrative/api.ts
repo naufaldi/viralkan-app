@@ -64,7 +64,10 @@ const ErrorResponseSchema = z.object({
   error: z.object({
     code: z.string().openapi({ example: "NOT_FOUND" }),
     message: z.string().openapi({ example: "Resource not found" }),
-    timestamp: z.string().datetime().openapi({ example: "2024-01-15T10:30:00Z" }),
+    timestamp: z
+      .string()
+      .datetime()
+      .openapi({ example: "2024-01-15T10:30:00Z" }),
   }),
 });
 
@@ -72,9 +75,9 @@ const SyncStatusSchema = z.object({
   provinces: z.number().openapi({ example: 38 }),
   regencies: z.number().openapi({ example: 514 }),
   districts: z.number().openapi({ example: 7024 }),
-  lastSync: z.string().datetime().nullable().openapi({ 
+  lastSync: z.string().datetime().nullable().openapi({
     example: "2024-01-15T10:30:00Z",
-    description: "Last sync timestamp, null if never synced"
+    description: "Last sync timestamp, null if never synced",
   }),
 });
 
@@ -84,7 +87,8 @@ const getProvincesRoute = createRoute({
   method: "get",
   path: "/provinces",
   summary: "Get all Indonesian provinces",
-  description: "Returns all 38 provinces in Indonesia with their codes and names",
+  description:
+    "Returns all 38 provinces in Indonesia with their codes and names",
   tags: ["Administrative"],
   responses: {
     200: {
@@ -107,15 +111,19 @@ const getRegenciesRoute = createRoute({
   path: "/regencies/{provinceCode}",
   request: {
     params: z.object({
-      provinceCode: z.string().length(2).regex(/^\d{2}$/).openapi({
-        param: {
-          name: "provinceCode",
-          in: "path",
-          required: true,
-        },
-        example: "32",
-        description: "Province code (2 digits)",
-      }),
+      provinceCode: z
+        .string()
+        .length(2)
+        .regex(/^\d{2}$/)
+        .openapi({
+          param: {
+            name: "provinceCode",
+            in: "path",
+            required: true,
+          },
+          example: "32",
+          description: "Province code (2 digits)",
+        }),
     }),
   },
   summary: "Get regencies by province",
@@ -150,15 +158,19 @@ const getDistrictsRoute = createRoute({
   path: "/districts/{regencyCode}",
   request: {
     params: z.object({
-      regencyCode: z.string().length(4).regex(/^\d{4}$/).openapi({
-        param: {
-          name: "regencyCode",
-          in: "path",
-          required: true,
-        },
-        example: "3273",
-        description: "Regency code (4 digits)",
-      }),
+      regencyCode: z
+        .string()
+        .length(4)
+        .regex(/^\d{4}$/)
+        .openapi({
+          param: {
+            name: "regencyCode",
+            in: "path",
+            required: true,
+          },
+          example: "3273",
+          description: "Regency code (4 digits)",
+        }),
     }),
   },
   summary: "Get districts by regency",

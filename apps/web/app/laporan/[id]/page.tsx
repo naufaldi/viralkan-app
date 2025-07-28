@@ -21,7 +21,11 @@ import Image from "next/image";
 import { REPORT_CATEGORIES } from "@/constant/reports";
 import { getTimeAgo, formatCoordinates } from "@/utils/reports";
 import { ReportDetailSkeleton } from "@/components/reports";
-import { ReportActions, ReportStatus, ReportStatusBadge } from "@/components/details";
+import {
+  ReportActions,
+  ReportStatus,
+  ReportStatusBadge,
+} from "@/components/details";
 import { getReportByIdAction } from "@/lib/report-actions";
 import { getAuthUser } from "@/lib/auth-server";
 import Header from "@/components/layout/header";
@@ -32,21 +36,24 @@ interface ReportDetailPageProps {
   };
 }
 
-export default async function ReportDetailPage({ params }: ReportDetailPageProps) {
+export default async function ReportDetailPage({
+  params,
+}: ReportDetailPageProps) {
   const reportId = params.id;
 
   try {
     // Fetch report data server-side
     const report = await getReportByIdAction(reportId);
-    
+
     // Get current user for ownership check
     const currentUser = await getAuthUser();
-    
+
     // Check if current user is the report owner
     const isOwner = currentUser && report.user_id === currentUser.id;
     const canEdit = isOwner || false;
 
-    const categoryInfo = REPORT_CATEGORIES[report.category as keyof typeof REPORT_CATEGORIES];
+    const categoryInfo =
+      REPORT_CATEGORIES[report.category as keyof typeof REPORT_CATEGORIES];
 
     const formatDate = (dateString: string) => {
       return new Date(dateString).toLocaleDateString("id-ID", {
@@ -91,7 +98,9 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
 
                 {/* Category Badge Overlay */}
                 <div className="absolute top-4 right-4">
-                  <Badge className={`${categoryInfo.color} border-0 font-medium`}>
+                  <Badge
+                    className={`${categoryInfo.color} border-0 font-medium`}
+                  >
                     <span className="mr-1">{categoryInfo.icon}</span>
                     {categoryInfo.label}
                   </Badge>
@@ -138,7 +147,7 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
 
                     {/* Status Details - Only show for owner */}
                     {isOwner && (
-                      <ReportStatus 
+                      <ReportStatus
                         status={report.status}
                         verifiedAt={report.verified_at}
                         rejectionReason={report.rejection_reason}
@@ -211,7 +220,7 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
     );
   } catch (error) {
     console.error("Error in report detail page:", error);
-    
+
     return (
       <>
         <Header />

@@ -6,7 +6,7 @@
  */
 
 // API router export (main export)
-export { administrativeRouter } from './api';
+export { administrativeRouter } from "./api";
 
 // Type exports for external use
 export type {
@@ -17,7 +17,7 @@ export type {
   AdministrativeHierarchy,
   AdministrativeNames,
   GeocodingAdministrative,
-} from './types';
+} from "./types";
 
 // Shell layer exports for internal use by other modules
 export {
@@ -27,7 +27,7 @@ export {
   getSyncStatus,
   validateAdministrativeHierarchy,
   getAdministrativeNames,
-} from './shell';
+} from "./shell";
 
 // Core utility exports for validation
 export {
@@ -37,4 +37,4 @@ export {
   isValidAdministrativeHierarchy,
   extractParentCodes,
   getAdministrativeLevel,
-} from './core';
+} from "./core";

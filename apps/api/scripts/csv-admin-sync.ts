@@ -1,6 +1,6 @@
-import { CsvParserService } from './csv-parser';
-import { DatabaseImporter, type ImportResult } from './csv-database-importer';
-import { testConnection } from '../src/db/connection';
+import { CsvParserService } from "./csv-parser";
+import { DatabaseImporter, type ImportResult } from "./csv-database-importer";
+import { testConnection } from "../src/db/connection";
 
 export interface EntityStats {
   total: number;
@@ -26,13 +26,13 @@ export class CsvAdminSyncService {
   async syncAllAdministrativeData(): Promise<SyncStats> {
     const startTime = Date.now();
 
-    console.log('🚀 Starting CSV administrative data import...');
+    console.log("🚀 Starting CSV administrative data import...");
 
     // Test database connection first
     const isConnected = await testConnection();
     if (!isConnected) {
       throw new Error(
-        'Database connection failed. Cannot proceed with import.'
+        "Database connection failed. Cannot proceed with import.",
       );
     }
 
@@ -45,28 +45,28 @@ export class CsvAdminSyncService {
 
     try {
       // Step 1: Import Provinces
-      console.log('📍 Processing provinces...');
+      console.log("📍 Processing provinces...");
       const provincesData = await this.csvParser.parseProvincesCSV();
       const provincesResult =
         await this.dbImporter.importProvinces(provincesData);
       stats.provinces = this.mapImportResultToEntityStats(provincesResult);
-      this.logImportResult('Provinces', provincesResult);
+      this.logImportResult("Provinces", provincesResult);
 
       // Step 2: Import Regencies
-      console.log('🏛️  Processing regencies...');
+      console.log("🏛️  Processing regencies...");
       const regenciesData = await this.csvParser.parseRegenciesCSV();
       const regenciesResult =
         await this.dbImporter.importRegencies(regenciesData);
       stats.regencies = this.mapImportResultToEntityStats(regenciesResult);
-      this.logImportResult('Regencies', regenciesResult);
+      this.logImportResult("Regencies", regenciesResult);
 
       // Step 3: Import Districts
-      console.log('🏘️  Processing districts...');
+      console.log("🏘️  Processing districts...");
       const districtsData = await this.csvParser.parseDistrictsCSV();
       const districtsResult =
         await this.dbImporter.importDistricts(districtsData);
       stats.districts = this.mapImportResultToEntityStats(districtsResult);
-      this.logImportResult('Districts', districtsResult);
+      this.logImportResult("Districts", districtsResult);
 
       stats.duration = Date.now() - startTime;
 
@@ -77,8 +77,8 @@ export class CsvAdminSyncService {
     } catch (error) {
       const duration = Date.now() - startTime;
       console.error(
-        '❌ Import failed:',
-        error instanceof Error ? error.message : 'Unknown error'
+        "❌ Import failed:",
+        error instanceof Error ? error.message : "Unknown error",
       );
       console.log(`⏱️  Duration: ${duration}ms`);
       throw error;
@@ -111,11 +111,11 @@ export class CsvAdminSyncService {
       console.log(`   Error details:`);
       result.errorDetails.forEach((error, index) => {
         console.log(
-          `     ${index + 1}. ${error.code} (${error.name}): ${error.error}`
+          `     ${index + 1}. ${error.code} (${error.name}): ${error.error}`,
         );
       });
     }
-    console.log('');
+    console.log("");
   }
 
   /**
@@ -135,21 +135,21 @@ export class CsvAdminSyncService {
     const totalErrors =
       stats.provinces.errors + stats.regencies.errors + stats.districts.errors;
 
-    console.log('🎉 Import completed successfully!');
-    console.log('📊 Final Statistics:');
+    console.log("🎉 Import completed successfully!");
+    console.log("📊 Final Statistics:");
     console.log(`   Total records processed: ${totalRecords}`);
     console.log(`   Total inserted: ${totalInserted}`);
     console.log(`   Total updated: ${totalUpdated}`);
     console.log(`   Total errors: ${totalErrors}`);
     console.log(
-      `   Duration: ${stats.duration}ms (${(stats.duration / 1000).toFixed(2)}s)`
+      `   Duration: ${stats.duration}ms (${(stats.duration / 1000).toFixed(2)}s)`,
     );
 
     if (totalErrors === 0) {
-      console.log('✨ All records processed successfully!');
+      console.log("✨ All records processed successfully!");
     } else {
       console.log(
-        `⚠️  ${totalErrors} records had errors. Check the logs above for details.`
+        `⚠️  ${totalErrors} records had errors. Check the logs above for details.`,
       );
     }
   }

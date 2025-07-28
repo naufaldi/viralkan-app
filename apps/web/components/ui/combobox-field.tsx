@@ -57,7 +57,7 @@ export const ComboboxField = React.forwardRef<
       error = false,
       ...props
     },
-    ref
+    ref,
   ) => {
     const [open, setOpen] = React.useState(false);
     const selectedOption = options.find((option) => option.value === value);
@@ -89,9 +89,10 @@ export const ComboboxField = React.forwardRef<
             className={cn(
               "w-full justify-between",
               buttonSizeClasses[size],
-              error && "border-red-300 focus:border-red-500 focus:ring-red-500/20",
+              error &&
+                "border-red-300 focus:border-red-500 focus:ring-red-500/20",
               !selectedOption && "text-muted-foreground",
-              className
+              className,
             )}
             {...props}
           >
@@ -104,7 +105,10 @@ export const ComboboxField = React.forwardRef<
             <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+        <PopoverContent
+          className="w-[--radix-popover-trigger-width] p-0"
+          align="start"
+        >
           <Command>
             <CommandInput placeholder={searchPlaceholder} />
             <CommandList>
@@ -120,7 +124,7 @@ export const ComboboxField = React.forwardRef<
                     <Check
                       className={cn(
                         "mr-2 h-4 w-4",
-                        value === option.value ? "opacity-100" : "opacity-0"
+                        value === option.value ? "opacity-100" : "opacity-0",
                       )}
                     />
                     <span className="truncate">{option.label}</span>
@@ -132,7 +136,7 @@ export const ComboboxField = React.forwardRef<
         </PopoverContent>
       </Popover>
     );
-  }
+  },
 );
 
 ComboboxField.displayName = "ComboboxField";
