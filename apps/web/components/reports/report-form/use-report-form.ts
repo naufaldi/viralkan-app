@@ -94,6 +94,10 @@ export const useReportForm = ({ onSuccess }: UseReportFormProps) => {
       district: "",
       city: "",
       province: "",
+      // Administrative codes (optional - for backend validation)
+      province_code: "",
+      regency_code: "",
+      district_code: "",
     },
   });
 

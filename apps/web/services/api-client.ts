@@ -364,6 +364,76 @@ class ApiClient {
 
 export const apiClient = new ApiClient();
 
+// Administrative data types
+export interface Province {
+  code: string;
+  name: string;
+}
+
+export interface Regency {
+  code: string;
+  name: string;
+  province_code: string;
+}
+
+export interface District {
+  code: string;
+  name: string;
+  regency_code: string;
+}
+
+export interface AdministrativeResponse<T> {
+  data: T[];
+  meta?: {
+    total?: number;
+    lastSync?: string;
+  };
+}
+
+// Administrative API Service
+export const administrativeService = {
+  // Get all provinces
+  getProvinces: async (): Promise<AdministrativeResponse<Province>> => {
+    return apiRequest<AdministrativeResponse<Province>>("/api/administrative/provinces");
+  },
+
+  // Get regencies by province code
+  getRegencies: async (provinceCode: string): Promise<AdministrativeResponse<Regency>> => {
+    return apiRequest<AdministrativeResponse<Regency>>(`/api/administrative/regencies/${provinceCode}`);
+  },
+
+  // Get districts by regency code
+  getDistricts: async (regencyCode: string): Promise<AdministrativeResponse<District>> => {
+    return apiRequest<AdministrativeResponse<District>>(`/api/administrative/districts/${regencyCode}`);
+  },
+
+  // Get sync status
+  getSyncStatus: async (): Promise<{
+    provinces: number;
+    regencies: number;
+    districts: number;
+    lastSync: string | null;
+  }> => {
+    return apiRequest("/api/administrative/sync/status");
+  },
+
+  // Validate administrative hierarchy
+  validateHierarchy: async (
+    provinceCode: string,
+    regencyCode: string,
+    districtCode: string
+  ): Promise<{
+    isValid: boolean;
+    names: {
+      province: string;
+      regency: string;
+      district: string;
+    };
+  }> => {
+    return apiRequest(`/api/administrative/validate/${provinceCode}/${regencyCode}/${districtCode}`);
+  },
+};
+
 // Re-export types for convenience
 export type {
   CreateReportInput,

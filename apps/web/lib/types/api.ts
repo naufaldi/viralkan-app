@@ -36,6 +36,10 @@ export const CreateReportSchema = z.object({
     .string()
     .min(1, "Province is required")
     .max(100, "Province name too long"),
+  // Administrative codes (optional - for backend validation)
+  province_code: z.string().length(2).regex(/^\d{2}$/).optional().or(z.literal("")),
+  regency_code: z.string().length(4).regex(/^\d{4}$/).optional().or(z.literal("")),
+  district_code: z.string().length(6).regex(/^\d{6}$/).optional().or(z.literal("")),
 });
 
 export const ReportResponseSchema = z.object({

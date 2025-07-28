@@ -19,6 +19,7 @@ import {
 import { CreateReportInput, REPORT_CATEGORIES } from "../../../lib/types/api";
 import { GetCoordinatesButton } from "./get-coordinates-button";
 import { GetAddressButton } from "./get-address-button";
+import { AdministrativeSelect } from "../administrative-select";
 import { Loader2, MapPin } from "lucide-react";
 
 interface ReportFormFieldsProps {
@@ -158,122 +159,14 @@ export const ReportFormFields = ({
         />
       </div>
 
-      {/* Administrative Boundaries - Three columns on large screens */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* District */}
-        <FormField
-          control={form.control}
-          name="district"
-          render={({ field }) => (
-            <FormItem className="space-y-3">
-              <FormLabel className="text-base font-semibold text-neutral-900 flex items-center gap-2">
-                District *
-                {isGeocodingFromCoords && (
-                  <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
-                )}
-                {lastGeocodingSource === "coordinates" && (
-                  <MapPin className="h-4 w-4 text-green-600" />
-                )}
-              </FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Example: Bekasi Utara"
-                  disabled={disabled || isGeocodingFromCoords}
-                  size="lg"
-                  className={`border-neutral-300 focus:border-neutral-600 focus:ring-neutral-600/20 bg-white ${
-                    lastGeocodingSource === "coordinates" ? "border-green-300 bg-green-50/30" : ""
-                  }`}
-                  {...field}
-                  onChange={(e) => {
-                    field.onChange(e);
-                    onClearGeocodingError?.();
-                  }}
-                />
-              </FormControl>
-              <FormDescription className="text-sm text-neutral-600">
-                District name where the damage is located.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* City */}
-        <FormField
-          control={form.control}
-          name="city"
-          render={({ field }) => (
-            <FormItem className="space-y-3">
-              <FormLabel className="text-base font-semibold text-neutral-900 flex items-center gap-2">
-                City *
-                {isGeocodingFromCoords && (
-                  <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
-                )}
-                {lastGeocodingSource === "coordinates" && (
-                  <MapPin className="h-4 w-4 text-green-600" />
-                )}
-              </FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Example: Kota Bekasi"
-                  disabled={disabled || isGeocodingFromCoords}
-                  size="lg"
-                  className={`border-neutral-300 focus:border-neutral-600 focus:ring-neutral-600/20 bg-white ${
-                    lastGeocodingSource === "coordinates" ? "border-green-300 bg-green-50/30" : ""
-                  }`}
-                  {...field}
-                  onChange={(e) => {
-                    field.onChange(e);
-                    onClearGeocodingError?.();
-                  }}
-                />
-              </FormControl>
-              <FormDescription className="text-sm text-neutral-600">
-                City or regency name where the damage is located.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Province */}
-        <FormField
-          control={form.control}
-          name="province"
-          render={({ field }) => (
-            <FormItem className="space-y-3">
-              <FormLabel className="text-base font-semibold text-neutral-900 flex items-center gap-2">
-                Province *
-                {isGeocodingFromCoords && (
-                  <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
-                )}
-                {lastGeocodingSource === "coordinates" && (
-                  <MapPin className="h-4 w-4 text-green-600" />
-                )}
-              </FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Example: Jawa Barat"
-                  disabled={disabled || isGeocodingFromCoords}
-                  size="lg"
-                  className={`border-neutral-300 focus:border-neutral-600 focus:ring-neutral-600/20 bg-white ${
-                    lastGeocodingSource === "coordinates" ? "border-green-300 bg-green-50/30" : ""
-                  }`}
-                  {...field}
-                  onChange={(e) => {
-                    field.onChange(e);
-                    onClearGeocodingError?.();
-                  }}
-                />
-              </FormControl>
-              <FormDescription className="text-sm text-neutral-600">
-                Province name where the damage is located.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
+      {/* Administrative Boundaries - Cascading Dropdowns */}
+      <AdministrativeSelect
+        form={form}
+        disabled={disabled}
+        isGeocodingFromCoords={isGeocodingFromCoords}
+        lastGeocodingSource={lastGeocodingSource}
+        onClearGeocodingError={onClearGeocodingError}
+      />
 
       {/* Get Coordinates Button */}
       {onGetCoordinates && (
