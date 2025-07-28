@@ -43,7 +43,7 @@ export const findReportsWithPagination = async (
 
     const whereClause = `WHERE ${whereConditions.join(" AND ")}`;
 
-    // Get reports with user information
+    // Get reports with user information including administrative fields
     const reportsQuery = `
       SELECT 
         r.id,
@@ -54,6 +54,12 @@ export const findReportsWithPagination = async (
         r.location_text,
         r.lat,
         r.lon,
+        r.district,
+        r.city,
+        r.province,
+        r.province_code,
+        r.regency_code,
+        r.district_code,
         r.status,
         r.verified_at,
         r.verified_by,
@@ -121,6 +127,12 @@ export const findReportById = async (
         r.location_text,
         r.lat,
         r.lon,
+        r.district,
+        r.city,
+        r.province,
+        r.province_code,
+        r.regency_code,
+        r.district_code,
         r.status,
         r.verified_at,
         r.verified_by,
@@ -164,9 +176,15 @@ export const createReport = async (
         location_text, 
         lat, 
         lon,
+        district,
+        city,
+        province,
+        province_code,
+        regency_code,
+        district_code,
         status
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
       RETURNING id
     `;
 
@@ -179,6 +197,12 @@ export const createReport = async (
       reportData.location_text,
       reportData.lat || null,
       reportData.lon || null,
+      reportData.district,
+      reportData.city,
+      reportData.province,
+      reportData.province_code || null,
+      reportData.regency_code || null,
+      reportData.district_code || null,
       "pending", // Default status for new reports
     ];
 
@@ -251,6 +275,43 @@ export const updateReport = async (
     if (reportData.lon !== undefined) {
       updateFields.push(`lon = $${paramIndex}`);
       params.push(reportData.lon);
+      paramIndex++;
+    }
+
+    // Administrative fields
+    if (reportData.district !== undefined) {
+      updateFields.push(`district = $${paramIndex}`);
+      params.push(reportData.district);
+      paramIndex++;
+    }
+
+    if (reportData.city !== undefined) {
+      updateFields.push(`city = $${paramIndex}`);
+      params.push(reportData.city);
+      paramIndex++;
+    }
+
+    if (reportData.province !== undefined) {
+      updateFields.push(`province = $${paramIndex}`);
+      params.push(reportData.province);
+      paramIndex++;
+    }
+
+    if (reportData.province_code !== undefined) {
+      updateFields.push(`province_code = $${paramIndex}`);
+      params.push(reportData.province_code);
+      paramIndex++;
+    }
+
+    if (reportData.regency_code !== undefined) {
+      updateFields.push(`regency_code = $${paramIndex}`);
+      params.push(reportData.regency_code);
+      paramIndex++;
+    }
+
+    if (reportData.district_code !== undefined) {
+      updateFields.push(`district_code = $${paramIndex}`);
+      params.push(reportData.district_code);
       paramIndex++;
     }
 

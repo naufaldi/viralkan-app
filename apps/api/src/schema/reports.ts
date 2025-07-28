@@ -37,6 +37,62 @@ export const CreateReportSchema = z.object({
     example: 112.752088,
     description: "Longitude coordinate of the damage location",
   }),
+  
+  // Administrative boundary fields (hybrid approach)
+  // Text fields for backward compatibility and performance
+  district: z
+    .string()
+    .min(1, "District is required")
+    .max(100, "District name too long")
+    .openapi({
+      example: "Sukasari",
+      description: "District name (kecamatan)",
+    }),
+  city: z
+    .string()
+    .min(1, "City is required")
+    .max(100, "City name too long")
+    .openapi({
+      example: "Kota Bandung",
+      description: "City or regency name (kota/kabupaten)",
+    }),
+  province: z
+    .string()
+    .min(1, "Province is required")
+    .max(100, "Province name too long")
+    .openapi({
+      example: "Jawa Barat",
+      description: "Province name (provinsi)",
+    }),
+  
+  // Code fields for data integrity and validation (optional for backward compatibility)
+  province_code: z
+    .string()
+    .length(2, "Province code must be 2 characters")
+    .regex(/^\d{2}$/, "Province code must be 2 digits")
+    .optional()
+    .openapi({
+      example: "32",
+      description: "Province code from Indonesian administrative system",
+    }),
+  regency_code: z
+    .string()
+    .length(4, "Regency code must be 4 characters")
+    .regex(/^\d{4}$/, "Regency code must be 4 digits")
+    .optional()
+    .openapi({
+      example: "3273",
+      description: "Regency/city code from Indonesian administrative system",
+    }),
+  district_code: z
+    .string()
+    .length(6, "District code must be 6 characters")
+    .regex(/^\d{6}$/, "District code must be 6 digits")
+    .optional()
+    .openapi({
+      example: "327301",
+      description: "District code from Indonesian administrative system",
+    }),
 });
 
 export const ReportQuerySchema = z.object({
@@ -131,6 +187,15 @@ export const ReportResponseSchema = z.object({
   location_text: z.string().openapi({ example: "Depan Mall Tunjungan Plaza" }),
   lat: z.number().nullable().openapi({ example: -7.257472 }),
   lon: z.number().nullable().openapi({ example: 112.752088 }),
+  
+  // Administrative boundary fields in responses
+  district: z.string().openapi({ example: "Sukasari" }),
+  city: z.string().openapi({ example: "Kota Bandung" }),
+  province: z.string().openapi({ example: "Jawa Barat" }),
+  province_code: z.string().nullable().openapi({ example: "32" }),
+  regency_code: z.string().nullable().openapi({ example: "3273" }),
+  district_code: z.string().nullable().openapi({ example: "327301" }),
+  
   status: z
     .enum(["pending", "verified", "rejected", "deleted"])
     .openapi({ example: "pending" }),

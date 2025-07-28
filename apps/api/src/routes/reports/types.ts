@@ -20,6 +20,13 @@ export interface Report {
   location_text: string;
   lat: number | null;
   lon: number | null;
+  // Administrative boundary fields (hybrid approach)
+  district: string;
+  city: string;
+  province: string;
+  province_code: string | null;
+  regency_code: string | null;
+  district_code: string | null;
   status: "pending" | "verified" | "rejected" | "deleted";
   verified_at: Date | null;
   verified_by: string | null;

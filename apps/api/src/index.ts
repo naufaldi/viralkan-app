@@ -3,7 +3,7 @@ import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { serve } from "@hono/node-server";
 import { swaggerUI } from "@hono/swagger-ui";
-import { reportsRouter, authRouter, uploadRouter } from "@/routes";
+import { reportsRouter, authRouter, uploadRouter, administrativeRouter } from "@/routes";
 import { adminRouter } from "@/routes/admin/api";
 import { env, validateEnv } from "@/config/env";
 import { testConnection } from "@/db/connection";
@@ -62,6 +62,7 @@ app.route("/api/reports", reportsRouter);
 app.route("/api/auth", authRouter);
 app.route("/api/upload", uploadRouter);
 app.route("/api/admin", adminRouter);
+app.route("/api/administrative", administrativeRouter);
 
 // Configure OpenAPI documentation
 app.openAPIRegistry.registerComponent("securitySchemes", "bearerAuth", {
@@ -120,6 +121,10 @@ app.doc("/openapi", {
     {
       name: "Admin",
       description: "Admin operations for report verification and management",
+    },
+    {
+      name: "Administrative",
+      description: "Indonesian administrative data (provinces, regencies, districts)",
     },
   ],
 });

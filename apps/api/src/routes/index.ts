@@ -6,6 +6,7 @@ export { authRouter } from "./auth";
 export { reportsRouter } from "./reports";
 export { uploadRouter } from "./upload";
 export { adminRouter } from "./admin";
+export { administrativeRouter } from "./administrative";
 
 // Middleware exports (for convenience)
 export {
@@ -42,5 +43,15 @@ export type {
   UploadErrorResponse,
   FileValidationConfig,
 } from "./upload";
+
+export type {
+  // Administrative types
+  Province,
+  Regency,
+  District,
+  SyncStatus,
+  AdministrativeHierarchy,
+  AdministrativeNames,
+} from "./administrative";
 
 // Note: Common types (AppResult, error classes) should be imported directly from @/types
