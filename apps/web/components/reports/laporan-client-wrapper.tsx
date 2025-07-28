@@ -19,6 +19,9 @@ interface LaporanClientWrapperProps {
   currentPage: number;
   selectedCategory?: CategoryType;
   searchQuery: string;
+  provinsi?: string;
+  kabupaten_kota?: string;
+  kecamatan?: string;
 }
 
 export function LaporanClientWrapper({
@@ -26,6 +29,9 @@ export function LaporanClientWrapper({
   currentPage,
   selectedCategory,
   searchQuery,
+  provinsi,
+  kabupaten_kota,
+  kecamatan,
 }: LaporanClientWrapperProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -49,7 +55,7 @@ export function LaporanClientWrapper({
       params.delete("category");
     }
     params.set("page", "1"); // Reset to first page when filtering
-    router.push(`/laporan?${params.toString()}`);
+    router.replace(`/laporan?${params.toString()}`, { scroll: false });
   };
 
   const handleSearchChange = (query: string) => {
@@ -60,7 +66,45 @@ export function LaporanClientWrapper({
       params.delete("search");
     }
     params.set("page", "1"); // Reset to first page when searching
-    router.push(`/laporan?${params.toString()}`);
+    router.replace(`/laporan?${params.toString()}`, { scroll: false });
+  };
+
+  const handleProvinsiChange = (value: string) => {
+    const params = new URLSearchParams(searchParams);
+    if (value && value !== "all") {
+      params.set("provinsi", value);
+    } else {
+      params.delete("provinsi");
+    }
+    // Clear dependent filters
+    params.delete("kabupaten_kota");
+    params.delete("kecamatan");
+    params.set("page", "1");
+    router.replace(`/laporan?${params.toString()}`, { scroll: false });
+  };
+
+  const handleKabupatenKotaChange = (value: string) => {
+    const params = new URLSearchParams(searchParams);
+    if (value && value !== "all") {
+      params.set("kabupaten_kota", value);
+    } else {
+      params.delete("kabupaten_kota");
+    }
+    // Clear dependent filters
+    params.delete("kecamatan");
+    params.set("page", "1");
+    router.replace(`/laporan?${params.toString()}`, { scroll: false });
+  };
+
+  const handleKecamatanChange = (value: string) => {
+    const params = new URLSearchParams(searchParams);
+    if (value && value !== "all") {
+      params.set("kecamatan", value);
+    } else {
+      params.delete("kecamatan");
+    }
+    params.set("page", "1");
+    router.replace(`/laporan?${params.toString()}`, { scroll: false });
   };
 
   return (
@@ -69,8 +113,14 @@ export function LaporanClientWrapper({
       <ReportsFilterSection
         selectedCategory={selectedCategory}
         searchQuery={searchQuery}
+        provinsi={provinsi}
+        kabupaten_kota={kabupaten_kota}
+        kecamatan={kecamatan}
         onCategoryChange={handleCategoryChange}
         onSearchChange={handleSearchChange}
+        onProvinsiChange={handleProvinsiChange}
+        onKabupatenKotaChange={handleKabupatenKotaChange}
+        onKecamatanChange={handleKecamatanChange}
       />
 
       {/* Gallery Section */}

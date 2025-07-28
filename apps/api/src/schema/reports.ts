@@ -122,6 +122,34 @@ export const ReportQuerySchema = z.object({
     example: "01890dd5-ea3f-7746-b3a5-e8c5e0b0f4a1",
     description: "Filter reports by user ID (UUID)",
   }),
+  // Administrative filtering parameters
+  province_code: z
+    .string()
+    .length(2, "Province code must be 2 characters")
+    .regex(/^\d{2}$/, "Province code must be 2 digits")
+    .optional()
+    .openapi({
+      example: "32",
+      description: "Filter reports by province code (2 digits)",
+    }),
+  regency_code: z
+    .string()
+    .length(4, "Regency code must be 4 characters")
+    .regex(/^\d{4}$/, "Regency code must be 4 digits")
+    .optional()
+    .openapi({
+      example: "3273",
+      description: "Filter reports by regency/city code (4 digits)",
+    }),
+  district_code: z
+    .string()
+    .length(6, "District code must be 6 characters")
+    .regex(/^\d{6}$/, "District code must be 6 digits")
+    .optional()
+    .openapi({
+      example: "327301",
+      description: "Filter reports by district code (6 digits)",
+    }),
 });
 
 // Schema for /me endpoint - doesn't include user_id validation

@@ -17,7 +17,7 @@ export const findReportsWithPagination = async (
   query: ReportQuery,
 ): Promise<AppResult<PaginatedReports>> => {
   try {
-    const { page, limit, category, user_id } = query;
+    const { page, limit, category, user_id, province_code, regency_code, district_code } = query;
     const offset = (page - 1) * limit;
 
     const whereConditions: string[] = [];
@@ -38,6 +38,25 @@ export const findReportsWithPagination = async (
     if (user_id) {
       whereConditions.push(`r.user_id = $${paramIndex}`);
       params.push(user_id); // Now expects UUID string, no parseInt needed
+      paramIndex++;
+    }
+
+    // Administrative filtering
+    if (province_code) {
+      whereConditions.push(`r.province_code = $${paramIndex}`);
+      params.push(province_code);
+      paramIndex++;
+    }
+
+    if (regency_code) {
+      whereConditions.push(`r.regency_code = $${paramIndex}`);
+      params.push(regency_code);
+      paramIndex++;
+    }
+
+    if (district_code) {
+      whereConditions.push(`r.district_code = $${paramIndex}`);
+      params.push(district_code);
       paramIndex++;
     }
 

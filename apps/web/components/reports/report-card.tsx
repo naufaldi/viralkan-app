@@ -8,6 +8,7 @@ import {
 import { MapPin, Calendar, User } from "lucide-react";
 import { REPORT_CATEGORIES } from "@/constant/reports";
 import { getTimeAgo } from "@/utils/reports";
+import { AdministrativeInfo } from "./administrative-info";
 import Image from "next/image";
 
 interface ReportCardProps {
@@ -20,6 +21,14 @@ interface ReportCardProps {
     created_at: string;
     user_name?: string | null;
     user_avatar?: string | null;
+    // Display fields (for backward compatibility)
+    kecamatan?: string;
+    kabupaten_kota?: string;
+    provinsi?: string;
+    // API fields
+    district?: string;
+    city?: string;
+    province?: string;
   };
   onClick?: () => void;
 }
@@ -66,6 +75,16 @@ export function ReportCard({ report, onClick }: ReportCardProps) {
               </p>
             </div>
           </div>
+
+          {/* Administrative Info */}
+          <AdministrativeInfo
+            kecamatan={report.kecamatan}
+            kabupaten_kota={report.kabupaten_kota}
+            provinsi={report.provinsi}
+            district={report.district}
+            city={report.city}
+            province={report.province}
+          />
 
           {/* User & Time */}
           <div className="flex items-center justify-between pt-2 border-t border-neutral-100">

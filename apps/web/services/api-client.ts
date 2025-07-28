@@ -64,6 +64,9 @@ export const reportsService = {
     category?: string;
     search?: string;
     user_id?: string;
+    province_code?: string;
+    regency_code?: string;
+    district_code?: string;
   }): Promise<PaginatedReports> => {
     const searchParams = new URLSearchParams();
 
@@ -72,6 +75,9 @@ export const reportsService = {
     if (params?.category) searchParams.append('category', params.category);
     if (params?.search) searchParams.append('search', params.search);
     if (params?.user_id) searchParams.append('user_id', params.user_id);
+    if (params?.province_code) searchParams.append('province_code', params.province_code);
+    if (params?.regency_code) searchParams.append('regency_code', params.regency_code);
+    if (params?.district_code) searchParams.append('district_code', params.district_code);
 
     const endpoint = `/api/reports${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
     return apiRequest<PaginatedReports>(endpoint);
@@ -84,6 +90,9 @@ export const reportsService = {
     category?: string;
     search?: string;
     user_id?: string;
+    province_code?: string;
+    regency_code?: string;
+    district_code?: string;
   }): Promise<PaginatedReports> => {
     const searchParams = new URLSearchParams();
 
@@ -92,6 +101,9 @@ export const reportsService = {
     if (params?.category) searchParams.append('category', params.category);
     if (params?.search) searchParams.append('search', params.search);
     if (params?.user_id) searchParams.append('user_id', params.user_id);
+    if (params?.province_code) searchParams.append('province_code', params.province_code);
+    if (params?.regency_code) searchParams.append('regency_code', params.regency_code);
+    if (params?.district_code) searchParams.append('district_code', params.district_code);
 
     const endpoint = `/api/reports/enriched${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
     return apiRequest<PaginatedReports>(endpoint);
@@ -278,6 +290,10 @@ export interface ReportFilters {
   limit?: number;
   category?: 'berlubang' | 'retak' | 'lainnya';
   search?: string;
+  // Administrative filters
+  province_code?: string;
+  regency_code?: string;
+  district_code?: string;
 }
 
 export interface Report {
@@ -292,6 +308,13 @@ export interface Report {
   lon: number | null;
   user_name?: string | null;
   user_avatar?: string | null;
+  // Administrative fields
+  district?: string;
+  city?: string;
+  province?: string;
+  province_code?: string | null;
+  regency_code?: string | null;
+  district_code?: string | null;
 }
 
 export interface ApiResponse<T> {
@@ -311,6 +334,9 @@ class ApiClient {
       limit: filters.limit,
       category: filters.category,
       search: filters.search,
+      province_code: filters.province_code,
+      regency_code: filters.regency_code,
+      district_code: filters.district_code,
     });
   }
 
@@ -322,6 +348,9 @@ class ApiClient {
       limit: filters.limit,
       category: filters.category,
       search: filters.search,
+      province_code: filters.province_code,
+      regency_code: filters.regency_code,
+      district_code: filters.district_code,
     });
   }
 

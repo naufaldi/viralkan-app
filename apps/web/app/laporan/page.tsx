@@ -12,6 +12,9 @@ interface LaporanPageProps {
     page?: string;
     category?: CategoryType;
     search?: string;
+    provinsi?: string;
+    kabupaten_kota?: string;
+    kecamatan?: string;
   }>;
 }
 
@@ -21,6 +24,9 @@ export default async function LaporanPage({ searchParams }: LaporanPageProps) {
   const currentPage = parseInt(params.page || "1");
   const selectedCategory = params.category;
   const searchQuery = params.search || "";
+  const provinsi = params.provinsi;
+  const kabupaten_kota = params.kabupaten_kota;
+  const kecamatan = params.kecamatan;
 
   // Build query parameters
   const queryParams = new URLSearchParams();
@@ -28,6 +34,9 @@ export default async function LaporanPage({ searchParams }: LaporanPageProps) {
   queryParams.set("limit", "20");
   if (selectedCategory) queryParams.set("category", selectedCategory);
   if (searchQuery) queryParams.set("search", searchQuery);
+  if (provinsi) queryParams.set("province_code", provinsi);
+  if (kabupaten_kota) queryParams.set("regency_code", kabupaten_kota);
+  if (kecamatan) queryParams.set("district_code", kecamatan);
 
   // Server-side data fetching with stats calculation
   let reports,
@@ -78,6 +87,9 @@ export default async function LaporanPage({ searchParams }: LaporanPageProps) {
           currentPage={currentPage}
           selectedCategory={selectedCategory}
           searchQuery={searchQuery}
+          provinsi={provinsi}
+          kabupaten_kota={kabupaten_kota}
+          kecamatan={kecamatan}
         />
       </main>
     </div>

@@ -43,7 +43,7 @@ export default async function DashboardPage() {
     userReports = (reportsData?.items || []).map((report: any) => ({
       ...report,
       title: report.street_name, // Use street_name as title
-      status: "pending", // Default status since API doesn't return status yet
+      status: report.status || "pending", // Use actual status from API
     }));
   } catch (error) {
     console.error("Error fetching user reports:", error);

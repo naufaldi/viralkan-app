@@ -7,6 +7,10 @@ export interface ReportQueryParams {
   category?: string;
   search?: string;
   user_id?: string;
+  // Administrative filters
+  province_code?: string;
+  regency_code?: string;
+  district_code?: string;
 }
 
 /**

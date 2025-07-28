@@ -3,6 +3,7 @@
 import * as React from "react";
 import { UseFormReturn } from "react-hook-form";
 import { Loader2, MapPin } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   FormControl,
   FormDescription,
@@ -12,13 +13,10 @@ import {
   FormMessage,
 } from "@repo/ui/components/ui/form";
 import { ComboboxField, ComboboxOption } from "../ui/combobox-field";
-import {
-  useProvinces,
-  useRegencies,
-  useDistricts,
-} from "../../hooks/reports/use-administrative";
+import { useAdministrative } from "../../hooks/reports/use-administrative";
 import { CreateReportInput } from "../../lib/types/api";
 import { Province, Regency, District } from "../../services/api-client";
+import { cn } from "@repo/ui/lib/utils";
 
 interface AdministrativeSelectProps {
   form: UseFormReturn<CreateReportInput>;
@@ -27,6 +25,8 @@ interface AdministrativeSelectProps {
   isGeocodingFromCoords?: boolean;
   lastGeocodingSource?: "coordinates" | "address" | null;
   onClearGeocodingError?: () => void;
+  // Enable "all" options for filtering context
+  enableAllOptions?: boolean;
 }
 
 export const AdministrativeSelect = ({
@@ -35,30 +35,45 @@ export const AdministrativeSelect = ({
   isGeocodingFromCoords = false,
   lastGeocodingSource = null,
   onClearGeocodingError,
+  enableAllOptions = false,
 }: AdministrativeSelectProps) => {
+  // URL state management
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   // Get current form values for cascading
   const selectedProvinceCode = form.watch("province_code");
   const selectedRegencyCode = form.watch("regency_code");
   const selectedDistrictCode = form.watch("district_code");
 
-  // Fetch data using our custom hooks
-  const {
-    data: provincesData,
-    isLoading: provincesLoading,
-    error: provincesError,
-  } = useProvinces();
+  // Get "all" states from URL params (default to "all" when no parameter exists)
+  const selectedAllProvince = !searchParams.get("provinsi");
+  const selectedAllRegency = !searchParams.get("kabupaten_kota");
+  const selectedAllDistrict = !searchParams.get("kecamatan");
 
+  // Fetch data using our custom hook
   const {
-    data: regenciesData,
-    isLoading: regenciesLoading,
-    error: regenciesError,
-  } = useRegencies(selectedProvinceCode);
+    data,
+    loading,
+    error,
+    refetchRegencies,
+    refetchDistricts,
+  } = useAdministrative();
 
-  const {
-    data: districtsData,
-    isLoading: districtsLoading,
-    error: districtsError,
-  } = useDistricts(selectedRegencyCode);
+  // Fetch dependent data when parent selection changes
+  React.useEffect(() => {
+    if (selectedProvinceCode) {
+      refetchRegencies(selectedProvinceCode);
+    }
+  }, [selectedProvinceCode, refetchRegencies]);
+
+  React.useEffect(() => {
+    if (selectedRegencyCode) {
+      refetchDistricts(selectedRegencyCode);
+    }
+  }, [selectedRegencyCode, refetchDistricts]);
+
+
 
   // Helper function to truncate long text
   const truncateText = (text: string, maxLength: number = 20) => {
@@ -66,109 +81,189 @@ export const AdministrativeSelect = ({
     return text.length > maxLength ? `${text.slice(0, maxLength)}...` : text;
   };
 
-  // Get display names for selected values (truncated)
-  const getSelectedProvinceDisplay = () => {
-    if (!selectedProvinceCode || !provincesData?.data) return "";
-    const province = provincesData.data.find(p => p.code === selectedProvinceCode);
-    return province ? truncateText(province.name) : "";
-  };
 
-  const getSelectedRegencyDisplay = () => {
-    if (!selectedRegencyCode || !regenciesData?.data) return "";
-    const regency = regenciesData.data.find(r => r.code === selectedRegencyCode);
-    return regency ? truncateText(regency.name) : "";
-  };
-
-  const getSelectedDistrictDisplay = () => {
-    if (!selectedDistrictCode || !districtsData?.data) return "";
-    const district = districtsData.data.find(d => d.code === selectedDistrictCode);
-    return district ? truncateText(district.name) : "";
-  };
 
   // Transform data for ComboboxField
   const provinceOptions: ComboboxOption[] = React.useMemo(() => {
-    if (!provincesData?.data) return [];
-    return provincesData.data.map((province: Province) => ({
-      value: province.code,
-      label: truncateText(province.name),
-      searchValue: province.name.toLowerCase(),
-      fullLabel: province.name, // Keep full name for search and tooltip
-    }));
-  }, [provincesData]);
+    const options: ComboboxOption[] = [];
+    
+    // Add "all" option if enabled
+    if (enableAllOptions) {
+      options.push({
+        value: "all",
+        label: "Semua Provinsi",
+        searchValue: "semua provinsi",
+      });
+    }
+    
+    // Add province options
+    if (data.provinces) {
+      options.push(...data.provinces.map((province: Province) => ({
+        value: province.code,
+        label: truncateText(province.name),
+        searchValue: province.name.toLowerCase(),
+      })));
+    }
+    
+    return options;
+  }, [data.provinces, enableAllOptions]);
 
   const regencyOptions: ComboboxOption[] = React.useMemo(() => {
-    if (!regenciesData?.data) return [];
-    return regenciesData.data.map((regency: Regency) => ({
-      value: regency.code,
-      label: truncateText(regency.name),
-      searchValue: regency.name.toLowerCase(),
-      fullLabel: regency.name, // Keep full name for search and tooltip
-    }));
-  }, [regenciesData]);
+    const options: ComboboxOption[] = [];
+    
+    // Add "all" option if enabled
+    if (enableAllOptions) {
+      options.push({
+        value: "all",
+        label: "Semua Kabupaten/Kota",
+        searchValue: "semua kabupaten kota",
+      });
+    }
+    
+    // Add regency options
+    if (data.regencies) {
+      options.push(...data.regencies.map((regency: Regency) => ({
+        value: regency.code,
+        label: truncateText(regency.name),
+        searchValue: regency.name.toLowerCase(),
+      })));
+    }
+    
+    return options;
+  }, [data.regencies, enableAllOptions]);
 
   const districtOptions: ComboboxOption[] = React.useMemo(() => {
-    if (!districtsData?.data) return [];
-    return districtsData.data.map((district: District) => ({
-      value: district.code,
-      label: truncateText(district.name),
-      searchValue: district.name.toLowerCase(),
-      fullLabel: district.name, // Keep full name for search and tooltip
-    }));
-  }, [districtsData]);
+    const options: ComboboxOption[] = [];
+    
+    // Add "all" option if enabled
+    if (enableAllOptions) {
+      options.push({
+        value: "all",
+        label: "Semua Kecamatan",
+        searchValue: "semua kecamatan",
+      });
+    }
+    
+    // Add district options
+    if (data.districts) {
+      options.push(...data.districts.map((district: District) => ({
+        value: district.code,
+        label: truncateText(district.name),
+        searchValue: district.name.toLowerCase(),
+      })));
+    }
+    
+    return options;
+  }, [data.districts, enableAllOptions]);
 
   // Handle province selection - reset dependent fields
   const handleProvinceChange = (provinceCode: string) => {
-    const selectedProvince = provincesData?.data?.find(
-      (p: Province) => p.code === provinceCode
-    );
-
-    if (selectedProvince) {
-      // Update both code and name fields
-      form.setValue("province_code", provinceCode);
-      form.setValue("province", selectedProvince.name);
-
+    const params = new URLSearchParams(searchParams);
+    
+    if (provinceCode === "all") {
+      // Handle "all" selection - remove URL parameter (default state)
+      params.delete("provinsi");
+      form.setValue("province_code", "");
+      form.setValue("province", "");
+      
       // Reset dependent fields
       form.setValue("regency_code", "");
       form.setValue("city", "");
       form.setValue("district_code", "");
       form.setValue("district", "");
+      params.delete("kabupaten_kota");
+      params.delete("kecamatan");
+    } else {
+      // Handle specific province selection
+      params.set("provinsi", provinceCode);
+      const selectedProvince = data.provinces?.find(
+        (p: Province) => p.code === provinceCode
+      );
 
-      onClearGeocodingError?.();
+      if (selectedProvince) {
+        // Update both code and name fields
+        form.setValue("province_code", provinceCode);
+        form.setValue("province", selectedProvince.name);
+
+        // Reset dependent fields
+        form.setValue("regency_code", "");
+        form.setValue("city", "");
+        form.setValue("district_code", "");
+        form.setValue("district", "");
+        params.delete("kabupaten_kota");
+        params.delete("kecamatan");
+      }
     }
+
+    // Update URL
+    router.replace(`?${params.toString()}`, { scroll: false });
+    onClearGeocodingError?.();
   };
 
   // Handle regency selection - reset dependent fields
   const handleRegencyChange = (regencyCode: string) => {
-    const selectedRegency = regenciesData?.data?.find(
-      (r: Regency) => r.code === regencyCode
-    );
-
-    if (selectedRegency) {
-      // Update both code and name fields
-      form.setValue("regency_code", regencyCode);
-      form.setValue("city", selectedRegency.name);
-
+    const params = new URLSearchParams(searchParams);
+    
+    if (regencyCode === "all") {
+      // Handle "all" selection - remove URL parameter (default state)
+      params.delete("kabupaten_kota");
+      form.setValue("regency_code", "");
+      form.setValue("city", "");
+      
       // Reset dependent fields
       form.setValue("district_code", "");
       form.setValue("district", "");
+      params.delete("kecamatan");
+    } else {
+      // Handle specific regency selection
+      params.set("kabupaten_kota", regencyCode);
+      const selectedRegency = data.regencies?.find(
+        (r: Regency) => r.code === regencyCode
+      );
 
-      onClearGeocodingError?.();
+      if (selectedRegency) {
+        // Update both code and name fields
+        form.setValue("regency_code", regencyCode);
+        form.setValue("city", selectedRegency.name);
+
+        // Reset dependent fields
+        form.setValue("district_code", "");
+        form.setValue("district", "");
+        params.delete("kecamatan");
+      }
     }
+
+    // Update URL
+    router.replace(`?${params.toString()}`, { scroll: false });
+    onClearGeocodingError?.();
   };
 
   // Handle district selection
   const handleDistrictChange = (districtCode: string) => {
-    const selectedDistrict = districtsData?.data?.find(
-      (d: District) => d.code === districtCode
-    );
+    const params = new URLSearchParams(searchParams);
+    
+    if (districtCode === "all") {
+      // Handle "all" selection - remove URL parameter (default state)
+      params.delete("kecamatan");
+      form.setValue("district_code", "");
+      form.setValue("district", "");
+    } else {
+      // Handle specific district selection
+      params.set("kecamatan", districtCode);
+      const selectedDistrict = data.districts?.find(
+        (d: District) => d.code === districtCode
+      );
 
-    if (selectedDistrict) {
-      // Update both code and name fields
-      form.setValue("district_code", districtCode);
-      form.setValue("district", selectedDistrict.name);
-
-      onClearGeocodingError?.();
+      if (selectedDistrict) {
+        // Update both code and name fields
+        form.setValue("district_code", districtCode);
+        form.setValue("district", selectedDistrict.name);
+      }
     }
+
+    // Update URL
+    router.replace(`?${params.toString()}`, { scroll: false });
+    onClearGeocodingError?.();
   };
 
   const isFromGeocoding = lastGeocodingSource === "coordinates";
@@ -176,38 +271,15 @@ export const AdministrativeSelect = ({
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <style dangerouslySetInnerHTML={{
-        __html: `
-          .admin-select-wrapper [role="combobox"] {
-            max-width: 100% !important;
-            overflow: hidden !important;
-            text-overflow: ellipsis !important;
-            white-space: nowrap !important;
-          }
-          .admin-select-wrapper button {
-            max-width: 100% !important;
-            overflow: hidden !important;
-            text-overflow: ellipsis !important;
-            white-space: nowrap !important;
-          }
-          .admin-select-wrapper button span {
-            max-width: 100% !important;
-            overflow: hidden !important;
-            text-overflow: ellipsis !important;
-            white-space: nowrap !important;
-            display: block !important;
-          }
-        `
-      }} />
       {/* Province Selection */}
-      <div className="admin-select-wrapper">
+      <div className="max-w-full">
         <FormField
           control={form.control}
           name="province"
           render={({ field }) => (
             <FormItem className="space-y-3">
               <FormLabel className="text-base font-semibold text-neutral-900 flex items-center gap-2">
-                Province *
+                Provinsi *
                 {isGeocodingFromCoords && (
                   <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
                 )}
@@ -218,25 +290,25 @@ export const AdministrativeSelect = ({
               <FormControl>
                 <ComboboxField
                   options={provinceOptions}
-                  value={selectedProvinceCode || ""}
+                  value={selectedAllProvince ? "all" : selectedProvinceCode || "all"}
                   onValueChange={handleProvinceChange}
-                  placeholder="Select province..."
-                  emptyMessage="No provinces found."
-                  searchPlaceholder="Search provinces..."
-                  disabled={disabled || isGeocodingFromCoords || provincesLoading}
-                  loading={provincesLoading}
+                  placeholder="Pilih provinsi..."
+                  emptyMessage="Tidak ada provinsi ditemukan."
+                  searchPlaceholder="Cari provinsi..."
+                  disabled={disabled || isGeocodingFromCoords || loading.provinces}
+                  loading={loading.provinces}
                   size="lg"
                   error={!!form.formState.errors.province}
-                  className={`${geocodingClasses} [&>button]:max-w-full [&>button]:truncate [&>button]:text-left [&>button>span]:truncate [&>button>span]:block [&>button>span]:max-w-[200px] [&_[role=combobox]]:truncate`}
+                  className={cn(geocodingClasses, "max-w-full truncate")}
                 />
               </FormControl>
               <FormDescription className="text-sm text-neutral-600">
-                Province name where the damage is located.
+                Nama provinsi tempat kerusakan jalan berada.
               </FormDescription>
               <FormMessage />
-              {provincesError && (
+              {error.provinces && (
                 <p className="text-sm text-red-600">
-                  Failed to load provinces. Please try again.
+                  Gagal memuat data provinsi. Silakan coba lagi.
                 </p>
               )}
             </FormItem>
@@ -245,14 +317,14 @@ export const AdministrativeSelect = ({
       </div>
 
       {/* Regency Selection */}
-      <div className="admin-select-wrapper">
+      <div className="max-w-full">
         <FormField
           control={form.control}
           name="city"
           render={({ field }) => (
             <FormItem className="space-y-3">
               <FormLabel className="text-base font-semibold text-neutral-900 flex items-center gap-2">
-                City *
+                Kabupaten/Kota *
                 {isGeocodingFromCoords && (
                   <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
                 )}
@@ -263,38 +335,38 @@ export const AdministrativeSelect = ({
               <FormControl>
                 <ComboboxField
                   options={regencyOptions}
-                  value={selectedRegencyCode || ""}
+                  value={selectedAllRegency ? "all" : selectedRegencyCode || "all"}
                   onValueChange={handleRegencyChange}
                   placeholder={
                     !selectedProvinceCode
-                      ? "Select province first..."
-                      : "Select city..."
+                      ? "Pilih provinsi terlebih dahulu..."
+                      : "Pilih kabupaten/kota..."
                   }
                   emptyMessage={
                     !selectedProvinceCode
-                      ? "Please select a province first."
-                      : "No cities found for this province."
+                      ? "Silakan pilih provinsi terlebih dahulu."
+                      : "Tidak ada kabupaten/kota ditemukan untuk provinsi ini."
                   }
-                  searchPlaceholder="Search cities..."
+                  searchPlaceholder="Cari kabupaten/kota..."
                   disabled={
                     disabled ||
                     isGeocodingFromCoords ||
                     !selectedProvinceCode ||
-                    regenciesLoading
+                    loading.regencies
                   }
-                  loading={regenciesLoading}
+                  loading={loading.regencies}
                   size="lg"
                   error={!!form.formState.errors.city}
-                  className={`${geocodingClasses} [&>button]:max-w-full [&>button]:truncate [&>button]:text-left [&>button>span]:truncate [&>button>span]:block [&>button>span]:max-w-[200px] [&_[role=combobox]]:truncate`}
+                  className={cn(geocodingClasses, "max-w-full truncate")}
                 />
               </FormControl>
               <FormDescription className="text-sm text-neutral-600">
-                City or regency name where the damage is located.
+                Nama kabupaten atau kota tempat kerusakan jalan berada.
               </FormDescription>
               <FormMessage />
-              {regenciesError && selectedProvinceCode && (
+              {error.regencies && selectedProvinceCode && (
                 <p className="text-sm text-red-600">
-                  Failed to load cities. Please try again.
+                  Gagal memuat data kabupaten/kota. Silakan coba lagi.
                 </p>
               )}
             </FormItem>
@@ -303,14 +375,14 @@ export const AdministrativeSelect = ({
       </div>
 
       {/* District Selection */}
-      <div className="admin-select-wrapper">
+      <div className="max-w-full">
         <FormField
           control={form.control}
           name="district"
           render={({ field }) => (
             <FormItem className="space-y-3">
               <FormLabel className="text-base font-semibold text-neutral-900 flex items-center gap-2">
-                District *
+                Kecamatan *
                 {isGeocodingFromCoords && (
                   <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
                 )}
@@ -321,38 +393,38 @@ export const AdministrativeSelect = ({
               <FormControl>
                 <ComboboxField
                   options={districtOptions}
-                  value={selectedDistrictCode || ""}
+                  value={selectedAllDistrict ? "all" : selectedDistrictCode || "all"}
                   onValueChange={handleDistrictChange}
                   placeholder={
                     !selectedRegencyCode
-                      ? "Select city first..."
-                      : "Select district..."
+                      ? "Pilih kabupaten/kota terlebih dahulu..."
+                      : "Pilih kecamatan..."
                   }
                   emptyMessage={
                     !selectedRegencyCode
-                      ? "Please select a city first."
-                      : "No districts found for this city."
+                      ? "Silakan pilih kabupaten/kota terlebih dahulu."
+                      : "Tidak ada kecamatan ditemukan untuk kabupaten/kota ini."
                   }
-                  searchPlaceholder="Search districts..."
+                  searchPlaceholder="Cari kecamatan..."
                   disabled={
                     disabled ||
                     isGeocodingFromCoords ||
                     !selectedRegencyCode ||
-                    districtsLoading
+                    loading.districts
                   }
-                  loading={districtsLoading}
+                  loading={loading.districts}
                   size="lg"
                   error={!!form.formState.errors.district}
-                  className={`${geocodingClasses} [&>button]:max-w-full [&>button]:truncate [&>button]:text-left [&>button>span]:truncate [&>button>span]:block [&>button>span]:max-w-[200px] [&_[role=combobox]]:truncate`}
+                  className={cn(geocodingClasses, "max-w-full truncate")}
                 />
               </FormControl>
               <FormDescription className="text-sm text-neutral-600">
-                District name where the damage is located.
+                Nama kecamatan tempat kerusakan jalan berada.
               </FormDescription>
               <FormMessage />
-              {districtsError && selectedRegencyCode && (
+              {error.districts && selectedRegencyCode && (
                 <p className="text-sm text-red-600">
-                  Failed to load districts. Please try again.
+                  Gagal memuat data kecamatan. Silakan coba lagi.
                 </p>
               )}
             </FormItem>
