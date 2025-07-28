@@ -12,7 +12,8 @@
     "check-types": "tsc --noEmit",
     "db:migrate": "bun run src/db/migrate.ts",
     "db:reset": "bun run src/db/reset.ts",
-    "db:seed": "bun run src/db/seed.ts"
+    "db:seed": "bun run src/db/seed.ts",
+    "import:admin-data": "bun run scripts/import-csv-admin-data.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.848.0",
@@ -21,6 +22,7 @@
     "@hono/swagger-ui": "^0.5.2",
     "@hono/zod-openapi": "^1.0.2",
     "@hono/zod-validator": "^0.7.0",
+    "csv-parse": "^6.1.0",
     "dotenv": "^17.0.1",
     "exifr": "^7.1.3",
     "firebase-admin": "^13.4.0",
