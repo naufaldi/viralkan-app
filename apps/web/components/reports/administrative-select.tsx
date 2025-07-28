@@ -60,13 +60,39 @@ export const AdministrativeSelect = ({
     error: districtsError,
   } = useDistricts(selectedRegencyCode);
 
+  // Helper function to truncate long text
+  const truncateText = (text: string, maxLength: number = 20) => {
+    if (!text) return text;
+    return text.length > maxLength ? `${text.slice(0, maxLength)}...` : text;
+  };
+
+  // Get display names for selected values (truncated)
+  const getSelectedProvinceDisplay = () => {
+    if (!selectedProvinceCode || !provincesData?.data) return "";
+    const province = provincesData.data.find(p => p.code === selectedProvinceCode);
+    return province ? truncateText(province.name) : "";
+  };
+
+  const getSelectedRegencyDisplay = () => {
+    if (!selectedRegencyCode || !regenciesData?.data) return "";
+    const regency = regenciesData.data.find(r => r.code === selectedRegencyCode);
+    return regency ? truncateText(regency.name) : "";
+  };
+
+  const getSelectedDistrictDisplay = () => {
+    if (!selectedDistrictCode || !districtsData?.data) return "";
+    const district = districtsData.data.find(d => d.code === selectedDistrictCode);
+    return district ? truncateText(district.name) : "";
+  };
+
   // Transform data for ComboboxField
   const provinceOptions: ComboboxOption[] = React.useMemo(() => {
     if (!provincesData?.data) return [];
     return provincesData.data.map((province: Province) => ({
       value: province.code,
-      label: province.name,
+      label: truncateText(province.name),
       searchValue: province.name.toLowerCase(),
+      fullLabel: province.name, // Keep full name for search and tooltip
     }));
   }, [provincesData]);
 
@@ -74,8 +100,9 @@ export const AdministrativeSelect = ({
     if (!regenciesData?.data) return [];
     return regenciesData.data.map((regency: Regency) => ({
       value: regency.code,
-      label: regency.name,
+      label: truncateText(regency.name),
       searchValue: regency.name.toLowerCase(),
+      fullLabel: regency.name, // Keep full name for search and tooltip
     }));
   }, [regenciesData]);
 
@@ -83,8 +110,9 @@ export const AdministrativeSelect = ({
     if (!districtsData?.data) return [];
     return districtsData.data.map((district: District) => ({
       value: district.code,
-      label: district.name,
+      label: truncateText(district.name),
       searchValue: district.name.toLowerCase(),
+      fullLabel: district.name, // Keep full name for search and tooltip
     }));
   }, [districtsData]);
 
@@ -98,13 +126,13 @@ export const AdministrativeSelect = ({
       // Update both code and name fields
       form.setValue("province_code", provinceCode);
       form.setValue("province", selectedProvince.name);
-      
+
       // Reset dependent fields
       form.setValue("regency_code", "");
       form.setValue("city", "");
       form.setValue("district_code", "");
       form.setValue("district", "");
-      
+
       onClearGeocodingError?.();
     }
   };
@@ -119,11 +147,11 @@ export const AdministrativeSelect = ({
       // Update both code and name fields
       form.setValue("regency_code", regencyCode);
       form.setValue("city", selectedRegency.name);
-      
+
       // Reset dependent fields
       form.setValue("district_code", "");
       form.setValue("district", "");
-      
+
       onClearGeocodingError?.();
     }
   };
@@ -138,7 +166,7 @@ export const AdministrativeSelect = ({
       // Update both code and name fields
       form.setValue("district_code", districtCode);
       form.setValue("district", selectedDistrict.name);
-      
+
       onClearGeocodingError?.();
     }
   };
@@ -148,160 +176,189 @@ export const AdministrativeSelect = ({
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          .admin-select-wrapper [role="combobox"] {
+            max-width: 100% !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            white-space: nowrap !important;
+          }
+          .admin-select-wrapper button {
+            max-width: 100% !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            white-space: nowrap !important;
+          }
+          .admin-select-wrapper button span {
+            max-width: 100% !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            white-space: nowrap !important;
+            display: block !important;
+          }
+        `
+      }} />
       {/* Province Selection */}
-      <FormField
-        control={form.control}
-        name="province"
-        render={({ field }) => (
-          <FormItem className="space-y-3">
-            <FormLabel className="text-base font-semibold text-neutral-900 flex items-center gap-2">
-              Province *
-              {isGeocodingFromCoords && (
-                <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+      <div className="admin-select-wrapper">
+        <FormField
+          control={form.control}
+          name="province"
+          render={({ field }) => (
+            <FormItem className="space-y-3">
+              <FormLabel className="text-base font-semibold text-neutral-900 flex items-center gap-2">
+                Province *
+                {isGeocodingFromCoords && (
+                  <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                )}
+                {isFromGeocoding && (
+                  <MapPin className="h-4 w-4 text-green-600" />
+                )}
+              </FormLabel>
+              <FormControl>
+                <ComboboxField
+                  options={provinceOptions}
+                  value={selectedProvinceCode || ""}
+                  onValueChange={handleProvinceChange}
+                  placeholder="Select province..."
+                  emptyMessage="No provinces found."
+                  searchPlaceholder="Search provinces..."
+                  disabled={disabled || isGeocodingFromCoords || provincesLoading}
+                  loading={provincesLoading}
+                  size="lg"
+                  error={!!form.formState.errors.province}
+                  className={`${geocodingClasses} [&>button]:max-w-full [&>button]:truncate [&>button]:text-left [&>button>span]:truncate [&>button>span]:block [&>button>span]:max-w-[200px] [&_[role=combobox]]:truncate`}
+                />
+              </FormControl>
+              <FormDescription className="text-sm text-neutral-600">
+                Province name where the damage is located.
+              </FormDescription>
+              <FormMessage />
+              {provincesError && (
+                <p className="text-sm text-red-600">
+                  Failed to load provinces. Please try again.
+                </p>
               )}
-              {isFromGeocoding && (
-                <MapPin className="h-4 w-4 text-green-600" />
-              )}
-            </FormLabel>
-            <FormControl>
-              <ComboboxField
-                options={provinceOptions}
-                value={selectedProvinceCode || ""}
-                onValueChange={handleProvinceChange}
-                placeholder="Select province..."
-                emptyMessage="No provinces found."
-                searchPlaceholder="Search provinces..."
-                disabled={disabled || isGeocodingFromCoords || provincesLoading}
-                loading={provincesLoading}
-                size="lg"
-                error={!!form.formState.errors.province}
-                className={geocodingClasses}
-              />
-            </FormControl>
-            <FormDescription className="text-sm text-neutral-600">
-              Province name where the damage is located.
-            </FormDescription>
-            <FormMessage />
-            {provincesError && (
-              <p className="text-sm text-red-600">
-                Failed to load provinces. Please try again.
-              </p>
-            )}
-          </FormItem>
-        )}
-      />
+            </FormItem>
+          )}
+        />
+      </div>
 
       {/* Regency Selection */}
-      <FormField
-        control={form.control}
-        name="city"
-        render={({ field }) => (
-          <FormItem className="space-y-3">
-            <FormLabel className="text-base font-semibold text-neutral-900 flex items-center gap-2">
-              City *
-              {isGeocodingFromCoords && (
-                <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+      <div className="admin-select-wrapper">
+        <FormField
+          control={form.control}
+          name="city"
+          render={({ field }) => (
+            <FormItem className="space-y-3">
+              <FormLabel className="text-base font-semibold text-neutral-900 flex items-center gap-2">
+                City *
+                {isGeocodingFromCoords && (
+                  <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                )}
+                {isFromGeocoding && (
+                  <MapPin className="h-4 w-4 text-green-600" />
+                )}
+              </FormLabel>
+              <FormControl>
+                <ComboboxField
+                  options={regencyOptions}
+                  value={selectedRegencyCode || ""}
+                  onValueChange={handleRegencyChange}
+                  placeholder={
+                    !selectedProvinceCode
+                      ? "Select province first..."
+                      : "Select city..."
+                  }
+                  emptyMessage={
+                    !selectedProvinceCode
+                      ? "Please select a province first."
+                      : "No cities found for this province."
+                  }
+                  searchPlaceholder="Search cities..."
+                  disabled={
+                    disabled ||
+                    isGeocodingFromCoords ||
+                    !selectedProvinceCode ||
+                    regenciesLoading
+                  }
+                  loading={regenciesLoading}
+                  size="lg"
+                  error={!!form.formState.errors.city}
+                  className={`${geocodingClasses} [&>button]:max-w-full [&>button]:truncate [&>button]:text-left [&>button>span]:truncate [&>button>span]:block [&>button>span]:max-w-[200px] [&_[role=combobox]]:truncate`}
+                />
+              </FormControl>
+              <FormDescription className="text-sm text-neutral-600">
+                City or regency name where the damage is located.
+              </FormDescription>
+              <FormMessage />
+              {regenciesError && selectedProvinceCode && (
+                <p className="text-sm text-red-600">
+                  Failed to load cities. Please try again.
+                </p>
               )}
-              {isFromGeocoding && (
-                <MapPin className="h-4 w-4 text-green-600" />
-              )}
-            </FormLabel>
-            <FormControl>
-              <ComboboxField
-                options={regencyOptions}
-                value={selectedRegencyCode || ""}
-                onValueChange={handleRegencyChange}
-                placeholder={
-                  !selectedProvinceCode
-                    ? "Select province first..."
-                    : "Select city..."
-                }
-                emptyMessage={
-                  !selectedProvinceCode
-                    ? "Please select a province first."
-                    : "No cities found for this province."
-                }
-                searchPlaceholder="Search cities..."
-                disabled={
-                  disabled ||
-                  isGeocodingFromCoords ||
-                  !selectedProvinceCode ||
-                  regenciesLoading
-                }
-                loading={regenciesLoading}
-                size="lg"
-                error={!!form.formState.errors.city}
-                className={geocodingClasses}
-              />
-            </FormControl>
-            <FormDescription className="text-sm text-neutral-600">
-              City or regency name where the damage is located.
-            </FormDescription>
-            <FormMessage />
-            {regenciesError && selectedProvinceCode && (
-              <p className="text-sm text-red-600">
-                Failed to load cities. Please try again.
-              </p>
-            )}
-          </FormItem>
-        )}
-      />
+            </FormItem>
+          )}
+        />
+      </div>
 
       {/* District Selection */}
-      <FormField
-        control={form.control}
-        name="district"
-        render={({ field }) => (
-          <FormItem className="space-y-3">
-            <FormLabel className="text-base font-semibold text-neutral-900 flex items-center gap-2">
-              District *
-              {isGeocodingFromCoords && (
-                <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+      <div className="admin-select-wrapper">
+        <FormField
+          control={form.control}
+          name="district"
+          render={({ field }) => (
+            <FormItem className="space-y-3">
+              <FormLabel className="text-base font-semibold text-neutral-900 flex items-center gap-2">
+                District *
+                {isGeocodingFromCoords && (
+                  <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                )}
+                {isFromGeocoding && (
+                  <MapPin className="h-4 w-4 text-green-600" />
+                )}
+              </FormLabel>
+              <FormControl>
+                <ComboboxField
+                  options={districtOptions}
+                  value={selectedDistrictCode || ""}
+                  onValueChange={handleDistrictChange}
+                  placeholder={
+                    !selectedRegencyCode
+                      ? "Select city first..."
+                      : "Select district..."
+                  }
+                  emptyMessage={
+                    !selectedRegencyCode
+                      ? "Please select a city first."
+                      : "No districts found for this city."
+                  }
+                  searchPlaceholder="Search districts..."
+                  disabled={
+                    disabled ||
+                    isGeocodingFromCoords ||
+                    !selectedRegencyCode ||
+                    districtsLoading
+                  }
+                  loading={districtsLoading}
+                  size="lg"
+                  error={!!form.formState.errors.district}
+                  className={`${geocodingClasses} [&>button]:max-w-full [&>button]:truncate [&>button]:text-left [&>button>span]:truncate [&>button>span]:block [&>button>span]:max-w-[200px] [&_[role=combobox]]:truncate`}
+                />
+              </FormControl>
+              <FormDescription className="text-sm text-neutral-600">
+                District name where the damage is located.
+              </FormDescription>
+              <FormMessage />
+              {districtsError && selectedRegencyCode && (
+                <p className="text-sm text-red-600">
+                  Failed to load districts. Please try again.
+                </p>
               )}
-              {isFromGeocoding && (
-                <MapPin className="h-4 w-4 text-green-600" />
-              )}
-            </FormLabel>
-            <FormControl>
-              <ComboboxField
-                options={districtOptions}
-                value={selectedDistrictCode || ""}
-                onValueChange={handleDistrictChange}
-                placeholder={
-                  !selectedRegencyCode
-                    ? "Select city first..."
-                    : "Select district..."
-                }
-                emptyMessage={
-                  !selectedRegencyCode
-                    ? "Please select a city first."
-                    : "No districts found for this city."
-                }
-                searchPlaceholder="Search districts..."
-                disabled={
-                  disabled ||
-                  isGeocodingFromCoords ||
-                  !selectedRegencyCode ||
-                  districtsLoading
-                }
-                loading={districtsLoading}
-                size="lg"
-                error={!!form.formState.errors.district}
-                className={geocodingClasses}
-              />
-            </FormControl>
-            <FormDescription className="text-sm text-neutral-600">
-              District name where the damage is located.
-            </FormDescription>
-            <FormMessage />
-            {districtsError && selectedRegencyCode && (
-              <p className="text-sm text-red-600">
-                Failed to load districts. Please try again.
-              </p>
-            )}
-          </FormItem>
-        )}
-      />
+            </FormItem>
+          )}
+        />
+      </div>
     </div>
   );
 };

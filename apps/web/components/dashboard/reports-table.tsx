@@ -30,7 +30,7 @@ import {
   DropdownMenuTrigger,
 } from "@repo/ui/components/ui/dropdown-menu";
 import { Input } from "@repo/ui/components/ui/input";
-import { ArrowUpDown, Eye, Edit, MoreHorizontal, Search } from "lucide-react";
+import { ArrowUpDown, Eye, Edit, MoreHorizontal, Search, Clock, CheckCircle, XCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -86,31 +86,36 @@ export function ReportsTable({ data, isLoading = false }: ReportsTableProps) {
         return (
           <Badge
             variant="secondary"
-            className="bg-neutral-100 text-neutral-700"
+            className="bg-neutral-100 text-neutral-600 border-neutral-200"
           >
+            <Clock className="w-3 h-3 mr-1" />
             Menunggu
           </Badge>
         );
-      case "under_review":
+      case "verified":
         return (
           <Badge
             variant="secondary"
-            className="bg-neutral-200 text-neutral-800"
+            className="bg-neutral-900 text-white border-neutral-900"
           >
-            Ditinjau
+            <CheckCircle className="w-3 h-3 mr-1" />
+            Disetujui
           </Badge>
         );
-      case "resolved":
+      case "rejected":
         return (
-          <Badge variant="secondary" className="bg-neutral-900 text-white">
-            Selesai
+          <Badge
+            variant="secondary"
+            className="bg-neutral-200 text-neutral-800 border-neutral-300"
+          >
+            <XCircle className="w-3 h-3 mr-1" />
+            Ditolak
           </Badge>
         );
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }
   };
-
   const getCategoryBadge = (category: string) => {
     switch (category.toLowerCase()) {
       case "berlubang":
@@ -313,6 +318,7 @@ export function ReportsTable({ data, isLoading = false }: ReportsTableProps) {
       },
     },
   });
+  console.log("data", data);
 
   if (isLoading) {
     return (
@@ -362,9 +368,9 @@ export function ReportsTable({ data, isLoading = false }: ReportsTableProps) {
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      )}
                   </TableHead>
                 ))}
               </TableRow>
@@ -420,7 +426,7 @@ export function ReportsTable({ data, isLoading = false }: ReportsTableProps) {
             hingga{" "}
             {Math.min(
               (table.getState().pagination.pageIndex + 1) *
-                table.getState().pagination.pageSize,
+              table.getState().pagination.pageSize,
               table.getFilteredRowModel().rows.length,
             )}{" "}
             dari {table.getFilteredRowModel().rows.length} laporan

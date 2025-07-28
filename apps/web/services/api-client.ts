@@ -7,20 +7,20 @@ import {
   ReportWithUser,
   PaginatedReports,
   ErrorResponse,
-} from "../lib/types/api";
+} from '../lib/types/api';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
 // Base API request function with consistent error handling
 async function apiRequest<T>(
   endpoint: string,
-  options: RequestInit = {},
+  options: RequestInit = {}
 ): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
 
   const response = await fetch(url, {
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
       ...options.headers,
     },
     ...options,
@@ -29,7 +29,7 @@ async function apiRequest<T>(
   if (!response.ok) {
     const errorData: ErrorResponse = await response.json().catch(() => ({
       error: {
-        code: "UNKNOWN_ERROR",
+        code: 'UNKNOWN_ERROR',
         message: `HTTP ${response.status}: ${response.statusText}`,
         timestamp: new Date().toISOString(),
       },
@@ -44,7 +44,7 @@ async function apiRequest<T>(
 async function authenticatedApiRequest<T>(
   endpoint: string,
   token: string,
-  options: RequestInit = {},
+  options: RequestInit = {}
 ): Promise<T> {
   return apiRequest<T>(endpoint, {
     ...options,
@@ -67,13 +67,13 @@ export const reportsService = {
   }): Promise<PaginatedReports> => {
     const searchParams = new URLSearchParams();
 
-    if (params?.page) searchParams.append("page", params.page.toString());
-    if (params?.limit) searchParams.append("limit", params.limit.toString());
-    if (params?.category) searchParams.append("category", params.category);
-    if (params?.search) searchParams.append("search", params.search);
-    if (params?.user_id) searchParams.append("user_id", params.user_id);
+    if (params?.page) searchParams.append('page', params.page.toString());
+    if (params?.limit) searchParams.append('limit', params.limit.toString());
+    if (params?.category) searchParams.append('category', params.category);
+    if (params?.search) searchParams.append('search', params.search);
+    if (params?.user_id) searchParams.append('user_id', params.user_id);
 
-    const endpoint = `/api/reports${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
+    const endpoint = `/api/reports${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
     return apiRequest<PaginatedReports>(endpoint);
   },
 
@@ -87,13 +87,13 @@ export const reportsService = {
   }): Promise<PaginatedReports> => {
     const searchParams = new URLSearchParams();
 
-    if (params?.page) searchParams.append("page", params.page.toString());
-    if (params?.limit) searchParams.append("limit", params.limit.toString());
-    if (params?.category) searchParams.append("category", params.category);
-    if (params?.search) searchParams.append("search", params.search);
-    if (params?.user_id) searchParams.append("user_id", params.user_id);
+    if (params?.page) searchParams.append('page', params.page.toString());
+    if (params?.limit) searchParams.append('limit', params.limit.toString());
+    if (params?.category) searchParams.append('category', params.category);
+    if (params?.search) searchParams.append('search', params.search);
+    if (params?.user_id) searchParams.append('user_id', params.user_id);
 
-    const endpoint = `/api/reports/enriched${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
+    const endpoint = `/api/reports/enriched${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
     return apiRequest<PaginatedReports>(endpoint);
   },
 
@@ -106,7 +106,7 @@ export const reportsService = {
       status?: string;
       category?: string;
       search?: string;
-    },
+    }
   ): Promise<{
     items: Array<{
       id: string;
@@ -117,7 +117,7 @@ export const reportsService = {
       location_text: string;
       lat: number | null;
       lon: number | null;
-      status: "pending" | "verified" | "rejected" | "deleted";
+      status: 'pending' | 'verified' | 'rejected' | 'deleted';
       verified_at: string | null;
       verified_by: string | null;
       rejection_reason: string | null;
@@ -135,13 +135,13 @@ export const reportsService = {
   }> => {
     const searchParams = new URLSearchParams();
 
-    if (params?.page) searchParams.append("page", params.page.toString());
-    if (params?.limit) searchParams.append("limit", params.limit.toString());
-    if (params?.status) searchParams.append("status", params.status);
-    if (params?.category) searchParams.append("category", params.category);
-    if (params?.search) searchParams.append("search", params.search);
+    if (params?.page) searchParams.append('page', params.page.toString());
+    if (params?.limit) searchParams.append('limit', params.limit.toString());
+    if (params?.status) searchParams.append('status', params.status);
+    if (params?.category) searchParams.append('category', params.category);
+    if (params?.search) searchParams.append('search', params.search);
 
-    const endpoint = `/api/admin/reports${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
+    const endpoint = `/api/admin/reports${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
     return authenticatedApiRequest(endpoint, token);
   },
 
@@ -153,14 +153,14 @@ export const reportsService = {
   // Create new report (authenticated)
   createReport: async (
     data: CreateReportInput,
-    token: string,
+    token: string
   ): Promise<{ id: string; message: string; success: boolean }> => {
     return authenticatedApiRequest<{
       id: string;
       message: string;
       success: boolean;
-    }>("/api/reports", token, {
-      method: "POST",
+    }>('/api/reports', token, {
+      method: 'POST',
       body: JSON.stringify(data),
     });
   },
@@ -172,15 +172,15 @@ export const reportsService = {
       page?: number;
       limit?: number;
       category?: string;
-    },
+    }
   ): Promise<PaginatedReports> => {
     const searchParams = new URLSearchParams();
 
-    if (params?.page) searchParams.append("page", params.page.toString());
-    if (params?.limit) searchParams.append("limit", params.limit.toString());
-    if (params?.category) searchParams.append("category", params.category);
+    if (params?.page) searchParams.append('page', params.page.toString());
+    if (params?.limit) searchParams.append('limit', params.limit.toString());
+    if (params?.category) searchParams.append('category', params.category);
 
-    const endpoint = `/api/reports/me${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
+    const endpoint = `/api/reports/me${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
     return authenticatedApiRequest<PaginatedReports>(endpoint, token);
   },
 
@@ -188,36 +188,36 @@ export const reportsService = {
   updateReport: async (
     id: string,
     data: Partial<CreateReportInput>,
-    token: string,
+    token: string
   ): Promise<ReportResponse> => {
     return authenticatedApiRequest<ReportResponse>(
       `/api/reports/${id}`,
       token,
       {
-        method: "PUT",
+        method: 'PUT',
         body: JSON.stringify(data),
-      },
+      }
     );
   },
 
   // Delete report (authenticated)
   deleteReport: async (
     id: string,
-    token: string,
+    token: string
   ): Promise<{ success: boolean }> => {
     return authenticatedApiRequest<{ success: boolean }>(
       `/api/reports/${id}`,
       token,
       {
-        method: "DELETE",
-      },
+        method: 'DELETE',
+      }
     );
   },
 
   // Validate report ownership (authenticated)
   validateOwnership: async (
     id: string,
-    token: string,
+    token: string
   ): Promise<{ canEdit: boolean; report: ReportResponse }> => {
     return authenticatedApiRequest<{
       canEdit: boolean;
@@ -240,7 +240,7 @@ export const reportsService = {
         acc[report.category] = (acc[report.category] || 0) + 1;
         return acc;
       },
-      {} as Record<string, number>,
+      {} as Record<string, number>
     );
 
     const recent = reports.items.filter((report) => {
@@ -276,13 +276,13 @@ export const {
 export interface ReportFilters {
   page?: number;
   limit?: number;
-  category?: "berlubang" | "retak" | "lainnya";
+  category?: 'berlubang' | 'retak' | 'lainnya';
   search?: string;
 }
 
 export interface Report {
   id: string;
-  category: "berlubang" | "retak" | "lainnya";
+  category: 'berlubang' | 'retak' | 'lainnya';
   street_name: string;
   location_text: string;
   image_url: string;
@@ -315,7 +315,7 @@ class ApiClient {
   }
 
   async getEnrichedReports(
-    filters: ReportFilters = {},
+    filters: ReportFilters = {}
   ): Promise<PaginatedReports> {
     return reportsService.getEnrichedReports({
       page: filters.page,
@@ -333,13 +333,13 @@ class ApiClient {
     endpoint: string,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     data: any,
-    options?: RequestInit,
+    options?: RequestInit
   ): Promise<{ data: T }> {
     const API_BASE_URL =
-      process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+      process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      method: "POST",
+      method: 'POST',
       ...options,
       headers: {
         ...options?.headers,
@@ -394,17 +394,28 @@ export interface AdministrativeResponse<T> {
 export const administrativeService = {
   // Get all provinces
   getProvinces: async (): Promise<AdministrativeResponse<Province>> => {
-    return apiRequest<AdministrativeResponse<Province>>("/api/administrative/provinces");
+    const data = await apiRequest<Province[]>('/api/administrative/provinces');
+    return { data };
   },
 
   // Get regencies by province code
-  getRegencies: async (provinceCode: string): Promise<AdministrativeResponse<Regency>> => {
-    return apiRequest<AdministrativeResponse<Regency>>(`/api/administrative/regencies/${provinceCode}`);
+  getRegencies: async (
+    provinceCode: string
+  ): Promise<AdministrativeResponse<Regency>> => {
+    const data = await apiRequest<Regency[]>(
+      `/api/administrative/regencies/${provinceCode}`
+    );
+    return { data };
   },
 
   // Get districts by regency code
-  getDistricts: async (regencyCode: string): Promise<AdministrativeResponse<District>> => {
-    return apiRequest<AdministrativeResponse<District>>(`/api/administrative/districts/${regencyCode}`);
+  getDistricts: async (
+    regencyCode: string
+  ): Promise<AdministrativeResponse<District>> => {
+    const data = await apiRequest<District[]>(
+      `/api/administrative/districts/${regencyCode}`
+    );
+    return { data };
   },
 
   // Get sync status
@@ -414,7 +425,7 @@ export const administrativeService = {
     districts: number;
     lastSync: string | null;
   }> => {
-    return apiRequest("/api/administrative/sync/status");
+    return apiRequest('/api/administrative/sync/status');
   },
 
   // Validate administrative hierarchy
@@ -430,7 +441,9 @@ export const administrativeService = {
       district: string;
     };
   }> => {
-    return apiRequest(`/api/administrative/validate/${provinceCode}/${regencyCode}/${districtCode}`);
+    return apiRequest(
+      `/api/administrative/validate/${provinceCode}/${regencyCode}/${districtCode}`
+    );
   },
 };
 
