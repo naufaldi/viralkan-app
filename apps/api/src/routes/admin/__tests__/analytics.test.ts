@@ -52,7 +52,7 @@ describe('Admin Analytics Endpoint Tests', () => {
         'whatsapp',
         'twitter',
         'facebook',
-        'instagram',
+        'threads',
         'telegram',
       ]).toContain(validQueryParams.platform);
 
@@ -267,7 +267,7 @@ describe('Admin Analytics Endpoint Tests', () => {
           startDate: 'optional ISO datetime string',
           endDate: 'optional ISO datetime string',
           platform:
-            'optional enum (whatsapp|twitter|facebook|instagram|telegram)',
+            'optional enum (whatsapp|twitter|facebook|threads|telegram)',
         },
       };
 

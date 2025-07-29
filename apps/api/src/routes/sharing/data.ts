@@ -275,7 +275,7 @@ export const getShareAnalytics = async (
       whatsapp: 0,
       twitter: 0,
       facebook: 0,
-      instagram: 0,
+      threads: 0,
       telegram: 0,
     };
 
@@ -347,7 +347,7 @@ export const getShareCountByPlatform = async (
       whatsapp: 0,
       twitter: 0,
       facebook: 0,
-      instagram: 0,
+      threads: 0,
       telegram: 0,
     };
 

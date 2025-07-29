@@ -90,7 +90,7 @@ export default function LoginPage() {
                     icon: "📱",
                     title: "Bagikan ke Media Sosial",
                     description:
-                      "Viralkan laporan Anda langsung ke WhatsApp, Twitter, Instagram",
+                      "Viralkan laporan Anda langsung ke WhatsApp, Twitter, Threads",
                   },
                   {
                     icon: "👥",

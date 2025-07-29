@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@repo/ui/components/ui/button";
 import {
   DropdownMenu,
@@ -13,12 +13,13 @@ import {
   MessageCircle,
   Twitter,
   Facebook,
-  Instagram,
+  AtSign,
   Send,
   Loader2,
 } from "lucide-react";
 import { ShareDialog } from "./share-dialog";
 import { useSharing } from "@/hooks/sharing";
+import { useReportSharing } from "@/hooks/sharing";
 
 interface ShareButtonProps {
   reportId: string;
@@ -33,13 +34,14 @@ interface ShareButtonProps {
   size?: "sm" | "md" | "lg";
   useDialog?: boolean;
   onShareSuccess?: (platform: string, newCount: number) => void;
+  showShareCount?: boolean;
 }
 
 const PLATFORMS = [
   { value: "whatsapp", label: "WhatsApp", icon: MessageCircle, color: "text-green-600" },
   { value: "twitter", label: "Twitter/X", icon: Twitter, color: "text-blue-500" },
   { value: "facebook", label: "Facebook", icon: Facebook, color: "text-blue-600" },
-  { value: "instagram", label: "Instagram", icon: Instagram, color: "text-pink-600" },
+  { value: "threads", label: "Threads", icon: AtSign, color: "text-purple-600" },
   { value: "telegram", label: "Telegram", icon: Send, color: "text-blue-400" },
 ] as const;
 
@@ -55,6 +57,12 @@ const ICON_SIZES = {
   lg: "h-6 w-6",
 };
 
+const BADGE_SIZES = {
+  sm: "text-xs px-1.5 py-0.5 -top-1 -right-1 min-w-[16px] h-4",
+  md: "text-xs px-2 py-1 -top-1.5 -right-1.5 min-w-[20px] h-5",
+  lg: "text-sm px-2.5 py-1.5 -top-2 -right-2 min-w-[24px] h-6",
+};
+
 export function ShareButton({
   reportId,
   report,
@@ -62,9 +70,11 @@ export function ShareButton({
   size = "md",
   useDialog = false,
   onShareSuccess,
+  showShareCount = true,
 }: ShareButtonProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
+  const [shareCount, setShareCount] = useState(0);
 
   // Use the sharing hook
   const { shareToPlatform } = useSharing({
@@ -73,6 +83,36 @@ export function ShareButton({
       console.error("Sharing error:", error);
     },
   });
+
+  // Use the report sharing hook to get share count
+  const { shareDetails, isLoading } = useReportSharing({
+    reportId,
+    enabled: showShareCount,
+  });
+
+  // Update share count when data is loaded
+  useEffect(() => {
+    if (shareDetails) {
+      setShareCount(shareDetails.shareCount);
+    }
+  }, [shareDetails]);
+
+  // Listen for share count updates from other components
+  useEffect(() => {
+    if (!showShareCount) return;
+
+    const handleShareCountUpdate = (event: CustomEvent) => {
+      if (event.detail?.newCount !== undefined) {
+        setShareCount(event.detail.newCount);
+      }
+    };
+
+    document.addEventListener('shareCountUpdated', handleShareCountUpdate as EventListener);
+    
+    return () => {
+      document.removeEventListener('shareCountUpdated', handleShareCountUpdate as EventListener);
+    };
+  }, [showShareCount]);
 
   const handleQuickShare = async (platform: string) => {
     setIsSharing(true);
@@ -98,20 +138,45 @@ export function ShareButton({
     onShareSuccess?.(platform, newCount);
   };
 
+  const formatShareCount = (count: number): string => {
+    if (count >= 1000000) {
+      return `${(count / 1000000).toFixed(1)}M`;
+    } else if (count >= 1000) {
+      return `${(count / 1000).toFixed(1)}K`;
+    }
+    return count.toString();
+  };
+
+  const renderButton = (children: React.ReactNode, onClick?: () => void) => (
+    <div className="relative group">
+      <Button
+        onClick={onClick}
+        className={`${SIZE_CLASSES[size]} ${className} bg-white/95 backdrop-blur-md border border-white/20 text-neutral-700 shadow-lg hover:bg-white hover:scale-105 hover:shadow-xl transition-all duration-300 ease-out rounded-full p-0`}
+        disabled={isSharing}
+      >
+        {children}
+      </Button>
+      
+      {/* Share Count Badge */}
+      {showShareCount && shareCount > 0 && (
+        <div className={`absolute ${BADGE_SIZES[size]} bg-neutral-800 text-white font-bold rounded-full flex items-center justify-center shadow-md border-2 border-white transition-all duration-300 ease-out group-hover:scale-110 group-hover:shadow-lg group-hover:bg-neutral-900`}>
+          {isLoading ? "..." : formatShareCount(shareCount)}
+        </div>
+      )}
+    </div>
+  );
+
   if (useDialog) {
     return (
       <>
-        <Button
-          onClick={() => setIsDialogOpen(true)}
-          className={`${SIZE_CLASSES[size]} ${className} bg-white/95 backdrop-blur-md border border-white/20 text-neutral-700 shadow-lg hover:bg-white hover:scale-105 hover:shadow-xl transition-all duration-300 ease-out rounded-full p-0`}
-          disabled={isSharing}
-        >
-          {isSharing ? (
+        {renderButton(
+          isSharing ? (
             <Loader2 className={`${ICON_SIZES[size]} animate-spin`} />
           ) : (
             <Share2 className={ICON_SIZES[size]} />
-          )}
-        </Button>
+          ),
+          () => setIsDialogOpen(true)
+        )}
 
         <ShareDialog
           isOpen={isDialogOpen}
@@ -126,16 +191,13 @@ export function ShareButton({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          className={`${SIZE_CLASSES[size]} ${className} bg-white/95 backdrop-blur-md border border-white/20 text-neutral-700 shadow-lg hover:bg-white hover:scale-105 hover:shadow-xl transition-all duration-300 ease-out rounded-full p-0`}
-          disabled={isSharing}
-        >
-          {isSharing ? (
+        {renderButton(
+          isSharing ? (
             <Loader2 className={`${ICON_SIZES[size]} animate-spin`} />
           ) : (
             <Share2 className={ICON_SIZES[size]} />
-          )}
-        </Button>
+          )
+        )}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
         {PLATFORMS.map((platform) => {

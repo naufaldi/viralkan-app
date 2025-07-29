@@ -8,7 +8,7 @@ import {
   Camera,
   Share2,
   Users,
-  CheckCircle,
+  
   ArrowRight,
   Star,
   MessageSquare,

@@ -41,7 +41,7 @@ describe('Sharing Data Layer Tests', () => {
         'whatsapp',
         'twitter',
         'facebook',
-        'instagram',
+        'threads',
         'telegram',
       ];
 

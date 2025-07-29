@@ -55,6 +55,10 @@ export const env = {
 
   // JWT - Required for security
   JWT_SECRET: getRequiredEnv("JWT_SECRET"),
+
+  // AI Configuration - Required for AI features
+  OPENROUTER_API_KEY: getRequiredEnv("OPENROUTER_API_KEY"),
+  OPENROUTER_BASE_URL: getOptionalEnv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1"),
 };
 
 export const validateEnv = (): void => {
@@ -76,6 +80,9 @@ export const validateEnv = (): void => {
       if (!env.R2_BUCKET_NAME) optionalWarnings.push("R2_BUCKET_NAME");
       if (!env.R2_ENDPOINT) optionalWarnings.push("R2_ENDPOINT");
       if (!env.R2_PUBLIC_URL) optionalWarnings.push("R2_PUBLIC_URL");
+
+      // AI Configuration warnings
+      if (!env.OPENROUTER_API_KEY) optionalWarnings.push("OPENROUTER_API_KEY");
 
       if (optionalWarnings.length > 0) {
         console.warn(

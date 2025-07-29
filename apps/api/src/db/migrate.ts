@@ -130,7 +130,7 @@ const runMigrations = async () => {
       CREATE TABLE IF NOT EXISTS shares (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         report_id UUID NOT NULL REFERENCES reports(id) ON DELETE CASCADE,
-        platform TEXT NOT NULL CHECK (platform IN ('whatsapp', 'twitter', 'facebook', 'instagram', 'telegram')),
+        platform TEXT NOT NULL CHECK (platform IN ('whatsapp', 'twitter', 'facebook', 'threads', 'telegram')),
         user_id UUID REFERENCES users(id) ON DELETE SET NULL,
         shared_at TIMESTAMPTZ DEFAULT now(),
         ip_address INET,

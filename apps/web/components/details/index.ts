@@ -10,7 +10,5 @@ export { ShareButton } from "./share-button";
 export { ShareDialog } from "./share-dialog";
 export { ShareCount } from "./share-count";
 
-// Sharing sub-components
-export { ToneSelector, type ToneType } from "./tone-selector";
-export { CaptionGenerator } from "./caption-generator";
-export { PlatformButtons } from "./platform-buttons";
+// Re-export sharing components for backward compatibility
+export { ToneSelector, type Tone } from "../sharing";

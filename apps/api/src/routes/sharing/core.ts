@@ -10,6 +10,7 @@ import type {
   TrackShareRequest,
   GenerateCaptionRequest,
 } from './types';
+import { generateAICaption as generateAICaptionFromService, type AICaptionResponse } from '@/services/ai-service';
 
 // Pure business logic for sharing (no database access, no side effects)
 
@@ -18,7 +19,7 @@ const PLATFORM_CONFIGS: Record<Platform, PlatformConfig> = {
   twitter: { maxLength: 280, hashtagLimit: 3, urlHandling: 'included' },
   facebook: { maxLength: 2000, hashtagLimit: 5, urlHandling: 'separate' },
   whatsapp: { maxLength: 1000, hashtagLimit: 3, urlHandling: 'included' },
-  instagram: { maxLength: 2200, hashtagLimit: 10, urlHandling: 'separate' },
+  threads: { maxLength: 2200, hashtagLimit: 10, urlHandling: 'separate' },
   telegram: { maxLength: 4096, hashtagLimit: 5, urlHandling: 'included' },
 };
 
@@ -55,7 +56,7 @@ export const validatePlatform = (platform: string): AppResult<Platform> => {
     'whatsapp',
     'twitter',
     'facebook',
-    'instagram',
+    'threads',
     'telegram',
   ];
 
@@ -109,6 +110,90 @@ export const validateCaptionRequest = (
   const toneValidation = validateCaptionTone(data.tone);
   if (!toneValidation.success) {
     return toneValidation;
+  }
+
+  return createSuccess(data);
+};
+
+// AI Caption Generation
+export const generateAICaption = async (
+  reportData: ReportSharingData,
+  tone: CaptionTone,
+  platform: Platform,
+  usePaidModel: boolean = false
+): Promise<AppResult<AICaptionResponse>> => {
+  try {
+    // Call AI service with retry logic (free first, then paid if needed)
+    const aiResponse = await generateAICaptionFromService({
+      reportData,
+      tone,
+      platform,
+      usePaidModel,
+    });
+
+    if (!aiResponse.success) {
+      // Only fallback to template if AI completely fails
+      const fallbackResult = await generateCaptionFromTemplate(reportData, tone, platform);
+      if (!fallbackResult.success) {
+        return fallbackResult;
+      }
+      
+      // Convert CaptionResponse to AICaptionResponse
+      return createSuccess({
+        ...fallbackResult.data,
+        aiGenerated: false,
+        modelUsed: 'template-fallback',
+      });
+    }
+
+    // Process AI response
+    const { caption, hashtags } = aiResponse.data;
+    
+    // Optimize for platform constraints
+    const optimized = optimizeForPlatform(caption, hashtags, platform);
+    
+    return createSuccess({
+      caption: optimized.caption,
+      hashtags: optimized.hashtags,
+      characterCount: `${optimized.caption} ${optimized.hashtags.join(' ')}`.length,
+      platformOptimized: optimized.optimized,
+      aiGenerated: true,
+      modelUsed: aiResponse.data.modelUsed,
+      tokenUsage: aiResponse.data.tokenUsage,
+    });
+  } catch (error) {
+    // Only fallback to template if AI completely fails
+    const fallbackResult = await generateCaptionFromTemplate(reportData, tone, platform);
+    if (!fallbackResult.success) {
+      return fallbackResult;
+    }
+    
+    // Convert CaptionResponse to AICaptionResponse
+    return createSuccess({
+      ...fallbackResult.data,
+      aiGenerated: false,
+      modelUsed: 'template-fallback',
+    });
+  }
+};
+
+// AI Caption Request Validation
+export const validateAICaptionRequest = (
+  data: GenerateCaptionRequest & { usePaidModel?: boolean }
+): AppResult<GenerateCaptionRequest & { usePaidModel?: boolean }> => {
+  const platformValidation = validatePlatform(data.platform);
+  if (!platformValidation.success) {
+    return platformValidation;
+  }
+
+  const toneValidation = validateCaptionTone(data.tone);
+  if (!toneValidation.success) {
+    return toneValidation;
+  }
+
+  // Validate usePaidModel is boolean if provided
+  if (data.usePaidModel !== undefined && typeof data.usePaidModel !== 'boolean') {
+    return createError('usePaidModel must be a boolean', 400);
   }
 
   return createSuccess(data);
@@ -185,7 +270,7 @@ export const optimizeForPlatform = (
   }
 
   // Try to optimize by reducing hashtags first
-  let optimizedHashtags = [...hashtags];
+  const optimizedHashtags = [...hashtags];
   let optimizedCaption = caption;
 
   while (optimizedHashtags.length > 1) {
@@ -332,7 +417,7 @@ export const getPlatformDisplayName = (platform: Platform): string => {
     whatsapp: 'WhatsApp',
     twitter: 'Twitter/X',
     facebook: 'Facebook',
-    instagram: 'Instagram',
+    threads: 'Threads',
     telegram: 'Telegram',
   };
 

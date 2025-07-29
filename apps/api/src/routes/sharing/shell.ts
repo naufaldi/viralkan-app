@@ -1,16 +1,19 @@
 import { createSuccess, createError } from '@/types';
 import type { AppResult } from '@/types';
-import * as core from './core';
-import * as data from './data';
 import type {
   TrackShareRequest,
   GenerateCaptionRequest,
-  ShareTrackingResponse,
-  CaptionResponse,
-  ShareAnalytics,
-  AnalyticsFilters,
+  GenerateAICaptionRequest,
   ShareEventData,
+  ReportSharingData,
+  CaptionResponse,
+  AICaptionResponse,
+  AnalyticsFilters,
+  ShareAnalyticsData,
+  ShareAnalytics,
 } from './types';
+import * as core from './core';
+import * as data from './data';
 
 // Business logic orchestration for sharing functionality
 
@@ -20,12 +23,12 @@ export const trackReportShare = async (
   userId?: string,
   ipAddress?: string,
   userAgent?: string
-): Promise<AppResult<ShareTrackingResponse>> => {
+): Promise<AppResult<{ success: boolean; newShareCount: number }>> => {
   try {
-    // Validate share request
-    const validationResult = core.validateShareRequest(shareRequest);
-    if (!validationResult.success) {
-      return validationResult;
+    // Validate request
+    const validation = core.validateShareRequest(shareRequest);
+    if (!validation.success) {
+      return validation;
     }
 
     // Check if report exists and is eligible for sharing
@@ -34,42 +37,35 @@ export const trackReportShare = async (
       return createError('Report not found or not eligible for sharing', 404);
     }
 
-    // Record the share event in database
-    const shareEventData: ShareEventData = {
-      report_id: reportId,
-      platform: shareRequest.platform,
-      user_id: userId,
-      ip_address: ipAddress,
-      user_agent: userAgent,
-    };
+    // Use transaction to ensure data consistency
+    return await data.withTransaction(async (sql) => {
+      // Increment share count
+      const shareCountResult = await data.incrementShareCount(reportId);
+      if (!shareCountResult.success) {
+        return shareCountResult;
+      }
 
-    const shareEventResult = await data.recordShareEvent(shareEventData);
-    if (!shareEventResult.success) {
-      return shareEventResult;
-    }
+      // Record share event
+      const shareEventData: ShareEventData = {
+        report_id: reportId,
+        platform: shareRequest.platform,
+        user_id: userId,
+        ip_address: ipAddress,
+        user_agent: userAgent,
+      };
 
-    // Increment share count atomically
-    const shareCountResult = await data.incrementShareCount(reportId);
-    if (!shareCountResult.success) {
-      return shareCountResult;
-    }
+      const shareEventResult = await data.recordShareEvent(shareEventData);
+      if (!shareEventResult.success) {
+        // Log error but don't fail the entire operation
+        console.error('Failed to record share event:', shareEventResult.error);
+      }
 
-    const newShareCount = shareCountResult.data;
-
-    // Validate the new share count
-    const countValidation = core.validateShareCount(newShareCount);
-    if (!countValidation.success) {
-      return countValidation;
-    }
-
-    const response: ShareTrackingResponse = {
-      success: true,
-      newShareCount,
-    };
-
-    return createSuccess(response);
+      return createSuccess({
+        success: true,
+        newShareCount: shareCountResult.data,
+      });
+    });
   } catch (error) {
-    console.error('Error tracking report share:', error);
     return createError(
       `Failed to track share: ${error instanceof Error ? error.message : 'Unknown error'}`,
       500
@@ -82,66 +78,78 @@ export const generateReportCaption = async (
   captionRequest: GenerateCaptionRequest
 ): Promise<AppResult<CaptionResponse>> => {
   try {
-    // Validate caption request
-    const validationResult = core.validateCaptionRequest(captionRequest);
-    if (!validationResult.success) {
-      return validationResult;
+    // DEPRECATED: This endpoint is kept for backward compatibility
+    // All caption generation should now use AI by default
+    
+    // Validate request
+    const validation = core.validateCaptionRequest(captionRequest);
+    if (!validation.success) {
+      return validation;
     }
 
-    // Fetch report data for caption generation
+    // Get report data
     const reportResult = await data.getReportForSharing(reportId);
     if (!reportResult.success) {
       return reportResult;
     }
 
-    const reportData = reportResult.data;
-
-    // Generate caption using templates
-    const captionResult = core.generateCaptionFromTemplate(
-      reportData,
+    // Use AI generation instead of template (with fallback)
+    const aiResult = await core.generateAICaption(
+      reportResult.data,
       captionRequest.tone,
-      captionRequest.platform
+      captionRequest.platform,
+      false // Use free model by default
     );
 
-    if (!captionResult.success) {
-      // If template generation fails, return fallback caption
-      console.warn(
-        'Template generation failed, using fallback:',
-        captionResult.error
-      );
-      const fallbackCaption = core.generateFallbackCaption(
-        reportData,
-        captionRequest.platform
-      );
-      return createSuccess(fallbackCaption);
+    if (!aiResult.success) {
+      return aiResult;
     }
 
-    // Sanitize caption content for security
-    const sanitizedCaption = {
-      ...captionResult.data,
-      caption: core.sanitizeCaptionContent(captionResult.data.caption),
-    };
-
-    return createSuccess(sanitizedCaption);
+    // Convert AICaptionResponse to CaptionResponse for backward compatibility
+    return createSuccess({
+      caption: aiResult.data.caption,
+      hashtags: aiResult.data.hashtags,
+      characterCount: aiResult.data.characterCount,
+      platformOptimized: aiResult.data.platformOptimized,
+    });
   } catch (error) {
-    console.error('Error generating report caption:', error);
-
-    // Try to provide fallback caption even on error
-    try {
-      const reportResult = await data.getReportForSharing(reportId);
-      if (reportResult.success) {
-        const fallbackCaption = core.generateFallbackCaption(
-          reportResult.data,
-          captionRequest.platform
-        );
-        return createSuccess(fallbackCaption);
-      }
-    } catch (fallbackError) {
-      console.error('Fallback caption generation also failed:', fallbackError);
-    }
-
     return createError(
       `Failed to generate caption: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      500
+    );
+  }
+};
+
+// New AI-powered caption generation endpoint
+export const generateAIReportCaption = async (
+  reportId: string,
+  captionRequest: GenerateAICaptionRequest
+): Promise<AppResult<AICaptionResponse>> => {
+  try {
+    // Validate request
+    const validation = core.validateAICaptionRequest(captionRequest);
+    if (!validation.success) {
+      return validation;
+    }
+
+    // Get report data
+    const reportResult = await data.getReportForSharing(reportId);
+    if (!reportResult.success) {
+      return reportResult;
+    }
+
+    // Generate AI caption
+    const aiResult = await core.generateAICaption(
+      reportResult.data,
+      captionRequest.tone,
+      captionRequest.platform,
+      captionRequest.usePaidModel
+    );
+
+    return aiResult;
+  } catch (error) {
+    return createError(
+      `Failed to generate AI caption: ${error instanceof Error ? error.message : 'Unknown error'}`,
       500
     );
   }
@@ -154,63 +162,37 @@ export const getShareAnalytics = async (
     // Validate date range if provided
     if (filters.startDate && filters.endDate) {
       if (filters.startDate > filters.endDate) {
-        return createError('Start date cannot be after end date', 400);
-      }
-
-      // Limit date range to prevent performance issues
-      const daysDiff = Math.ceil(
-        (filters.endDate.getTime() - filters.startDate.getTime()) /
-          (1000 * 60 * 60 * 24)
-      );
-      if (daysDiff > 365) {
-        return createError('Date range cannot exceed 365 days', 400);
+        return createError('Start date must be before end date', 400);
       }
     }
 
-    // Validate platform if provided
-    if (filters.platform) {
-      const platformValidation = core.validatePlatform(filters.platform);
-      if (!platformValidation.success) {
-        return platformValidation;
-      }
-    }
+    // Get analytics data
+    const analyticsData = await data.getShareAnalytics(filters);
 
-    // Set default date range if not provided (last 30 days)
-    const defaultEndDate = new Date();
-    const defaultStartDate = new Date();
-    defaultStartDate.setDate(defaultStartDate.getDate() - 30);
+    // Transform data for response
+    const topReports = analyticsData.topReports.map((report) => ({
+      id: report.id,
+      title: `${report.street_name}, ${report.location_text}`,
+      shareCount: report.shareCount,
+    }));
 
-    const effectiveFilters: AnalyticsFilters = {
-      startDate: filters.startDate || defaultStartDate,
-      endDate: filters.endDate || defaultEndDate,
-      platform: filters.platform,
+    // Calculate date range
+    const now = new Date();
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const dateRange = {
+      start: filters.startDate || thirtyDaysAgo,
+      end: filters.endDate || now,
     };
-
-    // Fetch analytics data
-    const analyticsData = await data.getShareAnalytics(effectiveFilters);
-
-    // Sort platforms by popularity for better presentation
-    const sortedPlatforms = core.sortPlatformsByPopularity(
-      analyticsData.platformBreakdown
-    );
 
     const response: ShareAnalytics = {
       totalShares: analyticsData.totalShares,
       platformBreakdown: analyticsData.platformBreakdown,
-      topReports: analyticsData.topReports.map((report) => ({
-        id: report.id,
-        title: `${report.street_name}, ${report.location_text}`,
-        shareCount: report.shareCount,
-      })),
-      dateRange: {
-        start: effectiveFilters.startDate!,
-        end: effectiveFilters.endDate!,
-      },
+      topReports,
+      dateRange,
     };
 
     return createSuccess(response);
   } catch (error) {
-    console.error('Error fetching share analytics:', error);
     return createError(
       `Failed to fetch analytics: ${error instanceof Error ? error.message : 'Unknown error'}`,
       500
@@ -238,31 +220,28 @@ export const getReportShareDetails = async (
       return createError('Report not found', 404);
     }
 
+    // Get share count
+    const shareCount = await data.getShareCountForReport(reportId);
+
     // Get platform breakdown
-    const platformCounts = await data.getShareCountByPlatform(reportId);
+    const platformBreakdown = await data.getShareCountByPlatform(reportId);
 
     // Get recent share events
     const recentShareEvents = await data.getRecentShareEvents(reportId, 10);
 
-    // Calculate total share count
-    const totalShares = Object.values(platformCounts).reduce(
-      (sum, count) => sum + count,
-      0
-    );
+    // Transform recent shares
+    const recentShares = recentShareEvents.map((event) => ({
+      platform: event.platform,
+      sharedAt: event.shared_at,
+      userId: event.user_id || undefined,
+    }));
 
-    const response = {
-      shareCount: totalShares,
-      platformBreakdown: platformCounts,
-      recentShares: recentShareEvents.map((event) => ({
-        platform: core.getPlatformDisplayName(event.platform),
-        sharedAt: event.shared_at,
-        userId: event.user_id || undefined,
-      })),
-    };
-
-    return createSuccess(response);
+    return createSuccess({
+      shareCount,
+      platformBreakdown,
+      recentShares,
+    });
   } catch (error) {
-    console.error('Error fetching report share details:', error);
     return createError(
       `Failed to fetch share details: ${error instanceof Error ? error.message : 'Unknown error'}`,
       500
@@ -274,31 +253,31 @@ export const validateReportForSharing = async (
   reportId: string
 ): Promise<AppResult<{ eligible: boolean; reason?: string }>> => {
   try {
-    // Check if report exists and is eligible
-    const reportResult = await data.getReportForSharing(reportId);
-
-    if (!reportResult.success) {
+    // Check if report exists
+    const reportExists = await data.checkReportExists(reportId);
+    if (!reportExists) {
       return createSuccess({
         eligible: false,
-        reason: 'Report not found, not verified, or has been deleted',
+        reason: 'Report not found or has been deleted',
       });
     }
 
-    const reportData = reportResult.data;
+    // Get report data to check status
+    const reportResult = await data.getReportForSharing(reportId);
+    if (!reportResult.success) {
+      return createSuccess({
+        eligible: false,
+        reason: 'Report not accessible',
+      });
+    }
 
-    // Additional business rules for sharing eligibility
-    const isHighEngagement = core.isHighEngagementReport(
-      reportData.share_count
-    );
+    // Additional validation logic can be added here
+    // For example, check if report is verified, not too old, etc.
 
     return createSuccess({
       eligible: true,
-      reason: isHighEngagement
-        ? 'Report has high engagement and is eligible for sharing'
-        : 'Report is eligible for sharing',
     });
   } catch (error) {
-    console.error('Error validating report for sharing:', error);
     return createError(
       `Failed to validate report: ${error instanceof Error ? error.message : 'Unknown error'}`,
       500
@@ -325,25 +304,19 @@ export const getMostSharedReports = async (
       return createError('Limit must be between 1 and 100', 400);
     }
 
-    // Validate timeframe if provided
-    if (timeframe) {
-      if (timeframe.start > timeframe.end) {
-        return createError('Start date cannot be after end date', 400);
-      }
-    }
-
+    // Get most shared reports
     const reports = await data.getMostSharedReports(limit, timeframe);
 
-    const response = reports.map((report) => ({
+    // Transform data
+    const transformedReports = reports.map((report) => ({
       id: report.id,
       title: `${report.street_name}, ${report.location_text}`,
       shareCount: report.shareCount,
       isHighEngagement: core.isHighEngagementReport(report.shareCount),
     }));
 
-    return createSuccess(response);
+    return createSuccess(transformedReports);
   } catch (error) {
-    console.error('Error fetching most shared reports:', error);
     return createError(
       `Failed to fetch most shared reports: ${error instanceof Error ? error.message : 'Unknown error'}`,
       500

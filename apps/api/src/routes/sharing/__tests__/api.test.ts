@@ -44,7 +44,7 @@ describe('Sharing API Integration Tests', () => {
         'whatsapp',
         'twitter',
         'facebook',
-        'instagram',
+        'threads',
         'telegram',
       ]).toContain(validQueryParams.platform);
 

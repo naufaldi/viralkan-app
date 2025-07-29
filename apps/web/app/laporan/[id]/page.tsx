@@ -94,19 +94,19 @@ export default async function ReportDetailPage({
                 />
 
                 {/* Status Badge Overlay - Only show for owner */}
-               <div className="absolute flex gap-4 h-auto w-auto px-4">
-               {isOwner && <ReportStatusBadge className="relative left-auto" status={report.status} />}
+                <div className="absolute flex gap-4 h-auto w-auto px-4">
+                {isOwner && <ReportStatusBadge className="relative left-auto" status={report.status} />}
 
-{/* Category Badge Overlay */}
-<div className="relative top-4 ">
-  <Badge
-    className={`${categoryInfo.color} border-0 font-medium`}
-  >
-    <span className="mr-1">{categoryInfo.icon}</span>
-    {categoryInfo.label}
-  </Badge>
-</div>
-               </div>
+                  {/* Category Badge Overlay */}
+                  <div className="relative top-4 ">
+                    <Badge
+                      className={`${categoryInfo.color} border-0 font-medium`}
+                    >
+                      <span className="mr-1">{categoryInfo.icon}</span>
+                      {categoryInfo.label}
+                    </Badge>
+                  </div>
+                </div>
 
                 {/* Share Button will be rendered by client component */}
                 <div className="absolute top-4 right-4 z-10">

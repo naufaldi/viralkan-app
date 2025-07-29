@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS shares (
             'whatsapp',
             'twitter',
             'facebook',
-            'instagram',
+            'threads',
             'telegram'
         )
     ),

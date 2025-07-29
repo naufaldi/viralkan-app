@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { sharingApi } from '@/services/api-client';
+import { sharingApi, type AICaptionResponse } from '@/services/api-client';
 import { toast } from 'sonner';
 
 interface UseSharingOptions {
@@ -13,11 +13,7 @@ interface UseSharingReturn {
   isSharing: boolean;
   
   // Actions
-  generateCaption: (reportId: string, platform: string, tone: string) => Promise<{
-    caption: string;
-    hashtags: string[];
-    characterCount: number;
-  } | null>;
+  generateAICaption: (reportId: string, platform: string, tone: string, usePaidModel?: boolean) => Promise<AICaptionResponse | null>;
   
   trackShare: (reportId: string, platform: string) => Promise<number | null>;
   
@@ -35,7 +31,7 @@ const PLATFORM_CONFIG = {
   whatsapp: { supportsPrefill: true },
   twitter: { supportsPrefill: true },
   facebook: { supportsPrefill: false },
-  instagram: { supportsPrefill: false },
+  threads: { supportsPrefill: false },
   telegram: { supportsPrefill: true },
 } as const;
 
@@ -43,27 +39,28 @@ export function useSharing(options: UseSharingOptions = {}): UseSharingReturn {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
 
-  const generateCaption = async (
+  // DEPRECATED: generateCaption is removed - always use generateAICaption
+
+  const generateAICaption = async (
     reportId: string,
     platform: string,
-    tone: string
+    tone: string,
+    usePaidModel?: boolean
   ) => {
     setIsGenerating(true);
     try {
-      const response = await sharingApi.generateCaption(reportId, {
+      const response = await sharingApi.generateAICaption(reportId, {
         platform: platform as any,
         tone: tone as any,
+        usePaidModel,
       });
       
-      toast.success("Caption berhasil dibuat!");
-      return {
-        caption: response.caption,
-        hashtags: response.hashtags,
-        characterCount: response.characterCount,
-      };
+      const modelName = response.modelUsed === 'template-fallback' ? 'Template' : 'AI';
+      toast.success(`${modelName} caption berhasil dibuat!`);
+      return response;
     } catch (error) {
-      console.error("Error generating caption:", error);
-      const errorMessage = "Gagal menghasilkan caption. Silakan coba lagi.";
+      console.error("Error generating AI caption:", error);
+      const errorMessage = "Gagal menghasilkan AI caption. Silakan coba lagi.";
       toast.error(errorMessage);
       options.onError?.(errorMessage);
       return null;
@@ -131,7 +128,7 @@ export function useSharing(options: UseSharingOptions = {}): UseSharingReturn {
           whatsapp: "WhatsApp",
           twitter: "Twitter/X",
           facebook: "Facebook",
-          instagram: "Instagram",
+          threads: "Threads",
           telegram: "Telegram",
         };
         toast.success(`Berhasil membagikan caption dan link ke ${platformNames[platform as keyof typeof platformNames]}!`);
@@ -153,7 +150,7 @@ export function useSharing(options: UseSharingOptions = {}): UseSharingReturn {
   return {
     isGenerating,
     isSharing,
-    generateCaption,
+    generateAICaption,
     trackShare,
     shareToPlatform,
   };

@@ -90,7 +90,7 @@ describe('Shell Layer Business Logic Tests', () => {
           whatsapp: 40,
           twitter: 30,
           facebook: 20,
-          instagram: 10,
+          threads: 10,
           telegram: 0,
         },
         topReports: [
@@ -139,7 +139,7 @@ describe('Shell Layer Business Logic Tests', () => {
         'whatsapp',
         'twitter',
         'facebook',
-        'instagram',
+        'threads',
         'telegram',
       ];
       const testPlatform = 'twitter';
@@ -227,7 +227,7 @@ describe('Shell Layer Business Logic Tests', () => {
         whatsapp: 5,
         twitter: 3,
         facebook: 2,
-        instagram: 1,
+        threads: 1,
         telegram: 0,
       };
 

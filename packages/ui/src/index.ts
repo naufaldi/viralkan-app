@@ -22,6 +22,8 @@ export {
 } from "./components/ui/form";
 export { Input } from "./components/ui/input";
 export { Textarea } from "./components/ui/textarea";
+export { Switch } from "./components/ui/switch";
+export { Badge } from "./components/ui/badge";
 export {
   Select,
   SelectContent,

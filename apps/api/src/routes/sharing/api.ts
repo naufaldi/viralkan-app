@@ -5,10 +5,12 @@ import { firebaseAuthMiddleware, requireAdmin } from '../auth';
 import {
   TrackShareSchema,
   GenerateCaptionSchema,
+  GenerateAICaptionSchema,
   ShareAnalyticsQuerySchema,
   SharingReportParamsSchema,
   ShareTrackingResponseSchema,
   CaptionResponseSchema,
+  AICaptionResponseSchema,
   ShareAnalyticsResponseSchema,
   ReportShareDetailsResponseSchema,
   ShareValidationResponseSchema,
@@ -16,6 +18,7 @@ import {
   SharingErrorResponseSchema,
 } from '@/schema/sharing';
 import * as shell from './shell';
+import { AVAILABLE_TONES } from './types';
 
 type Env = {
   Variables: {
@@ -78,7 +81,7 @@ const trackShareRoute = createRoute({
   },
 });
 
-// Generate caption for sharing
+// Generate caption for sharing (template-based) - DEPRECATED: Use AI caption generation instead
 const generateCaptionRoute = createRoute({
   method: 'post',
   path: '/{id}/generate-caption',
@@ -92,9 +95,9 @@ const generateCaptionRoute = createRoute({
       },
     },
   },
-  summary: 'Generate sharing caption',
-  description: 'Generate a template-based caption for social media sharing',
-  tags: ['Sharing'],
+  summary: 'Generate sharing caption (template-based) - DEPRECATED',
+  description: 'DEPRECATED: Use /{id}/generate-ai-caption instead. This endpoint is kept for backward compatibility.',
+  tags: ['Sharing', 'Deprecated'],
   responses: {
     200: {
       description: 'Caption generated successfully',
@@ -112,6 +115,45 @@ const generateCaptionRoute = createRoute({
     },
     500: {
       description: 'Internal server error',
+      content: { 'application/json': { schema: SharingErrorResponseSchema } },
+    },
+  },
+});
+
+// Generate AI-powered caption for sharing
+const generateAICaptionRoute = createRoute({
+  method: 'post',
+  path: '/{id}/generate-ai-caption',
+  request: {
+    params: SharingReportParamsSchema,
+    body: {
+      content: {
+        'application/json': {
+          schema: GenerateAICaptionSchema,
+        },
+      },
+    },
+  },
+  summary: 'Generate AI-powered sharing caption',
+  description: 'Generate a context-aware caption using AI for social media sharing',
+  tags: ['Sharing', 'AI'],
+  responses: {
+    200: {
+      description: 'AI caption generated successfully',
+      content: {
+        'application/json': { schema: AICaptionResponseSchema },
+      },
+    },
+    400: {
+      description: 'Invalid request data',
+      content: { 'application/json': { schema: SharingErrorResponseSchema } },
+    },
+    404: {
+      description: 'Report not found or not eligible for sharing',
+      content: { 'application/json': { schema: SharingErrorResponseSchema } },
+    },
+    500: {
+      description: 'Internal server error or AI service unavailable',
       content: { 'application/json': { schema: SharingErrorResponseSchema } },
     },
   },
@@ -203,6 +245,32 @@ const validateReportSharingRoute = createRoute({
     500: {
       description: 'Internal server error',
       content: { 'application/json': { schema: SharingErrorResponseSchema } },
+    },
+  },
+});
+
+// Get available tones
+const getAvailableTonesRoute = createRoute({
+  method: 'get',
+  path: '/tones',
+  summary: 'Get available caption tones',
+  description: 'Retrieve all available caption tones with their metadata',
+  tags: ['Sharing', 'Configuration'],
+  responses: {
+    200: {
+      description: 'Available tones retrieved successfully',
+      content: {
+        'application/json': { 
+          schema: z.object({
+            tones: z.array(z.object({
+              value: z.string(),
+              label: z.string(),
+              description: z.string(),
+              icon: z.string(),
+            }))
+          })
+        },
+      },
     },
   },
 });
@@ -311,7 +379,7 @@ sharingRouter.openapi(trackShareRoute, async (c) => {
   }
 });
 
-// Generate caption handler
+// Generate caption handler (template-based)
 sharingRouter.openapi(generateCaptionRoute, async (c) => {
   try {
     const { id } = c.req.valid('param');
@@ -344,6 +412,47 @@ sharingRouter.openapi(generateCaptionRoute, async (c) => {
         error: {
           code: 'INTERNAL_ERROR',
           message: 'Failed to generate caption',
+          timestamp: new Date().toISOString(),
+        },
+      },
+      500
+    );
+  }
+});
+
+// Generate AI caption handler
+sharingRouter.openapi(generateAICaptionRoute, async (c) => {
+  try {
+    const { id } = c.req.valid('param');
+    const captionRequest = c.req.valid('json');
+
+    const result = await shell.generateAIReportCaption(id, captionRequest);
+
+    if (result.success) {
+      return c.json(result.data, 200);
+    }
+
+    // Map status codes to expected OpenAPI responses
+    const statusCode =
+      result.statusCode === 404 ? 404 : result.statusCode === 400 ? 400 : 500;
+
+    return c.json(
+      {
+        error: {
+          code: 'AI_CAPTION_GENERATION_FAILED',
+          message: result.error,
+          timestamp: new Date().toISOString(),
+        },
+      },
+      statusCode
+    );
+  } catch (error) {
+    console.error('Error in AI caption generation handler:', error);
+    return c.json(
+      {
+        error: {
+          code: 'INTERNAL_ERROR',
+          message: 'Failed to generate AI caption',
           timestamp: new Date().toISOString(),
         },
       },
@@ -524,4 +633,9 @@ sharingRouter.openapi(getMostSharedReportsRoute, async (c) => {
       500
     );
   }
+});
+
+// Available tones handler
+sharingRouter.openapi(getAvailableTonesRoute, async (c) => {
+  return c.json({ tones: AVAILABLE_TONES }, 200);
 });

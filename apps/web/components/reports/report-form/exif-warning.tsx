@@ -25,7 +25,7 @@ export const ExifWarning = ({ isVisible }: ExifWarningProps) => {
       <AlertDescription className="text-yellow-700">
         <p className="mb-3">
           Gambar tidak memiliki data lokasi GPS. Ini normal untuk foto yang
-          dikirim melalui WhatsApp, Instagram, atau aplikasi lainnya karena
+          dikirim melalui WhatsApp, media sosial, atau aplikasi lainnya karena
           metadata GPS dihapus otomatis untuk privasi.
         </p>
 

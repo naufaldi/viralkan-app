@@ -492,12 +492,19 @@ export type {
 
 // Sharing API Types
 export interface TrackShareRequest {
-  platform: 'whatsapp' | 'twitter' | 'facebook' | 'instagram' | 'telegram';
+  platform: 'whatsapp' | 'twitter' | 'facebook' | 'threads' | 'telegram';
 }
 
 export interface GenerateCaptionRequest {
-  platform: 'whatsapp' | 'twitter' | 'facebook' | 'instagram' | 'telegram';
+  platform: 'whatsapp' | 'twitter' | 'facebook' | 'threads' | 'telegram';
   tone: 'formal' | 'urgent' | 'community' | 'informative';
+}
+
+export interface GenerateAICaptionRequest {
+  platform: 'whatsapp' | 'twitter' | 'facebook' | 'threads' | 'telegram';
+  tone: 'formal' | 'urgent' | 'community' | 'informative';
+  usePaidModel?: boolean; // true = force paid, false = force free only, undefined = auto-retry (free first, then paid)
+  customInstructions?: string;
 }
 
 export interface ShareTrackingResponse {
@@ -510,6 +517,20 @@ export interface CaptionResponse {
   hashtags: string[];
   characterCount: number;
   platformOptimized: boolean;
+}
+
+export interface AICaptionResponse {
+  caption: string;
+  hashtags: string[];
+  characterCount: number;
+  platformOptimized: boolean;
+  aiGenerated: boolean;
+  modelUsed: string;
+  tokenUsage?: {
+    prompt: number;
+    completion: number;
+    total: number;
+  };
 }
 
 export interface ShareAnalytics {
@@ -539,12 +560,23 @@ export const sharingApi = {
     });
   },
 
-  // Generate caption for sharing
+  // Generate caption for sharing (template-based)
   generateCaption: async (
     reportId: string,
     data: GenerateCaptionRequest
   ): Promise<CaptionResponse> => {
     return apiRequest<CaptionResponse>(`/api/sharing/${reportId}/generate-caption`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  // Generate AI-powered caption for sharing
+  generateAICaption: async (
+    reportId: string,
+    data: GenerateAICaptionRequest
+  ): Promise<AICaptionResponse> => {
+    return apiRequest<AICaptionResponse>(`/api/sharing/${reportId}/generate-ai-caption`, {
       method: 'POST',
       body: JSON.stringify(data),
     });
