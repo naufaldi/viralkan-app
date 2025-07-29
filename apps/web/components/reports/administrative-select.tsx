@@ -21,6 +21,7 @@ import { cn } from "@repo/ui/lib/utils";
 interface AdministrativeSelectProps {
   form: UseFormReturn<CreateReportInput>;
   disabled?: boolean;
+  isFormActivated?: boolean;
   // Geocoding integration props
   isGeocodingFromCoords?: boolean;
   lastGeocodingSource?: "coordinates" | "address" | null;
@@ -32,6 +33,7 @@ interface AdministrativeSelectProps {
 export const AdministrativeSelect = ({
   form,
   disabled = false,
+  isFormActivated = false,
   isGeocodingFromCoords = false,
   lastGeocodingSource = null,
   onClearGeocodingError,
@@ -269,7 +271,9 @@ export const AdministrativeSelect = ({
     : "";
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 transition-all duration-300 ${
+      !isFormActivated ? 'opacity-40 pointer-events-none' : 'opacity-100'
+    }`}>
       {/* Province Selection */}
       <div className="max-w-full">
         <FormField
@@ -297,7 +301,7 @@ export const AdministrativeSelect = ({
                   emptyMessage="Tidak ada provinsi ditemukan."
                   searchPlaceholder="Cari provinsi..."
                   disabled={
-                    disabled || isGeocodingFromCoords || loading.provinces
+                    disabled || isGeocodingFromCoords || loading.provinces || !isFormActivated
                   }
                   loading={loading.provinces}
                   size="lg"
@@ -357,7 +361,8 @@ export const AdministrativeSelect = ({
                     disabled ||
                     isGeocodingFromCoords ||
                     !selectedProvinceCode ||
-                    loading.regencies
+                    loading.regencies ||
+                    !isFormActivated
                   }
                   loading={loading.regencies}
                   size="lg"
@@ -417,7 +422,8 @@ export const AdministrativeSelect = ({
                     disabled ||
                     isGeocodingFromCoords ||
                     !selectedRegencyCode ||
-                    loading.districts
+                    loading.districts ||
+                    !isFormActivated
                   }
                   loading={loading.districts}
                   size="lg"

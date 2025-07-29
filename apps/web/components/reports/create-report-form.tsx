@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@repo/ui/components/ui/card";
 import { Form } from "@repo/ui/components/ui/form";
 import {
@@ -18,6 +19,9 @@ interface CreateReportFormProps {
 }
 
 export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
+  // Start with form explicitly disabled
+  const [isFormActivated, setIsFormActivated] = useState(false);
+
   const {
     form,
     selectedImage,
@@ -47,7 +51,33 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
     onSubmit,
   } = useReportForm({ onSuccess });
 
+  const handleFormActivation = () => {
+    setIsFormActivated(true);
+  };
+
+  // Reset form activation when image is removed
+  const handleImageRemoveWithReset = () => {
+    setIsFormActivated(false);
+    handleImageRemove();
+  };
+
+  // Set form activation based on existing selected image
+  useEffect(() => {
+    if (selectedImage && !isFormActivated) {
+      setIsFormActivated(true);
+    } else if (!selectedImage && isFormActivated) {
+      setIsFormActivated(false);
+    }
+  }, [selectedImage, isFormActivated]);
+
   const displayError = formError || submitError || undefined;
+
+  // Debug log to see the form activation state
+  console.log('🔍 Form Activation Debug:', {
+    isFormActivated,
+    hasSelectedImage: !!selectedImage,
+    selectedImageName: selectedImage?.name,
+  });
 
   return (
     <Card className="border-neutral-200 shadow-lg rounded-xl overflow-hidden hover:translate-0">
@@ -66,12 +96,13 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
             <ReportImageUpload
               selectedImage={selectedImage}
               onImageSelect={handleImageSelect}
-              onImageRemove={handleImageRemove}
+              onImageRemove={handleImageRemoveWithReset}
               onUploadError={handleImageUploadError}
               onUploadSuccess={handleImageUploadSuccess}
               isUploading={isUploadingImage || isExtractingExif}
               error={uploadError}
               disabled={isLoading}
+              onFormActivation={handleFormActivation}
             />
 
             {/* EXIF Warning - Shows when GPS metadata is missing */}
@@ -80,6 +111,8 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
             <ReportFormFields
               form={form}
               disabled={isLoading}
+              isFormActivated={isFormActivated}
+              selectedImage={selectedImage}
               isGeocodingFromCoords={isGeocodingFromCoords}
               isGeocodingFromAddress={isGeocodingFromAddress}
               lastGeocodingSource={lastGeocodingSource}
@@ -89,20 +122,28 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
               onClearGeocodingError={clearGeocodingError}
             />
 
-            <LocationButton
-              onGetLocation={getCurrentLocation}
-              isLoading={isGettingLocation}
-              disabled={isLoading}
-            />
+            <div className={`transition-all duration-300 ${
+              !isFormActivated ? 'opacity-40 pointer-events-none' : 'opacity-100'
+            }`}>
+              <LocationButton
+                onGetLocation={getCurrentLocation}
+                isLoading={isGettingLocation}
+                disabled={isLoading || !isFormActivated}
+              />
+            </div>
 
-            <ReportFormActions
-              isLoading={isLoading}
-              isUploadingImage={isUploadingImage}
-              isUploading={false}
-              imageUploadFailed={imageUploadFailed}
-              selectedImage={selectedImage}
-              disabled={isLoading}
-            />
+            <div className={`transition-all duration-300 ${
+              !isFormActivated ? 'opacity-40 pointer-events-none' : 'opacity-100'
+            }`}>
+              <ReportFormActions
+                isLoading={isLoading}
+                isUploadingImage={isUploadingImage}
+                isUploading={false}
+                imageUploadFailed={imageUploadFailed}
+                selectedImage={selectedImage}
+                disabled={isLoading || !isFormActivated}
+              />
+            </div>
           </form>
         </Form>
       </CardContent>

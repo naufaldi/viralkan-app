@@ -9,6 +9,9 @@ import {
   Image as ImageIcon,
   AlertCircle,
   RefreshCw,
+  Camera,
+  FolderOpen,
+  CheckCircle2,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@repo/ui/components/ui/alert";
 import imageCompression from "browser-image-compression";
@@ -22,6 +25,8 @@ interface ImageUploadProps {
   disabled?: boolean;
   onUploadError?: (error: string) => void;
   onUploadSuccess?: () => void;
+  enableCameraMode?: boolean;
+  onFormActivation?: () => void;
 }
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB - matches backend limit
@@ -37,13 +42,17 @@ export default function ImageUpload({
   disabled = false,
   onUploadError,
   onUploadSuccess,
+  enableCameraMode = true,
+  onFormActivation,
 }: ImageUploadProps) {
   const [preview, setPreview] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const [uploadError, setUploadError] = useState<string | undefined>(undefined);
   const [retryCount, setRetryCount] = useState(0);
   const [isCompressing, setIsCompressing] = useState(false);
+  const [cameraMode, setCameraMode] = useState<'camera' | 'gallery'>('camera');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   const compressImage = useCallback(async (file: File): Promise<File> => {
     try {
@@ -124,6 +133,9 @@ export default function ImageUpload({
 
         onImageSelect(compressedFile);
         onUploadSuccess?.();
+        
+        // Trigger form activation when image is successfully selected
+        onFormActivation?.();
       } catch (error) {
         console.error("File processing error:", error);
         const errorMsg = "Gagal memproses gambar. Silakan coba lagi.";
@@ -133,7 +145,7 @@ export default function ImageUpload({
         setIsCompressing(false);
       }
     },
-    [onImageSelect, onUploadError, onUploadSuccess, compressImage],
+    [onImageSelect, onUploadError, onUploadSuccess, compressImage, onFormActivation],
   );
 
   const handleRetry = useCallback(() => {
@@ -195,74 +207,135 @@ export default function ImageUpload({
   }, [onImageRemove]);
 
   const handleUploadClick = useCallback(() => {
-    if (!disabled && fileInputRef.current) {
+    if (disabled) return;
+    
+    if (enableCameraMode && cameraMode === 'camera' && cameraInputRef.current) {
+      cameraInputRef.current.click();
+    } else if (fileInputRef.current) {
       fileInputRef.current.click();
     }
-  }, [disabled]);
+  }, [disabled, cameraMode, enableCameraMode]);
+
+  const handleCameraModeToggle = useCallback((mode: 'camera' | 'gallery') => {
+    setCameraMode(mode);
+  }, []);
 
   // Show error from parent component or internal upload error
   const displayError = error || uploadError;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {!selectedImage ? (
-        <Card
-          className={`border-2 border-dashed transition-all duration-150 cursor-pointer rounded-lg ${
-            dragOver
-              ? "border-primary bg-muted"
-              : "border-muted hover:border-border hover:bg-muted/50"
-          } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-          onClick={handleUploadClick}
-        >
-          <CardContent className="p-12 text-center">
-            <div className="space-y-6">
-              <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto border border-border">
-                {isCompressing ? (
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                ) : (
-                  <Upload className="h-8 w-8 text-muted-foreground" />
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <h3 className="text-lg font-semibold text-foreground tracking-tight">
-                  {isCompressing
-                    ? "Memproses gambar..."
-                    : "Drag foto jalan rusak ke sini"}
-                </h3>
-                <p className="text-base text-muted-foreground">
-                  {isCompressing
-                    ? "Mengompres dan mengoptimalkan gambar"
-                    : "atau klik untuk memilih file dari perangkat"}
-                </p>
-                <p className="text-sm text-muted-foreground mt-3">
-                  Format: JPEG, PNG, WebP • Maksimal 10MB • Otomatis dikompres
-                  ke WebP
-                </p>
-              </div>
-
-              <Button
+        <div className="space-y-4">
+          {/* Civic Monochrome Camera Mode Toggle */}
+          {enableCameraMode && (
+            <div className="flex p-1 bg-neutral-100 rounded-lg border border-neutral-200 max-w-xs mx-auto">
+              <button
                 type="button"
-                variant="outline"
-                size="lg"
-                className="mt-6 px-6 py-3 text-base font-medium transition-all duration-150"
-                disabled={disabled || isCompressing}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleUploadClick();
-                }}
+                onClick={() => handleCameraModeToggle('camera')}
+                className={`flex-1 flex items-center justify-center px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                  cameraMode === 'camera'
+                    ? 'bg-white text-neutral-800 shadow-sm border border-neutral-200'
+                    : 'text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50'
+                }`}
+                disabled={disabled}
               >
-                <ImageIcon className="mr-3 h-5 w-5" />
-                {isCompressing ? "Memproses..." : "Pilih Foto"}
-              </Button>
+                <Camera className="w-4 h-4 mr-2" />
+                Kamera
+              </button>
+              <button
+                type="button"
+                onClick={() => handleCameraModeToggle('gallery')}
+                className={`flex-1 flex items-center justify-center px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                  cameraMode === 'gallery'
+                    ? 'bg-white text-neutral-800 shadow-sm border border-neutral-200'
+                    : 'text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50'
+                }`}
+                disabled={disabled}
+              >
+                <FolderOpen className="w-4 h-4 mr-2" />
+                Galeri
+              </button>
             </div>
-          </CardContent>
-        </Card>
+          )}
+
+          {/* Luxury Civic Upload Zone */}
+          <Card
+            className={`border-2 border-dashed transition-all duration-200 cursor-pointer rounded-lg shadow-sm ${
+              dragOver
+                ? "border-neutral-300 bg-neutral-25 transform -translate-y-0.5 shadow-md"
+                : "border-neutral-200 hover:border-neutral-300 hover:bg-neutral-25 hover:transform hover:-translate-y-0.5 hover:shadow-md"
+            } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            onClick={handleUploadClick}
+          >
+            <CardContent className="p-8 sm:p-12 text-center">
+              <div className="space-y-6">
+                <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto border border-neutral-200 shadow-sm">
+                  {isCompressing ? (
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-neutral-600"></div>
+                  ) : cameraMode === 'camera' ? (
+                    <Camera className="h-8 w-8 text-neutral-600" />
+                  ) : (
+                    <Upload className="h-8 w-8 text-neutral-600" />
+                  )}
+                </div>
+
+                <div className="space-y-3">
+                  <h3 className="text-xl font-semibold text-neutral-800 tracking-tight">
+                    {isCompressing
+                      ? "Memproses gambar..."
+                      : cameraMode === 'camera'
+                      ? "Ambil foto jalan rusak"
+                      : "Pilih foto jalan rusak"}
+                  </h3>
+                  <p className="text-base text-neutral-600 max-w-sm mx-auto">
+                    {isCompressing
+                      ? "Mengompres dan mengoptimalkan gambar"
+                      : cameraMode === 'camera'
+                      ? "Gunakan kamera perangkat untuk mengambil foto langsung"
+                      : "Drag foto ke sini atau klik untuk memilih dari galeri"}
+                  </p>
+                  <p className="text-sm text-neutral-500 mt-4">
+                    Format: JPEG, PNG, WebP • Maksimal 10MB • Otomatis dikompres ke WebP
+                  </p>
+                </div>
+
+                <Button
+                  type="button"
+                  size="lg"
+                  className="mt-8 px-8 py-3 text-base font-medium bg-neutral-800 hover:bg-neutral-700 text-white border-0 shadow-md hover:shadow-lg transition-all duration-200 hover:transform hover:-translate-y-0.5"
+                  disabled={disabled || isCompressing}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleUploadClick();
+                  }}
+                >
+                  {isCompressing ? (
+                    <>
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
+                      Memproses...
+                    </>
+                  ) : cameraMode === 'camera' ? (
+                    <>
+                      <Camera className="mr-3 h-5 w-5" />
+                      Buka Kamera
+                    </>
+                  ) : (
+                    <>
+                      <ImageIcon className="mr-3 h-5 w-5" />
+                      Pilih Foto
+                    </>
+                  )}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       ) : (
-        <Card className="overflow-hidden">
+        <Card className="overflow-hidden shadow-md border border-neutral-200">
           <CardContent className="p-0">
             <div className="relative">
               {preview && (
@@ -271,34 +344,42 @@ export default function ImageUpload({
                   <img
                     src={preview}
                     alt="Preview foto jalan rusak"
-                    className="w-full h-72 object-cover"
+                    className="w-full h-72 sm:h-80 object-cover"
                   />
 
-                  {/* Overlay Change Photo Button - Both Desktop and Mobile */}
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
+                  {/* Civic Monochrome Overlay */}
+                  <div className="absolute inset-0 bg-neutral-900/40 opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center justify-center">
                     <Button
                       type="button"
-                      variant="secondary"
                       size="sm"
                       onClick={handleUploadClick}
                       disabled={disabled || isUploading || isCompressing}
-                      className="bg-white/90 text-neutral-800 hover:bg-white border-0 shadow-lg"
+                      className="bg-white/95 text-neutral-800 hover:bg-white border border-white/20 shadow-lg hover:shadow-xl transition-all duration-200 hover:transform hover:-translate-y-0.5"
                     >
-                      <Upload className="mr-2 h-4 w-4" />
-                      Ganti Foto
+                      {cameraMode === 'camera' ? (
+                        <>
+                          <Camera className="mr-2 h-4 w-4" />
+                          Ambil Ulang
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="mr-2 h-4 w-4" />
+                          Ganti Foto
+                        </>
+                      )}
                     </Button>
                   </div>
 
                   {(isUploading || isCompressing) && (
-                    <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center">
+                    <div className="absolute inset-0 bg-white/90 backdrop-blur-sm flex items-center justify-center">
                       <div className="text-center">
-                        <div className="spinner mx-auto mb-3"></div>
-                        <p className="text-base font-medium text-foreground">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-neutral-600 mx-auto mb-4"></div>
+                        <p className="text-base font-semibold text-neutral-800">
                           {isCompressing
                             ? "Memproses gambar..."
                             : "Mengunggah foto..."}
                         </p>
-                        <p className="text-sm text-muted-foreground mt-1">
+                        <p className="text-sm text-neutral-600 mt-1">
                           Mohon tunggu sebentar
                         </p>
                       </div>
@@ -307,41 +388,50 @@ export default function ImageUpload({
                 </div>
               )}
 
-              <div className="p-4 bg-muted/30 border-t border-border">
+              {/* Civic Success Status Card */}
+              <div className="p-4 bg-white border-t border-neutral-200">
                 {/* Mobile Layout - Stack vertically */}
                 <div className="sm:hidden space-y-4">
                   <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                      <ImageIcon className="h-4 w-4 text-green-600" />
+                    <div className="w-10 h-10 bg-green-50 rounded-full flex items-center justify-center flex-shrink-0 border border-green-200">
+                      <CheckCircle2 className="h-5 w-5 text-green-700" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p
-                        className="text-sm font-medium text-foreground line-clamp-1"
+                        className="text-sm font-semibold text-neutral-800 line-clamp-1"
                         title={selectedImage.name}
                       >
                         {selectedImage.name.length > 25
                           ? `${selectedImage.name.substring(0, 22)}...${selectedImage.name.split(".").pop()}`
                           : selectedImage.name}
                       </p>
-                      <p className="text-xs text-muted-foreground">
-                        {(selectedImage.size / 1024 / 1024).toFixed(1)} MB •
-                        Foto siap digunakan
+                      <p className="text-xs text-green-700 font-medium">
+                        {(selectedImage.size / 1024 / 1024).toFixed(1)} MB • Foto siap digunakan
                       </p>
                     </div>
                   </div>
 
-                  {/* Mobile Action Buttons */}
-                  <div className="flex gap-2">
+                  {/* Mobile Action Buttons - Civic Style */}
+                  <div className="flex gap-3">
                     <Button
                       type="button"
                       variant="outline"
                       size="sm"
                       onClick={handleUploadClick}
                       disabled={disabled || isUploading || isCompressing}
-                      className="flex-1 h-9 text-sm border-neutral-300 text-neutral-700 hover:bg-neutral-50"
+                      className="flex-1 h-10 text-sm border-neutral-300 text-neutral-700 hover:bg-neutral-50 hover:border-neutral-400 transition-all duration-200"
                     >
-                      <Upload className="mr-2 h-4 w-4" />
-                      Ganti Foto
+                      {cameraMode === 'camera' ? (
+                        <>
+                          <Camera className="mr-2 h-4 w-4" />
+                          Ambil Ulang
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="mr-2 h-4 w-4" />
+                          Ganti Foto
+                        </>
+                      )}
                     </Button>
                     <Button
                       type="button"
@@ -349,7 +439,7 @@ export default function ImageUpload({
                       size="sm"
                       onClick={handleRemoveImage}
                       disabled={disabled || isUploading || isCompressing}
-                      className="flex-shrink-0 h-9 w-9 text-muted-foreground hover:text-red-600 hover:bg-red-50 rounded-md transition-colors duration-150"
+                      className="flex-shrink-0 h-10 w-10 text-neutral-500 hover:text-red-600 hover:bg-red-50 rounded-md transition-all duration-200"
                     >
                       <X className="h-4 w-4" />
                     </Button>
@@ -358,35 +448,43 @@ export default function ImageUpload({
 
                 {/* Desktop Layout - Horizontal */}
                 <div className="hidden sm:flex items-center justify-between">
-                  <div className="flex items-center space-x-3 flex-1 min-w-0">
-                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                      <ImageIcon className="h-4 w-4 text-green-600" />
+                  <div className="flex items-center space-x-4 flex-1 min-w-0">
+                    <div className="w-10 h-10 bg-green-50 rounded-full flex items-center justify-center flex-shrink-0 border border-green-200">
+                      <CheckCircle2 className="h-5 w-5 text-green-700" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p
-                        className="text-sm font-medium text-foreground truncate"
+                        className="text-sm font-semibold text-neutral-800 truncate"
                         title={selectedImage.name}
                       >
                         {selectedImage.name}
                       </p>
-                      <p className="text-xs text-muted-foreground">
-                        {(selectedImage.size / 1024 / 1024).toFixed(1)} MB •
-                        Foto siap digunakan
+                      <p className="text-xs text-green-700 font-medium">
+                        {(selectedImage.size / 1024 / 1024).toFixed(1)} MB • Foto siap digunakan
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 ml-4">
+                  <div className="flex items-center gap-3 ml-6">
                     <Button
                       type="button"
                       variant="outline"
                       size="sm"
                       onClick={handleUploadClick}
                       disabled={disabled || isUploading || isCompressing}
-                      className="h-8 px-3 text-xs border-neutral-300 text-neutral-700 hover:bg-neutral-50"
+                      className="h-9 px-4 text-xs border-neutral-300 text-neutral-700 hover:bg-neutral-50 hover:border-neutral-400 transition-all duration-200"
                     >
-                      <Upload className="mr-1 h-3 w-3" />
-                      Ganti
+                      {cameraMode === 'camera' ? (
+                        <>
+                          <Camera className="mr-2 h-3 w-3" />
+                          Ambil Ulang
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="mr-2 h-3 w-3" />
+                          Ganti
+                        </>
+                      )}
                     </Button>
                     <Button
                       type="button"
@@ -394,7 +492,7 @@ export default function ImageUpload({
                       size="sm"
                       onClick={handleRemoveImage}
                       disabled={disabled || isUploading || isCompressing}
-                      className="h-8 w-8 text-muted-foreground hover:text-red-600 hover:bg-red-50 rounded-md transition-colors duration-150"
+                      className="h-9 w-9 text-neutral-500 hover:text-red-600 hover:bg-red-50 rounded-md transition-all duration-200"
                     >
                       <X className="h-4 w-4" />
                     </Button>
@@ -407,7 +505,7 @@ export default function ImageUpload({
       )}
 
       {displayError && (
-        <Alert variant="destructive" className="border-red-200 bg-red-50">
+        <Alert variant="destructive" className="border-red-200 bg-red-50 shadow-sm">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription className="text-red-800 font-medium">
             <div className="flex items-center justify-between">
@@ -419,7 +517,7 @@ export default function ImageUpload({
                   size="sm"
                   onClick={handleRetry}
                   disabled={isCompressing}
-                  className="ml-3 h-8 px-3 text-xs border-red-300 text-red-700 hover:bg-red-100"
+                  className="ml-3 h-8 px-3 text-xs border-red-300 text-red-700 hover:bg-red-100 transition-all duration-200"
                 >
                   <RefreshCw className="mr-1 h-3 w-3" />
                   Coba Lagi ({retryCount + 1}/{MAX_RETRIES})
@@ -430,6 +528,7 @@ export default function ImageUpload({
         </Alert>
       )}
 
+      {/* Standard file input for gallery mode */}
       <input
         ref={fileInputRef}
         type="file"
@@ -438,6 +537,19 @@ export default function ImageUpload({
         className="hidden"
         disabled={disabled}
       />
+      
+      {/* Camera input for camera mode */}
+      {enableCameraMode && (
+        <input
+          ref={cameraInputRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          onChange={handleFileInputChange}
+          className="hidden"
+          disabled={disabled}
+        />
+      )}
     </div>
   );
 }
