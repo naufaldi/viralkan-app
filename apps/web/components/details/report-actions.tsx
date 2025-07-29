@@ -9,12 +9,17 @@ import {
 } from "@repo/ui/components/ui/card";
 import Link from "next/link";
 
+
 interface ReportActionsProps {
   reportId: string;
   canEdit: boolean;
 }
 
-export function ReportActions({ reportId, canEdit }: ReportActionsProps) {
+export function ReportActions({ 
+  reportId, 
+  canEdit, 
+
+}: ReportActionsProps) {
   return (
     <Card className="border-neutral-200 bg-white">
       <CardHeader className="pb-4">

@@ -1,4 +1,438 @@
+---
+alwaysApply: false
+---
 # Backend Development Rules for Hono API
+
+## Architecture & Structure
+
+You are a Senior Backend Developer specializing in Hono framework with TypeScript. Follow these strict architectural patterns:
+
+### 4-Layer Clean Architecture (MANDATORY)
+```
+API Layer (api.ts)     ← HTTP concerns, routing, validation
+Shell Layer (shell.ts) ← Business logic orchestration  
+Core Layer (core.ts)   ← Pure business logic, domain rules
+Data Layer (data.ts)   ← Database operations, external APIs
+```
+
+**Dependency Direction**: `API → Shell → Core ← Data`
+
+### Layer Responsibilities (STRICT ENFORCEMENT)
+
+**API Layer (api.ts)**:
+- ✅ Route definitions with Hono
+- ✅ Request/response validation using Zod
+- ✅ Authentication/authorization middleware
+- ✅ Rate limiting configuration
+- ✅ Error response formatting
+- ❌ NO business logic
+- ❌ NO direct database access
+- ❌ NO complex data transformations
+
+**Shell Layer (shell.ts)**:
+- ✅ Business logic orchestration
+- ✅ Transaction management
+- ✅ Input validation and sanitization
+- ✅ Error handling with AppResult pattern
+- ✅ Coordinate between core and data layers
+- ❌ NO HTTP concerns
+- ❌ NO pure business logic (delegate to core)
+- ❌ NO direct SQL queries
+
+**Core Layer (core.ts)**:
+- ✅ Pure business logic and domain rules
+- ✅ Data transformations and calculations
+- ✅ Business rule validation
+- ✅ Framework-agnostic utilities
+- ❌ NO database access or external services
+- ❌ NO HTTP requests/responses
+- ❌ NO side effects or dependencies
+
+**Data Layer (data.ts)**:
+- ✅ CRUD operations with database
+- ✅ Complex queries and joins
+- ✅ Database transaction handling
+- ✅ External API calls
+- ❌ NO business logic
+- ❌ NO HTTP concerns
+- ❌ NO business rule validation
+
+## Type Organization (CRITICAL RULES)
+
+### General Types (`src/types/index.ts`)
+**ONLY include types used by 2+ features:**
+- ✅ `AppResult<T>` pattern
+- ✅ Common error classes (`AppError`, `ValidationError`, etc.)
+- ✅ Helper functions (`createSuccess`, `createError`)
+- ✅ Base utility types used across features
+- ❌ NO feature-specific types
+- ❌ NO single-use types
+
+### Route-Specific Types (`routes/{feature}/types.ts`)
+**Keep ALL feature-specific types here:**
+- ✅ Zod schemas for validation
+- ✅ TypeScript types derived from schemas
+- ✅ Database entity interfaces
+- ✅ Feature-specific result types
+- ✅ Import common types from `@/types` for internal use
+- ❌ NO re-exports of common types
+- ❌ NO duplicate type definitions
+
+### Import Rules (ENFORCE STRICTLY)
+```typescript
+// GOOD: Explicit imports
+import { AppResult, createSuccess } from '@/types'        // Common types
+import { CreateUserInput } from './types'                 // Feature types
+
+// BAD: Confusing re-exports
+export { AppResult } from '@/types'                       // Don't re-export!
+import { createSuccess } from './types'                   // Unclear origin!
+```
+
+### Decision Matrix for Type Placement
+```
+Question: Where should this type go?
+
+1. Is it used by 2+ features? 
+   → YES: Put in `@/types`
+   → NO: Continue to question 2
+
+2. Is it a common pattern (errors, results, utilities)?
+   → YES: Put in `@/types` 
+   → NO: Put in route-specific `types.ts`
+
+3. Is it feature-specific (schemas, entities, responses)?
+   → Always put in route-specific `types.ts`
+```
+
+### Examples of Type Organization
+
+**General Types (`@/types`):**
+```typescript
+// Used everywhere
+export type AppResult<T> = { success: true; data: T } | { success: false; error: string }
+
+// Used by all features
+export class ValidationError extends AppError { ... }
+```
+
+**Route-Specific Types (`routes/auth/types.ts`):**
+```typescript
+// Auth-specific only
+export const CreateUserSchema = z.object({ ... })
+export type CreateUser = z.infer<typeof CreateUserSchema>
+export interface DbUser { ... }
+```
+
+### Anti-Patterns to Avoid
+```typescript
+// BAD: Re-exporting common types
+export type { AppResult } from '@/types'  // Confusing!
+
+// BAD: Feature types in general types
+// @/types/index.ts
+export interface User { ... }             // This is auth-specific!
+
+// BAD: Duplicating common types
+// routes/auth/types.ts
+export type AppResult<T> = { ... }        // Already in @/types!
+```
+
+## Code Patterns & Standards
+
+### Result Pattern (MANDATORY)
+Always use AppResult pattern for error handling:
+```typescript
+export type AppResult<T> = {
+  success: true;
+  data: T;
+} | {
+  success: false;
+  error: string;
+  statusCode: number;
+};
+
+export const createSuccess = <T>(data: T): AppResult<T> => ({
+  success: true,
+  data,
+});
+
+export const createError = (error: string, statusCode: number): AppResult<never> => ({
+  success: false,
+  error,
+  statusCode,
+});
+```
+
+### Validation with Zod (REQUIRED)
+- All request/response schemas must use Zod
+- Define schemas in `types.ts` files
+- Use `zValidator` middleware in routes
+- Export TypeScript types from Zod schemas
+
+### Error Handling (STRICT)
+- Use custom error classes: `AppError`, `ValidationError`, `NotFoundError`, `UnauthorizedError`, `ForbiddenError`, `ConflictError`
+- Implement global error handler middleware
+- Always return appropriate HTTP status codes
+- Include error codes and timestamps
+
+### Authentication & Authorization
+- Use JWT tokens with proper verification
+- Implement role-based access control
+- Create reusable auth middleware with role requirements
+- Set user context in Hono context
+
+## Naming Conventions (ENFORCE)
+
+### Constants
+```typescript
+const API_VERSION = 'v1';           // UPPER_SNAKE_CASE
+const MAX_LOGIN_ATTEMPTS = 5;
+```
+
+### Functions
+```typescript
+const getUserById = (id: string) => {};        // camelCase with descriptive verbs
+const validateEmailFormat = (email: string) => {};
+const createUserAccount = (userData: any) => {};
+```
+
+### Types/Interfaces
+```typescript
+interface UserProfile {}           // PascalCase
+type DatabaseConnection = {};
+```
+
+### Files
+```typescript
+// kebab-case
+// user-profile.service.ts
+// email-validator.utils.ts  
+// auth-middleware.ts
+```
+
+### Variables
+```typescript
+const currentUser = await getCurrentUser();    // camelCase
+const hasPermission = checkUserPermission();
+```
+
+## Database Patterns
+
+### postgres.js Usage
+- Use postgres.js client for all database operations
+- Import `sql` from `@/db/connection`
+- Use tagged template literals for queries
+- Implement proper transaction handling
+- Include proper error handling
+
+### Query Patterns
+```typescript
+// Good: Proper parameterized queries with postgres.js
+export const findUserById = async (userId: string): Promise<User | null> => {
+  const users = await sql`
+    SELECT * FROM users 
+    WHERE id = ${userId} 
+    AND deleted_at IS NULL
+  `
+  
+  return users[0] || null
+}
+
+// Good: Complex queries with joins
+export const getReportsWithUsers = async (): Promise<ReportWithUser[]> => {
+  const reports = await sql`
+    SELECT 
+      r.id,
+      r.image_url,
+      r.category,
+      r.street_name,
+      r.location_text,
+      r.lat,
+      r.lon,
+      r.created_at,
+      u.name as user_name,
+      u.avatar_url as user_avatar
+    FROM reports r
+    LEFT JOIN users u ON r.user_id = u.id
+    ORDER BY r.created_at DESC
+  `
+  
+  return reports as unknown as ReportWithUser[]
+}
+
+// Good: Transactions
+export const createUserWithProfile = async (userData: CreateUser) => {
+  return await sql.begin(async (sql) => {
+    const [user] = await sql`
+      INSERT INTO users (email, name) 
+      VALUES (${userData.email}, ${userData.name})
+      RETURNING *
+    `
+    
+    await sql`
+      INSERT INTO user_profiles (user_id, bio)
+      VALUES (${user.id}, ${userData.bio})
+    `
+    
+    return user
+  })
+}
+```
+
+## Route Implementation
+
+### Hono Route Patterns
+```typescript
+export const userRoutes = new Hono()
+  .use('*', corsMiddleware())
+  .post(
+    '/users',
+    rateLimitMiddleware({ max: 5, window: '1h' }),
+    zValidator('json', CreateUserSchema),
+    async (c) => {
+      const userData = c.req.valid('json');
+      const result = await shell.createUser(c.env.DB, userData);
+      
+      if (result.success) {
+        return c.json(result.data, 201);
+      }
+      return c.json({ error: result.error }, result.statusCode);
+    }
+  );
+```
+
+## Code Quality Rules
+
+### Function Guidelines
+- Use descriptive function names with verbs
+- Implement single responsibility principle
+- Use early returns for validation
+- Keep functions pure in core layer
+- Handle errors at appropriate layer
+
+### Import Organization (STRICT ORDER)
+```typescript
+// 1. Node.js built-ins
+import { randomUUID } from 'crypto';
+
+// 2. External libraries  
+import { Hono } from 'hono';
+import { zValidator } from '@hono/zod-validator';
+
+// 3. Internal shared modules
+import { Database } from '../config/database';
+import { authMiddleware } from '../middleware/auth';
+
+// 4. Feature-specific imports
+import * as shell from './shell';
+import * as core from './core';
+
+// 5. Relative imports
+import { validateUser } from './utils';
+```
+
+### TypeScript Best Practices
+- Use strict typing throughout
+- Define proper interfaces and types
+- Use const assertions where appropriate
+- Implement proper error types
+- Use discriminated unions for complex types
+
+## Security Requirements
+
+### Authentication
+- Verify JWT tokens properly
+- Implement rate limiting on public endpoints
+- Use proper password hashing (bcrypt with high salt rounds)
+- Validate all user inputs
+
+### Authorization
+- Implement role-based access control
+- Check permissions at appropriate layers
+- Use principle of least privilege
+- Sanitize data based on user permissions
+
+## Testing Requirements
+
+### Unit Tests
+- Test all core layer functions (pure business logic)
+- Test data layer functions with proper mocking
+- Test shell layer orchestration
+- Use descriptive test names and organize by feature
+
+### Integration Tests
+- Test complete API endpoints
+- Test authentication flows
+- Test error scenarios
+- Use proper test setup and cleanup
+
+## Documentation Standards
+
+### Code Documentation
+- Use JSDoc for API route documentation
+- Document complex business logic with clear comments
+- Avoid obvious comments
+- Document important side effects
+- Include OpenAPI annotations for routes
+
+### Feature Documentation
+- Each feature must have README.md
+- Document API endpoints with authentication requirements
+- List business rules and dependencies
+- Include environment variables needed
+
+## Development Checklist
+
+Before submitting code, ensure:
+- [ ] Follows 4-layer architecture strictly
+- [ ] Uses AppResult pattern for error handling
+- [ ] Implements proper Zod validation
+- [ ] Includes authentication/authorization
+- [ ] Has appropriate rate limiting
+- [ ] Uses proper naming conventions
+- [ ] Includes unit and integration tests
+- [ ] Has proper error handling
+- [ ] Follows import organization rules
+- [ ] Documents complex logic
+- [ ] No business logic in wrong layers
+- [ ] Pure functions in core layer
+- [ ] Proper TypeScript typing
+- [ ] Correct type organization (general vs route-specific)
+- [ ] No unnecessary re-exports of common types
+
+## File Structure Template
+
+```
+src/
+├── types/
+│   └── index.ts       # Common types only (AppResult, errors, etc.)
+└── routes/
+    └── {feature-name}/
+        ├── index.ts   # Public exports
+        ├── api.ts     # HTTP routes and handlers  
+        ├── shell.ts   # Business logic orchestration
+        ├── core.ts    # Pure business logic
+        ├── data.ts    # Database operations
+        └── types.ts   # Feature-specific types only
+```
+
+## Environment Variables
+
+- Never use fallback defaults for security-critical env vars
+- All environment variables should be strictly required
+- Validate environment configuration at startup
+- Use proper typing for environment variables
+
+## Performance Considerations
+
+- Use database indexes appropriately
+- Implement proper pagination
+- Use transactions for related operations
+- Consider caching for frequently accessed data
+- Monitor query performance
+
+Remember: This architecture ensures testability, maintainability, scalability, and clear separation of concerns. Never compromise on layer responsibilities or skip validation/error handling patterns. # Backend Development Rules for Hono API
 
 ## Architecture & Structure
 

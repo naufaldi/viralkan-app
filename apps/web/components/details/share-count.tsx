@@ -1,46 +1,61 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Share2 } from "lucide-react";
-import { Separator } from "@repo/ui/components/ui/separator";
+import { useReportSharing } from "@/hooks/sharing";
 
 interface ShareCountProps {
-  count: number;
+  reportId: string;
+  initialCount?: number;
   className?: string;
 }
 
-export function ShareCount({ count, className = "" }: ShareCountProps) {
-  const formatShareCount = (shareCount: number): string => {
-    if (shareCount >= 1000000) {
-      return `${(shareCount / 1000000).toFixed(1)}M`;
-    } else if (shareCount >= 1000) {
-      return `${(shareCount / 1000).toFixed(1)}K`;
-    }
-    return shareCount.toString();
-  };
+export function ShareCount({ 
+  reportId, 
+  initialCount = 0,
+  className = "" 
+}: ShareCountProps) {
+  const [count, setCount] = useState(initialCount);
+  
+  // Use the report sharing hook to get real-time data
+  const { shareDetails, isLoading, error } = useReportSharing({
+    reportId,
+    enabled: true,
+  });
 
-  const getShareText = (shareCount: number): string => {
-    if (shareCount === 0) return "Belum ada yang membagikan";
-    if (shareCount === 1) return "1 kali dibagikan";
-    return `${formatShareCount(shareCount)} kali dibagikan`;
-  };
+  // Update count when share details are loaded
+  useEffect(() => {
+    if (shareDetails) {
+      setCount(shareDetails.shareCount);
+    }
+  }, [shareDetails]);
+
+  // Listen for share count updates from other components
+  useEffect(() => {
+    const handleShareCountUpdate = (event: CustomEvent) => {
+      if (event.detail?.newCount !== undefined) {
+        setCount(event.detail.newCount);
+      }
+    };
+
+    document.addEventListener('shareCountUpdated', handleShareCountUpdate as EventListener);
+    
+    return () => {
+      document.removeEventListener('shareCountUpdated', handleShareCountUpdate as EventListener);
+    };
+  }, []);
+
+  if (error) {
+    console.error("Error loading share count:", error);
+  }
 
   return (
-    <>
-      <Separator className="bg-neutral-200" />
-      <div className={`flex items-center gap-3 ${className}`}>
-        <Share2 className="h-4 w-4 text-neutral-500 flex-shrink-0" />
-        <div>
-          <p className="text-sm font-medium text-neutral-900">Dibagikan</p>
-          <p className="text-sm text-neutral-600">{getShareText(count)}</p>
-
-          {/* Additional context for zero shares */}
-          {count === 0 && (
-            <p className="text-xs text-neutral-500 mt-1">
-              Jadilah yang pertama membagikan
-            </p>
-          )}
-        </div>
-      </div>
-    </>
+    <div className={`flex items-center gap-2 text-sm text-neutral-600 ${className}`}>
+      <Share2 className="h-4 w-4" />
+      <span className="font-medium">
+        {isLoading ? "..." : count.toLocaleString()}
+      </span>
+      <span>dibagikan</span>
+    </div>
   );
 }

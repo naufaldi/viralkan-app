@@ -23,11 +23,12 @@ import {
   ReportStatusBadge,
   LocationHierarchy,
   ShareCount,
+  ShareButton,
 } from "@/components/details";
 import { getReportByIdAction } from "@/lib/report-actions";
 import { getAuthUser } from "@/lib/auth-server";
 import Header from "@/components/layout/header";
-import { ReportDetailClient } from "./report-detail-client";
+import { ReportDetailClient } from "@/components/details/report-detail-client";
 
 interface ReportDetailPageProps {
   params: Promise<{
@@ -93,19 +94,35 @@ export default async function ReportDetailPage({
                 />
 
                 {/* Status Badge Overlay - Only show for owner */}
-                {isOwner && <ReportStatusBadge status={report.status} />}
+               <div className="absolute flex gap-4 h-auto w-auto px-4">
+               {isOwner && <ReportStatusBadge className="relative left-auto" status={report.status} />}
 
-                {/* Category Badge Overlay */}
-                <div className="absolute top-4 left-4">
-                  <Badge
-                    className={`${categoryInfo.color} border-0 font-medium`}
-                  >
-                    <span className="mr-1">{categoryInfo.icon}</span>
-                    {categoryInfo.label}
-                  </Badge>
-                </div>
+{/* Category Badge Overlay */}
+<div className="relative top-4 ">
+  <Badge
+    className={`${categoryInfo.color} border-0 font-medium`}
+  >
+    <span className="mr-1">{categoryInfo.icon}</span>
+    {categoryInfo.label}
+  </Badge>
+</div>
+               </div>
 
                 {/* Share Button will be rendered by client component */}
+                <div className="absolute top-4 right-4 z-10">
+                  <ShareButton 
+                    reportId={report.id}
+                    report={{
+                      street_name: report.street_name,
+                      district: report.district,
+                      city: report.city,
+                      province: report.province,
+                      category: report.category
+                    }}
+                    useDialog={true}
+                    size="md"
+                  />
+                </div>
               </div>
             </div>
 
@@ -213,13 +230,16 @@ export default async function ReportDetailPage({
 
                     {/* Share Count */}
                     <div data-share-count>
-                      <ShareCount count={0} />
+                      <ShareCount reportId={report.id} initialCount={report.share_count || 0} />
                     </div>
                   </CardContent>
                 </Card>
 
                 {/* Actions */}
-                <ReportActions reportId={report.id} canEdit={canEdit} />
+                <ReportActions 
+                  reportId={report.id} 
+                  canEdit={canEdit} 
+                />
               </div>
             </div>
           </div>

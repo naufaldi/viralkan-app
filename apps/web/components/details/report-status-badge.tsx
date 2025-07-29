@@ -1,13 +1,15 @@
 "use client";
 
 import { Badge } from "@repo/ui/components/ui/badge";
+import { cn } from "@repo/ui/index";
 import { CheckCircle, Clock, XCircle } from "lucide-react";
 
 interface ReportStatusBadgeProps {
   status: string;
+  className?: string;
 }
 
-export function ReportStatusBadge({ status }: ReportStatusBadgeProps) {
+export function ReportStatusBadge({ status,className }: ReportStatusBadgeProps) {
   const getStatusConfig = (status: string) => {
     switch (status) {
       case "verified":
@@ -41,7 +43,7 @@ export function ReportStatusBadge({ status }: ReportStatusBadgeProps) {
   const StatusIcon = statusConfig.icon;
 
   return (
-    <div className="absolute top-4 left-4">
+    <div className={cn("absolute top-4 left-4", className)}>
       <Badge className={`${statusConfig.color} border font-medium`}>
         <StatusIcon className="h-3 w-3 mr-1" />
         {statusConfig.label}

@@ -6,6 +6,7 @@ export { ReportStatusBadge } from "./report-status-badge";
 // Location and sharing components
 export { LocationHierarchy } from "./location-hierarchy";
 export { HeroShareButton } from "./hero-share-button";
+export { ShareButton } from "./share-button";
 export { ShareDialog } from "./share-dialog";
 export { ShareCount } from "./share-count";
 

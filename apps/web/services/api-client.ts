@@ -489,3 +489,123 @@ export type {
   ReportWithUser,
   PaginatedReports,
 };
+
+// Sharing API Types
+export interface TrackShareRequest {
+  platform: 'whatsapp' | 'twitter' | 'facebook' | 'instagram' | 'telegram';
+}
+
+export interface GenerateCaptionRequest {
+  platform: 'whatsapp' | 'twitter' | 'facebook' | 'instagram' | 'telegram';
+  tone: 'formal' | 'urgent' | 'community' | 'informative';
+}
+
+export interface ShareTrackingResponse {
+  success: boolean;
+  newShareCount: number;
+}
+
+export interface CaptionResponse {
+  caption: string;
+  hashtags: string[];
+  characterCount: number;
+  platformOptimized: boolean;
+}
+
+export interface ShareAnalytics {
+  totalShares: number;
+  platformBreakdown: Record<string, number>;
+  topReports: Array<{
+    id: string;
+    title: string;
+    shareCount: number;
+  }>;
+  dateRange: {
+    start: Date;
+    end: Date;
+  };
+}
+
+// Sharing API Service
+export const sharingApi = {
+  // Track a share event
+  trackShare: async (
+    reportId: string,
+    data: TrackShareRequest
+  ): Promise<ShareTrackingResponse> => {
+    return apiRequest<ShareTrackingResponse>(`/api/sharing/${reportId}/share`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  // Generate caption for sharing
+  generateCaption: async (
+    reportId: string,
+    data: GenerateCaptionRequest
+  ): Promise<CaptionResponse> => {
+    return apiRequest<CaptionResponse>(`/api/sharing/${reportId}/generate-caption`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  // Get share analytics (admin only)
+  getShareAnalytics: async (
+    token: string,
+    params?: {
+      startDate?: string;
+      endDate?: string;
+      platform?: string;
+    }
+  ): Promise<ShareAnalytics> => {
+    const searchParams = new URLSearchParams();
+    if (params?.startDate) searchParams.append('startDate', params.startDate);
+    if (params?.endDate) searchParams.append('endDate', params.endDate);
+    if (params?.platform) searchParams.append('platform', params.platform);
+
+    const endpoint = `/api/sharing/analytics${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
+    return authenticatedApiRequest<ShareAnalytics>(endpoint, token);
+  },
+
+  // Get report share details
+  getReportShareDetails: async (reportId: string): Promise<{
+    shareCount: number;
+    platformBreakdown: Record<string, number>;
+    recentShares: Array<{
+      platform: string;
+      sharedAt: Date;
+      userId?: string;
+    }>;
+  }> => {
+    return apiRequest(`/api/sharing/${reportId}/details`);
+  },
+
+  // Validate report for sharing
+  validateReportForSharing: async (reportId: string): Promise<{
+    eligible: boolean;
+    reason?: string;
+  }> => {
+    return apiRequest(`/api/sharing/${reportId}/validate`);
+  },
+
+  // Get most shared reports
+  getMostSharedReports: async (params?: {
+    limit?: number;
+    startDate?: string;
+    endDate?: string;
+  }): Promise<Array<{
+    id: string;
+    title: string;
+    shareCount: number;
+    isHighEngagement: boolean;
+  }>> => {
+    const searchParams = new URLSearchParams();
+    if (params?.limit) searchParams.append('limit', params.limit.toString());
+    if (params?.startDate) searchParams.append('startDate', params.startDate);
+    if (params?.endDate) searchParams.append('endDate', params.endDate);
+
+    const endpoint = `/api/sharing/most-shared${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
+    return apiRequest(endpoint);
+  },
+};
