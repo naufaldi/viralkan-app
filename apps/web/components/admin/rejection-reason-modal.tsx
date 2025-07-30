@@ -99,7 +99,7 @@ export function RejectionReasonModal({
                 disabled={isLoading}
                 maxLength={500}
               />
-              {error && <p className="text-sm text-red-600 mt-1">{error}</p>}
+              {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
               <div className="flex justify-between text-xs text-neutral-500">
                 <span>Minimal 10 karakter</span>
                 <span>{reason.length}/500</span>
@@ -112,7 +112,7 @@ export function RejectionReasonModal({
               variant="outline"
               onClick={handleClose}
               disabled={isLoading}
-              className="hover:bg-neutral-50 hover:border-neutral-400"
+              className="hover:border-neutral-400 hover:bg-neutral-50"
             >
               Batal
             </Button>
@@ -120,7 +120,7 @@ export function RejectionReasonModal({
               type="submit"
               variant="outline"
               disabled={!isValid || isLoading}
-              className="bg-neutral-800 text-white hover:bg-red-600 hover:text-white border-neutral-800 disabled:bg-neutral-200 disabled:text-neutral-400 disabled:border-neutral-200"
+              className="border-neutral-800 bg-neutral-800 text-white hover:bg-red-600 hover:text-white disabled:border-neutral-200 disabled:bg-neutral-200 disabled:text-neutral-400"
             >
               {isLoading ? "Memproses..." : "Tolak Laporan"}
             </Button>

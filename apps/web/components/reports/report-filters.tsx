@@ -33,12 +33,12 @@ export function ReportFilters({
       {/* Search Section */}
       <div className="space-y-3">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-neutral-500" />
+          <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-neutral-500" />
           <Input
             placeholder="Cari lokasi atau nama jalan..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-10 border-neutral-200 focus:border-neutral-800 focus:ring-neutral-800/12 rounded-md"
+            className="rounded-md border-neutral-200 pl-10 focus:border-neutral-800 focus:ring-neutral-800/12"
           />
         </div>
       </div>
@@ -60,8 +60,8 @@ export function ReportFilters({
             onClick={() => onCategoryChange(undefined)}
             className={
               selectedCategory
-                ? "border-neutral-200 text-neutral-600 hover:bg-neutral-50 hover:border-neutral-300 rounded-md"
-                : "bg-neutral-800 hover:bg-neutral-900 text-white rounded-md"
+                ? "rounded-md border-neutral-200 text-neutral-600 hover:border-neutral-300 hover:bg-neutral-50"
+                : "rounded-md bg-neutral-800 text-white hover:bg-neutral-900"
             }
           >
             Semua Laporan
@@ -82,10 +82,10 @@ export function ReportFilters({
                   isActive
                     ? `${
                         isPothole
-                          ? "bg-red-600 hover:bg-red-700 text-white"
-                          : "bg-neutral-800 hover:bg-neutral-900 text-white"
+                          ? "bg-red-600 text-white hover:bg-red-700"
+                          : "bg-neutral-800 text-white hover:bg-neutral-900"
                       } rounded-md`
-                    : "border-neutral-200 text-neutral-600 hover:bg-neutral-50 hover:border-neutral-300 rounded-md"
+                    : "rounded-md border-neutral-200 text-neutral-600 hover:border-neutral-300 hover:bg-neutral-50"
                 }
               >
                 <span className="mr-2">{config.icon}</span>
@@ -98,13 +98,13 @@ export function ReportFilters({
 
       {/* Active Filters Display */}
       {(selectedCategory || searchQuery) && (
-        <div className="flex items-center gap-3 pt-4 border-t border-neutral-200">
+        <div className="flex items-center gap-3 border-t border-neutral-200 pt-4">
           <span className="text-sm text-neutral-600">Filter aktif:</span>
 
           {selectedCategory && (
             <Badge
               variant="secondary"
-              className="bg-neutral-100 text-neutral-700 border-neutral-200 rounded-full px-3 py-1"
+              className="rounded-full border-neutral-200 bg-neutral-100 px-3 py-1 text-neutral-700"
             >
               <span className="mr-1">
                 {categoryConfig[selectedCategory].icon}
@@ -116,7 +116,7 @@ export function ReportFilters({
           {searchQuery && (
             <Badge
               variant="secondary"
-              className="bg-neutral-100 text-neutral-700 border-neutral-200 rounded-full px-3 py-1"
+              className="rounded-full border-neutral-200 bg-neutral-100 px-3 py-1 text-neutral-700"
             >
               &quot;{searchQuery}&quot;
             </Badge>
@@ -126,9 +126,9 @@ export function ReportFilters({
             variant="ghost"
             size="sm"
             onClick={handleClearFilters}
-            className="text-sm text-neutral-500 hover:text-neutral-700 hover:bg-neutral-50 p-2 h-auto rounded-md"
+            className="h-auto rounded-md p-2 text-sm text-neutral-500 hover:bg-neutral-50 hover:text-neutral-700"
           >
-            <X className="h-3 w-3 mr-1" />
+            <X className="mr-1 h-3 w-3" />
             Hapus filter
           </Button>
         </div>

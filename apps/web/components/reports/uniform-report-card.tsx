@@ -23,12 +23,12 @@ function AdministrativeArea({
 }) {
   return (
     <div className="flex items-start gap-2">
-      <Building className="text-neutral-500 mt-0.5 flex-shrink-0 h-4 w-4" />
-      <div className="space-y-0.5 min-w-0 flex-1">
-        <p className="text-sm text-neutral-600 font-medium truncate">
+      <Building className="mt-0.5 h-4 w-4 flex-shrink-0 text-neutral-500" />
+      <div className="min-w-0 flex-1 space-y-0.5">
+        <p className="truncate text-sm font-medium text-neutral-600">
           {district}
         </p>
-        <p className="text-xs text-neutral-500 truncate">
+        <p className="truncate text-xs text-neutral-500">
           {city}, {province}
         </p>
       </div>
@@ -44,7 +44,7 @@ export function UniformReportCard({ report, onClick }: UniformReportCardProps) {
 
   return (
     <Card
-      className="cursor-pointer group overflow-hidden transition-all duration-200 hover:shadow-card-hover hover:-translate-y-1 border-neutral-200 rounded-lg"
+      className="group hover:shadow-card-hover cursor-pointer overflow-hidden rounded-lg border-neutral-200 transition-all duration-200 hover:-translate-y-1"
       onClick={onClick}
     >
       <div className="relative overflow-hidden">
@@ -53,11 +53,11 @@ export function UniformReportCard({ report, onClick }: UniformReportCardProps) {
           alt={`Jalan rusak di ${report.street_name}`}
           width={400}
           height={300}
-          className="w-full aspect-[4/3] object-cover transition-transform duration-300 group-hover:scale-105"
+          className="aspect-[4/3] w-full object-cover transition-transform duration-300 group-hover:scale-105"
         />
         <div className="absolute top-3 left-3">
           <Badge
-            className={`${categoryInfo.color} border-0 text-xs rounded-full px-3 py-1`}
+            className={`${categoryInfo.color} rounded-full border-0 px-3 py-1 text-xs`}
           >
             <span className="mr-1">{categoryInfo.icon}</span>
             {categoryInfo.label}
@@ -65,17 +65,17 @@ export function UniformReportCard({ report, onClick }: UniformReportCardProps) {
         </div>
       </div>
 
-      <CardContent className="p-4 flex flex-col h-full">
+      <CardContent className="flex h-full flex-col p-4">
         <div className="flex-1 space-y-3">
-          <h3 className="font-semibold text-neutral-900 line-clamp-2 text-base">
+          <h3 className="line-clamp-2 text-base font-semibold text-neutral-900">
             {report.street_name}
           </h3>
 
           <div className="space-y-2">
             {/* Main Location */}
             <div className="flex items-start gap-2">
-              <MapPin className="text-neutral-500 mt-0.5 flex-shrink-0 h-4 w-4" />
-              <p className="text-neutral-600 line-clamp-2 text-sm">
+              <MapPin className="mt-0.5 h-4 w-4 flex-shrink-0 text-neutral-500" />
+              <p className="line-clamp-2 text-sm text-neutral-600">
                 {report.location_text}
               </p>
             </div>
@@ -92,8 +92,8 @@ export function UniformReportCard({ report, onClick }: UniformReportCardProps) {
             {/* Coordinates (Optional) */}
             {hasCoordinates && (
               <div className="flex items-center gap-2">
-                <Crosshair className="text-neutral-400 flex-shrink-0 h-3 w-3" />
-                <span className="text-xs text-neutral-500 font-mono">
+                <Crosshair className="h-3 w-3 flex-shrink-0 text-neutral-400" />
+                <span className="font-mono text-xs text-neutral-500">
                   {formatCoordinates(report.lat!, report.lon!)}
                 </span>
               </div>
@@ -101,7 +101,7 @@ export function UniformReportCard({ report, onClick }: UniformReportCardProps) {
           </div>
         </div>
 
-        <div className="flex items-center justify-between pt-3 mt-auto">
+        <div className="mt-auto flex items-center justify-between pt-3">
           <div className="flex items-center gap-2">
             {report.user_avatar && (
               <Image
@@ -109,7 +109,7 @@ export function UniformReportCard({ report, onClick }: UniformReportCardProps) {
                 alt={report.user_name || "User"}
                 width={24}
                 height={24}
-                className="w-6 h-6 rounded-full"
+                className="h-6 w-6 rounded-full"
               />
             )}
             <span className="text-xs text-neutral-600">

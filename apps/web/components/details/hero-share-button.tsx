@@ -29,23 +29,23 @@ export function HeroShareButton({
         onClick={onClick}
         disabled={disabled}
         size="icon"
-        className="relative group bg-white/95 backdrop-blur-md border border-white/20 text-neutral-700 shadow-lg hover:bg-white hover:scale-105 hover:shadow-xl transition-all duration-300 ease-out rounded-full w-12 h-12"
+        className="group relative h-12 w-12 rounded-full border border-white/20 bg-white/95 text-neutral-700 shadow-lg backdrop-blur-md transition-all duration-300 ease-out hover:scale-105 hover:bg-white hover:shadow-xl"
       >
-        <Share2 className="h-5 w-5 group-hover:rotate-12 transition-transform duration-300" />
+        <Share2 className="h-5 w-5 transition-transform duration-300 group-hover:rotate-12" />
 
         {/* Share Count Badge */}
         {shareCount > 0 && (
-          <div className="absolute -top-2 -right-2 bg-neutral-800 text-white text-xs font-bold px-2 py-1 rounded-full min-w-[20px] h-6 flex items-center justify-center shadow-md">
+          <div className="absolute -top-2 -right-2 flex h-6 min-w-[20px] items-center justify-center rounded-full bg-neutral-800 px-2 py-1 text-xs font-bold text-white shadow-md">
             {formatShareCount(shareCount)}
           </div>
         )}
 
         {/* Glass morphism glow effect */}
-        <div className="absolute inset-0 rounded-full bg-gradient-to-t from-white/10 to-white/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+        <div className="pointer-events-none absolute inset-0 rounded-full bg-gradient-to-t from-white/10 to-white/30 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
       </Button>
 
       {/* Tooltip */}
-      <div className="absolute top-14 right-0 bg-black/80 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+      <div className="pointer-events-none absolute top-14 right-0 rounded bg-black/80 px-2 py-1 text-xs whitespace-nowrap text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100">
         Bagikan laporan
       </div>
     </div>

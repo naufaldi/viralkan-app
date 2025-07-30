@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { sharingApi } from '@/services/api-client';
+import { useState, useEffect } from "react";
+import { sharingApi } from "@/services/api-client";
 
 interface UseShareAnalyticsOptions {
   token: string | undefined;
@@ -28,7 +28,7 @@ interface UseShareAnalyticsReturn {
   } | null;
   isLoading: boolean;
   error: string | null;
-  
+
   // Actions
   refetch: () => void;
 }
@@ -38,7 +38,8 @@ export function useShareAnalytics({
   filters = {},
   enabled = true,
 }: UseShareAnalyticsOptions): UseShareAnalyticsReturn {
-  const [analytics, setAnalytics] = useState<UseShareAnalyticsReturn['analytics']>(null);
+  const [analytics, setAnalytics] =
+    useState<UseShareAnalyticsReturn["analytics"]>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -52,8 +53,8 @@ export function useShareAnalytics({
       const result = await sharingApi.getShareAnalytics(token, filters);
       setAnalytics(result);
     } catch (err) {
-      console.error('Error fetching share analytics:', err);
-      setError('Gagal memuat analitik pembagian');
+      console.error("Error fetching share analytics:", err);
+      setError("Gagal memuat analitik pembagian");
     } finally {
       setIsLoading(false);
     }
@@ -73,4 +74,4 @@ export function useShareAnalytics({
     error,
     refetch,
   };
-} 
+}

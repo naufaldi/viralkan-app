@@ -1,79 +1,80 @@
-import { z } from '@hono/zod-openapi';
-import { createUuidValidator } from '@/utils/uuid';
+import { z } from "@hono/zod-openapi";
+import { createUuidValidator } from "@/utils/uuid";
 
-const uuidValidator = createUuidValidator('UUID');
+const uuidValidator = createUuidValidator("UUID");
 
 // Request Schemas
 export const TrackShareSchema = z.object({
   platform: z
-    .enum(['whatsapp', 'twitter', 'facebook', 'threads', 'telegram'])
+    .enum(["whatsapp", "twitter", "facebook", "threads", "telegram"])
     .openapi({
-      example: 'twitter',
-      description: 'Social media platform where the report was shared',
+      example: "twitter",
+      description: "Social media platform where the report was shared",
     }),
 });
 
 export const GenerateCaptionSchema = z.object({
-  tone: z.enum(['formal', 'urgent', 'community', 'informative']).openapi({
-    example: 'formal',
-    description: 'Tone of the caption to generate',
+  tone: z.enum(["formal", "urgent", "community", "informative"]).openapi({
+    example: "formal",
+    description: "Tone of the caption to generate",
   }),
   platform: z
-    .enum(['whatsapp', 'twitter', 'facebook', 'threads', 'telegram'])
+    .enum(["whatsapp", "twitter", "facebook", "threads", "telegram"])
     .openapi({
-      example: 'twitter',
-      description: 'Target social media platform for caption optimization',
+      example: "twitter",
+      description: "Target social media platform for caption optimization",
     }),
 });
 
 export const GenerateAICaptionSchema = z.object({
-  tone: z.enum(['formal', 'urgent', 'community', 'informative']).openapi({
-    example: 'formal',
-    description: 'Tone of the caption to generate',
+  tone: z.enum(["formal", "urgent", "community", "informative"]).openapi({
+    example: "formal",
+    description: "Tone of the caption to generate",
   }),
   platform: z
-    .enum(['whatsapp', 'twitter', 'facebook', 'threads', 'telegram'])
+    .enum(["whatsapp", "twitter", "facebook", "threads", "telegram"])
     .openapi({
-      example: 'twitter',
-      description: 'Target social media platform for caption optimization',
+      example: "twitter",
+      description: "Target social media platform for caption optimization",
     }),
   usePaidModel: z.boolean().optional().default(false).openapi({
     example: false,
-    description: 'AI model selection: true = force paid model, false = force free model only, undefined = auto-retry (free first, then paid if free fails)',
+    description:
+      "AI model selection: true = force paid model, false = force free model only, undefined = auto-retry (free first, then paid if free fails)",
   }),
   customInstructions: z.string().optional().openapi({
-    example: 'Focus on safety concerns and urgency',
-    description: 'Custom instructions for AI caption generation',
+    example: "Focus on safety concerns and urgency",
+    description: "Custom instructions for AI caption generation",
   }),
 });
 
 export const ShareAnalyticsQuerySchema = z.object({
   startDate: z.string().datetime().optional().openapi({
-    example: '2024-01-01T00:00:00Z',
-    description: 'Start date for analytics data (ISO 8601 format)',
+    example: "2024-01-01T00:00:00Z",
+    description: "Start date for analytics data (ISO 8601 format)",
   }),
   endDate: z.string().datetime().optional().openapi({
-    example: '2024-01-31T23:59:59Z',
-    description: 'End date for analytics data (ISO 8601 format)',
+    example: "2024-01-31T23:59:59Z",
+    description: "End date for analytics data (ISO 8601 format)",
   }),
   platform: z
-    .enum(['whatsapp', 'twitter', 'facebook', 'threads', 'telegram'])
+    .enum(["whatsapp", "twitter", "facebook", "threads", "telegram"])
     .optional()
     .openapi({
-      example: 'twitter',
-      description: 'Filter analytics by specific platform',
+      example: "twitter",
+      description: "Filter analytics by specific platform",
     }),
 });
 
 export const SharingReportParamsSchema = z.object({
   id: uuidValidator.openapi({
-    example: '01890dd5-ea3f-7746-b3a5-e8c5e0b0f4a1',
-    description: 'Unique identifier of the report (UUID v7)',
-    format: 'uuid',
-    pattern: '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$',
+    example: "01890dd5-ea3f-7746-b3a5-e8c5e0b0f4a1",
+    description: "Unique identifier of the report (UUID v7)",
+    format: "uuid",
+    pattern: "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
     param: {
-      name: 'id',
-      in: 'path',
+      name: "id",
+      in: "path",
       required: true,
     },
   }),
@@ -83,82 +84,85 @@ export const SharingReportParamsSchema = z.object({
 export const ShareTrackingResponseSchema = z.object({
   success: z.boolean().openapi({
     example: true,
-    description: 'Indicates if the share was tracked successfully',
+    description: "Indicates if the share was tracked successfully",
   }),
   newShareCount: z.number().openapi({
     example: 15,
-    description: 'Updated total share count for the report',
+    description: "Updated total share count for the report",
   }),
 });
 
 export const CaptionResponseSchema = z.object({
   caption: z.string().openapi({
     example:
-      'Ditemukan kerusakan jalan berlubang di Jl. Sudirman, Menteng, Jakarta Pusat, DKI Jakarta. Mohon perhatian pemerintah daerah untuk perbaikan.',
-    description: 'Generated caption text optimized for the target platform',
+      "Ditemukan kerusakan jalan berlubang di Jl. Sudirman, Menteng, Jakarta Pusat, DKI Jakarta. Mohon perhatian pemerintah daerah untuk perbaikan.",
+    description: "Generated caption text optimized for the target platform",
   }),
   hashtags: z.array(z.string()).openapi({
-    example: ['#ViralkanJalan', '#RoadDamage', '#JalanBerlubang'],
-    description: 'Relevant hashtags for the caption',
+    example: ["#ViralkanJalan", "#RoadDamage", "#JalanBerlubang"],
+    description: "Relevant hashtags for the caption",
   }),
   characterCount: z.number().openapi({
     example: 156,
-    description: 'Total character count including hashtags',
+    description: "Total character count including hashtags",
   }),
   platformOptimized: z.boolean().openapi({
     example: true,
-    description: 'Indicates if the caption was optimized for platform limits',
+    description: "Indicates if the caption was optimized for platform limits",
   }),
 });
 
 export const AICaptionResponseSchema = z.object({
   caption: z.string().openapi({
     example:
-      'Ditemukan kerusakan jalan berlubang di Jl. Sudirman, Menteng, Jakarta Pusat, DKI Jakarta. Mohon perhatian pemerintah daerah untuk perbaikan.',
-    description: 'AI-generated caption text optimized for the target platform',
+      "Ditemukan kerusakan jalan berlubang di Jl. Sudirman, Menteng, Jakarta Pusat, DKI Jakarta. Mohon perhatian pemerintah daerah untuk perbaikan.",
+    description: "AI-generated caption text optimized for the target platform",
   }),
   hashtags: z.array(z.string()).openapi({
-    example: ['#ViralkanJalan', '#RoadDamage', '#JalanBerlubang'],
-    description: 'AI-generated relevant hashtags for the caption',
+    example: ["#ViralkanJalan", "#RoadDamage", "#JalanBerlubang"],
+    description: "AI-generated relevant hashtags for the caption",
   }),
   characterCount: z.number().openapi({
     example: 156,
-    description: 'Total character count including hashtags',
+    description: "Total character count including hashtags",
   }),
   platformOptimized: z.boolean().openapi({
     example: true,
-    description: 'Indicates if the caption was optimized for platform limits',
+    description: "Indicates if the caption was optimized for platform limits",
   }),
   aiGenerated: z.boolean().openapi({
     example: true,
-    description: 'Indicates if the caption was generated by AI',
+    description: "Indicates if the caption was generated by AI",
   }),
   modelUsed: z.string().openapi({
-    example: 'deepseek/deepseek-chat-v3-0324:free',
-    description: 'AI model used for caption generation',
+    example: "deepseek/deepseek-chat-v3-0324:free",
+    description: "AI model used for caption generation",
   }),
-  tokenUsage: z.object({
-    prompt: z.number().openapi({
-      example: 150,
-      description: 'Number of tokens used in the prompt',
+  tokenUsage: z
+    .object({
+      prompt: z.number().openapi({
+        example: 150,
+        description: "Number of tokens used in the prompt",
+      }),
+      completion: z.number().openapi({
+        example: 50,
+        description: "Number of tokens used in the completion",
+      }),
+      total: z.number().openapi({
+        example: 200,
+        description: "Total number of tokens used",
+      }),
+    })
+    .optional()
+    .openapi({
+      description: "Token usage information for AI generation",
     }),
-    completion: z.number().openapi({
-      example: 50,
-      description: 'Number of tokens used in the completion',
-    }),
-    total: z.number().openapi({
-      example: 200,
-      description: 'Total number of tokens used',
-    }),
-  }).optional().openapi({
-    description: 'Token usage information for AI generation',
-  }),
 });
 
 export const ShareAnalyticsResponseSchema = z.object({
   totalShares: z.number().openapi({
     example: 1250,
-    description: 'Total number of shares in the specified period',
+    description: "Total number of shares in the specified period",
   }),
   platformBreakdown: z.record(z.string(), z.number()).openapi({
     example: {
@@ -168,48 +172,48 @@ export const ShareAnalyticsResponseSchema = z.object({
       threads: 150,
       telegram: 50,
     },
-    description: 'Share count breakdown by platform',
+    description: "Share count breakdown by platform",
   }),
   topReports: z
     .array(
       z.object({
         id: uuidValidator.openapi({
-          example: '01890dd5-ea3f-7746-b3a5-e8c5e0b0f4a1',
-          description: 'Report ID',
+          example: "01890dd5-ea3f-7746-b3a5-e8c5e0b0f4a1",
+          description: "Report ID",
         }),
         title: z.string().openapi({
-          example: 'Jl. Sudirman, Menteng, Jakarta Pusat',
-          description: 'Report title (street and location)',
+          example: "Jl. Sudirman, Menteng, Jakarta Pusat",
+          description: "Report title (street and location)",
         }),
         shareCount: z.number().openapi({
           example: 45,
-          description: 'Total share count for this report',
+          description: "Total share count for this report",
         }),
-      })
+      }),
     )
     .openapi({
-      description: 'Top 10 most shared reports in the period',
+      description: "Top 10 most shared reports in the period",
     }),
   dateRange: z
     .object({
       start: z.string().datetime().openapi({
-        example: '2024-01-01T00:00:00Z',
-        description: 'Start date of the analytics period',
+        example: "2024-01-01T00:00:00Z",
+        description: "Start date of the analytics period",
       }),
       end: z.string().datetime().openapi({
-        example: '2024-01-31T23:59:59Z',
-        description: 'End date of the analytics period',
+        example: "2024-01-31T23:59:59Z",
+        description: "End date of the analytics period",
       }),
     })
     .openapi({
-      description: 'Date range for the analytics data',
+      description: "Date range for the analytics data",
     }),
 });
 
 export const ReportShareDetailsResponseSchema = z.object({
   shareCount: z.number().openapi({
     example: 25,
-    description: 'Total share count for the report',
+    description: "Total share count for the report",
   }),
   platformBreakdown: z.record(z.string(), z.number()).openapi({
     example: {
@@ -219,71 +223,71 @@ export const ReportShareDetailsResponseSchema = z.object({
       threads: 2,
       telegram: 0,
     },
-    description: 'Share count breakdown by platform for this report',
+    description: "Share count breakdown by platform for this report",
   }),
   recentShares: z
     .array(
       z.object({
         platform: z.string().openapi({
-          example: 'Twitter/X',
-          description: 'Platform display name',
+          example: "Twitter/X",
+          description: "Platform display name",
         }),
         sharedAt: z.string().datetime().openapi({
-          example: '2024-01-15T10:30:00Z',
-          description: 'When the share occurred',
+          example: "2024-01-15T10:30:00Z",
+          description: "When the share occurred",
         }),
         userId: uuidValidator.optional().openapi({
-          example: '01890dd5-1234-7746-b3a5-e8c5e0b0f4a1',
-          description: 'User ID if the share was by an authenticated user',
+          example: "01890dd5-1234-7746-b3a5-e8c5e0b0f4a1",
+          description: "User ID if the share was by an authenticated user",
         }),
-      })
+      }),
     )
     .openapi({
-      description: 'Recent share events for this report (last 10)',
+      description: "Recent share events for this report (last 10)",
     }),
 });
 
 export const ShareValidationResponseSchema = z.object({
   eligible: z.boolean().openapi({
     example: true,
-    description: 'Whether the report is eligible for sharing',
+    description: "Whether the report is eligible for sharing",
   }),
   reason: z.string().optional().openapi({
-    example: 'Report is eligible for sharing',
-    description: 'Explanation of eligibility status',
+    example: "Report is eligible for sharing",
+    description: "Explanation of eligibility status",
   }),
 });
 
 export const MostSharedReportsResponseSchema = z.array(
   z.object({
     id: uuidValidator.openapi({
-      example: '01890dd5-ea3f-7746-b3a5-e8c5e0b0f4a1',
-      description: 'Report ID',
+      example: "01890dd5-ea3f-7746-b3a5-e8c5e0b0f4a1",
+      description: "Report ID",
     }),
     title: z.string().openapi({
-      example: 'Jl. Sudirman, Menteng, Jakarta Pusat',
-      description: 'Report title (street and location)',
+      example: "Jl. Sudirman, Menteng, Jakarta Pusat",
+      description: "Report title (street and location)",
     }),
     shareCount: z.number().openapi({
       example: 45,
-      description: 'Total share count for this report',
+      description: "Total share count for this report",
     }),
     isHighEngagement: z.boolean().openapi({
       example: true,
-      description: 'Whether this report has high engagement (10+ shares)',
+      description: "Whether this report has high engagement (10+ shares)",
     }),
-  })
+  }),
 );
 
 // Error Response Schema
 export const SharingErrorResponseSchema = z.object({
   error: z.object({
-    code: z.string().openapi({ example: 'VALIDATION_ERROR' }),
-    message: z.string().openapi({ example: 'Invalid request data' }),
+    code: z.string().openapi({ example: "VALIDATION_ERROR" }),
+    message: z.string().openapi({ example: "Invalid request data" }),
     details: z.any().optional(),
     timestamp: z
       .string()
       .datetime()
-      .openapi({ example: '2024-01-15T10:30:00Z' }),
+      .openapi({ example: "2024-01-15T10:30:00Z" }),
   }),
 });

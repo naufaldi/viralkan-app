@@ -2,7 +2,7 @@
 // Following the 4-layer clean architecture pattern
 
 // API Layer exports
-export { sharingRouter } from './api';
+export { sharingRouter } from "./api";
 
 // Type exports
 export type {
@@ -20,13 +20,13 @@ export type {
   ShareEvent,
   PlatformConfig,
   CaptionTemplate,
-} from './types';
+} from "./types";
 
 // Shell layer exports (for use by other features)
-export * as sharingShell from './shell';
+export * as sharingShell from "./shell";
 
 // Core layer exports (for use by other features)
-export * as sharingCore from './core';
+export * as sharingCore from "./core";
 
 // Key business logic functions that might be needed elsewhere
 export {
@@ -40,4 +40,4 @@ export {
   getPlatformDisplayName,
   sortPlatformsByPopularity,
   isHighEngagementReport,
-} from './core';
+} from "./core";

@@ -52,10 +52,10 @@ export function Pagination({
         size="sm"
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        className="border-neutral-200 text-neutral-600 hover:bg-neutral-50 hover:border-neutral-300 disabled:text-neutral-400 disabled:cursor-not-allowed rounded-md"
+        className="rounded-md border-neutral-200 text-neutral-600 hover:border-neutral-300 hover:bg-neutral-50 disabled:cursor-not-allowed disabled:text-neutral-400"
       >
         <ChevronLeft className="h-4 w-4" />
-        <span className="hidden sm:inline ml-1">Sebelumnya</span>
+        <span className="ml-1 hidden sm:inline">Sebelumnya</span>
       </Button>
 
       {/* Page Numbers */}
@@ -77,8 +77,8 @@ export function Pagination({
               onClick={() => onPageChange(page)}
               className={
                 currentPage === page
-                  ? "bg-neutral-800 hover:bg-neutral-900 text-white rounded-md"
-                  : "border-neutral-200 text-neutral-600 hover:bg-neutral-50 hover:border-neutral-300 rounded-md"
+                  ? "rounded-md bg-neutral-800 text-white hover:bg-neutral-900"
+                  : "rounded-md border-neutral-200 text-neutral-600 hover:border-neutral-300 hover:bg-neutral-50"
               }
             >
               {page}
@@ -93,9 +93,9 @@ export function Pagination({
         size="sm"
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className="border-neutral-200 text-neutral-600 hover:bg-neutral-50 hover:border-neutral-300 disabled:text-neutral-400 disabled:cursor-not-allowed rounded-md"
+        className="rounded-md border-neutral-200 text-neutral-600 hover:border-neutral-300 hover:bg-neutral-50 disabled:cursor-not-allowed disabled:text-neutral-400"
       >
-        <span className="hidden sm:inline mr-1">Selanjutnya</span>
+        <span className="mr-1 hidden sm:inline">Selanjutnya</span>
         <ChevronRight className="h-4 w-4" />
       </Button>
     </div>

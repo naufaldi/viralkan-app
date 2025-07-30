@@ -1,6 +1,6 @@
-import { sql } from '@/db/connection';
-import { createSuccess, createError } from '@/types';
-import type { AppResult } from '@/types';
+import { sql } from "@/db/connection";
+import { createSuccess, createError } from "@/types";
+import type { AppResult } from "@/types";
 import type {
   ShareEvent,
   ShareEventData,
@@ -8,13 +8,13 @@ import type {
   ShareAnalyticsData,
   AnalyticsFilters,
   Platform,
-} from './types';
+} from "./types";
 
 // Database operations for sharing functionality
 
 // Transaction wrapper for atomic operations
 export const withTransaction = async <T>(
-  operation: (sql: typeof import('@/db/connection').sql) => Promise<T>
+  operation: (sql: typeof import("@/db/connection").sql) => Promise<T>,
 ): Promise<T> => {
   // Note: The postgres library used here handles transactions differently
   // For now, we'll use the existing sql connection directly
@@ -23,7 +23,7 @@ export const withTransaction = async <T>(
 };
 
 export const getReportForSharing = async (
-  reportId: string
+  reportId: string,
 ): Promise<AppResult<ReportSharingData>> => {
   try {
     const result = await sql`
@@ -44,13 +44,13 @@ export const getReportForSharing = async (
     `;
 
     if (result.length === 0) {
-      return createError('Report not found or not eligible for sharing', 404);
+      return createError("Report not found or not eligible for sharing", 404);
     }
 
     const report = result[0];
     const reportData: ReportSharingData = {
       id: report.id,
-      category: report.category as 'berlubang' | 'retak' | 'lainnya',
+      category: report.category as "berlubang" | "retak" | "lainnya",
       street_name: report.street_name,
       location_text: report.location_text,
       district: report.district,
@@ -62,13 +62,13 @@ export const getReportForSharing = async (
 
     return createSuccess(reportData);
   } catch (error) {
-    console.error('Error fetching report for sharing:', error);
-    return createError('Failed to fetch report data', 500);
+    console.error("Error fetching report for sharing:", error);
+    return createError("Failed to fetch report data", 500);
   }
 };
 
 export const incrementShareCount = async (
-  reportId: string
+  reportId: string,
 ): Promise<AppResult<number>> => {
   try {
     const result = await sql`
@@ -81,18 +81,18 @@ export const incrementShareCount = async (
     `;
 
     if (result.length === 0) {
-      return createError('Report not found or not eligible for sharing', 404);
+      return createError("Report not found or not eligible for sharing", 404);
     }
 
     return createSuccess(result[0].share_count);
   } catch (error) {
-    console.error('Error incrementing share count:', error);
-    return createError('Failed to update share count', 500);
+    console.error("Error incrementing share count:", error);
+    return createError("Failed to update share count", 500);
   }
 };
 
 export const recordShareEvent = async (
-  shareEventData: ShareEventData
+  shareEventData: ShareEventData,
 ): Promise<AppResult<ShareEvent>> => {
   try {
     const result = await sql`
@@ -115,7 +115,7 @@ export const recordShareEvent = async (
     `;
 
     if (result.length === 0) {
-      return createError('Failed to record share event', 500);
+      return createError("Failed to record share event", 500);
     }
 
     const share = result[0];
@@ -131,13 +131,13 @@ export const recordShareEvent = async (
 
     return createSuccess(shareEvent);
   } catch (error) {
-    console.error('Error recording share event:', error);
-    return createError('Failed to record share event', 500);
+    console.error("Error recording share event:", error);
+    return createError("Failed to record share event", 500);
   }
 };
 
 export const getShareAnalytics = async (
-  filters: AnalyticsFilters
+  filters: AnalyticsFilters,
 ): Promise<ShareAnalyticsData> => {
   try {
     // Build base query conditions
@@ -297,14 +297,14 @@ export const getShareAnalytics = async (
       topReports,
     };
   } catch (error) {
-    console.error('Error fetching share analytics:', error);
-    throw new Error('Failed to fetch share analytics');
+    console.error("Error fetching share analytics:", error);
+    throw new Error("Failed to fetch share analytics");
   }
 };
 
 export const getRecentShareEvents = async (
   reportId: string,
-  limit: number = 10
+  limit: number = 10,
 ): Promise<ShareEvent[]> => {
   try {
     const result = await sql`
@@ -325,13 +325,13 @@ export const getRecentShareEvents = async (
       user_agent: row.user_agent,
     }));
   } catch (error) {
-    console.error('Error fetching recent share events:', error);
-    throw new Error('Failed to fetch recent share events');
+    console.error("Error fetching recent share events:", error);
+    throw new Error("Failed to fetch recent share events");
   }
 };
 
 export const getShareCountByPlatform = async (
-  reportId: string
+  reportId: string,
 ): Promise<Record<Platform, number>> => {
   try {
     const result = await sql`
@@ -357,8 +357,8 @@ export const getShareCountByPlatform = async (
 
     return platformCounts;
   } catch (error) {
-    console.error('Error fetching share count by platform:', error);
-    throw new Error('Failed to fetch platform share counts');
+    console.error("Error fetching share count by platform:", error);
+    throw new Error("Failed to fetch platform share counts");
   }
 };
 
@@ -374,7 +374,7 @@ export const checkReportExists = async (reportId: string): Promise<boolean> => {
 
     return result.length > 0;
   } catch (error) {
-    console.error('Error checking report existence:', error);
+    console.error("Error checking report existence:", error);
     return false;
   }
 };
@@ -382,7 +382,7 @@ export const checkReportExists = async (reportId: string): Promise<boolean> => {
 export const getShareEventsByDateRange = async (
   startDate: Date,
   endDate: Date,
-  platform?: Platform
+  platform?: Platform,
 ): Promise<ShareEvent[]> => {
   try {
     let result;
@@ -416,14 +416,14 @@ export const getShareEventsByDateRange = async (
       user_agent: row.user_agent,
     }));
   } catch (error) {
-    console.error('Error fetching share events by date range:', error);
-    throw new Error('Failed to fetch share events');
+    console.error("Error fetching share events by date range:", error);
+    throw new Error("Failed to fetch share events");
   }
 };
 
 export const getMostSharedReports = async (
   limit: number = 10,
-  timeframe?: { start: Date; end: Date }
+  timeframe?: { start: Date; end: Date },
 ): Promise<
   Array<{
     id: string;
@@ -476,15 +476,15 @@ export const getMostSharedReports = async (
       shareCount: parseInt(row.share_count) || 0,
     }));
   } catch (error) {
-    console.error('Error fetching most shared reports:', error);
-    throw new Error('Failed to fetch most shared reports');
+    console.error("Error fetching most shared reports:", error);
+    throw new Error("Failed to fetch most shared reports");
   }
 };
 
 // Additional utility functions for comprehensive share tracking
 
 export const getShareCountForReport = async (
-  reportId: string
+  reportId: string,
 ): Promise<number> => {
   try {
     const result = await sql`
@@ -497,13 +497,13 @@ export const getShareCountForReport = async (
 
     return result.length > 0 ? result[0].share_count || 0 : 0;
   } catch (error) {
-    console.error('Error fetching share count for report:', error);
-    throw new Error('Failed to fetch share count');
+    console.error("Error fetching share count for report:", error);
+    throw new Error("Failed to fetch share count");
   }
 };
 
 export const getShareEventById = async (
-  shareId: string
+  shareId: string,
 ): Promise<ShareEvent | null> => {
   try {
     const result = await sql`
@@ -527,15 +527,15 @@ export const getShareEventById = async (
       user_agent: share.user_agent,
     };
   } catch (error) {
-    console.error('Error fetching share event by ID:', error);
-    throw new Error('Failed to fetch share event');
+    console.error("Error fetching share event by ID:", error);
+    throw new Error("Failed to fetch share event");
   }
 };
 
 export const getSharesByUser = async (
   userId: string,
   limit: number = 20,
-  offset: number = 0
+  offset: number = 0,
 ): Promise<ShareEvent[]> => {
   try {
     const result = await sql`
@@ -557,14 +557,14 @@ export const getSharesByUser = async (
       user_agent: row.user_agent,
     }));
   } catch (error) {
-    console.error('Error fetching shares by user:', error);
-    throw new Error('Failed to fetch user shares');
+    console.error("Error fetching shares by user:", error);
+    throw new Error("Failed to fetch user shares");
   }
 };
 
 export const getShareStatsByPlatform = async (
   startDate?: Date,
-  endDate?: Date
+  endDate?: Date,
 ): Promise<
   Array<{ platform: Platform; count: number; percentage: number }>
 > => {
@@ -603,14 +603,14 @@ export const getShareStatsByPlatform = async (
       percentage: parseFloat(row.percentage),
     }));
   } catch (error) {
-    console.error('Error fetching share stats by platform:', error);
-    throw new Error('Failed to fetch platform statistics');
+    console.error("Error fetching share stats by platform:", error);
+    throw new Error("Failed to fetch platform statistics");
   }
 };
 
 export const getTopSharedReportsByTimeframe = async (
-  timeframe: 'day' | 'week' | 'month',
-  limit: number = 10
+  timeframe: "day" | "week" | "month",
+  limit: number = 10,
 ): Promise<
   Array<{
     id: string;
@@ -625,20 +625,20 @@ export const getTopSharedReportsByTimeframe = async (
     let periodFormat;
 
     switch (timeframe) {
-      case 'day':
+      case "day":
         dateFilter = sql`shared_at >= CURRENT_DATE`;
         periodFormat = sql`TO_CHAR(shared_at, 'YYYY-MM-DD')`;
         break;
-      case 'week':
+      case "week":
         dateFilter = sql`shared_at >= DATE_TRUNC('week', CURRENT_DATE)`;
         periodFormat = sql`TO_CHAR(DATE_TRUNC('week', shared_at), 'YYYY-MM-DD')`;
         break;
-      case 'month':
+      case "month":
         dateFilter = sql`shared_at >= DATE_TRUNC('month', CURRENT_DATE)`;
         periodFormat = sql`TO_CHAR(DATE_TRUNC('month', shared_at), 'YYYY-MM')`;
         break;
       default:
-        throw new Error('Invalid timeframe');
+        throw new Error("Invalid timeframe");
     }
 
     const result = await sql`
@@ -666,14 +666,14 @@ export const getTopSharedReportsByTimeframe = async (
       period: row.period,
     }));
   } catch (error) {
-    console.error('Error fetching top shared reports by timeframe:', error);
-    throw new Error('Failed to fetch top shared reports');
+    console.error("Error fetching top shared reports by timeframe:", error);
+    throw new Error("Failed to fetch top shared reports");
   }
 };
 
 // Batch operations for performance
 export const recordMultipleShareEvents = async (
-  shareEvents: ShareEventData[]
+  shareEvents: ShareEventData[],
 ): Promise<ShareEvent[]> => {
   try {
     if (shareEvents.length === 0) {
@@ -689,7 +689,7 @@ export const recordMultipleShareEvents = async (
       ${event.ip_address || null},
       ${event.user_agent || null},
       NOW()
-    )`
+    )`,
     );
 
     // For now, we'll insert one by one since sql.join might not be available
@@ -729,7 +729,7 @@ export const recordMultipleShareEvents = async (
       user_agent: row.user_agent,
     }));
   } catch (error) {
-    console.error('Error recording multiple share events:', error);
-    throw new Error('Failed to record multiple share events');
+    console.error("Error recording multiple share events:", error);
+    throw new Error("Failed to record multiple share events");
   }
 };

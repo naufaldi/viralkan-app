@@ -27,8 +27,8 @@ export function ReportsFilterSection({
   onKecamatanChange,
 }: ReportsFilterSectionProps) {
   return (
-    <section className="border-b border-border bg-muted/20">
-      <div className="container mx-auto px-4 py-6 space-y-6">
+    <section className="border-border bg-muted/20 border-b">
+      <div className="container mx-auto space-y-6 px-4 py-6">
         <ReportFilters
           selectedCategory={selectedCategory}
           searchQuery={searchQuery}

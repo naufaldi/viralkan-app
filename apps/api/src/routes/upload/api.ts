@@ -37,7 +37,8 @@ const uploadImageRoute = createRoute({
             file: z.any().openapi({
               type: "string",
               format: "binary",
-              description: "Image file to upload (JPEG, PNG, WebP, HEIC, max 10MB)",
+              description:
+                "Image file to upload (JPEG, PNG, WebP, HEIC, max 10MB)",
             }),
           }),
         },

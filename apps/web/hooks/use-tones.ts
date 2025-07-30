@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
-import { tonesAPI, type ToneConfig } from '@/services/tones-api';
+import { useQuery } from "@tanstack/react-query";
+import { tonesAPI, type ToneConfig } from "@/services/tones-api";
 
 /**
  * Custom hook to fetch available tones using TanStack Query
@@ -7,7 +7,7 @@ import { tonesAPI, type ToneConfig } from '@/services/tones-api';
  */
 export function useTones() {
   return useQuery({
-    queryKey: ['tones'],
+    queryKey: ["tones"],
     queryFn: () => tonesAPI.getAvailableTones(),
     staleTime: 1000 * 60 * 60, // 1 hour - tones rarely change
     gcTime: 1000 * 60 * 60 * 24, // 24 hours cache time
@@ -22,9 +22,9 @@ export function useTones() {
  */
 export function useTone(value: string) {
   const { data: tones, ...query } = useTones();
-  
-  const tone = tones?.find(t => t.value === value);
-  
+
+  const tone = tones?.find((t) => t.value === value);
+
   return {
     ...query,
     data: tone,
@@ -37,14 +37,15 @@ export function useTone(value: string) {
  */
 export function useToneOptions() {
   const { data: tones, ...query } = useTones();
-  
-  const options = tones?.map(tone => ({
-    value: tone.value,
-    label: tone.label,
-    description: tone.description,
-    icon: tone.icon,
-  })) || [];
-  
+
+  const options =
+    tones?.map((tone) => ({
+      value: tone.value,
+      label: tone.label,
+      description: tone.description,
+      icon: tone.icon,
+    })) || [];
+
   return {
     ...query,
     data: options,
@@ -54,4 +55,4 @@ export function useToneOptions() {
 
 // Export types for convenience
 export type { ToneConfig };
-export type Tone = ToneConfig['value'];
+export type Tone = ToneConfig["value"];

@@ -11,7 +11,7 @@ export const ReportFormError = ({ error }: ReportFormErrorProps) => {
   return (
     <Alert variant="destructive" className="mb-6 border-red-200 bg-red-50">
       <AlertCircle className="h-4 w-4" />
-      <AlertDescription className="text-red-800 font-medium">
+      <AlertDescription className="font-medium text-red-800">
         {error}
       </AlertDescription>
     </Alert>

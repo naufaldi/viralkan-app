@@ -13,7 +13,7 @@ export default function AdminReportsPage() {
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-neutral-900 tracking-tight mb-2">
+          <h1 className="mb-2 text-4xl font-bold tracking-tight text-neutral-900">
             Kelola Laporan
           </h1>
           <p className="text-lg text-neutral-600">

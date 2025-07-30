@@ -43,21 +43,21 @@ export default function EditReportPage() {
     return (
       <>
         <Header />
-        <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+        <div className="flex min-h-screen items-center justify-center bg-neutral-50">
           <div className="text-center">
-            <AlertCircle className="h-16 w-16 text-neutral-400 mx-auto mb-4" />
-            <h1 className="text-2xl font-semibold text-neutral-900 mb-2">
+            <AlertCircle className="mx-auto mb-4 h-16 w-16 text-neutral-400" />
+            <h1 className="mb-2 text-2xl font-semibold text-neutral-900">
               {error instanceof Error
                 ? error.message
                 : "Laporan tidak ditemukan"}
             </h1>
-            <p className="text-neutral-600 mb-6">
+            <p className="mb-6 text-neutral-600">
               Laporan yang Anda cari tidak dapat ditemukan atau Anda tidak
               memiliki izin untuk mengeditnya.
             </p>
             <Link href="/laporan">
               <Button variant="outline" className="mr-4">
-                <ArrowLeft className="h-4 w-4 mr-2" />
+                <ArrowLeft className="mr-2 h-4 w-4" />
                 Kembali ke Daftar
               </Button>
             </Link>
@@ -71,18 +71,18 @@ export default function EditReportPage() {
     return (
       <>
         <Header />
-        <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+        <div className="flex min-h-screen items-center justify-center bg-neutral-50">
           <div className="text-center">
-            <AlertCircle className="h-16 w-16 text-neutral-400 mx-auto mb-4" />
-            <h1 className="text-2xl font-semibold text-neutral-900 mb-2">
+            <AlertCircle className="mx-auto mb-4 h-16 w-16 text-neutral-400" />
+            <h1 className="mb-2 text-2xl font-semibold text-neutral-900">
               Laporan tidak ditemukan
             </h1>
-            <p className="text-neutral-600 mb-6">
+            <p className="mb-6 text-neutral-600">
               Laporan yang Anda cari tidak dapat ditemukan atau telah dihapus.
             </p>
             <Link href="/laporan">
               <Button variant="outline" className="mr-4">
-                <ArrowLeft className="h-4 w-4 mr-2" />
+                <ArrowLeft className="mr-2 h-4 w-4" />
                 Kembali ke Daftar
               </Button>
             </Link>
@@ -96,33 +96,33 @@ export default function EditReportPage() {
     <>
       <Header />
       <div className="min-h-screen bg-neutral-50">
-        <div className="max-w-4xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
           {/* Breadcrumb Navigation */}
           <nav className="mb-8">
             <div className="flex items-center gap-4 text-sm text-neutral-600">
               <Link
                 href="/laporan"
-                className="inline-flex items-center hover:text-neutral-900 transition-colors"
+                className="inline-flex items-center transition-colors hover:text-neutral-900"
               >
-                <ArrowLeft className="h-4 w-4 mr-2" />
+                <ArrowLeft className="mr-2 h-4 w-4" />
                 Daftar Laporan
               </Link>
               <span>/</span>
               <Link
                 href={`/laporan/${report.id}`}
-                className="hover:text-neutral-900 transition-colors"
+                className="transition-colors hover:text-neutral-900"
               >
                 Detail Laporan
               </Link>
               <span>/</span>
-              <span className="text-neutral-900 font-medium">Edit</span>
+              <span className="font-medium text-neutral-900">Edit</span>
             </div>
           </nav>
 
           {/* Page Header */}
           <div className="mb-8">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 bg-neutral-900 rounded-lg flex items-center justify-center">
+            <div className="mb-4 flex items-center gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-neutral-900">
                 <Edit3 className="h-6 w-6 text-white" />
               </div>
               <div>
@@ -137,14 +137,14 @@ export default function EditReportPage() {
           </div>
 
           {/* Current Report Info */}
-          <Card className="border-neutral-200 bg-white mb-8">
+          <Card className="mb-8 border-neutral-200 bg-white">
             <CardHeader className="pb-4">
               <CardTitle className="text-lg font-semibold text-neutral-900">
                 Informasi Laporan Saat Ini
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="flex items-center gap-3">
                   <FileText className="h-4 w-4 text-neutral-500" />
                   <div>
@@ -188,7 +188,7 @@ export default function EditReportPage() {
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <div className="w-4 h-4 bg-neutral-500 rounded-full" />
+                  <div className="h-4 w-4 rounded-full bg-neutral-500" />
                   <div>
                     <p className="text-sm font-medium text-neutral-900">
                       Kategori
@@ -203,8 +203,8 @@ export default function EditReportPage() {
               <Separator className="bg-neutral-200" />
 
               <div className="text-sm text-neutral-600">
-                <p className="font-medium mb-2">Catatan:</p>
-                <ul className="list-disc list-inside space-y-1">
+                <p className="mb-2 font-medium">Catatan:</p>
+                <ul className="list-inside list-disc space-y-1">
                   <li>Anda dapat mengubah semua informasi laporan</li>
                   <li>Foto dapat diganti dengan foto baru yang lebih jelas</li>
                   <li>Lokasi dapat diperbarui jika diperlukan</li>

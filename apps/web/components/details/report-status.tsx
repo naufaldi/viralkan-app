@@ -65,7 +65,7 @@ export function ReportStatus({
     <div className="space-y-4">
       <h4 className="font-medium text-neutral-900">Status Laporan</h4>
       <div
-        className={`p-4 rounded-lg ${statusConfig.bgColor} border border-neutral-200`}
+        className={`rounded-lg p-4 ${statusConfig.bgColor} border border-neutral-200`}
       >
         <div className="flex items-center gap-3">
           <StatusIcon className="h-5 w-5 text-neutral-600" />

@@ -4,7 +4,13 @@ import type { FileValidationResult, FileValidationConfig } from "./types";
 // File validation configuration
 export const FILE_VALIDATION_CONFIG: FileValidationConfig = {
   maxSize: 10 * 1024 * 1024, // 10MB
-  allowedTypes: ["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"],
+  allowedTypes: [
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "image/heic",
+    "image/heif",
+  ],
   allowedExtensions: [".jpg", ".jpeg", ".png", ".webp", ".heic", ".heif"],
 };
 

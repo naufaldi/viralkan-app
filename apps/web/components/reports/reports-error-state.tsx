@@ -18,18 +18,18 @@ export function ReportsErrorState({ error, onRetry }: ReportsErrorStateProps) {
   };
 
   return (
-    <div className="text-center py-16 px-4">
+    <div className="px-4 py-16 text-center">
       {/* Error Icon with Civic Styling */}
-      <div className="w-20 h-20 rounded-full bg-neutral-100 flex items-center justify-center mx-auto mb-6 border border-neutral-200">
+      <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full border border-neutral-200 bg-neutral-100">
         <AlertTriangle className="h-10 w-10 text-neutral-600" />
       </div>
 
       {/* Error Message with Professional Typography */}
-      <div className="max-w-md mx-auto space-y-4">
-        <h3 className="text-xl font-semibold text-neutral-900 tracking-tight">
+      <div className="mx-auto max-w-md space-y-4">
+        <h3 className="text-xl font-semibold tracking-tight text-neutral-900">
           Gagal Memuat Data
         </h3>
-        <p className="text-base text-neutral-600 leading-relaxed">
+        <p className="text-base leading-relaxed text-neutral-600">
           {error?.message ||
             "Terjadi kesalahan saat memuat data laporan. Silakan coba lagi."}
         </p>
@@ -41,7 +41,7 @@ export function ReportsErrorState({ error, onRetry }: ReportsErrorStateProps) {
           onClick={handleRetry}
           variant="outline"
           size="lg"
-          className="gap-3 px-8 py-3 bg-white border-neutral-300 text-neutral-700 hover:bg-neutral-50 hover:border-neutral-400 hover:text-neutral-800 transition-all duration-200 font-medium"
+          className="gap-3 border-neutral-300 bg-white px-8 py-3 font-medium text-neutral-700 transition-all duration-200 hover:border-neutral-400 hover:bg-neutral-50 hover:text-neutral-800"
         >
           <RefreshCw className="h-4 w-4" />
           Coba Lagi

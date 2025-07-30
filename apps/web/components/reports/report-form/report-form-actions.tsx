@@ -22,12 +22,12 @@ export const ReportFormActions = ({
     <Button
       type="submit"
       size="default"
-      className="w-full h-12 bg-neutral-900 hover:bg-neutral-800 text-white font-semibold text-base rounded-lg transition-all duration-150 shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0"
+      className="h-12 w-full rounded-lg bg-neutral-900 text-base font-semibold text-white shadow-sm transition-all duration-150 hover:-translate-y-0.5 hover:bg-neutral-800 hover:shadow-md active:translate-y-0"
       disabled={disabled || !selectedImage || imageUploadFailed}
     >
       {isLoading ? (
         <>
-          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+          <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-white"></div>
           {isUploadingImage
             ? "Mengunggah Foto..."
             : isUploading

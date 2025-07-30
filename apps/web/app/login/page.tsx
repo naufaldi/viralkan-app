@@ -18,9 +18,9 @@ export default function LoginPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-white">
         <div className="text-center">
-          <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center mx-auto mb-4">
+          <div className="bg-primary-600 mx-auto mb-4 flex h-8 w-8 items-center justify-center rounded-lg">
             <MapPin className="h-5 w-5 text-white" />
           </div>
           <p className="text-neutral-600">Memuat...</p>
@@ -32,11 +32,11 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-neutral-50 to-neutral-100">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-neutral-200">
+      <header className="border-b border-neutral-200 bg-white/80 backdrop-blur-sm">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
+              <div className="bg-primary-600 flex h-8 w-8 items-center justify-center rounded-lg">
                 <MapPin className="h-5 w-5 text-white" />
               </div>
               <span className="text-xl font-semibold text-neutral-900">
@@ -57,16 +57,16 @@ export default function LoginPage() {
       </header>
 
       <main className="container mx-auto px-6 py-16">
-        <div className="grid lg:grid-cols-2 gap-16 items-center max-w-6xl mx-auto">
+        <div className="mx-auto grid max-w-6xl items-center gap-16 lg:grid-cols-2">
           {/* Left Side - Info */}
           <div className="space-y-8">
             <div className="space-y-6">
-              <h1 className="text-4xl lg:text-5xl font-bold text-neutral-900 leading-tight">
+              <h1 className="text-4xl leading-tight font-bold text-neutral-900 lg:text-5xl">
                 Bergabung dengan{" "}
                 <span className="text-primary-600">komunitas</span>
               </h1>
 
-              <p className="text-xl text-neutral-600 leading-relaxed">
+              <p className="text-xl leading-relaxed text-neutral-600">
                 Masuk untuk mulai melaporkan kerusakan jalan, berbagi informasi
                 dengan komunitas, dan membantu membangun infrastruktur yang
                 lebih baik untuk Indonesia.
@@ -108,10 +108,10 @@ export default function LoginPage() {
                   <div key={index} className="flex gap-4">
                     <div className="text-2xl">{feature.icon}</div>
                     <div>
-                      <h3 className="font-semibold text-neutral-900 mb-1">
+                      <h3 className="mb-1 font-semibold text-neutral-900">
                         {feature.title}
                       </h3>
-                      <p className="text-neutral-600 text-sm">
+                      <p className="text-sm text-neutral-600">
                         {feature.description}
                       </p>
                     </div>
@@ -120,11 +120,11 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <div className="bg-primary-50 border border-primary-200 rounded-lg p-6">
-              <h3 className="font-semibold text-primary-900 mb-2">
+            <div className="bg-primary-50 border-primary-200 rounded-lg border p-6">
+              <h3 className="text-primary-900 mb-2 font-semibold">
                 💡 Catatan Penting
               </h3>
-              <p className="text-sm text-primary-700 leading-relaxed">
+              <p className="text-primary-700 text-sm leading-relaxed">
                 Viralkan adalah platform <strong>komunitas independen</strong>.
                 Kami tidak berafiliasi dengan pemerintah dan tidak dapat
                 menjamin perbaikan jalan. Tujuan kami murni untuk meningkatkan

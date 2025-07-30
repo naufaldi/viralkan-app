@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { sharingApi } from '@/services/api-client';
+import { useState, useEffect } from "react";
+import { sharingApi } from "@/services/api-client";
 
 interface UseReportSharingOptions {
   reportId: string;
@@ -23,7 +23,7 @@ interface UseReportSharingReturn {
   } | null;
   isLoading: boolean;
   error: string | null;
-  
+
   // Actions
   refetch: () => void;
 }
@@ -32,8 +32,10 @@ export function useReportSharing({
   reportId,
   enabled = true,
 }: UseReportSharingOptions): UseReportSharingReturn {
-  const [shareDetails, setShareDetails] = useState<UseReportSharingReturn['shareDetails']>(null);
-  const [validation, setValidation] = useState<UseReportSharingReturn['validation']>(null);
+  const [shareDetails, setShareDetails] =
+    useState<UseReportSharingReturn["shareDetails"]>(null);
+  const [validation, setValidation] =
+    useState<UseReportSharingReturn["validation"]>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -53,8 +55,8 @@ export function useReportSharing({
       setShareDetails(detailsResult);
       setValidation(validationResult);
     } catch (err) {
-      console.error('Error fetching report sharing data:', err);
-      setError('Gagal memuat data pembagian laporan');
+      console.error("Error fetching report sharing data:", err);
+      setError("Gagal memuat data pembagian laporan");
     } finally {
       setIsLoading(false);
     }
@@ -75,4 +77,4 @@ export function useReportSharing({
     error,
     refetch,
   };
-} 
+}

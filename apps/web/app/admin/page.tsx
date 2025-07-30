@@ -212,28 +212,28 @@ function StatCard({
 
   return (
     <Card
-      className={`${variantStyles[variant]} transition-all duration-300 hover:shadow-xl hover:-translate-y-1`}
+      className={`${variantStyles[variant]} transition-all duration-300 hover:-translate-y-1 hover:shadow-xl`}
     >
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-        <CardTitle className="text-sm font-medium text-neutral-600 tracking-wide uppercase">
+        <CardTitle className="text-sm font-medium tracking-wide text-neutral-600 uppercase">
           {title}
         </CardTitle>
-        <div className="p-2 bg-neutral-100 rounded-lg">
+        <div className="rounded-lg bg-neutral-100 p-2">
           <Icon className={`h-4 w-4 ${iconColors[variant]}`} />
         </div>
       </CardHeader>
       <CardContent className="pt-0">
-        <div className="text-3xl font-bold text-neutral-900 tracking-tight mb-1">
+        <div className="mb-1 text-3xl font-bold tracking-tight text-neutral-900">
           {value}
         </div>
-        <p className="text-sm text-neutral-500 leading-relaxed">
+        <p className="text-sm leading-relaxed text-neutral-500">
           {description}
           {trend && (
             <span
               className={`ml-2 inline-flex items-center font-medium ${trend.isPositive ? "text-neutral-700" : "text-neutral-600"}`}
             >
               <TrendingUp
-                className={`w-3 h-3 mr-1 ${!trend.isPositive ? "rotate-180" : ""}`}
+                className={`mr-1 h-3 w-3 ${!trend.isPositive ? "rotate-180" : ""}`}
               />
               {Math.abs(trend.value)}%
             </span>
@@ -259,8 +259,8 @@ export default async function AdminDashboard() {
     <div className="min-h-screen bg-neutral-100">
       {/* Debug Info - Remove in production */}
       {process.env.NODE_ENV === "development" && (
-        <div className="mb-6 p-4 bg-white border border-neutral-200 rounded-xl shadow-sm">
-          <h3 className="font-semibold text-neutral-900 mb-2">
+        <div className="mb-6 rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
+          <h3 className="mb-2 font-semibold text-neutral-900">
             Server-Side Auth Debug:
           </h3>
           <p className="text-sm text-neutral-700">User Role: {user.role}</p>
@@ -274,16 +274,16 @@ export default async function AdminDashboard() {
 
       {/* Enhanced Header */}
       <div className="mb-12">
-        <h1 className="text-4xl font-bold text-neutral-900 mb-3 tracking-tight">
+        <h1 className="mb-3 text-4xl font-bold tracking-tight text-neutral-900">
           Dashboard Admin
         </h1>
-        <p className="text-lg text-neutral-600 leading-relaxed">
+        <p className="text-lg leading-relaxed text-neutral-600">
           Kelola dan pantau laporan kerusakan jalan untuk Kota Bekasi
         </p>
       </div>
 
       {/* Enhanced Quick Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+      <div className="mb-12 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Menunggu Verifikasi"
           value={stats.pendingReports}
@@ -317,7 +317,7 @@ export default async function AdminDashboard() {
       </div>
 
       {/* Enhanced Additional Stats Row */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+      <div className="mb-12 grid grid-cols-1 gap-6 md:grid-cols-3">
         <StatCard
           title="Laporan Ditolak"
           value={stats.rejectedReports}
@@ -343,16 +343,16 @@ export default async function AdminDashboard() {
       <div className="grid grid-cols-1 gap-8">
         {/* Enhanced Reports Table */}
         <div className="w-full">
-          <Card className="border border-neutral-200 bg-white shadow-md hover:shadow-lg transition-all duration-300">
+          <Card className="border border-neutral-200 bg-white shadow-md transition-all duration-300 hover:shadow-lg">
             <CardHeader className="flex flex-row items-center justify-between pb-6">
               <div>
-                <CardTitle className="text-xl font-semibold flex items-center text-neutral-900 mb-2">
-                  <div className="p-2 bg-neutral-100 rounded-lg mr-3">
-                    <ClipboardList className="w-5 h-5 text-neutral-600" />
+                <CardTitle className="mb-2 flex items-center text-xl font-semibold text-neutral-900">
+                  <div className="mr-3 rounded-lg bg-neutral-100 p-2">
+                    <ClipboardList className="h-5 w-5 text-neutral-600" />
                   </div>
                   Semua Laporan
                 </CardTitle>
-                <CardDescription className="text-neutral-600 font-medium">
+                <CardDescription className="font-medium text-neutral-600">
                   Kelola dan verifikasi laporan kerusakan jalan
                 </CardDescription>
               </div>
@@ -360,10 +360,10 @@ export default async function AdminDashboard() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-10 px-4 text-neutral-700 border-neutral-300 hover:bg-neutral-50 hover:border-neutral-400 hover:text-neutral-800 transition-all duration-200 font-medium"
+                  className="h-10 border-neutral-300 px-4 font-medium text-neutral-700 transition-all duration-200 hover:border-neutral-400 hover:bg-neutral-50 hover:text-neutral-800"
                 >
                   Lihat Semua
-                  <Eye className="w-4 h-4 ml-2" />
+                  <Eye className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
             </CardHeader>

@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { sharingApi, type AICaptionResponse } from '@/services/api-client';
-import { toast } from 'sonner';
+import { useState } from "react";
+import { sharingApi, type AICaptionResponse } from "@/services/api-client";
+import { toast } from "sonner";
 
 interface UseSharingOptions {
   onShareSuccess?: (platform: string, newCount: number) => void;
@@ -11,18 +11,23 @@ interface UseSharingReturn {
   // State
   isGenerating: boolean;
   isSharing: boolean;
-  
+
   // Actions
-  generateAICaption: (reportId: string, platform: string, tone: string, usePaidModel?: boolean) => Promise<AICaptionResponse | null>;
-  
+  generateAICaption: (
+    reportId: string,
+    platform: string,
+    tone: string,
+    usePaidModel?: boolean,
+  ) => Promise<AICaptionResponse | null>;
+
   trackShare: (reportId: string, platform: string) => Promise<number | null>;
-  
+
   // Utilities
   shareToPlatform: (
     platform: string,
     caption: string,
     hashtags: string[],
-    reportId: string
+    reportId: string,
   ) => Promise<boolean>;
 }
 
@@ -45,7 +50,7 @@ export function useSharing(options: UseSharingOptions = {}): UseSharingReturn {
     reportId: string,
     platform: string,
     tone: string,
-    usePaidModel?: boolean
+    usePaidModel?: boolean,
   ) => {
     setIsGenerating(true);
     try {
@@ -54,8 +59,9 @@ export function useSharing(options: UseSharingOptions = {}): UseSharingReturn {
         tone: tone as any,
         usePaidModel,
       });
-      
-      const modelName = response.modelUsed === 'template-fallback' ? 'Template' : 'AI';
+
+      const modelName =
+        response.modelUsed === "template-fallback" ? "Template" : "AI";
       toast.success(`${modelName} caption berhasil dibuat!`);
       return response;
     } catch (error) {
@@ -74,7 +80,7 @@ export function useSharing(options: UseSharingOptions = {}): UseSharingReturn {
       const response = await sharingApi.trackShare(reportId, {
         platform: platform as any,
       });
-      
+
       options.onShareSuccess?.(platform, response.newShareCount);
       return response.newShareCount;
     } catch (error) {
@@ -90,10 +96,11 @@ export function useSharing(options: UseSharingOptions = {}): UseSharingReturn {
     platform: string,
     caption: string,
     hashtags: string[],
-    reportId: string
+    reportId: string,
   ) => {
     // Check if platform supports pre-filling
-    const platformConfig = PLATFORM_CONFIG[platform as keyof typeof PLATFORM_CONFIG];
+    const platformConfig =
+      PLATFORM_CONFIG[platform as keyof typeof PLATFORM_CONFIG];
     if (!platformConfig?.supportsPrefill) {
       // For platforms that don't support pre-filling, just return success
       // The UI will handle the copy-paste flow
@@ -105,7 +112,7 @@ export function useSharing(options: UseSharingOptions = {}): UseSharingReturn {
       const shareUrl = `${window.location.origin}/laporan/${reportId}`;
       const fullText = `${caption}\n\n${hashtags.join(" ")}\n\n${shareUrl}`;
       const encodedText = encodeURIComponent(fullText);
-      
+
       let shareUrlPlatform = "";
 
       switch (platform) {
@@ -131,7 +138,9 @@ export function useSharing(options: UseSharingOptions = {}): UseSharingReturn {
           threads: "Threads",
           telegram: "Telegram",
         };
-        toast.success(`Berhasil membagikan caption dan link ke ${platformNames[platform as keyof typeof platformNames]}!`);
+        toast.success(
+          `Berhasil membagikan caption dan link ke ${platformNames[platform as keyof typeof platformNames]}!`,
+        );
         return true;
       }
 
@@ -154,4 +163,4 @@ export function useSharing(options: UseSharingOptions = {}): UseSharingReturn {
     trackShare,
     shareToPlatform,
   };
-} 
+}

@@ -95,9 +95,9 @@ export function ReportsTable({ data, isLoading = false }: ReportsTableProps) {
         return (
           <Badge
             variant="secondary"
-            className="bg-neutral-100 text-neutral-600 border-neutral-200"
+            className="border-neutral-200 bg-neutral-100 text-neutral-600"
           >
-            <Clock className="w-3 h-3 mr-1" />
+            <Clock className="mr-1 h-3 w-3" />
             Menunggu
           </Badge>
         );
@@ -105,9 +105,9 @@ export function ReportsTable({ data, isLoading = false }: ReportsTableProps) {
         return (
           <Badge
             variant="secondary"
-            className="bg-neutral-900 text-white border-neutral-900"
+            className="border-neutral-900 bg-neutral-900 text-white"
           >
-            <CheckCircle className="w-3 h-3 mr-1" />
+            <CheckCircle className="mr-1 h-3 w-3" />
             Disetujui
           </Badge>
         );
@@ -115,9 +115,9 @@ export function ReportsTable({ data, isLoading = false }: ReportsTableProps) {
         return (
           <Badge
             variant="secondary"
-            className="bg-neutral-200 text-neutral-800 border-neutral-300"
+            className="border-neutral-300 bg-neutral-200 text-neutral-800"
           >
-            <XCircle className="w-3 h-3 mr-1" />
+            <XCircle className="mr-1 h-3 w-3" />
             Ditolak
           </Badge>
         );
@@ -191,7 +191,7 @@ export function ReportsTable({ data, isLoading = false }: ReportsTableProps) {
       accessorKey: "image_url",
       header: "Foto",
       cell: ({ row }) => (
-        <div className="w-16 h-12 bg-neutral-100 rounded-md overflow-hidden relative">
+        <div className="relative h-12 w-16 overflow-hidden rounded-md bg-neutral-100">
           {row.getValue("image_url") ? (
             <Image
               src={row.getValue("image_url")}
@@ -201,7 +201,7 @@ export function ReportsTable({ data, isLoading = false }: ReportsTableProps) {
               sizes="64px"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-neutral-200">
+            <div className="flex h-full w-full items-center justify-center bg-neutral-200">
               <span className="text-xs text-neutral-500">No Image</span>
             </div>
           )}
@@ -223,16 +223,16 @@ export function ReportsTable({ data, isLoading = false }: ReportsTableProps) {
       ),
       cell: ({ row }) => (
         <div className="max-w-[200px] md:max-w-[300px]">
-          <div className="font-medium text-neutral-900 truncate">
+          <div className="truncate font-medium text-neutral-900">
             {row.getValue("title") || "Laporan Kerusakan Jalan"}
           </div>
           {row.original.street_name && (
-            <div className="text-sm text-neutral-500 truncate">
+            <div className="truncate text-sm text-neutral-500">
               {row.original.street_name}
             </div>
           )}
           {/* Show category on mobile when column is hidden */}
-          <div className="md:hidden mt-1">
+          <div className="mt-1 md:hidden">
             {getCategoryBadge(row.original.category)}
           </div>
         </div>
@@ -332,16 +332,16 @@ export function ReportsTable({ data, isLoading = false }: ReportsTableProps) {
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <div className="h-10 bg-neutral-100 rounded animate-pulse" />
-        <div className="border rounded-lg">
-          <div className="h-12 bg-neutral-50 border-b" />
+        <div className="h-10 animate-pulse rounded bg-neutral-100" />
+        <div className="rounded-lg border">
+          <div className="h-12 border-b bg-neutral-50" />
           {Array.from({ length: 5 }).map((_, i) => (
             <div key={i} className="h-16 border-b bg-white">
               <div className="flex items-center space-x-4 p-4">
-                <div className="w-16 h-12 bg-neutral-100 rounded animate-pulse" />
+                <div className="h-12 w-16 animate-pulse rounded bg-neutral-100" />
                 <div className="flex-1 space-y-2">
-                  <div className="h-4 bg-neutral-100 rounded w-3/4 animate-pulse" />
-                  <div className="h-3 bg-neutral-100 rounded w-1/2 animate-pulse" />
+                  <div className="h-4 w-3/4 animate-pulse rounded bg-neutral-100" />
+                  <div className="h-3 w-1/2 animate-pulse rounded bg-neutral-100" />
                 </div>
               </div>
             </div>
@@ -356,7 +356,7 @@ export function ReportsTable({ data, isLoading = false }: ReportsTableProps) {
       {/* Search Input */}
       <div className="flex items-center space-x-2">
         <div className="relative max-w-sm">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 h-4 w-4" />
+          <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-neutral-400" />
           <Input
             placeholder="Cari laporan..."
             value={globalFilter ?? ""}
@@ -367,7 +367,7 @@ export function ReportsTable({ data, isLoading = false }: ReportsTableProps) {
       </div>
 
       {/* Table */}
-      <div className="border rounded-lg bg-white shadow-sm">
+      <div className="rounded-lg border bg-white shadow-sm">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -410,7 +410,7 @@ export function ReportsTable({ data, isLoading = false }: ReportsTableProps) {
                   className="h-24 text-center"
                 >
                   <div className="text-neutral-500">
-                    <div className="text-lg font-medium mb-2">
+                    <div className="mb-2 text-lg font-medium">
                       Tidak ada laporan
                     </div>
                     <div className="text-sm">
@@ -427,7 +427,7 @@ export function ReportsTable({ data, isLoading = false }: ReportsTableProps) {
       {/* Pagination */}
       {table.getPageCount() > 1 && (
         <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
-          <div className="text-sm text-neutral-600 text-center md:text-left">
+          <div className="text-center text-sm text-neutral-600 md:text-left">
             Menampilkan{" "}
             {table.getState().pagination.pageIndex *
               table.getState().pagination.pageSize +
@@ -475,7 +475,7 @@ export function ReportsTable({ data, isLoading = false }: ReportsTableProps) {
                       }
                       size="sm"
                       onClick={() => table.setPageIndex(displayPage)}
-                      className="w-8 h-8 p-0"
+                      className="h-8 w-8 p-0"
                     >
                       {displayPage + 1}
                     </Button>

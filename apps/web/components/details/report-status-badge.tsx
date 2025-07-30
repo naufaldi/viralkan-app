@@ -9,7 +9,10 @@ interface ReportStatusBadgeProps {
   className?: string;
 }
 
-export function ReportStatusBadge({ status,className }: ReportStatusBadgeProps) {
+export function ReportStatusBadge({
+  status,
+  className,
+}: ReportStatusBadgeProps) {
   const getStatusConfig = (status: string) => {
     switch (status) {
       case "verified":
@@ -45,7 +48,7 @@ export function ReportStatusBadge({ status,className }: ReportStatusBadgeProps) 
   return (
     <div className={cn("absolute top-4 left-4", className)}>
       <Badge className={`${statusConfig.color} border font-medium`}>
-        <StatusIcon className="h-3 w-3 mr-1" />
+        <StatusIcon className="mr-1 h-3 w-3" />
         {statusConfig.label}
       </Badge>
     </div>

@@ -15,33 +15,33 @@ export function ReportsStats({ stats }: ReportsStatsProps) {
   return (
     <div className="grid grid-cols-2 gap-4">
       <Card className="p-6 text-center">
-        <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-3">
+        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
           <AlertTriangle className="h-6 w-6 text-red-600" />
         </div>
-        <div className="text-2xl font-bold text-foreground mb-1">
+        <div className="text-foreground mb-1 text-2xl font-bold">
           {stats.byCategory.berlubang}
         </div>
-        <div className="text-sm text-muted-foreground">Jalan Berlubang</div>
+        <div className="text-muted-foreground text-sm">Jalan Berlubang</div>
       </Card>
 
       <Card className="p-6 text-center">
-        <div className="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center mx-auto mb-3">
+        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-yellow-100">
           <TrendingUp className="h-6 w-6 text-yellow-600" />
         </div>
-        <div className="text-2xl font-bold text-foreground mb-1">
+        <div className="text-foreground mb-1 text-2xl font-bold">
           {stats.byCategory.retak}
         </div>
-        <div className="text-sm text-muted-foreground">Jalan Retak</div>
+        <div className="text-muted-foreground text-sm">Jalan Retak</div>
       </Card>
 
-      <Card className="p-6 text-center col-span-2">
-        <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-3">
+      <Card className="col-span-2 p-6 text-center">
+        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
           <MapPin className="h-6 w-6 text-blue-600" />
         </div>
-        <div className="text-2xl font-bold text-foreground mb-1">
+        <div className="text-foreground mb-1 text-2xl font-bold">
           {stats.byCategory.lainnya}
         </div>
-        <div className="text-sm text-muted-foreground">Masalah Lainnya</div>
+        <div className="text-muted-foreground text-sm">Masalah Lainnya</div>
       </Card>
     </div>
   );

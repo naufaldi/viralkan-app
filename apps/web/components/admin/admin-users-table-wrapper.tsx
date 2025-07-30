@@ -80,11 +80,11 @@ export function AdminUsersTableWrapper({}: AdminUsersTableWrapperProps) {
   if (error) {
     return (
       <div className="space-y-4">
-        <div className="border border-red-200 rounded-lg bg-red-50 p-4">
-          <div className="text-red-800 font-medium mb-2">
+        <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+          <div className="mb-2 font-medium text-red-800">
             Error loading users
           </div>
-          <div className="text-red-600 text-sm">
+          <div className="text-sm text-red-600">
             {error instanceof Error ? error.message : "Failed to load users"}
           </div>
         </div>

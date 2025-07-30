@@ -21,7 +21,7 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
   return (
     <div className="min-h-screen bg-neutral-50">
       <AdminNavigation />
-      <main className="container mx-auto px-4 sm:px-6 py-6">{children}</main>
+      <main className="container mx-auto px-4 py-6 sm:px-6">{children}</main>
     </div>
   );
 }

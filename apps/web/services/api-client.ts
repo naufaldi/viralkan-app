@@ -486,46 +486,46 @@ export const administrativeService = {
     if (!query || query.trim().length < 2) {
       return null;
     }
-    
+
     const searchParams = new URLSearchParams();
-    searchParams.append('q', query.trim());
-    
+    searchParams.append("q", query.trim());
+
     return apiRequest<Province | null>(
-      `/api/administrative/provinces/search?${searchParams.toString()}`
+      `/api/administrative/provinces/search?${searchParams.toString()}`,
     );
   },
 
   // Search regencies by name within province with fuzzy matching
   searchRegencies: async (
     query: string,
-    provinceCode: string
+    provinceCode: string,
   ): Promise<Regency | null> => {
     if (!query || query.trim().length < 2 || !provinceCode) {
       return null;
     }
-    
+
     const searchParams = new URLSearchParams();
-    searchParams.append('q', query.trim());
-    
+    searchParams.append("q", query.trim());
+
     return apiRequest<Regency | null>(
-      `/api/administrative/regencies/${provinceCode}/search?${searchParams.toString()}`
+      `/api/administrative/regencies/${provinceCode}/search?${searchParams.toString()}`,
     );
   },
 
   // Search districts by name within regency with fuzzy matching
   searchDistricts: async (
     query: string,
-    regencyCode: string
+    regencyCode: string,
   ): Promise<District | null> => {
     if (!query || query.trim().length < 2 || !regencyCode) {
       return null;
     }
-    
+
     const searchParams = new URLSearchParams();
-    searchParams.append('q', query.trim());
-    
+    searchParams.append("q", query.trim());
+
     return apiRequest<District | null>(
-      `/api/administrative/districts/${regencyCode}/search?${searchParams.toString()}`
+      `/api/administrative/districts/${regencyCode}/search?${searchParams.toString()}`,
     );
   },
 };
@@ -540,17 +540,17 @@ export type {
 
 // Sharing API Types
 export interface TrackShareRequest {
-  platform: 'whatsapp' | 'twitter' | 'facebook' | 'threads' | 'telegram';
+  platform: "whatsapp" | "twitter" | "facebook" | "threads" | "telegram";
 }
 
 export interface GenerateCaptionRequest {
-  platform: 'whatsapp' | 'twitter' | 'facebook' | 'threads' | 'telegram';
-  tone: 'formal' | 'urgent' | 'community' | 'informative';
+  platform: "whatsapp" | "twitter" | "facebook" | "threads" | "telegram";
+  tone: "formal" | "urgent" | "community" | "informative";
 }
 
 export interface GenerateAICaptionRequest {
-  platform: 'whatsapp' | 'twitter' | 'facebook' | 'threads' | 'telegram';
-  tone: 'formal' | 'urgent' | 'community' | 'informative';
+  platform: "whatsapp" | "twitter" | "facebook" | "threads" | "telegram";
+  tone: "formal" | "urgent" | "community" | "informative";
   usePaidModel?: boolean; // true = force paid, false = force free only, undefined = auto-retry (free first, then paid)
   customInstructions?: string;
 }
@@ -600,10 +600,10 @@ export const sharingApi = {
   // Track a share event
   trackShare: async (
     reportId: string,
-    data: TrackShareRequest
+    data: TrackShareRequest,
   ): Promise<ShareTrackingResponse> => {
     return apiRequest<ShareTrackingResponse>(`/api/sharing/${reportId}/share`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(data),
     });
   },
@@ -611,23 +611,29 @@ export const sharingApi = {
   // Generate caption for sharing (template-based)
   generateCaption: async (
     reportId: string,
-    data: GenerateCaptionRequest
+    data: GenerateCaptionRequest,
   ): Promise<CaptionResponse> => {
-    return apiRequest<CaptionResponse>(`/api/sharing/${reportId}/generate-caption`, {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
+    return apiRequest<CaptionResponse>(
+      `/api/sharing/${reportId}/generate-caption`,
+      {
+        method: "POST",
+        body: JSON.stringify(data),
+      },
+    );
   },
 
   // Generate AI-powered caption for sharing
   generateAICaption: async (
     reportId: string,
-    data: GenerateAICaptionRequest
+    data: GenerateAICaptionRequest,
   ): Promise<AICaptionResponse> => {
-    return apiRequest<AICaptionResponse>(`/api/sharing/${reportId}/generate-ai-caption`, {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
+    return apiRequest<AICaptionResponse>(
+      `/api/sharing/${reportId}/generate-ai-caption`,
+      {
+        method: "POST",
+        body: JSON.stringify(data),
+      },
+    );
   },
 
   // Get share analytics (admin only)
@@ -637,19 +643,21 @@ export const sharingApi = {
       startDate?: string;
       endDate?: string;
       platform?: string;
-    }
+    },
   ): Promise<ShareAnalytics> => {
     const searchParams = new URLSearchParams();
-    if (params?.startDate) searchParams.append('startDate', params.startDate);
-    if (params?.endDate) searchParams.append('endDate', params.endDate);
-    if (params?.platform) searchParams.append('platform', params.platform);
+    if (params?.startDate) searchParams.append("startDate", params.startDate);
+    if (params?.endDate) searchParams.append("endDate", params.endDate);
+    if (params?.platform) searchParams.append("platform", params.platform);
 
-    const endpoint = `/api/sharing/analytics${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
+    const endpoint = `/api/sharing/analytics${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
     return authenticatedApiRequest<ShareAnalytics>(endpoint, token);
   },
 
   // Get report share details
-  getReportShareDetails: async (reportId: string): Promise<{
+  getReportShareDetails: async (
+    reportId: string,
+  ): Promise<{
     shareCount: number;
     platformBreakdown: Record<string, number>;
     recentShares: Array<{
@@ -662,7 +670,9 @@ export const sharingApi = {
   },
 
   // Validate report for sharing
-  validateReportForSharing: async (reportId: string): Promise<{
+  validateReportForSharing: async (
+    reportId: string,
+  ): Promise<{
     eligible: boolean;
     reason?: string;
   }> => {
@@ -674,18 +684,20 @@ export const sharingApi = {
     limit?: number;
     startDate?: string;
     endDate?: string;
-  }): Promise<Array<{
-    id: string;
-    title: string;
-    shareCount: number;
-    isHighEngagement: boolean;
-  }>> => {
+  }): Promise<
+    Array<{
+      id: string;
+      title: string;
+      shareCount: number;
+      isHighEngagement: boolean;
+    }>
+  > => {
     const searchParams = new URLSearchParams();
-    if (params?.limit) searchParams.append('limit', params.limit.toString());
-    if (params?.startDate) searchParams.append('startDate', params.startDate);
-    if (params?.endDate) searchParams.append('endDate', params.endDate);
+    if (params?.limit) searchParams.append("limit", params.limit.toString());
+    if (params?.startDate) searchParams.append("startDate", params.startDate);
+    if (params?.endDate) searchParams.append("endDate", params.endDate);
 
-    const endpoint = `/api/sharing/most-shared${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
+    const endpoint = `/api/sharing/most-shared${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
     return apiRequest(endpoint);
   },
 };

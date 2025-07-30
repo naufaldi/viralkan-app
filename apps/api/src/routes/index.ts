@@ -2,12 +2,12 @@
 // Each feature should export its router and be included here
 
 // Router exports
-export { authRouter } from './auth';
-export { reportsRouter } from './reports';
-export { uploadRouter } from './upload';
-export { adminRouter } from './admin';
-export { administrativeRouter } from './administrative';
-export { sharingRouter } from './sharing';
+export { authRouter } from "./auth";
+export { reportsRouter } from "./reports";
+export { uploadRouter } from "./upload";
+export { adminRouter } from "./admin";
+export { administrativeRouter } from "./administrative";
+export { sharingRouter } from "./sharing";
 
 // Middleware exports (for convenience)
 export {
@@ -15,7 +15,7 @@ export {
   optionalAuthMiddleware,
   requireRole,
   requireAdmin,
-} from './auth';
+} from "./auth";
 
 // Public API type exports - these are the main types external consumers would use
 export type {
@@ -26,7 +26,7 @@ export type {
   LogoutResponse,
   ErrorResponse,
   UserStatsResponse,
-} from './auth';
+} from "./auth";
 
 export type {
   // Reports types
@@ -36,14 +36,14 @@ export type {
   Report,
   ReportWithUser,
   PaginatedReports,
-} from './reports';
+} from "./reports";
 
 export type {
   // Upload types
   UploadResponse,
   UploadErrorResponse,
   FileValidationConfig,
-} from './upload';
+} from "./upload";
 
 export type {
   // Administrative types
@@ -53,7 +53,7 @@ export type {
   SyncStatus,
   AdministrativeHierarchy,
   AdministrativeNames,
-} from './administrative';
+} from "./administrative";
 
 export type {
   // Sharing types
@@ -64,6 +64,6 @@ export type {
   ShareAnalytics,
   Platform,
   CaptionTone,
-} from './sharing';
+} from "./sharing";
 
 // Note: Common types (AppResult, error classes) should be imported directly from @/types

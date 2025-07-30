@@ -80,14 +80,14 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
   const displayError = formError || submitError || undefined;
 
   // Debug log to see the form activation state
-  console.log('🔍 Form Activation Debug:', {
+  console.log("🔍 Form Activation Debug:", {
     isFormActivated,
     hasSelectedImage: !!selectedImage,
     selectedImageName: selectedImage?.name,
   });
 
   return (
-    <Card className="border-neutral-200 shadow-lg rounded-xl overflow-hidden hover:translate-0">
+    <Card className="overflow-hidden rounded-xl border-neutral-200 shadow-lg hover:translate-0">
       <ReportFormHeader />
 
       <CardContent className="p-6 lg:p-8">
@@ -139,9 +139,13 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
             />
 
             {/* Primary Action - Following Fitts's Law */}
-            <div className={`transition-all duration-300 ${
-              !isFormActivated ? 'opacity-40 pointer-events-none' : 'opacity-100'
-            }`}>
+            <div
+              className={`transition-all duration-300 ${
+                !isFormActivated
+                  ? "pointer-events-none opacity-40"
+                  : "opacity-100"
+              }`}
+            >
               <ReportFormActions
                 isLoading={isLoading}
                 isUploadingImage={isUploadingImage}

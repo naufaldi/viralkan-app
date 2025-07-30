@@ -7,12 +7,7 @@ import {
 import { Badge } from "@repo/ui/components/ui/badge";
 import { Button } from "@repo/ui/components/ui/button";
 import { Separator } from "@repo/ui/components/ui/separator";
-import {
-  ArrowLeft,
-  Calendar,
-  User,
-  AlertCircle,
-} from "lucide-react";
+import { ArrowLeft, Calendar, User, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { REPORT_CATEGORIES } from "@/constant/reports";
@@ -69,21 +64,21 @@ export default async function ReportDetailPage({
       <>
         <Header />
         <div className="min-h-screen bg-neutral-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
             {/* Breadcrumb Navigation */}
             <nav className="mb-8">
               <Link
                 href="/laporan"
-                className="inline-flex items-center text-sm text-neutral-600 hover:text-neutral-900 transition-colors"
+                className="inline-flex items-center text-sm text-neutral-600 transition-colors hover:text-neutral-900"
               >
-                <ArrowLeft className="h-4 w-4 mr-2" />
+                <ArrowLeft className="mr-2 h-4 w-4" />
                 Kembali ke Daftar Laporan
               </Link>
             </nav>
 
             {/* Hero Section - Large Image */}
             <div className="mb-12">
-              <div className="relative w-full h-96 lg:h-[500px] rounded-lg overflow-hidden bg-neutral-100">
+              <div className="relative h-96 w-full overflow-hidden rounded-lg bg-neutral-100 lg:h-[500px]">
                 <Image
                   src={report.image_url}
                   alt={`Kerusakan jalan di ${report.street_name}`}
@@ -94,11 +89,16 @@ export default async function ReportDetailPage({
                 />
 
                 {/* Status Badge Overlay - Only show for owner */}
-                <div className="absolute flex gap-4 h-auto w-auto px-4">
-                {isOwner && <ReportStatusBadge className="relative left-auto" status={report.status} />}
+                <div className="absolute flex h-auto w-auto gap-4 px-4">
+                  {isOwner && (
+                    <ReportStatusBadge
+                      className="relative left-auto"
+                      status={report.status}
+                    />
+                  )}
 
                   {/* Category Badge Overlay */}
-                  <div className="relative top-4 ">
+                  <div className="relative top-4">
                     <Badge
                       className={`${categoryInfo.color} border-0 font-medium`}
                     >
@@ -110,14 +110,14 @@ export default async function ReportDetailPage({
 
                 {/* Share Button will be rendered by client component */}
                 <div className="absolute top-4 right-4 z-10">
-                  <ShareButton 
+                  <ShareButton
                     reportId={report.id}
                     report={{
                       street_name: report.street_name,
                       district: report.district,
                       city: report.city,
                       province: report.province,
-                      category: report.category
+                      category: report.category,
                     }}
                     useDialog={true}
                     size="md"
@@ -127,9 +127,9 @@ export default async function ReportDetailPage({
             </div>
 
             {/* Content Section - Two Column Layout */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
               {/* Main Content - Left Column */}
-              <div className="lg:col-span-2 space-y-8">
+              <div className="space-y-8 lg:col-span-2">
                 {/* Report Title and Description */}
                 <Card className="border-neutral-200 bg-white">
                   <CardHeader className="pb-4">
@@ -153,11 +153,11 @@ export default async function ReportDetailPage({
 
                     {/* Additional Location Details */}
                     {report.location_text && (
-                      <div className="bg-neutral-50 rounded-lg p-4 border border-neutral-200">
-                        <h4 className="text-sm font-medium text-neutral-900 mb-2">
+                      <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4">
+                        <h4 className="mb-2 text-sm font-medium text-neutral-900">
                           Deskripsi Lokasi
                         </h4>
-                        <p className="text-neutral-700 leading-relaxed text-sm">
+                        <p className="text-sm leading-relaxed text-neutral-700">
                           {report.location_text}
                         </p>
                       </div>
@@ -219,7 +219,7 @@ export default async function ReportDetailPage({
                     <Separator className="bg-neutral-200" />
 
                     <div>
-                      <p className="text-sm font-medium text-neutral-900 mb-2">
+                      <p className="mb-2 text-sm font-medium text-neutral-900">
                         Kategori
                       </p>
                       <Badge className={`${categoryInfo.color} border-0`}>
@@ -230,16 +230,16 @@ export default async function ReportDetailPage({
 
                     {/* Share Count */}
                     <div data-share-count>
-                      <ShareCount reportId={report.id} initialCount={report.share_count || 0} />
+                      <ShareCount
+                        reportId={report.id}
+                        initialCount={report.share_count || 0}
+                      />
                     </div>
                   </CardContent>
                 </Card>
 
                 {/* Actions */}
-                <ReportActions 
-                  reportId={report.id} 
-                  canEdit={canEdit} 
-                />
+                <ReportActions reportId={report.id} canEdit={canEdit} />
               </div>
             </div>
           </div>
@@ -255,22 +255,22 @@ export default async function ReportDetailPage({
     return (
       <>
         <Header />
-        <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+        <div className="flex min-h-screen items-center justify-center bg-neutral-50">
           <div className="text-center">
-            <AlertCircle className="h-16 w-16 text-neutral-400 mx-auto mb-4" />
-            <h1 className="text-2xl font-semibold text-neutral-900 mb-2">
+            <AlertCircle className="mx-auto mb-4 h-16 w-16 text-neutral-400" />
+            <h1 className="mb-2 text-2xl font-semibold text-neutral-900">
               {error instanceof Error && error.message === "Report not found"
                 ? "Laporan tidak ditemukan"
                 : "Terjadi kesalahan"}
             </h1>
-            <p className="text-neutral-600 mb-6">
+            <p className="mb-6 text-neutral-600">
               {error instanceof Error && error.message === "Report not found"
                 ? "Laporan yang Anda cari tidak dapat ditemukan atau telah dihapus."
                 : "Terjadi kesalahan saat memuat laporan. Silakan coba lagi."}
             </p>
             <Link href="/laporan">
               <Button variant="outline" className="mr-4">
-                <ArrowLeft className="h-4 w-4 mr-2" />
+                <ArrowLeft className="mr-2 h-4 w-4" />
                 Kembali ke Daftar
               </Button>
             </Link>

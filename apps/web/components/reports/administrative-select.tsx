@@ -2,7 +2,14 @@
 
 import * as React from "react";
 import { UseFormReturn } from "react-hook-form";
-import { Loader2, MapPin, CheckCircle, AlertTriangle, Settings, RefreshCw } from "lucide-react";
+import {
+  Loader2,
+  MapPin,
+  CheckCircle,
+  AlertTriangle,
+  Settings,
+  RefreshCw,
+} from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   FormControl,
@@ -39,7 +46,7 @@ interface AdministrativeSelectProps {
   // Administrative sync status props (passed from parent)
   syncStatus?: any; // TODO: Import proper type
   hasValidMatch?: boolean;
-  confidenceLevel?: 'high' | 'medium' | 'low' | 'none';
+  confidenceLevel?: "high" | "medium" | "low" | "none";
   canAutoSelect?: boolean;
   isProcessingAdminSync?: boolean;
 }
@@ -57,7 +64,7 @@ export const AdministrativeSelect = ({
   // Administrative sync status props (passed from parent)
   syncStatus: externalSyncStatus,
   hasValidMatch: externalHasValidMatch = false,
-  confidenceLevel: externalConfidenceLevel = 'none',
+  confidenceLevel: externalConfidenceLevel = "none",
   canAutoSelect: externalCanAutoSelect = false,
   isProcessingAdminSync: externalIsProcessingAdminSync = false,
 }: AdministrativeSelectProps) => {
@@ -76,26 +83,37 @@ export const AdministrativeSelect = ({
   const selectedAllDistrict = !searchParams.get("kecamatan");
 
   // Fetch data using our custom hook
-  const { data, loading, error, refetchRegencies, refetchDistricts, addDynamicOption } =
-    useAdministrative();
+  const {
+    data,
+    loading,
+    error,
+    refetchRegencies,
+    refetchDistricts,
+    addDynamicOption,
+  } = useAdministrative();
 
   // Enhanced administrative sync hook (only when not provided externally)
   const internalSync = useAdministrativeSync({
     form,
     autoApply: enableAutoSync,
     confidenceThreshold: 0.7,
-    enableValidation: true
+    enableValidation: true,
   });
 
   // Use external sync status if provided, otherwise fall back to internal
   const syncStatus = externalSyncStatus || internalSync.syncStatus;
   const hasValidMatch = externalHasValidMatch || internalSync.hasValidMatch;
   const canAutoSelect = externalCanAutoSelect || internalSync.canAutoSelect;
-  const confidenceLevel = externalConfidenceLevel !== 'none' ? externalConfidenceLevel : internalSync.confidenceLevel;
-  const isSyncProcessing = externalIsProcessingAdminSync || internalSync.isProcessing;
-  
+  const confidenceLevel =
+    externalConfidenceLevel !== "none"
+      ? externalConfidenceLevel
+      : internalSync.confidenceLevel;
+  const isSyncProcessing =
+    externalIsProcessingAdminSync || internalSync.isProcessing;
+
   // Always use internal sync methods (external props are for status display only)
-  const { enhancedGeocoding, processGeocoding, applyToForm, clearSync } = internalSync;
+  const { enhancedGeocoding, processGeocoding, applyToForm, clearSync } =
+    internalSync;
 
   // Fetch dependent data when parent selection changes
   React.useEffect(() => {
@@ -117,35 +135,35 @@ export const AdministrativeSelect = ({
   };
 
   // Get confidence level styling
-  const getConfidenceStyling = (level: 'high' | 'medium' | 'low' | 'none') => {
+  const getConfidenceStyling = (level: "high" | "medium" | "low" | "none") => {
     switch (level) {
-      case 'high':
+      case "high":
         return {
-          bgColor: 'bg-green-50',
-          borderColor: 'border-green-200',
-          textColor: 'text-green-700',
-          iconColor: 'text-green-600'
+          bgColor: "bg-green-50",
+          borderColor: "border-green-200",
+          textColor: "text-green-700",
+          iconColor: "text-green-600",
         };
-      case 'medium':
+      case "medium":
         return {
-          bgColor: 'bg-yellow-50',
-          borderColor: 'border-yellow-200',
-          textColor: 'text-yellow-700',
-          iconColor: 'text-yellow-600'
+          bgColor: "bg-yellow-50",
+          borderColor: "border-yellow-200",
+          textColor: "text-yellow-700",
+          iconColor: "text-yellow-600",
         };
-      case 'low':
+      case "low":
         return {
-          bgColor: 'bg-red-50',
-          borderColor: 'border-red-200',
-          textColor: 'text-red-700',
-          iconColor: 'text-red-600'
+          bgColor: "bg-red-50",
+          borderColor: "border-red-200",
+          textColor: "text-red-700",
+          iconColor: "text-red-600",
         };
       default:
         return {
-          bgColor: 'bg-neutral-50',
-          borderColor: 'border-neutral-200',
-          textColor: 'text-neutral-700',
-          iconColor: 'text-neutral-600'
+          bgColor: "bg-neutral-50",
+          borderColor: "border-neutral-200",
+          textColor: "text-neutral-700",
+          iconColor: "text-neutral-600",
         };
     }
   };
@@ -236,14 +254,14 @@ export const AdministrativeSelect = ({
     if (provinceCode === "all") {
       // Handle "all" selection - remove URL parameter (default state)
       params.delete("provinsi");
-      form.setValue("province_code", "");
-      form.setValue("province", "");
+      form.setValue("province_code", "", { shouldValidate: true });
+      form.setValue("province", "", { shouldValidate: true });
 
       // Reset dependent fields
-      form.setValue("regency_code", "");
-      form.setValue("city", "");
-      form.setValue("district_code", "");
-      form.setValue("district", "");
+      form.setValue("regency_code", "", { shouldValidate: true });
+      form.setValue("city", "", { shouldValidate: true });
+      form.setValue("district_code", "", { shouldValidate: true });
+      form.setValue("district", "", { shouldValidate: true });
       params.delete("kabupaten_kota");
       params.delete("kecamatan");
     } else {
@@ -255,14 +273,16 @@ export const AdministrativeSelect = ({
 
       if (selectedProvince) {
         // Update both code and name fields
-        form.setValue("province_code", provinceCode);
-        form.setValue("province", selectedProvince.name);
+        form.setValue("province_code", provinceCode, { shouldValidate: true });
+        form.setValue("province", selectedProvince.name, {
+          shouldValidate: true,
+        });
 
         // Reset dependent fields
-        form.setValue("regency_code", "");
-        form.setValue("city", "");
-        form.setValue("district_code", "");
-        form.setValue("district", "");
+        form.setValue("regency_code", "", { shouldValidate: true });
+        form.setValue("city", "", { shouldValidate: true });
+        form.setValue("district_code", "", { shouldValidate: true });
+        form.setValue("district", "", { shouldValidate: true });
         params.delete("kabupaten_kota");
         params.delete("kecamatan");
       }
@@ -271,7 +291,7 @@ export const AdministrativeSelect = ({
     // Update URL
     router.replace(`?${params.toString()}`, { scroll: false });
     onClearGeocodingError?.();
-    
+
     // Clear sync status when user manually changes selection
     clearSync();
   };
@@ -283,12 +303,12 @@ export const AdministrativeSelect = ({
     if (regencyCode === "all") {
       // Handle "all" selection - remove URL parameter (default state)
       params.delete("kabupaten_kota");
-      form.setValue("regency_code", "");
-      form.setValue("city", "");
+      form.setValue("regency_code", "", { shouldValidate: true });
+      form.setValue("city", "", { shouldValidate: true });
 
       // Reset dependent fields
-      form.setValue("district_code", "");
-      form.setValue("district", "");
+      form.setValue("district_code", "", { shouldValidate: true });
+      form.setValue("district", "", { shouldValidate: true });
       params.delete("kecamatan");
     } else {
       // Handle specific regency selection
@@ -299,12 +319,12 @@ export const AdministrativeSelect = ({
 
       if (selectedRegency) {
         // Update both code and name fields
-        form.setValue("regency_code", regencyCode);
-        form.setValue("city", selectedRegency.name);
+        form.setValue("regency_code", regencyCode, { shouldValidate: true });
+        form.setValue("city", selectedRegency.name, { shouldValidate: true });
 
         // Reset dependent fields
-        form.setValue("district_code", "");
-        form.setValue("district", "");
+        form.setValue("district_code", "", { shouldValidate: true });
+        form.setValue("district", "", { shouldValidate: true });
         params.delete("kecamatan");
       }
     }
@@ -312,7 +332,7 @@ export const AdministrativeSelect = ({
     // Update URL
     router.replace(`?${params.toString()}`, { scroll: false });
     onClearGeocodingError?.();
-    
+
     // Clear sync status when user manually changes selection
     clearSync();
   };
@@ -324,8 +344,8 @@ export const AdministrativeSelect = ({
     if (districtCode === "all") {
       // Handle "all" selection - remove URL parameter (default state)
       params.delete("kecamatan");
-      form.setValue("district_code", "");
-      form.setValue("district", "");
+      form.setValue("district_code", "", { shouldValidate: true });
+      form.setValue("district", "", { shouldValidate: true });
     } else {
       // Handle specific district selection
       params.set("kecamatan", districtCode);
@@ -335,15 +355,17 @@ export const AdministrativeSelect = ({
 
       if (selectedDistrict) {
         // Update both code and name fields
-        form.setValue("district_code", districtCode);
-        form.setValue("district", selectedDistrict.name);
+        form.setValue("district_code", districtCode, { shouldValidate: true });
+        form.setValue("district", selectedDistrict.name, {
+          shouldValidate: true,
+        });
       }
     }
 
     // Update URL
     router.replace(`?${params.toString()}`, { scroll: false });
     onClearGeocodingError?.();
-    
+
     // Clear sync status when user manually changes selection
     clearSync();
   };
@@ -367,10 +389,13 @@ export const AdministrativeSelect = ({
       const result = await applyToForm();
       if (result.applied) {
         // Show success feedback
-        console.log('Administrative data applied successfully:', result.appliedFields);
+        console.log(
+          "Administrative data applied successfully:",
+          result.appliedFields,
+        );
       }
     } catch (error) {
-      console.error('Failed to apply administrative sync:', error);
+      console.error("Failed to apply administrative sync:", error);
     }
   };
 
@@ -381,7 +406,7 @@ export const AdministrativeSelect = ({
 
   // Enhanced styling based on sync status
   const syncStyling = getConfidenceStyling(confidenceLevel);
-  const enhancedGeocodingClasses = hasValidMatch 
+  const enhancedGeocodingClasses = hasValidMatch
     ? `${syncStyling.bgColor} ${syncStyling.borderColor} border`
     : geocodingClasses;
 
@@ -406,19 +431,26 @@ export const AdministrativeSelect = ({
 
       {/* Auto-filled Values Display */}
       {hasValidMatch && enhancedGeocoding && (
-        <Card className={`${syncStyling.bgColor} ${syncStyling.borderColor} border`}>
+        <Card
+          className={`${syncStyling.bgColor} ${syncStyling.borderColor} border`}
+        >
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 <CheckCircle className={`h-5 w-5 ${syncStyling.iconColor}`} />
                 <div>
-                  <h4 className={`text-sm font-medium ${syncStyling.textColor}`}>
+                  <h4
+                    className={`text-sm font-medium ${syncStyling.textColor}`}
+                  >
                     Lokasi Otomatis Terdeteksi
                   </h4>
-                  <p className="text-xs text-neutral-600 mt-1">
-                    {enhancedGeocoding.administrative.province.name && `Provinsi: ${enhancedGeocoding.administrative.province.name}`}
-                    {enhancedGeocoding.administrative.regency.name && ` • Kota: ${enhancedGeocoding.administrative.regency.name}`}
-                    {enhancedGeocoding.administrative.district.name && ` • Kecamatan: ${enhancedGeocoding.administrative.district.name}`}
+                  <p className="mt-1 text-xs text-neutral-600">
+                    {enhancedGeocoding.administrative.province.name &&
+                      `Provinsi: ${enhancedGeocoding.administrative.province.name}`}
+                    {enhancedGeocoding.administrative.regency.name &&
+                      ` • Kota: ${enhancedGeocoding.administrative.regency.name}`}
+                    {enhancedGeocoding.administrative.district.name &&
+                      ` • Kecamatan: ${enhancedGeocoding.administrative.district.name}`}
                   </p>
                 </div>
               </div>
@@ -432,7 +464,7 @@ export const AdministrativeSelect = ({
                   onClick={handleManualOverride}
                   className="h-8 px-3 text-xs"
                 >
-                  <Settings className="h-3 w-3 mr-1" />
+                  <Settings className="mr-1 h-3 w-3" />
                   Ubah
                 </Button>
               </div>
@@ -442,9 +474,11 @@ export const AdministrativeSelect = ({
       )}
 
       {/* Administrative Fields Grid */}
-      <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 transition-all duration-300 ${
-        !isFormActivated ? 'opacity-40 pointer-events-none' : 'opacity-100'
-      }`}>
+      <div
+        className={`grid grid-cols-1 gap-6 transition-all duration-300 md:grid-cols-2 lg:grid-cols-3 ${
+          !isFormActivated ? "pointer-events-none opacity-40" : "opacity-100"
+        }`}
+      >
         {/* Province Selection */}
         <div className="max-w-full">
           <FormField
@@ -452,7 +486,7 @@ export const AdministrativeSelect = ({
             name="province"
             render={({ field }) => (
               <FormItem className="space-y-3">
-                <FormLabel className="text-base font-semibold text-neutral-900 flex items-center gap-2">
+                <FormLabel className="flex items-center gap-2 text-base font-semibold text-neutral-900">
                   Provinsi *
                   {isGeocodingFromCoords && (
                     <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
@@ -460,27 +494,38 @@ export const AdministrativeSelect = ({
                   {isFromGeocoding && (
                     <MapPin className="h-4 w-4 text-green-600" />
                   )}
-                  {hasValidMatch && enhancedGeocoding?.administrative.province.code && (
-                    <CheckCircle className={`h-4 w-4 ${syncStyling.iconColor}`} />
-                  )}
+                  {hasValidMatch &&
+                    enhancedGeocoding?.administrative.province.code && (
+                      <CheckCircle
+                        className={`h-4 w-4 ${syncStyling.iconColor}`}
+                      />
+                    )}
                 </FormLabel>
                 <FormControl>
                   <ComboboxField
                     options={provinceOptions}
                     value={
-                      selectedAllProvince ? "all" : selectedProvinceCode || "all"
+                      selectedAllProvince
+                        ? "all"
+                        : selectedProvinceCode || "all"
                     }
                     onValueChange={handleProvinceChange}
                     placeholder="Pilih provinsi..."
                     emptyMessage="Tidak ada provinsi ditemukan."
                     searchPlaceholder="Cari provinsi..."
                     disabled={
-                      disabled || isGeocodingFromCoords || loading.provinces || !isFormActivated
+                      disabled ||
+                      isGeocodingFromCoords ||
+                      loading.provinces ||
+                      !isFormActivated
                     }
                     loading={loading.provinces}
                     size="lg"
                     error={!!form.formState.errors.province}
-                    className={cn(enhancedGeocodingClasses, "max-w-full truncate")}
+                    className={cn(
+                      enhancedGeocodingClasses,
+                      "max-w-full truncate",
+                    )}
                   />
                 </FormControl>
                 <FormDescription className="text-sm text-neutral-600">
@@ -504,7 +549,7 @@ export const AdministrativeSelect = ({
             name="city"
             render={({ field }) => (
               <FormItem className="space-y-3">
-                <FormLabel className="text-base font-semibold text-neutral-900 flex items-center gap-2">
+                <FormLabel className="flex items-center gap-2 text-base font-semibold text-neutral-900">
                   Kabupaten/Kota *
                   {isGeocodingFromCoords && (
                     <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
@@ -512,9 +557,12 @@ export const AdministrativeSelect = ({
                   {isFromGeocoding && (
                     <MapPin className="h-4 w-4 text-green-600" />
                   )}
-                  {hasValidMatch && enhancedGeocoding?.administrative.regency.code && (
-                    <CheckCircle className={`h-4 w-4 ${syncStyling.iconColor}`} />
-                  )}
+                  {hasValidMatch &&
+                    enhancedGeocoding?.administrative.regency.code && (
+                      <CheckCircle
+                        className={`h-4 w-4 ${syncStyling.iconColor}`}
+                      />
+                    )}
                 </FormLabel>
                 <FormControl>
                   <ComboboxField
@@ -544,7 +592,10 @@ export const AdministrativeSelect = ({
                     loading={loading.regencies}
                     size="lg"
                     error={!!form.formState.errors.city}
-                    className={cn(enhancedGeocodingClasses, "max-w-full truncate")}
+                    className={cn(
+                      enhancedGeocodingClasses,
+                      "max-w-full truncate",
+                    )}
                   />
                 </FormControl>
                 <FormDescription className="text-sm text-neutral-600">
@@ -568,7 +619,7 @@ export const AdministrativeSelect = ({
             name="district"
             render={({ field }) => (
               <FormItem className="space-y-3">
-                <FormLabel className="text-base font-semibold text-neutral-900 flex items-center gap-2">
+                <FormLabel className="flex items-center gap-2 text-base font-semibold text-neutral-900">
                   Kecamatan *
                   {isGeocodingFromCoords && (
                     <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
@@ -576,15 +627,20 @@ export const AdministrativeSelect = ({
                   {isFromGeocoding && (
                     <MapPin className="h-4 w-4 text-green-600" />
                   )}
-                  {hasValidMatch && enhancedGeocoding?.administrative.district.code && (
-                    <CheckCircle className={`h-4 w-4 ${syncStyling.iconColor}`} />
-                  )}
+                  {hasValidMatch &&
+                    enhancedGeocoding?.administrative.district.code && (
+                      <CheckCircle
+                        className={`h-4 w-4 ${syncStyling.iconColor}`}
+                      />
+                    )}
                 </FormLabel>
                 <FormControl>
                   <ComboboxField
                     options={districtOptions}
                     value={
-                      selectedAllDistrict ? "all" : selectedDistrictCode || "all"
+                      selectedAllDistrict
+                        ? "all"
+                        : selectedDistrictCode || "all"
                     }
                     onValueChange={handleDistrictChange}
                     placeholder={
@@ -608,7 +664,10 @@ export const AdministrativeSelect = ({
                     loading={loading.districts}
                     size="lg"
                     error={!!form.formState.errors.district}
-                    className={cn(enhancedGeocodingClasses, "max-w-full truncate")}
+                    className={cn(
+                      enhancedGeocodingClasses,
+                      "max-w-full truncate",
+                    )}
                   />
                 </FormControl>
                 <FormDescription className="text-sm text-neutral-600">
@@ -628,15 +687,16 @@ export const AdministrativeSelect = ({
 
       {/* Manual Override Instructions */}
       {hasValidMatch && !canAutoSelect && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
           <div className="flex items-start space-x-3">
-            <AlertTriangle className="h-5 w-5 text-blue-600 mt-0.5" />
+            <AlertTriangle className="mt-0.5 h-5 w-5 text-blue-600" />
             <div className="flex-1">
-              <h4 className="text-sm font-medium text-blue-700 mb-1">
+              <h4 className="mb-1 text-sm font-medium text-blue-700">
                 Perlu Verifikasi Manual
               </h4>
-              <p className="text-sm text-blue-600 mb-3">
-                Lokasi terdeteksi dengan keakuratan rendah. Silakan periksa dan pilih data administratif yang benar.
+              <p className="mb-3 text-sm text-blue-600">
+                Lokasi terdeteksi dengan keakuratan rendah. Silakan periksa dan
+                pilih data administratif yang benar.
               </p>
               <Button
                 size="sm"
@@ -644,7 +704,7 @@ export const AdministrativeSelect = ({
                 onClick={handleManualOverride}
                 className="h-8 px-3 text-xs"
               >
-                <Settings className="h-3 w-3 mr-1" />
+                <Settings className="mr-1 h-3 w-3" />
                 Pilih Manual
               </Button>
             </div>

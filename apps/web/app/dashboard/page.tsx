@@ -62,27 +62,27 @@ export default async function DashboardPage() {
     <div className="min-h-screen bg-neutral-50">
       <Header />
 
-      <main className="container mx-auto px-8 py-12 max-w-7xl">
+      <main className="container mx-auto max-w-7xl px-8 py-12">
         {/* Welcome Section */}
         <div className="mb-16">
-          <div className="flex items-center gap-8 mb-6">
-            <Avatar className="h-24 w-24 ring-4 ring-white shadow-lg">
+          <div className="mb-6 flex items-center gap-8">
+            <Avatar className="h-24 w-24 shadow-lg ring-4 ring-white">
               <AvatarImage src={user.avatar_url || undefined} alt={user.name} />
-              <AvatarFallback className="text-2xl font-semibold bg-neutral-100">
+              <AvatarFallback className="bg-neutral-100 text-2xl font-semibold">
                 {user.name?.charAt(0)?.toUpperCase() || "U"}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1">
-              <h1 className="text-4xl font-bold text-neutral-900 mb-2">
+              <h1 className="mb-2 text-4xl font-bold text-neutral-900">
                 Selamat datang, {user.name}!
               </h1>
-              <p className="text-lg text-neutral-600 mb-4">
+              <p className="mb-4 text-lg text-neutral-600">
                 Dashboard untuk memantau kontribusi Anda di Viralkan
               </p>
               <div className="flex items-center gap-3">
                 <Badge
                   variant="secondary"
-                  className="bg-neutral-100 text-neutral-800 px-3 py-1"
+                  className="bg-neutral-100 px-3 py-1 text-neutral-800"
                 >
                   <MapPin className="mr-2 h-4 w-4" />
                   Kontributor Aktif
@@ -100,18 +100,18 @@ export default async function DashboardPage() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-          <Card className="border-0 shadow-md hover:shadow-lg transition-shadow duration-200">
+        <div className="mb-16 grid grid-cols-1 gap-8 md:grid-cols-3">
+          <Card className="border-0 shadow-md transition-shadow duration-200 hover:shadow-lg">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-              <CardTitle className="text-sm font-semibold text-neutral-600 uppercase tracking-wide">
+              <CardTitle className="text-sm font-semibold tracking-wide text-neutral-600 uppercase">
                 Total Laporan
               </CardTitle>
-              <div className="p-2 bg-neutral-100 rounded-lg">
+              <div className="rounded-lg bg-neutral-100 p-2">
                 <FileText className="h-5 w-5 text-neutral-600" />
               </div>
             </CardHeader>
             <CardContent className="pt-0">
-              <div className="text-4xl font-bold text-neutral-900 mb-2">
+              <div className="mb-2 text-4xl font-bold text-neutral-900">
                 {stats?.total_reports || 0}
               </div>
               <p className="text-sm text-neutral-500">
@@ -120,17 +120,17 @@ export default async function DashboardPage() {
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-md hover:shadow-lg transition-shadow duration-200">
+          <Card className="border-0 shadow-md transition-shadow duration-200 hover:shadow-lg">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-              <CardTitle className="text-sm font-semibold text-neutral-600 uppercase tracking-wide">
+              <CardTitle className="text-sm font-semibold tracking-wide text-neutral-600 uppercase">
                 Bulan Ini
               </CardTitle>
-              <div className="p-2 bg-neutral-100 rounded-lg">
+              <div className="rounded-lg bg-neutral-100 p-2">
                 <TrendingUp className="h-5 w-5 text-neutral-600" />
               </div>
             </CardHeader>
             <CardContent className="pt-0">
-              <div className="text-4xl font-bold text-neutral-900 mb-2">
+              <div className="mb-2 text-4xl font-bold text-neutral-900">
                 {stats?.reports_this_month || 0}
               </div>
               <p className="text-sm text-neutral-500">
@@ -140,17 +140,17 @@ export default async function DashboardPage() {
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-md hover:shadow-lg transition-shadow duration-200">
+          <Card className="border-0 shadow-md transition-shadow duration-200 hover:shadow-lg">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-              <CardTitle className="text-sm font-semibold text-neutral-600 uppercase tracking-wide">
+              <CardTitle className="text-sm font-semibold tracking-wide text-neutral-600 uppercase">
                 Terakhir Lapor
               </CardTitle>
-              <div className="p-2 bg-neutral-100 rounded-lg">
+              <div className="rounded-lg bg-neutral-100 p-2">
                 <Calendar className="h-5 w-5 text-neutral-600" />
               </div>
             </CardHeader>
             <CardContent className="pt-0">
-              <div className="text-4xl font-bold text-neutral-900 mb-2">
+              <div className="mb-2 text-4xl font-bold text-neutral-900">
                 {stats?.last_report_date
                   ? new Date(stats.last_report_date).toLocaleDateString(
                       "id-ID",
@@ -171,23 +171,23 @@ export default async function DashboardPage() {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
-          <Card className="border-0 shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
+        <div className="mb-16 grid grid-cols-1 gap-8 md:grid-cols-2">
+          <Card className="border-0 shadow-md transition-all duration-200 hover:-translate-y-1 hover:shadow-lg">
             <CardContent className="p-8">
               <div className="flex items-center gap-6">
-                <div className="w-16 h-16 bg-neutral-900 rounded-xl flex items-center justify-center shadow-lg">
+                <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-neutral-900 shadow-lg">
                   <Plus className="h-8 w-8 text-white" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-bold text-neutral-900 mb-2">
+                  <h3 className="mb-2 text-xl font-bold text-neutral-900">
                     Buat Laporan Baru
                   </h3>
-                  <p className="text-neutral-600 mb-4 leading-relaxed">
+                  <p className="mb-4 leading-relaxed text-neutral-600">
                     Laporkan kerusakan jalan yang Anda temukan
                   </p>
                   <Button
                     asChild
-                    className="bg-neutral-900 hover:bg-neutral-800 text-white px-6 py-2"
+                    className="bg-neutral-900 px-6 py-2 text-white hover:bg-neutral-800"
                   >
                     <Link href="/laporan/buat">Mulai Lapor</Link>
                   </Button>
@@ -196,17 +196,17 @@ export default async function DashboardPage() {
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
+          <Card className="border-0 shadow-md transition-all duration-200 hover:-translate-y-1 hover:shadow-lg">
             <CardContent className="p-8">
               <div className="flex items-center gap-6">
-                <div className="w-16 h-16 bg-neutral-100 rounded-xl flex items-center justify-center shadow-sm">
+                <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-neutral-100 shadow-sm">
                   <Eye className="h-8 w-8 text-neutral-700" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-bold text-neutral-900 mb-2">
+                  <h3 className="mb-2 text-xl font-bold text-neutral-900">
                     Lihat Laporan Anda
                   </h3>
-                  <p className="text-neutral-600 mb-4 leading-relaxed">
+                  <p className="mb-4 leading-relaxed text-neutral-600">
                     Pantau status dan respons dari laporan Anda
                   </p>
                   <Button
@@ -230,7 +230,7 @@ export default async function DashboardPage() {
                 <CardTitle className="text-2xl font-bold text-neutral-900">
                   Laporan Terbaru Saya
                 </CardTitle>
-                <CardDescription className="text-lg text-neutral-600 mt-2">
+                <CardDescription className="mt-2 text-lg text-neutral-600">
                   Kelola dan pantau status laporan yang telah Anda buat
                 </CardDescription>
               </div>
@@ -247,9 +247,9 @@ export default async function DashboardPage() {
             {userReports.length > 0 ? (
               <ReportsTable data={userReports} />
             ) : (
-              <div className="text-center py-12">
-                <FileText className="h-12 w-12 mx-auto mb-4 text-neutral-400" />
-                <p className="text-neutral-600 mb-4">Belum ada laporan</p>
+              <div className="py-12 text-center">
+                <FileText className="mx-auto mb-4 h-12 w-12 text-neutral-400" />
+                <p className="mb-4 text-neutral-600">Belum ada laporan</p>
                 <Button asChild>
                   <Link href="/laporan/buat">Buat Laporan Pertama</Link>
                 </Button>

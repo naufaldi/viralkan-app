@@ -1,27 +1,30 @@
 /**
  * Administrative Sync Status Component
- * 
+ *
  * Visual feedback component for administrative data synchronization status
  * with confidence indicators and manual override options.
- * 
+ *
  * Following Viralkan Design System 2.0 & Frontend Development Guidelines
  */
 
-import React from 'react';
-import { Button } from '@repo/ui/components/ui/button';
-import { Card, CardContent } from '@repo/ui/components/ui/card';
-import { Badge } from '@repo/ui/components/ui/badge';
-import { 
-  CheckCircle, 
-  AlertTriangle, 
-  XCircle, 
+import React from "react";
+import { Button } from "@repo/ui/components/ui/button";
+import { Card, CardContent } from "@repo/ui/components/ui/card";
+import { Badge } from "@repo/ui/components/ui/badge";
+import {
+  CheckCircle,
+  AlertTriangle,
+  XCircle,
   HelpCircle,
   RefreshCw,
   MapPin,
-  Settings
-} from 'lucide-react';
-import type { AdministrativeSyncStatus } from '../../lib/utils/enhanced-geocoding-handler';
-import { getConfidenceDescription, getMatchTypeDescription } from '../../lib/utils/enhanced-geocoding-handler';
+  Settings,
+} from "lucide-react";
+import type { AdministrativeSyncStatus } from "../../lib/utils/enhanced-geocoding-handler";
+import {
+  getConfidenceDescription,
+  getMatchTypeDescription,
+} from "../../lib/utils/enhanced-geocoding-handler";
 
 /**
  * Component props
@@ -38,57 +41,60 @@ interface AdministrativeSyncStatusComponentProps {
 /**
  * Administrative sync status component
  */
-export const AdministrativeSyncStatus: React.FC<AdministrativeSyncStatusComponentProps> = ({
+export const AdministrativeSyncStatus: React.FC<
+  AdministrativeSyncStatusComponentProps
+> = ({
   syncStatus,
   isProcessing = false,
   onApply,
   onManualOverride,
   onRetry,
-  className = ''
+  className = "",
 }) => {
   if (!syncStatus) {
     return null;
   }
 
-  const { isSynced, confidence, matchType, message, color, canAutoSelect } = syncStatus;
+  const { isSynced, confidence, matchType, message, color, canAutoSelect } =
+    syncStatus;
   const confidenceInfo = getConfidenceDescription(confidence);
   const matchTypeInfo = getMatchTypeDescription(matchType);
 
   // Determine status icon and styling
   const getStatusConfig = () => {
     switch (color) {
-      case 'green':
+      case "green":
         return {
           icon: CheckCircle,
-          bgColor: 'bg-green-50',
-          borderColor: 'border-green-200',
-          textColor: 'text-green-700',
-          iconColor: 'text-green-600'
+          bgColor: "bg-green-50",
+          borderColor: "border-green-200",
+          textColor: "text-green-700",
+          iconColor: "text-green-600",
         };
-      case 'yellow':
+      case "yellow":
         return {
           icon: AlertTriangle,
-          bgColor: 'bg-yellow-50',
-          borderColor: 'border-yellow-200',
-          textColor: 'text-yellow-700',
-          iconColor: 'text-yellow-600'
+          bgColor: "bg-yellow-50",
+          borderColor: "border-yellow-200",
+          textColor: "text-yellow-700",
+          iconColor: "text-yellow-600",
         };
-      case 'red':
+      case "red":
         return {
           icon: XCircle,
-          bgColor: 'bg-red-50',
-          borderColor: 'border-red-200',
-          textColor: 'text-red-700',
-          iconColor: 'text-red-600'
+          bgColor: "bg-red-50",
+          borderColor: "border-red-200",
+          textColor: "text-red-700",
+          iconColor: "text-red-600",
         };
-      case 'gray':
+      case "gray":
       default:
         return {
           icon: HelpCircle,
-          bgColor: 'bg-neutral-50',
-          borderColor: 'border-neutral-200',
-          textColor: 'text-neutral-700',
-          iconColor: 'text-neutral-600'
+          bgColor: "bg-neutral-50",
+          borderColor: "border-neutral-200",
+          textColor: "text-neutral-700",
+          iconColor: "text-neutral-600",
         };
     }
   };
@@ -97,11 +103,13 @@ export const AdministrativeSyncStatus: React.FC<AdministrativeSyncStatusComponen
   const StatusIcon = statusConfig.icon;
 
   return (
-    <Card className={`${statusConfig.bgColor} ${statusConfig.borderColor} border ${className}`}>
+    <Card
+      className={`${statusConfig.bgColor} ${statusConfig.borderColor} border ${className}`}
+    >
       <CardContent className="p-4">
         <div className="flex items-start justify-between">
           {/* Status Information */}
-          <div className="flex items-start space-x-3 flex-1">
+          <div className="flex flex-1 items-start space-x-3">
             {/* Status Icon */}
             <div className={`${statusConfig.iconColor} mt-0.5`}>
               {isProcessing ? (
@@ -119,8 +127,8 @@ export const AdministrativeSyncStatus: React.FC<AdministrativeSyncStatusComponen
                   {message}
                 </h4>
                 {isSynced && (
-                  <Badge 
-                    variant="outline" 
+                  <Badge
+                    variant="outline"
                     className={`text-xs ${statusConfig.borderColor} ${statusConfig.textColor}`}
                   >
                     {confidenceInfo.icon} {confidenceInfo.description}
@@ -138,7 +146,7 @@ export const AdministrativeSyncStatus: React.FC<AdministrativeSyncStatusComponen
                     </span>
                   </div>
                   <div className="flex items-center space-x-1">
-                    <div className="w-2 h-2 rounded-full bg-neutral-300" />
+                    <div className="h-2 w-2 rounded-full bg-neutral-300" />
                     <span className="text-neutral-600">
                       Keakuratan: {Math.round(confidence * 100)}%
                     </span>
@@ -147,16 +155,17 @@ export const AdministrativeSyncStatus: React.FC<AdministrativeSyncStatusComponen
               )}
 
               {/* Validation Issues */}
-              {!isSynced && matchType === 'none' && (
+              {!isSynced && matchType === "none" && (
                 <p className="text-xs text-neutral-600">
-                  Lokasi tidak ditemukan dalam data administratif. Silakan pilih secara manual.
+                  Lokasi tidak ditemukan dalam data administratif. Silakan pilih
+                  secara manual.
                 </p>
               )}
             </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center space-x-2 ml-4">
+          <div className="ml-4 flex items-center space-x-2">
             {/* Apply Button */}
             {canAutoSelect && onApply && (
               <Button
@@ -168,12 +177,12 @@ export const AdministrativeSyncStatus: React.FC<AdministrativeSyncStatusComponen
               >
                 {isProcessing ? (
                   <>
-                    <RefreshCw className="h-3 w-3 animate-spin mr-1" />
+                    <RefreshCw className="mr-1 h-3 w-3 animate-spin" />
                     Memproses...
                   </>
                 ) : (
                   <>
-                    <CheckCircle className="h-3 w-3 mr-1" />
+                    <CheckCircle className="mr-1 h-3 w-3" />
                     Terapkan
                   </>
                 )}
@@ -189,7 +198,7 @@ export const AdministrativeSyncStatus: React.FC<AdministrativeSyncStatusComponen
                 disabled={isProcessing}
                 className="h-8 px-3 text-xs"
               >
-                <Settings className="h-3 w-3 mr-1" />
+                <Settings className="mr-1 h-3 w-3" />
                 Manual
               </Button>
             )}
@@ -203,7 +212,7 @@ export const AdministrativeSyncStatus: React.FC<AdministrativeSyncStatusComponen
                 disabled={isProcessing}
                 className="h-8 px-3 text-xs"
               >
-                <RefreshCw className="h-3 w-3 mr-1" />
+                <RefreshCw className="mr-1 h-3 w-3" />
                 Coba Lagi
               </Button>
             )}
@@ -213,10 +222,13 @@ export const AdministrativeSyncStatus: React.FC<AdministrativeSyncStatusComponen
         {/* Progress Indicator for Processing */}
         {isProcessing && (
           <div className="mt-3">
-            <div className="w-full bg-neutral-200 rounded-full h-1">
-              <div className="bg-blue-600 h-1 rounded-full animate-pulse" style={{ width: '60%' }} />
+            <div className="h-1 w-full rounded-full bg-neutral-200">
+              <div
+                className="h-1 animate-pulse rounded-full bg-blue-600"
+                style={{ width: "60%" }}
+              />
             </div>
-            <p className="text-xs text-neutral-600 mt-1">
+            <p className="mt-1 text-xs text-neutral-600">
               Mencari data administratif...
             </p>
           </div>
@@ -229,12 +241,14 @@ export const AdministrativeSyncStatus: React.FC<AdministrativeSyncStatusComponen
 /**
  * Compact version for inline use
  */
-export const AdministrativeSyncStatusCompact: React.FC<AdministrativeSyncStatusComponentProps> = ({
+export const AdministrativeSyncStatusCompact: React.FC<
+  AdministrativeSyncStatusComponentProps
+> = ({
   syncStatus,
   isProcessing = false,
   onApply,
   onManualOverride,
-  className = ''
+  className = "",
 }) => {
   if (!syncStatus) {
     return null;
@@ -245,34 +259,34 @@ export const AdministrativeSyncStatusCompact: React.FC<AdministrativeSyncStatusC
 
   const getStatusConfig = () => {
     switch (color) {
-      case 'green':
+      case "green":
         return {
           icon: CheckCircle,
-          bgColor: 'bg-green-50',
-          borderColor: 'border-green-200',
-          textColor: 'text-green-700'
+          bgColor: "bg-green-50",
+          borderColor: "border-green-200",
+          textColor: "text-green-700",
         };
-      case 'yellow':
+      case "yellow":
         return {
           icon: AlertTriangle,
-          bgColor: 'bg-yellow-50',
-          borderColor: 'border-yellow-200',
-          textColor: 'text-yellow-700'
+          bgColor: "bg-yellow-50",
+          borderColor: "border-yellow-200",
+          textColor: "text-yellow-700",
         };
-      case 'red':
+      case "red":
         return {
           icon: XCircle,
-          bgColor: 'bg-red-50',
-          borderColor: 'border-red-200',
-          textColor: 'text-red-700'
+          bgColor: "bg-red-50",
+          borderColor: "border-red-200",
+          textColor: "text-red-700",
         };
-      case 'gray':
+      case "gray":
       default:
         return {
           icon: HelpCircle,
-          bgColor: 'bg-neutral-50',
-          borderColor: 'border-neutral-200',
-          textColor: 'text-neutral-700'
+          bgColor: "bg-neutral-50",
+          borderColor: "border-neutral-200",
+          textColor: "text-neutral-700",
         };
     }
   };
@@ -281,17 +295,19 @@ export const AdministrativeSyncStatusCompact: React.FC<AdministrativeSyncStatusC
   const StatusIcon = statusConfig.icon;
 
   return (
-    <div className={`inline-flex items-center space-x-2 px-3 py-2 rounded-lg border ${statusConfig.bgColor} ${statusConfig.borderColor} ${className}`}>
+    <div
+      className={`inline-flex items-center space-x-2 rounded-lg border px-3 py-2 ${statusConfig.bgColor} ${statusConfig.borderColor} ${className}`}
+    >
       {isProcessing ? (
         <RefreshCw className="h-4 w-4 animate-spin text-neutral-500" />
       ) : (
         <StatusIcon className="h-4 w-4" />
       )}
-      
+
       <span className={`text-sm font-medium ${statusConfig.textColor}`}>
         {message}
       </span>
-      
+
       {isSynced && (
         <Badge variant="outline" className="text-xs">
           {confidenceInfo.icon} {Math.round(confidence * 100)}%
@@ -325,4 +341,4 @@ export const AdministrativeSyncStatusCompact: React.FC<AdministrativeSyncStatusC
   );
 };
 
-export default AdministrativeSyncStatus; 
+export default AdministrativeSyncStatus;

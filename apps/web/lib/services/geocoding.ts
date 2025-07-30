@@ -444,7 +444,9 @@ export function getCacheStats() {
 export async function reverseGeocodeWithNominatimData(
   lat: number,
   lon: number,
-): Promise<GeocodingResult & { nominatimAddress?: NominatimResponse["address"] }> {
+): Promise<
+  GeocodingResult & { nominatimAddress?: NominatimResponse["address"] }
+> {
   try {
     // Validate coordinates
     const validation = CoordinatesSchema.safeParse({ lat, lon });

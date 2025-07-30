@@ -4,7 +4,7 @@ import { Skeleton } from "@repo/ui/components/ui/skeleton";
 export function ReportDetailSkeleton() {
   return (
     <div className="min-h-screen bg-neutral-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Breadcrumb Skeleton */}
         <div className="mb-8">
           <Skeleton className="h-6 w-48" />
@@ -12,13 +12,13 @@ export function ReportDetailSkeleton() {
 
         {/* Hero Image Skeleton */}
         <div className="mb-12">
-          <Skeleton className="w-full h-96 lg:h-[500px] rounded-lg" />
+          <Skeleton className="h-96 w-full rounded-lg lg:h-[500px]" />
         </div>
 
         {/* Content Skeleton */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
           {/* Main Content - Left Column */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className="space-y-8 lg:col-span-2">
             <Card className="border-neutral-200 bg-white">
               <CardHeader className="pb-4">
                 <Skeleton className="h-8 w-64" />
@@ -37,7 +37,7 @@ export function ReportDetailSkeleton() {
 
                 <div className="space-y-4">
                   <Skeleton className="h-5 w-32" />
-                  <div className="p-4 rounded-lg bg-neutral-50 border border-neutral-200">
+                  <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4">
                     <div className="flex items-center gap-3">
                       <Skeleton className="h-5 w-5 rounded-full" />
                       <div className="space-y-2">

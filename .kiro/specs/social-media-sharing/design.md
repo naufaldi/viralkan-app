@@ -78,29 +78,29 @@ The API layer provides RESTful endpoints for sharing functionality:
 export const sharingRouter = new OpenAPIHono<Env>();
 
 const trackShareRoute = createRoute({
-  method: 'post',
-  path: '/{id}/share',
+  method: "post",
+  path: "/{id}/share",
   request: {
     params: ReportParamsSchema,
     body: {
       content: {
-        'application/json': {
+        "application/json": {
           schema: TrackShareSchema,
         },
       },
     },
   },
-  summary: 'Track report share',
-  description: 'Increment share count for a report',
-  tags: ['Sharing'],
+  summary: "Track report share",
+  description: "Increment share count for a report",
+  tags: ["Sharing"],
   responses: {
     200: {
-      description: 'Share tracked successfully',
-      content: { 'application/json': { schema: ShareTrackingResponseSchema } },
+      description: "Share tracked successfully",
+      content: { "application/json": { schema: ShareTrackingResponseSchema } },
     },
     404: {
-      description: 'Report not found',
-      content: { 'application/json': { schema: ErrorResponseSchema } },
+      description: "Report not found",
+      content: { "application/json": { schema: ErrorResponseSchema } },
     },
   },
 });
@@ -116,7 +116,7 @@ The shell layer orchestrates business logic and coordinates between core and dat
 export const trackReportShare = async (
   reportId: string,
   platform: string,
-  userId?: string
+  userId?: string,
 ): Promise<AppResult<ShareTrackingResponse>> => {
   // 1. Validate report exists
   // 2. Validate platform is supported
@@ -128,7 +128,7 @@ export const trackReportShare = async (
 export const generateReportCaption = async (
   reportId: string,
   tone: string,
-  platform: string
+  platform: string,
 ): Promise<AppResult<CaptionResponse>> => {
   // 1. Fetch report data
   // 2. Validate tone and platform
@@ -138,7 +138,7 @@ export const generateReportCaption = async (
 };
 
 export const getShareAnalytics = async (
-  filters: AnalyticsFilters
+  filters: AnalyticsFilters,
 ): Promise<AppResult<ShareAnalytics>> => {
   // 1. Validate date ranges
   // 2. Query share events
@@ -163,19 +163,19 @@ interface CaptionTemplate {
 
 const CAPTION_TEMPLATES: CaptionTemplate = {
   formal:
-    'Ditemukan kerusakan jalan {category} di {street}, {district}, {city}, {province}. Mohon perhatian pemerintah daerah untuk perbaikan. #ViralkanJalan #RoadDamage',
+    "Ditemukan kerusakan jalan {category} di {street}, {district}, {city}, {province}. Mohon perhatian pemerintah daerah untuk perbaikan. #ViralkanJalan #RoadDamage",
   urgent:
-    '🚨 URGENT! Jalan rusak parah di {location} membahayakan pengendara! Kapan diperbaiki? #DamageAlert #FixOurRoads',
+    "🚨 URGENT! Jalan rusak parah di {location} membahayakan pengendara! Kapan diperbaiki? #DamageAlert #FixOurRoads",
   community:
-    'Warga {district} butuh bantuan! Jalan {street} rusak dan mengganggu aktivitas sehari-hari. Mari bersama-sama minta perbaikan 🙏 #CommunityAction',
+    "Warga {district} butuh bantuan! Jalan {street} rusak dan mengganggu aktivitas sehari-hari. Mari bersama-sama minta perbaikan 🙏 #CommunityAction",
   informative:
-    'Data kerusakan jalan: {location} - Kategori: {category} - Dilaporkan: {date}. Butuh tindakan segera dari pihak berwenang. #DataTransparency',
+    "Data kerusakan jalan: {location} - Kategori: {category} - Dilaporkan: {date}. Butuh tindakan segera dari pihak berwenang. #DataTransparency",
 };
 
 export const generateCaptionFromTemplate = (
   template: string,
   reportData: ReportData,
-  platform: string
+  platform: string,
 ): string => {
   // 1. Replace template variables with report data
   // 2. Optimize for platform character limits
@@ -190,15 +190,15 @@ export const generateCaptionFromTemplate = (
 interface PlatformConfig {
   maxLength: number;
   hashtagLimit: number;
-  urlHandling: 'included' | 'separate';
+  urlHandling: "included" | "separate";
 }
 
 const PLATFORM_CONFIGS: Record<string, PlatformConfig> = {
-  twitter: { maxLength: 280, hashtagLimit: 3, urlHandling: 'included' },
-  facebook: { maxLength: 2000, hashtagLimit: 5, urlHandling: 'separate' },
-  whatsapp: { maxLength: 1000, hashtagLimit: 3, urlHandling: 'included' },
-  instagram: { maxLength: 2200, hashtagLimit: 10, urlHandling: 'separate' },
-  telegram: { maxLength: 4096, hashtagLimit: 5, urlHandling: 'included' },
+  twitter: { maxLength: 280, hashtagLimit: 3, urlHandling: "included" },
+  facebook: { maxLength: 2000, hashtagLimit: 5, urlHandling: "separate" },
+  whatsapp: { maxLength: 1000, hashtagLimit: 3, urlHandling: "included" },
+  instagram: { maxLength: 2200, hashtagLimit: 10, urlHandling: "separate" },
+  telegram: { maxLength: 4096, hashtagLimit: 5, urlHandling: "included" },
 };
 ```
 
@@ -211,7 +211,7 @@ The data layer handles database operations:
 ```typescript
 export const incrementShareCount = async (
   db: Database,
-  reportId: string
+  reportId: string,
 ): Promise<number> => {
   // Update reports.share_count atomically
   // Return new count
@@ -219,7 +219,7 @@ export const incrementShareCount = async (
 
 export const recordShareEvent = async (
   db: Database,
-  shareEvent: ShareEventData
+  shareEvent: ShareEventData,
 ): Promise<ShareEvent> => {
   // Insert into shares table
   // Return created record
@@ -227,7 +227,7 @@ export const recordShareEvent = async (
 
 export const getReportForSharing = async (
   db: Database,
-  reportId: string
+  reportId: string,
 ): Promise<ReportSharingData | null> => {
   // Fetch report with location hierarchy
   // Include only public data for sharing
@@ -235,7 +235,7 @@ export const getReportForSharing = async (
 
 export const getShareAnalytics = async (
   db: Database,
-  filters: AnalyticsFilters
+  filters: AnalyticsFilters,
 ): Promise<ShareAnalyticsData> => {
   // Query aggregated share statistics
   // Group by platform, date, etc.
@@ -284,7 +284,7 @@ CREATE INDEX IF NOT EXISTS shares_user_id_idx ON shares(user_id);
 export interface ShareEvent {
   id: string;
   report_id: string;
-  platform: 'whatsapp' | 'twitter' | 'facebook' | 'instagram' | 'telegram';
+  platform: "whatsapp" | "twitter" | "facebook" | "instagram" | "telegram";
   user_id?: string;
   shared_at: Date;
   ip_address?: string;
@@ -314,8 +314,8 @@ export interface ShareTrackingResponse {
 }
 
 export interface GenerateCaptionRequest {
-  tone: 'formal' | 'urgent' | 'community' | 'informative';
-  platform: 'whatsapp' | 'twitter' | 'facebook' | 'instagram' | 'telegram';
+  tone: "formal" | "urgent" | "community" | "informative";
+  platform: "whatsapp" | "twitter" | "facebook" | "instagram" | "telegram";
 }
 
 export interface CaptionResponse {
@@ -351,21 +351,21 @@ Following the existing error handling pattern:
 export class ShareNotFoundError extends Error {
   constructor(reportId: string) {
     super(`Report ${reportId} not found for sharing`);
-    this.name = 'ShareNotFoundError';
+    this.name = "ShareNotFoundError";
   }
 }
 
 export class InvalidPlatformError extends Error {
   constructor(platform: string) {
     super(`Platform ${platform} is not supported`);
-    this.name = 'InvalidPlatformError';
+    this.name = "InvalidPlatformError";
   }
 }
 
 export class CaptionGenerationError extends Error {
   constructor(message: string) {
     super(`Caption generation failed: ${message}`);
-    this.name = 'CaptionGenerationError';
+    this.name = "CaptionGenerationError";
   }
 }
 ```
@@ -390,33 +390,33 @@ interface ErrorResponse {
 
 ```typescript
 // core.test.ts - Test caption generation logic
-describe('Caption Generation', () => {
-  it('should generate formal tone caption', () => {
+describe("Caption Generation", () => {
+  it("should generate formal tone caption", () => {
     const reportData = {
-      category: 'berlubang',
-      street_name: 'Jl. Sudirman',
-      district: 'Menteng',
-      city: 'Jakarta Pusat',
-      province: 'DKI Jakarta',
+      category: "berlubang",
+      street_name: "Jl. Sudirman",
+      district: "Menteng",
+      city: "Jakarta Pusat",
+      province: "DKI Jakarta",
     };
 
     const caption = generateCaptionFromTemplate(
       CAPTION_TEMPLATES.formal,
       reportData,
-      'twitter'
+      "twitter",
     );
 
-    expect(caption).toContain('berlubang');
-    expect(caption).toContain('Jl. Sudirman');
+    expect(caption).toContain("berlubang");
+    expect(caption).toContain("Jl. Sudirman");
     expect(caption.length).toBeLessThanOrEqual(280);
   });
 });
 
 // shell.test.ts - Test business logic
-describe('Share Tracking', () => {
-  it('should increment share count', async () => {
+describe("Share Tracking", () => {
+  it("should increment share count", async () => {
     const mockDb = createMockDatabase();
-    const result = await trackReportShare('report-id', 'twitter');
+    const result = await trackReportShare("report-id", "twitter");
 
     expect(result.success).toBe(true);
     expect(result.data.newShareCount).toBe(1);
@@ -428,12 +428,12 @@ describe('Share Tracking', () => {
 
 ```typescript
 // api.test.ts - Test API endpoints
-describe('Sharing API', () => {
-  it('should track share successfully', async () => {
-    const response = await app.request('/api/reports/test-id/share', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ platform: 'twitter' }),
+describe("Sharing API", () => {
+  it("should track share successfully", async () => {
+    const response = await app.request("/api/reports/test-id/share", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ platform: "twitter" }),
     });
 
     expect(response.status).toBe(200);
@@ -459,7 +459,7 @@ describe('Sharing API', () => {
 const REPORT_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 export const getCachedReportData = async (
-  reportId: string
+  reportId: string,
 ): Promise<ReportSharingData | null> => {
   // Check cache first
   // Fallback to database
@@ -485,22 +485,22 @@ const SHARE_RATE_LIMIT = {
 // Validate all inputs using Zod schemas
 export const TrackShareSchema = z.object({
   platform: z.enum([
-    'whatsapp',
-    'twitter',
-    'facebook',
-    'instagram',
-    'telegram',
+    "whatsapp",
+    "twitter",
+    "facebook",
+    "instagram",
+    "telegram",
   ]),
 });
 
 export const GenerateCaptionSchema = z.object({
-  tone: z.enum(['formal', 'urgent', 'community', 'informative']),
+  tone: z.enum(["formal", "urgent", "community", "informative"]),
   platform: z.enum([
-    'whatsapp',
-    'twitter',
-    'facebook',
-    'instagram',
-    'telegram',
+    "whatsapp",
+    "twitter",
+    "facebook",
+    "instagram",
+    "telegram",
   ]),
 });
 ```
@@ -536,14 +536,14 @@ const shareReport = async (reportId: string, platform: string) => {
   const captionResponse = await fetch(
     `/api/reports/${reportId}/generate-caption`,
     {
-      method: 'POST',
-      body: JSON.stringify({ tone: 'formal', platform }),
-    }
+      method: "POST",
+      body: JSON.stringify({ tone: "formal", platform }),
+    },
   );
 
   // 2. Track share
   const shareResponse = await fetch(`/api/reports/${reportId}/share`, {
-    method: 'POST',
+    method: "POST",
     body: JSON.stringify({ platform }),
   });
 
@@ -570,13 +570,13 @@ After MVP is stable, integrate OpenAI API:
 export const generateAICaption = async (
   reportData: ReportSharingData,
   tone: string,
-  platform: string
+  platform: string,
 ): Promise<string> => {
   const prompt = `Generate a ${tone} social media caption for ${platform} about road damage: ${JSON.stringify(reportData)}`;
 
   const response = await openai.chat.completions.create({
-    model: 'gpt-3.5-turbo',
-    messages: [{ role: 'user', content: prompt }],
+    model: "gpt-3.5-turbo",
+    messages: [{ role: "user", content: prompt }],
     max_tokens: 100,
   });
 

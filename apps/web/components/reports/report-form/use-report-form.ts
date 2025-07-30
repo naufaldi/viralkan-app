@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useCreateReport } from "../../../hooks/use-create-report";
 import { useGeocoding } from "../../../hooks/use-geocoding";
 import { useAdministrativeSync } from "../../../hooks/reports/use-administrative-sync";
+import { useAdministrative } from "../../../hooks/reports/use-administrative";
 import { uploadImage } from "../../../services/upload";
 import { useAuth } from "../../../hooks/useAuth";
 import { useInvalidateDashboard } from "../../../hooks/dashboard";
@@ -19,7 +20,10 @@ import {
   extractGPSFromImage,
   getExifErrorMessage,
 } from "../../../lib/utils/exif-extraction";
-import { reverseGeocode, reverseGeocodeWithNominatimData } from "../../../lib/services/geocoding";
+import {
+  reverseGeocode,
+  reverseGeocodeWithNominatimData,
+} from "../../../lib/services/geocoding";
 import { processNominatimAddressWithAPI } from "../../../lib/utils/enhanced-geocoding-handler";
 import { administrativeService } from "../../../services/api-client";
 import { CreateReportSchema, CreateReportInput } from "../../../lib/types/api";
@@ -44,6 +48,9 @@ export const useReportForm = ({ onSuccess }: UseReportFormProps) => {
   const { invalidateAll } = useInvalidateDashboard();
   const router = useRouter();
 
+  // Administrative data hook for adding dynamic options
+  const { addDynamicOption } = useAdministrative();
+
   // Geocoding hook for manual address/coordinates filling
   const {
     isGeocodingFromCoords,
@@ -57,15 +64,17 @@ export const useReportForm = ({ onSuccess }: UseReportFormProps) => {
   } = useGeocoding({
     onAddressFilled: (addressData) => {
       // Auto-fill address fields when coordinates are geocoded
-      form.setValue("street_name", addressData.street_name);
-      form.setValue("district", addressData.district);
-      form.setValue("city", addressData.city);
-      form.setValue("province", addressData.province);
+      form.setValue("street_name", addressData.street_name, {
+        shouldValidate: true,
+      });
+      form.setValue("district", addressData.district, { shouldValidate: true });
+      form.setValue("city", addressData.city, { shouldValidate: true });
+      form.setValue("province", addressData.province, { shouldValidate: true });
     },
     onCoordinatesFilled: (coordData) => {
       // Auto-fill coordinates when address is geocoded
-      form.setValue("lat", coordData.lat);
-      form.setValue("lon", coordData.lon);
+      form.setValue("lat", coordData.lat, { shouldValidate: true });
+      form.setValue("lon", coordData.lon, { shouldValidate: true });
     },
   });
 
@@ -120,44 +129,99 @@ export const useReportForm = ({ onSuccess }: UseReportFormProps) => {
   });
 
   // Helper function to apply search results and ensure data loading
-  const applyAdministrativeSearchResults = async (enhancedResult: { administrative: { province: { code: string | null; name: string | null }; regency: { code: string | null; name: string | null }; district: { code: string | null; name: string | null } } }) => {
+  const applyAdministrativeSearchResults = async (enhancedResult: {
+    administrative: {
+      province: { code: string | null; name: string | null };
+      regency: { code: string | null; name: string | null };
+      district: { code: string | null; name: string | null };
+    };
+  }) => {
     try {
       // Apply province first
-      if (enhancedResult.administrative.province.code) {
-        form.setValue("province_code", enhancedResult.administrative.province.code);
-        form.setValue("province", enhancedResult.administrative.province.name || "");
-        
+      if (
+        enhancedResult.administrative.province.code &&
+        enhancedResult.administrative.province.name
+      ) {
+        // Add to dynamic options so ComboboxField can find it
+        addDynamicOption("province", {
+          code: enhancedResult.administrative.province.code,
+          name: enhancedResult.administrative.province.name,
+        });
+
+        form.setValue(
+          "province_code",
+          enhancedResult.administrative.province.code,
+          { shouldValidate: true },
+        );
+        form.setValue("province", enhancedResult.administrative.province.name, {
+          shouldValidate: true,
+        });
+
         // Ensure regency data is loaded for this province
         if (enhancedResult.administrative.regency.code) {
           try {
-            await administrativeService.getRegencies(enhancedResult.administrative.province.code);
+            await administrativeService.getRegencies(
+              enhancedResult.administrative.province.code,
+            );
           } catch (error) {
             console.warn("Failed to preload regency data:", error);
           }
         }
       }
-      
+
       // Apply regency
-      if (enhancedResult.administrative.regency.code) {
-        form.setValue("regency_code", enhancedResult.administrative.regency.code);
-        form.setValue("city", enhancedResult.administrative.regency.name || "");
-        
+      if (
+        enhancedResult.administrative.regency.code &&
+        enhancedResult.administrative.regency.name
+      ) {
+        // Add to dynamic options so ComboboxField can find it
+        addDynamicOption("regency", {
+          code: enhancedResult.administrative.regency.code,
+          name: enhancedResult.administrative.regency.name,
+        });
+
+        form.setValue(
+          "regency_code",
+          enhancedResult.administrative.regency.code,
+          { shouldValidate: true },
+        );
+        form.setValue("city", enhancedResult.administrative.regency.name, {
+          shouldValidate: true,
+        });
+
         // Ensure district data is loaded for this regency
         if (enhancedResult.administrative.district.code) {
           try {
-            await administrativeService.getDistricts(enhancedResult.administrative.regency.code);
+            await administrativeService.getDistricts(
+              enhancedResult.administrative.regency.code,
+            );
           } catch (error) {
             console.warn("Failed to preload district data:", error);
           }
         }
       }
-      
+
       // Apply district
-      if (enhancedResult.administrative.district.code) {
-        form.setValue("district_code", enhancedResult.administrative.district.code);
-        form.setValue("district", enhancedResult.administrative.district.name || "");
+      if (
+        enhancedResult.administrative.district.code &&
+        enhancedResult.administrative.district.name
+      ) {
+        // Add to dynamic options so ComboboxField can find it
+        addDynamicOption("district", {
+          code: enhancedResult.administrative.district.code,
+          name: enhancedResult.administrative.district.name,
+        });
+
+        form.setValue(
+          "district_code",
+          enhancedResult.administrative.district.code,
+          { shouldValidate: true },
+        );
+        form.setValue("district", enhancedResult.administrative.district.name, {
+          shouldValidate: true,
+        });
       }
-      
+
       // Force form to re-render by triggering validation
       await form.trigger();
     } catch (error) {
@@ -191,7 +255,7 @@ export const useReportForm = ({ onSuccess }: UseReportFormProps) => {
       originalFile: originalFile?.name,
       usingFile: fileForExif.name,
       fileSize: fileForExif.size,
-      fileType: fileForExif.type
+      fileType: fileForExif.type,
     });
     setIsExtractingExif(true);
 
@@ -200,8 +264,8 @@ export const useReportForm = ({ onSuccess }: UseReportFormProps) => {
 
       if (exifResult.success && exifResult.gpsData) {
         // Auto-fill coordinates from EXIF data
-        form.setValue("lat", exifResult.gpsData.lat);
-        form.setValue("lon", exifResult.gpsData.lon);
+        form.setValue("lat", exifResult.gpsData.lat, { shouldValidate: true });
+        form.setValue("lon", exifResult.gpsData.lon, { shouldValidate: true });
         setHasExifData(true);
 
         // Perform enhanced reverse geocoding with API-based administrative matching
@@ -213,20 +277,25 @@ export const useReportForm = ({ onSuccess }: UseReportFormProps) => {
 
           if (geocodingResult.success && geocodingResult.data) {
             // Process with new API-based progressive population
-            const enhancedResult = await processNominatimAddressWithAPI(geocodingResult.data);
-            
+            const enhancedResult = await processNominatimAddressWithAPI(
+              geocodingResult.data,
+            );
+
             // Apply the enhanced result to the form with proper data loading
             await applyAdministrativeSearchResults(enhancedResult);
 
             // Set basic address fields
             if (geocodingResult.data.street_name) {
-              form.setValue("street_name", geocodingResult.data.street_name);
+              form.setValue("street_name", geocodingResult.data.street_name, {
+                shouldValidate: true,
+              });
             }
 
             // Show success message based on overall confidence
             if (enhancedResult.overallConfidence >= 0.9) {
               toast.success("Lokasi dan alamat berhasil diekstrak dengan AI", {
-                description: "Data administratif telah divalidasi dengan akurasi tinggi",
+                description:
+                  "Data administratif telah divalidasi dengan akurasi tinggi",
                 duration: 5000,
               });
             } else if (enhancedResult.overallConfidence >= 0.7) {
@@ -235,10 +304,14 @@ export const useReportForm = ({ onSuccess }: UseReportFormProps) => {
                 duration: 5000,
               });
             } else if (enhancedResult.overallConfidence > 0) {
-              toast.success("Koordinat dan sebagian alamat berhasil diekstrak", {
-                description: "Beberapa data administratif ditemukan - silakan verifikasi",
-                duration: 5000,
-              });
+              toast.success(
+                "Koordinat dan sebagian alamat berhasil diekstrak",
+                {
+                  description:
+                    "Beberapa data administratif ditemukan - silakan verifikasi",
+                  duration: 5000,
+                },
+              );
             } else {
               toast.success("Koordinat berhasil diekstrak dari foto", {
                 description: `${geocodingResult.data.district || ""}, ${geocodingResult.data.city || ""} - Silakan verifikasi data administratif`,
@@ -331,8 +404,8 @@ export const useReportForm = ({ onSuccess }: UseReportFormProps) => {
         const lat = position.coords.latitude;
         const lon = position.coords.longitude;
 
-        form.setValue("lat", lat);
-        form.setValue("lon", lon);
+        form.setValue("lat", lat, { shouldValidate: true });
+        form.setValue("lon", lon, { shouldValidate: true });
 
         toast.loading("Mencari alamat dengan AI...", {
           id: "location",
@@ -340,25 +413,33 @@ export const useReportForm = ({ onSuccess }: UseReportFormProps) => {
 
         // Use enhanced geocoding with API-based administrative matching
         try {
-          const geocodingResult = await reverseGeocodeWithNominatimData(lat, lon);
+          const geocodingResult = await reverseGeocodeWithNominatimData(
+            lat,
+            lon,
+          );
 
           if (geocodingResult.success && geocodingResult.data) {
             // Process with new API-based progressive population
-            const enhancedResult = await processNominatimAddressWithAPI(geocodingResult.data);
-            
+            const enhancedResult = await processNominatimAddressWithAPI(
+              geocodingResult.data,
+            );
+
             // Apply the enhanced result to the form with proper data loading
             await applyAdministrativeSearchResults(enhancedResult);
 
             // Set basic address fields
             if (geocodingResult.data.street_name) {
-              form.setValue("street_name", geocodingResult.data.street_name);
+              form.setValue("street_name", geocodingResult.data.street_name, {
+                shouldValidate: true,
+              });
             }
 
             // Show success message based on overall confidence
             if (enhancedResult.overallConfidence >= 0.9) {
               toast.success("Lokasi dan alamat berhasil ditemukan dengan AI", {
                 id: "location",
-                description: "Data administratif telah divalidasi dengan akurasi tinggi",
+                description:
+                  "Data administratif telah divalidasi dengan akurasi tinggi",
                 duration: 5000,
               });
             } else if (enhancedResult.overallConfidence >= 0.7) {
@@ -368,11 +449,15 @@ export const useReportForm = ({ onSuccess }: UseReportFormProps) => {
                 duration: 5000,
               });
             } else if (enhancedResult.overallConfidence > 0) {
-              toast.success("Lokasi diperoleh dengan sebagian data administratif", {
-                id: "location",
-                description: "Beberapa data administratif ditemukan - silakan verifikasi",
-                duration: 5000,
-              });
+              toast.success(
+                "Lokasi diperoleh dengan sebagian data administratif",
+                {
+                  id: "location",
+                  description:
+                    "Beberapa data administratif ditemukan - silakan verifikasi",
+                  duration: 5000,
+                },
+              );
             } else {
               toast.success("Lokasi berhasil diperoleh", {
                 id: "location",
@@ -432,27 +517,55 @@ export const useReportForm = ({ onSuccess }: UseReportFormProps) => {
 
       if (geocodingResult.success && geocodingResult.data) {
         // Process with new API-based progressive population
-        const enhancedResult = await processNominatimAddressWithAPI(geocodingResult.data);
-        
+        const enhancedResult = await processNominatimAddressWithAPI(
+          geocodingResult.data,
+        );
+
         // Apply the enhanced result to the form
         if (enhancedResult.administrative.province.code) {
-          form.setValue("province_code", enhancedResult.administrative.province.code);
-          form.setValue("province", enhancedResult.administrative.province.name || "");
+          form.setValue(
+            "province_code",
+            enhancedResult.administrative.province.code,
+            { shouldValidate: true },
+          );
+          form.setValue(
+            "province",
+            enhancedResult.administrative.province.name || "",
+            { shouldValidate: true },
+          );
         }
-        
+
         if (enhancedResult.administrative.regency.code) {
-          form.setValue("regency_code", enhancedResult.administrative.regency.code);
-          form.setValue("city", enhancedResult.administrative.regency.name || "");
+          form.setValue(
+            "regency_code",
+            enhancedResult.administrative.regency.code,
+            { shouldValidate: true },
+          );
+          form.setValue(
+            "city",
+            enhancedResult.administrative.regency.name || "",
+            { shouldValidate: true },
+          );
         }
-        
+
         if (enhancedResult.administrative.district.code) {
-          form.setValue("district_code", enhancedResult.administrative.district.code);
-          form.setValue("district", enhancedResult.administrative.district.name || "");
+          form.setValue(
+            "district_code",
+            enhancedResult.administrative.district.code,
+            { shouldValidate: true },
+          );
+          form.setValue(
+            "district",
+            enhancedResult.administrative.district.name || "",
+            { shouldValidate: true },
+          );
         }
 
         // Set basic address fields
         if (geocodingResult.data.street_name) {
-          form.setValue("street_name", geocodingResult.data.street_name);
+          form.setValue("street_name", geocodingResult.data.street_name, {
+            shouldValidate: true,
+          });
         }
 
         // Show success message based on overall confidence
@@ -465,7 +578,8 @@ export const useReportForm = ({ onSuccess }: UseReportFormProps) => {
         } else if (enhancedResult.overallConfidence > 0) {
           toast.success("Sebagian alamat berhasil ditemukan", {
             id: "manual-geocode",
-            description: "Beberapa data administratif ditemukan - silakan verifikasi",
+            description:
+              "Beberapa data administratif ditemukan - silakan verifikasi",
             duration: 4000,
           });
         } else {

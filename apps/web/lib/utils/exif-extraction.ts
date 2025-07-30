@@ -3,9 +3,14 @@ import exifr from "exifr";
 /**
  * Convert GPS coordinates from degrees/minutes/seconds to decimal degrees
  */
-function dmsToDecimal(degrees: number, minutes: number, seconds: number, direction: string): number {
-  let decimal = degrees + (minutes / 60) + (seconds / 3600);
-  if (direction === 'S' || direction === 'W') {
+function dmsToDecimal(
+  degrees: number,
+  minutes: number,
+  seconds: number,
+  direction: string,
+): number {
+  let decimal = degrees + minutes / 60 + seconds / 3600;
+  if (direction === "S" || direction === "W") {
     decimal = -decimal;
   }
   return decimal;
@@ -60,7 +65,16 @@ export async function extractGPSFromImage(
       exifData = await exifr.parse(file, {
         gps: true,
         // Try extracting all GPS-related tags
-        pick: ["GPS", "GPSLatitude", "GPSLongitude", "GPSLatitudeRef", "GPSLongitudeRef", "DateTimeOriginal", "Make", "Model"],
+        pick: [
+          "GPS",
+          "GPSLatitude",
+          "GPSLongitude",
+          "GPSLatitudeRef",
+          "GPSLongitudeRef",
+          "DateTimeOriginal",
+          "Make",
+          "Model",
+        ],
       });
     }
 
@@ -81,7 +95,9 @@ export async function extractGPSFromImage(
       gpsData: exifData?.GPS,
       allKeys: exifData ? Object.keys(exifData) : [],
       // Log all GPS-related fields
-      gpsFields: exifData ? Object.keys(exifData).filter(k => k.toLowerCase().includes('gps')) : []
+      gpsFields: exifData
+        ? Object.keys(exifData).filter((k) => k.toLowerCase().includes("gps"))
+        : [],
     });
 
     // Check if EXIF data exists
@@ -99,7 +115,10 @@ export async function extractGPSFromImage(
 
     if (exifData.GPS) {
       // Standard GPS format - check if already in decimal
-      if (typeof exifData.GPS.latitude === "number" && typeof exifData.GPS.longitude === "number") {
+      if (
+        typeof exifData.GPS.latitude === "number" &&
+        typeof exifData.GPS.longitude === "number"
+      ) {
         lat = exifData.GPS.latitude;
         lon = exifData.GPS.longitude;
       }
@@ -107,23 +126,33 @@ export async function extractGPSFromImage(
       else if (exifData.GPS.GPSLatitude && exifData.GPS.GPSLongitude) {
         const latDMS = exifData.GPS.GPSLatitude;
         const lonDMS = exifData.GPS.GPSLongitude;
-        const latRef = exifData.GPS.GPSLatitudeRef || 'N';
-        const lonRef = exifData.GPS.GPSLongitudeRef || 'E';
-        
-        if (Array.isArray(latDMS) && latDMS.length >= 3 && Array.isArray(lonDMS) && lonDMS.length >= 3) {
+        const latRef = exifData.GPS.GPSLatitudeRef || "N";
+        const lonRef = exifData.GPS.GPSLongitudeRef || "E";
+
+        if (
+          Array.isArray(latDMS) &&
+          latDMS.length >= 3 &&
+          Array.isArray(lonDMS) &&
+          lonDMS.length >= 3
+        ) {
           lat = dmsToDecimal(latDMS[0], latDMS[1], latDMS[2], latRef);
           lon = dmsToDecimal(lonDMS[0], lonDMS[1], lonDMS[2], lonRef);
         }
       }
-    } 
+    }
     // Alternative GPS format at root level
     else if (exifData.GPSLatitude && exifData.GPSLongitude) {
       const latDMS = exifData.GPSLatitude;
       const lonDMS = exifData.GPSLongitude;
-      const latRef = exifData.GPSLatitudeRef || 'N';
-      const lonRef = exifData.GPSLongitudeRef || 'E';
-      
-      if (Array.isArray(latDMS) && latDMS.length >= 3 && Array.isArray(lonDMS) && lonDMS.length >= 3) {
+      const latRef = exifData.GPSLatitudeRef || "N";
+      const lonRef = exifData.GPSLongitudeRef || "E";
+
+      if (
+        Array.isArray(latDMS) &&
+        latDMS.length >= 3 &&
+        Array.isArray(lonDMS) &&
+        lonDMS.length >= 3
+      ) {
         lat = dmsToDecimal(latDMS[0], latDMS[1], latDMS[2], latRef);
         lon = dmsToDecimal(lonDMS[0], lonDMS[1], lonDMS[2], lonRef);
       } else if (typeof latDMS === "number" && typeof lonDMS === "number") {
@@ -140,7 +169,7 @@ export async function extractGPSFromImage(
       isLatNumber: typeof lat === "number",
       isLonNumber: typeof lon === "number",
       isLatValid: typeof lat === "number" && !isNaN(lat),
-      isLonValid: typeof lon === "number" && !isNaN(lon)
+      isLonValid: typeof lon === "number" && !isNaN(lon),
     });
 
     // Check if we found valid GPS coordinates

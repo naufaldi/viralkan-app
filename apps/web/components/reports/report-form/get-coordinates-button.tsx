@@ -21,7 +21,7 @@ export function GetCoordinatesButton({
       size="sm"
       onClick={onClick}
       disabled={disabled || isLoading || !isValidAddress}
-      className="w-full sm:w-auto border-neutral-300 text-neutral-700 hover:bg-green-50 hover:border-green-200 hover:text-green-700 transition-all duration-200"
+      className="w-full border-neutral-300 text-neutral-700 transition-all duration-200 hover:border-green-200 hover:bg-green-50 hover:text-green-700 sm:w-auto"
     >
       {isLoading ? (
         <Loader2 className="mr-2 h-4 w-4 animate-spin" />

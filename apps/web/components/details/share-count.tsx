@@ -10,13 +10,13 @@ interface ShareCountProps {
   className?: string;
 }
 
-export function ShareCount({ 
-  reportId, 
+export function ShareCount({
+  reportId,
   initialCount = 0,
-  className = "" 
+  className = "",
 }: ShareCountProps) {
   const [count, setCount] = useState(initialCount);
-  
+
   // Use the report sharing hook to get real-time data
   const { shareDetails, isLoading, error } = useReportSharing({
     reportId,
@@ -38,10 +38,16 @@ export function ShareCount({
       }
     };
 
-    document.addEventListener('shareCountUpdated', handleShareCountUpdate as EventListener);
-    
+    document.addEventListener(
+      "shareCountUpdated",
+      handleShareCountUpdate as EventListener,
+    );
+
     return () => {
-      document.removeEventListener('shareCountUpdated', handleShareCountUpdate as EventListener);
+      document.removeEventListener(
+        "shareCountUpdated",
+        handleShareCountUpdate as EventListener,
+      );
     };
   }, []);
 
@@ -50,7 +56,9 @@ export function ShareCount({
   }
 
   return (
-    <div className={`flex items-center gap-2 text-sm text-neutral-600 ${className}`}>
+    <div
+      className={`flex items-center gap-2 text-sm text-neutral-600 ${className}`}
+    >
       <Share2 className="h-4 w-4" />
       <span className="font-medium">
         {isLoading ? "..." : count.toLocaleString()}

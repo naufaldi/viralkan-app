@@ -64,21 +64,21 @@ export const AdminNavigation = () => {
   };
 
   return (
-    <nav className="bg-white border-b border-neutral-200 shadow-sm">
+    <nav className="border-b border-neutral-200 bg-white shadow-sm">
       <div className="container mx-auto px-4 sm:px-6">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center shadow-sm">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-600 shadow-sm">
               <ChevronUp className="h-5 w-5 text-white" />
             </div>
-            <span className="text-lg font-bold text-neutral-900 tracking-tight">
+            <span className="text-lg font-bold tracking-tight text-neutral-900">
               Viralkan Admin
             </span>
           </div>
 
           {/* Navigation Links */}
-          <div className="hidden md:flex items-center gap-1">
+          <div className="hidden items-center gap-1 md:flex">
             {navigationItems.map((item) => {
               const Icon = item.icon;
               return (
@@ -100,12 +100,12 @@ export const AdminNavigation = () => {
 
           {/* User Menu */}
           {isAuthenticated && backendUser && (
-            <div className="hidden md:flex items-center ml-4">
+            <div className="ml-4 hidden items-center md:flex">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
-                    className="relative h-9 w-9 rounded-full hover:bg-neutral-100 focus:bg-neutral-100 transition-colors"
+                    className="relative h-9 w-9 rounded-full transition-colors hover:bg-neutral-100 focus:bg-neutral-100"
                     aria-label="User menu"
                   >
                     <Avatar className="h-8 w-8">
@@ -113,7 +113,7 @@ export const AdminNavigation = () => {
                         src={backendUser.avatar_url || undefined}
                         alt={backendUser.name}
                       />
-                      <AvatarFallback className="bg-neutral-100 text-neutral-700 font-medium text-sm">
+                      <AvatarFallback className="bg-neutral-100 text-sm font-medium text-neutral-700">
                         {backendUser.name?.charAt(0)?.toUpperCase() || "A"}
                       </AvatarFallback>
                     </Avatar>
@@ -125,12 +125,12 @@ export const AdminNavigation = () => {
                   forceMount
                   sideOffset={8}
                 >
-                  <DropdownMenuLabel className="font-normal p-3">
+                  <DropdownMenuLabel className="p-3 font-normal">
                     <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-semibold leading-none text-neutral-900">
+                      <p className="text-sm leading-none font-semibold text-neutral-900">
                         {backendUser.name}
                       </p>
-                      <p className="text-xs leading-none text-neutral-600 mt-1">
+                      <p className="mt-1 text-xs leading-none text-neutral-600">
                         {backendUser.email}
                       </p>
                     </div>
@@ -139,7 +139,7 @@ export const AdminNavigation = () => {
                   <DropdownMenuItem asChild className="py-2.5">
                     <Link
                       href="/dashboard"
-                      className="cursor-pointer flex items-center"
+                      className="flex cursor-pointer items-center"
                     >
                       <LayoutDashboard className="mr-3 h-4 w-4" />
                       <span className="font-medium">Dashboard</span>
@@ -148,7 +148,7 @@ export const AdminNavigation = () => {
                   <DropdownMenuItem asChild className="py-2.5">
                     <Link
                       href="/laporan/buat"
-                      className="cursor-pointer flex items-center"
+                      className="flex cursor-pointer items-center"
                     >
                       <FileText className="mr-3 h-4 w-4" />
                       <span className="font-medium">Buat Laporan</span>
@@ -157,7 +157,7 @@ export const AdminNavigation = () => {
                   <DropdownMenuSeparator className="bg-neutral-200" />
                   <DropdownMenuItem
                     onClick={handleLogout}
-                    className="cursor-pointer py-2.5 text-red-600 hover:text-red-700 hover:bg-red-50"
+                    className="cursor-pointer py-2.5 text-red-600 hover:bg-red-50 hover:text-red-700"
                   >
                     <LogOut className="mr-3 h-4 w-4" />
                     <span className="font-medium">Keluar</span>
@@ -171,10 +171,10 @@ export const AdminNavigation = () => {
           <div className="md:hidden">
             <Button variant="ghost" size="sm" className="h-9 w-9 p-0">
               <span className="sr-only">Open admin menu</span>
-              <div className="w-5 h-5 flex flex-col justify-center items-center gap-1">
-                <div className="w-4 h-0.5 bg-neutral-600 rounded"></div>
-                <div className="w-4 h-0.5 bg-neutral-600 rounded"></div>
-                <div className="w-4 h-0.5 bg-neutral-600 rounded"></div>
+              <div className="flex h-5 w-5 flex-col items-center justify-center gap-1">
+                <div className="h-0.5 w-4 rounded bg-neutral-600"></div>
+                <div className="h-0.5 w-4 rounded bg-neutral-600"></div>
+                <div className="h-0.5 w-4 rounded bg-neutral-600"></div>
               </div>
             </Button>
           </div>

@@ -38,18 +38,18 @@ export function ReportCard({ report, onClick }: ReportCardProps) {
 
   return (
     <Card
-      className="hover:shadow-md transition-shadow cursor-pointer border border-neutral-200"
+      className="cursor-pointer border border-neutral-200 transition-shadow hover:shadow-md"
       onClick={onClick}
     >
       <CardContent className="p-0">
         {/* Report Image */}
         <div className="relative">
-          <div className="w-full h-48 relative">
+          <div className="relative h-48 w-full">
             <Image
               src={report.image_url}
               alt={`Kerusakan jalan di ${report.street_name}`}
               fill
-              className="object-cover rounded-t-lg"
+              className="rounded-t-lg object-cover"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
           </div>
@@ -62,15 +62,15 @@ export function ReportCard({ report, onClick }: ReportCardProps) {
         </div>
 
         {/* Report Info */}
-        <div className="p-4 space-y-3">
+        <div className="space-y-3 p-4">
           {/* Location */}
           <div className="space-y-2">
-            <h3 className="font-semibold text-neutral-900 line-clamp-1">
+            <h3 className="line-clamp-1 font-semibold text-neutral-900">
               {report.street_name}
             </h3>
             <div className="flex items-start gap-2">
-              <MapPin className="h-4 w-4 text-neutral-500 mt-0.5 flex-shrink-0" />
-              <p className="text-sm text-neutral-600 line-clamp-2">
+              <MapPin className="mt-0.5 h-4 w-4 flex-shrink-0 text-neutral-500" />
+              <p className="line-clamp-2 text-sm text-neutral-600">
                 {report.location_text}
               </p>
             </div>
@@ -87,18 +87,18 @@ export function ReportCard({ report, onClick }: ReportCardProps) {
           />
 
           {/* User & Time */}
-          <div className="flex items-center justify-between pt-2 border-t border-neutral-100">
+          <div className="flex items-center justify-between border-t border-neutral-100 pt-2">
             <div className="flex items-center gap-2">
               <Avatar className="h-6 w-6">
                 <AvatarImage src={report.user_avatar || undefined} />
-                <AvatarFallback className="text-xs bg-neutral-100 text-neutral-700">
+                <AvatarFallback className="bg-neutral-100 text-xs text-neutral-700">
                   {report.user_name
                     ?.split(" ")
                     .map((n: string) => n[0])
                     .join("") || <User className="h-3 w-3" />}
                 </AvatarFallback>
               </Avatar>
-              <span className="text-xs text-neutral-600 font-medium">
+              <span className="text-xs font-medium text-neutral-600">
                 {report.user_name || "Anonim"}
               </span>
             </div>

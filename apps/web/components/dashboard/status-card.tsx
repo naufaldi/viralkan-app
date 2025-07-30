@@ -35,7 +35,7 @@ export function StatusCard({
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold">{value}</div>
-        <p className="text-xs text-muted-foreground">{description}</p>
+        <p className="text-muted-foreground text-xs">{description}</p>
         {trend && (
           <div className="flex items-center pt-1">
             <span
@@ -46,7 +46,7 @@ export function StatusCard({
               {trend.isPositive ? "+" : ""}
               {trend.value}
             </span>
-            <span className="text-xs text-muted-foreground ml-1">
+            <span className="text-muted-foreground ml-1 text-xs">
               {trend.label}
             </span>
           </div>

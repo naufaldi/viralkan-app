@@ -1,8 +1,8 @@
 export function ReportsEmptyState() {
   return (
-    <div className="text-center py-24">
-      <div className="text-6xl mb-4">🔍</div>
-      <h3 className="text-xl font-semibold text-foreground mb-2">
+    <div className="py-24 text-center">
+      <div className="mb-4 text-6xl">🔍</div>
+      <h3 className="text-foreground mb-2 text-xl font-semibold">
         Tidak ada laporan ditemukan
       </h3>
       <p className="text-muted-foreground">

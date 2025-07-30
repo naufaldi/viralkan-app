@@ -78,8 +78,8 @@ export default function EditReportForm({
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
-        form.setValue("lat", latitude);
-        form.setValue("lon", longitude);
+        form.setValue("lat", latitude, { shouldValidate: true });
+        form.setValue("lon", longitude, { shouldValidate: true });
         setIsGettingLocation(false);
       },
       (error) => {
@@ -95,12 +95,12 @@ export default function EditReportForm({
   };
 
   return (
-    <Card className="border-neutral-200 shadow-lg rounded-xl overflow-hidden hover:translate-0">
-      <div className="bg-neutral-50 border-b border-neutral-200 px-6 lg:px-8 py-6">
+    <Card className="overflow-hidden rounded-xl border-neutral-200 shadow-lg hover:translate-0">
+      <div className="border-b border-neutral-200 bg-neutral-50 px-6 py-6 lg:px-8">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-neutral-900 rounded-lg flex items-center justify-center">
+          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-neutral-900">
             <svg
-              className="w-6 h-6 text-white"
+              className="h-6 w-6 text-white"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"

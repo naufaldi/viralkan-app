@@ -29,7 +29,13 @@ interface EditImageUploadProps {
 }
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-const ACCEPTED_FORMATS = ["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"];
+const ACCEPTED_FORMATS = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/heic",
+  "image/heif",
+];
 const MAX_RETRIES = 3;
 
 export default function EditImageUpload({
@@ -58,33 +64,44 @@ export default function EditImageUpload({
         toType: "image/jpeg",
         quality: 0.9,
       });
-      
+
       // Handle both single blob and array of blobs
-      const blob = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
-      
+      const blob = Array.isArray(convertedBlob)
+        ? convertedBlob[0]
+        : convertedBlob;
+
       if (!blob) {
-        throw new Error("Gagal mengkonversi file HEIC. Hasil konversi tidak valid.");
+        throw new Error(
+          "Gagal mengkonversi file HEIC. Hasil konversi tidak valid.",
+        );
       }
-      
+
       // Create a new File object with the converted data
       const originalName = file.name;
-      const nameWithoutExt = originalName.substring(0, originalName.lastIndexOf("."));
-      const newFileName = nameWithoutExt ? `${nameWithoutExt}.jpg` : `converted_${Date.now()}.jpg`;
-      
+      const nameWithoutExt = originalName.substring(
+        0,
+        originalName.lastIndexOf("."),
+      );
+      const newFileName = nameWithoutExt
+        ? `${nameWithoutExt}.jpg`
+        : `converted_${Date.now()}.jpg`;
+
       const convertedFile = new File([blob], newFileName, {
         type: "image/jpeg",
         lastModified: Date.now(),
       });
-      
+
       console.log("HEIC conversion successful:", {
         original: `${(file.size / 1024 / 1024).toFixed(2)}MB`,
         converted: `${(convertedFile.size / 1024 / 1024).toFixed(2)}MB`,
       });
-      
+
       return convertedFile;
     } catch (error) {
       console.error("HEIC conversion failed:", error);
-      throw new Error("Gagal mengkonversi file HEIC. Silakan gunakan format JPEG, PNG, atau WebP.");
+      throw new Error(
+        "Gagal mengkonversi file HEIC. Silakan gunakan format JPEG, PNG, atau WebP.",
+      );
     }
   }, []);
 
@@ -138,12 +155,19 @@ export default function EditImageUpload({
 
       // Check if file is HEIC/HEIF and convert it
       let processedFile = file;
-      if (file.type === "image/heic" || file.type === "image/heif" || file.name.toLowerCase().endsWith('.heic') || file.name.toLowerCase().endsWith('.heif')) {
+      if (
+        file.type === "image/heic" ||
+        file.type === "image/heif" ||
+        file.name.toLowerCase().endsWith(".heic") ||
+        file.name.toLowerCase().endsWith(".heif")
+      ) {
         try {
           setIsCompressing(true);
           processedFile = await convertHeicToJpeg(file);
         } catch (error: any) {
-          const errorMsg = error.message || "Gagal mengkonversi file HEIC. Silakan gunakan format JPEG, PNG, atau WebP.";
+          const errorMsg =
+            error.message ||
+            "Gagal mengkonversi file HEIC. Silakan gunakan format JPEG, PNG, atau WebP.";
           setUploadError(errorMsg);
           onUploadError?.(errorMsg);
           setIsCompressing(false);
@@ -152,7 +176,10 @@ export default function EditImageUpload({
       }
 
       // Validate file type after HEIC conversion
-      if (!ACCEPTED_FORMATS.includes(processedFile.type) && processedFile.type !== "image/jpeg") {
+      if (
+        !ACCEPTED_FORMATS.includes(processedFile.type) &&
+        processedFile.type !== "image/jpeg"
+      ) {
         const errorMsg =
           "Format file tidak didukung. Gunakan JPEG, PNG, WebP, atau HEIC";
         setUploadError(errorMsg);
@@ -182,7 +209,13 @@ export default function EditImageUpload({
         setIsCompressing(false);
       }
     },
-    [compressImage, onImageSelect, onUploadError, onUploadSuccess, convertHeicToJpeg],
+    [
+      compressImage,
+      onImageSelect,
+      onUploadError,
+      onUploadSuccess,
+      convertHeicToJpeg,
+    ],
   );
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -238,7 +271,7 @@ export default function EditImageUpload({
 
   return (
     <div className="space-y-3">
-      <FormLabel className="text-base font-semibold text-neutral-900 flex items-center gap-2">
+      <FormLabel className="flex items-center gap-2 text-base font-semibold text-neutral-900">
         <Upload className="h-4 w-4 text-neutral-600" />
         Foto Jalan Rusak *
       </FormLabel>
@@ -249,7 +282,7 @@ export default function EditImageUpload({
             dragOver
               ? "border-neutral-400 bg-neutral-50"
               : "border-neutral-300 hover:border-neutral-400"
-          } ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+          } ${disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
@@ -257,16 +290,16 @@ export default function EditImageUpload({
         >
           <CardContent className="p-8 text-center">
             <div className="flex flex-col items-center space-y-4">
-              <div className="w-16 h-16 bg-neutral-100 rounded-full flex items-center justify-center">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-neutral-100">
                 {isCompressing ? (
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-neutral-600"></div>
+                  <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-neutral-600"></div>
                 ) : (
                   <Upload className="h-8 w-8 text-neutral-600" />
                 )}
               </div>
 
               <div className="space-y-2">
-                <h3 className="text-lg font-semibold text-neutral-900 tracking-tight">
+                <h3 className="text-lg font-semibold tracking-tight text-neutral-900">
                   {isCompressing
                     ? "Memproses gambar..."
                     : "Drag foto jalan rusak ke sini"}
@@ -276,9 +309,9 @@ export default function EditImageUpload({
                     ? "Mengompres dan mengoptimalkan gambar"
                     : "atau klik untuk memilih file dari perangkat"}
                 </p>
-                <p className="text-sm text-neutral-600 mt-3">
-                  Format: JPEG, PNG, WebP, HEIC • Maksimal 10MB • Otomatis dikompres
-                  ke WebP
+                <p className="mt-3 text-sm text-neutral-600">
+                  Format: JPEG, PNG, WebP, HEIC • Maksimal 10MB • Otomatis
+                  dikompres ke WebP
                 </p>
               </div>
 
@@ -308,19 +341,19 @@ export default function EditImageUpload({
                   <img
                     src={preview || existingImageUrl || ""}
                     alt="Foto jalan rusak"
-                    className="w-full h-72 object-cover"
+                    className="h-72 w-full object-cover"
                   />
 
                   {(isUploading || isCompressing) && (
-                    <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center">
+                    <div className="absolute inset-0 flex items-center justify-center bg-white/80 backdrop-blur-sm">
                       <div className="text-center">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-neutral-600 mx-auto mb-3"></div>
+                        <div className="mx-auto mb-3 h-8 w-8 animate-spin rounded-full border-b-2 border-neutral-600"></div>
                         <p className="text-base font-medium text-neutral-900">
                           {isCompressing
                             ? "Memproses gambar..."
                             : "Mengunggah foto..."}
                         </p>
-                        <p className="text-sm text-neutral-600 mt-1">
+                        <p className="mt-1 text-sm text-neutral-600">
                           Mohon tunggu sebentar
                         </p>
                       </div>
@@ -329,14 +362,14 @@ export default function EditImageUpload({
                 </div>
               )}
 
-              <div className="p-4 bg-neutral-50 border-t border-neutral-200">
+              <div className="border-t border-neutral-200 bg-neutral-50 p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-100">
                       <ImageIcon className="h-4 w-4 text-green-600" />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-neutral-900 truncate">
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium text-neutral-900">
                         {selectedImage ? selectedImage.name : "Foto saat ini"}
                       </p>
                       <p className="text-xs text-neutral-600">
@@ -354,9 +387,9 @@ export default function EditImageUpload({
                       size="sm"
                       onClick={handleUploadClick}
                       disabled={disabled || isUploading || isCompressing}
-                      className="text-neutral-700 hover:text-neutral-900 hover:bg-neutral-100 border-neutral-300"
+                      className="border-neutral-300 text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900"
                     >
-                      <Camera className="h-4 w-4 mr-1" />
+                      <Camera className="mr-1 h-4 w-4" />
                       Ganti
                     </Button>
 
@@ -366,7 +399,7 @@ export default function EditImageUpload({
                       size="sm"
                       onClick={handleRemoveImage}
                       disabled={disabled || isUploading || isCompressing}
-                      className="text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100 rounded-md p-2"
+                      className="rounded-md p-2 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700"
                     >
                       <X className="h-4 w-4" />
                     </Button>
@@ -381,7 +414,7 @@ export default function EditImageUpload({
       {displayError && (
         <Alert variant="destructive" className="border-red-200 bg-red-50">
           <AlertCircle className="h-4 w-4" />
-          <AlertDescription className="text-red-800 font-medium">
+          <AlertDescription className="font-medium text-red-800">
             <div className="flex items-center justify-between">
               <span>{displayError}</span>
               {retryCount < MAX_RETRIES && (
@@ -391,7 +424,7 @@ export default function EditImageUpload({
                   size="sm"
                   onClick={handleRetry}
                   disabled={isCompressing}
-                  className="ml-3 h-8 px-3 text-xs border-red-300 text-red-700 hover:bg-red-100"
+                  className="ml-3 h-8 border-red-300 px-3 text-xs text-red-700 hover:bg-red-100"
                 >
                   <RefreshCw className="mr-1 h-3 w-3" />
                   Coba Lagi ({retryCount + 1}/{MAX_RETRIES})

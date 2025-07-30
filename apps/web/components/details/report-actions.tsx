@@ -9,17 +9,12 @@ import {
 } from "@repo/ui/components/ui/card";
 import Link from "next/link";
 
-
 interface ReportActionsProps {
   reportId: string;
   canEdit: boolean;
 }
 
-export function ReportActions({ 
-  reportId, 
-  canEdit, 
-
-}: ReportActionsProps) {
+export function ReportActions({ reportId, canEdit }: ReportActionsProps) {
   return (
     <Card className="border-neutral-200 bg-white">
       <CardHeader className="pb-4">
@@ -38,7 +33,7 @@ export function ReportActions({
 
         {canEdit && (
           <Button
-            className="w-full bg-neutral-900 hover:bg-neutral-800 text-white"
+            className="w-full bg-neutral-900 text-white hover:bg-neutral-800"
             asChild
           >
             <Link href={`/laporan/${reportId}/edit`}>Edit Laporan</Link>

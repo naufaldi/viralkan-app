@@ -1,5 +1,5 @@
-import { createSuccess, createError } from '@/types';
-import type { AppResult } from '@/types';
+import { createSuccess, createError } from "@/types";
+import type { AppResult } from "@/types";
 import type {
   Platform,
   CaptionTone,
@@ -9,61 +9,64 @@ import type {
   CaptionResponse,
   TrackShareRequest,
   GenerateCaptionRequest,
-} from './types';
-import { generateAICaption as generateAICaptionFromService, type AICaptionResponse } from '@/services/ai-service';
+} from "./types";
+import {
+  generateAICaption as generateAICaptionFromService,
+  type AICaptionResponse,
+} from "@/services/ai-service";
 
 // Pure business logic for sharing (no database access, no side effects)
 
 // Platform configurations for character limits and optimization
 const PLATFORM_CONFIGS: Record<Platform, PlatformConfig> = {
-  twitter: { maxLength: 280, hashtagLimit: 3, urlHandling: 'included' },
-  facebook: { maxLength: 2000, hashtagLimit: 5, urlHandling: 'separate' },
-  whatsapp: { maxLength: 1000, hashtagLimit: 3, urlHandling: 'included' },
-  threads: { maxLength: 2200, hashtagLimit: 10, urlHandling: 'separate' },
-  telegram: { maxLength: 4096, hashtagLimit: 5, urlHandling: 'included' },
+  twitter: { maxLength: 280, hashtagLimit: 3, urlHandling: "included" },
+  facebook: { maxLength: 2000, hashtagLimit: 5, urlHandling: "separate" },
+  whatsapp: { maxLength: 1000, hashtagLimit: 3, urlHandling: "included" },
+  threads: { maxLength: 2200, hashtagLimit: 10, urlHandling: "separate" },
+  telegram: { maxLength: 4096, hashtagLimit: 5, urlHandling: "included" },
 };
 
 // Caption templates for different tones
 const CAPTION_TEMPLATES: CaptionTemplate = {
   formal:
-    'Ditemukan kerusakan jalan {category} di {street}, {district}, {city}, {province}. Mohon perhatian pemerintah daerah untuk perbaikan. #ViralkanJalan #RoadDamage',
+    "Ditemukan kerusakan jalan {category} di {street}, {district}, {city}, {province}. Mohon perhatian pemerintah daerah untuk perbaikan. #ViralkanJalan #RoadDamage",
   urgent:
-    '🚨 URGENT! Jalan rusak parah di {location} membahayakan pengendara! Kapan diperbaiki? #DamageAlert #FixOurRoads',
+    "🚨 URGENT! Jalan rusak parah di {location} membahayakan pengendara! Kapan diperbaiki? #DamageAlert #FixOurRoads",
   community:
-    'Warga {district} butuh bantuan! Jalan {street} rusak dan mengganggu aktivitas sehari-hari. Mari bersama-sama minta perbaikan 🙏 #CommunityAction',
+    "Warga {district} butuh bantuan! Jalan {street} rusak dan mengganggu aktivitas sehari-hari. Mari bersama-sama minta perbaikan 🙏 #CommunityAction",
   informative:
-    'Data kerusakan jalan: {location} - Kategori: {category} - Dilaporkan: {date}. Butuh tindakan segera dari pihak berwenang. #DataTransparency',
+    "Data kerusakan jalan: {location} - Kategori: {category} - Dilaporkan: {date}. Butuh tindakan segera dari pihak berwenang. #DataTransparency",
 };
 
 // Base hashtags for different categories
 const CATEGORY_HASHTAGS: Record<string, string[]> = {
-  berlubang: ['#JalanBerlubang', '#Pothole', '#RoadSafety'],
-  retak: ['#JalanRetak', '#RoadCrack', '#Infrastructure'],
-  lainnya: ['#KerusakanJalan', '#RoadDamage', '#PublicWorks'],
+  berlubang: ["#JalanBerlubang", "#Pothole", "#RoadSafety"],
+  retak: ["#JalanRetak", "#RoadCrack", "#Infrastructure"],
+  lainnya: ["#KerusakanJalan", "#RoadDamage", "#PublicWorks"],
 };
 
 // Common hashtags
 const COMMON_HASHTAGS = [
-  '#ViralkanJalan',
-  '#FixOurRoads',
-  '#InfrastrukturJalan',
-  '#RoadMaintenance',
-  '#PublicService',
+  "#ViralkanJalan",
+  "#FixOurRoads",
+  "#InfrastrukturJalan",
+  "#RoadMaintenance",
+  "#PublicService",
 ];
 
 export const validatePlatform = (platform: string): AppResult<Platform> => {
   const validPlatforms: Platform[] = [
-    'whatsapp',
-    'twitter',
-    'facebook',
-    'threads',
-    'telegram',
+    "whatsapp",
+    "twitter",
+    "facebook",
+    "threads",
+    "telegram",
   ];
 
   if (!validPlatforms.includes(platform as Platform)) {
     return createError(
-      `Platform ${platform} is not supported. Valid platforms: ${validPlatforms.join(', ')}`,
-      400
+      `Platform ${platform} is not supported. Valid platforms: ${validPlatforms.join(", ")}`,
+      400,
     );
   }
 
@@ -72,16 +75,16 @@ export const validatePlatform = (platform: string): AppResult<Platform> => {
 
 export const validateCaptionTone = (tone: string): AppResult<CaptionTone> => {
   const validTones: CaptionTone[] = [
-    'formal',
-    'urgent',
-    'community',
-    'informative',
+    "formal",
+    "urgent",
+    "community",
+    "informative",
   ];
 
   if (!validTones.includes(tone as CaptionTone)) {
     return createError(
-      `Tone ${tone} is not supported. Valid tones: ${validTones.join(', ')}`,
-      400
+      `Tone ${tone} is not supported. Valid tones: ${validTones.join(", ")}`,
+      400,
     );
   }
 
@@ -89,7 +92,7 @@ export const validateCaptionTone = (tone: string): AppResult<CaptionTone> => {
 };
 
 export const validateShareRequest = (
-  data: TrackShareRequest
+  data: TrackShareRequest,
 ): AppResult<TrackShareRequest> => {
   const platformValidation = validatePlatform(data.platform);
   if (!platformValidation.success) {
@@ -100,7 +103,7 @@ export const validateShareRequest = (
 };
 
 export const validateCaptionRequest = (
-  data: GenerateCaptionRequest
+  data: GenerateCaptionRequest,
 ): AppResult<GenerateCaptionRequest> => {
   const platformValidation = validatePlatform(data.platform);
   if (!platformValidation.success) {
@@ -120,7 +123,7 @@ export const generateAICaption = async (
   reportData: ReportSharingData,
   tone: CaptionTone,
   platform: Platform,
-  usePaidModel: boolean = false
+  usePaidModel: boolean = false,
 ): Promise<AppResult<AICaptionResponse>> => {
   try {
     // Call AI service with retry logic (free first, then paid if needed)
@@ -133,29 +136,34 @@ export const generateAICaption = async (
 
     if (!aiResponse.success) {
       // Only fallback to template if AI completely fails
-      const fallbackResult = await generateCaptionFromTemplate(reportData, tone, platform);
+      const fallbackResult = await generateCaptionFromTemplate(
+        reportData,
+        tone,
+        platform,
+      );
       if (!fallbackResult.success) {
         return fallbackResult;
       }
-      
+
       // Convert CaptionResponse to AICaptionResponse
       return createSuccess({
         ...fallbackResult.data,
         aiGenerated: false,
-        modelUsed: 'template-fallback',
+        modelUsed: "template-fallback",
       });
     }
 
     // Process AI response
     const { caption, hashtags } = aiResponse.data;
-    
+
     // Optimize for platform constraints
     const optimized = optimizeForPlatform(caption, hashtags, platform);
-    
+
     return createSuccess({
       caption: optimized.caption,
       hashtags: optimized.hashtags,
-      characterCount: `${optimized.caption} ${optimized.hashtags.join(' ')}`.length,
+      characterCount: `${optimized.caption} ${optimized.hashtags.join(" ")}`
+        .length,
       platformOptimized: optimized.optimized,
       aiGenerated: true,
       modelUsed: aiResponse.data.modelUsed,
@@ -163,23 +171,27 @@ export const generateAICaption = async (
     });
   } catch (error) {
     // Only fallback to template if AI completely fails
-    const fallbackResult = await generateCaptionFromTemplate(reportData, tone, platform);
+    const fallbackResult = await generateCaptionFromTemplate(
+      reportData,
+      tone,
+      platform,
+    );
     if (!fallbackResult.success) {
       return fallbackResult;
     }
-    
+
     // Convert CaptionResponse to AICaptionResponse
     return createSuccess({
       ...fallbackResult.data,
       aiGenerated: false,
-      modelUsed: 'template-fallback',
+      modelUsed: "template-fallback",
     });
   }
 };
 
 // AI Caption Request Validation
 export const validateAICaptionRequest = (
-  data: GenerateCaptionRequest & { usePaidModel?: boolean }
+  data: GenerateCaptionRequest & { usePaidModel?: boolean },
 ): AppResult<GenerateCaptionRequest & { usePaidModel?: boolean }> => {
   const platformValidation = validatePlatform(data.platform);
   if (!platformValidation.success) {
@@ -192,8 +204,11 @@ export const validateAICaptionRequest = (
   }
 
   // Validate usePaidModel is boolean if provided
-  if (data.usePaidModel !== undefined && typeof data.usePaidModel !== 'boolean') {
-    return createError('usePaidModel must be a boolean', 400);
+  if (
+    data.usePaidModel !== undefined &&
+    typeof data.usePaidModel !== "boolean"
+  ) {
+    return createError("usePaidModel must be a boolean", 400);
   }
 
   return createSuccess(data);
@@ -201,25 +216,25 @@ export const validateAICaptionRequest = (
 
 export const getCategoryDisplayName = (category: string): string => {
   const categoryNames: Record<string, string> = {
-    berlubang: 'berlubang',
-    retak: 'retak',
-    lainnya: 'kerusakan lainnya',
+    berlubang: "berlubang",
+    retak: "retak",
+    lainnya: "kerusakan lainnya",
   };
 
   return categoryNames[category] || category;
 };
 
 export const formatDateForCaption = (date: Date): string => {
-  return date.toLocaleDateString('id-ID', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
+  return date.toLocaleDateString("id-ID", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
   });
 };
 
 export const replaceTemplateVariables = (
   template: string,
-  reportData: ReportSharingData
+  reportData: ReportSharingData,
 ): string => {
   const categoryDisplay = getCategoryDisplayName(reportData.category);
   const formattedDate = formatDateForCaption(reportData.created_at);
@@ -238,7 +253,7 @@ export const replaceTemplateVariables = (
 export const generateHashtags = (
   reportData: ReportSharingData,
   platform: Platform,
-  maxHashtags?: number
+  maxHashtags?: number,
 ): string[] => {
   const config = PLATFORM_CONFIGS[platform];
   const limit = maxHashtags || config.hashtagLimit;
@@ -258,10 +273,10 @@ export const generateHashtags = (
 export const optimizeForPlatform = (
   caption: string,
   hashtags: string[],
-  platform: Platform
+  platform: Platform,
 ): { caption: string; hashtags: string[]; optimized: boolean } => {
   const config = PLATFORM_CONFIGS[platform];
-  const hashtagString = hashtags.join(' ');
+  const hashtagString = hashtags.join(" ");
   const fullText = `${caption} ${hashtagString}`;
 
   // If within limits, return as-is
@@ -275,7 +290,7 @@ export const optimizeForPlatform = (
 
   while (optimizedHashtags.length > 1) {
     optimizedHashtags.pop();
-    const testText = `${optimizedCaption} ${optimizedHashtags.join(' ')}`;
+    const testText = `${optimizedCaption} ${optimizedHashtags.join(" ")}`;
 
     if (testText.length <= config.maxLength) {
       return {
@@ -290,7 +305,7 @@ export const optimizeForPlatform = (
   const availableLength = config.maxLength - hashtagString.length - 1; // -1 for space
   if (availableLength > 50) {
     // Ensure minimum caption length
-    optimizedCaption = caption.substring(0, availableLength - 3) + '...';
+    optimizedCaption = caption.substring(0, availableLength - 3) + "...";
     return {
       caption: optimizedCaption,
       hashtags: optimizedHashtags,
@@ -300,11 +315,11 @@ export const optimizeForPlatform = (
 
   // Last resort: just caption with minimal hashtags
   const minimalHashtags = hashtags.slice(0, 1);
-  const minimalHashtagString = minimalHashtags.join(' ');
+  const minimalHashtagString = minimalHashtags.join(" ");
   const minimalAvailableLength =
     config.maxLength - minimalHashtagString.length - 1;
 
-  optimizedCaption = caption.substring(0, minimalAvailableLength - 3) + '...';
+  optimizedCaption = caption.substring(0, minimalAvailableLength - 3) + "...";
 
   return {
     caption: optimizedCaption,
@@ -316,7 +331,7 @@ export const optimizeForPlatform = (
 export const generateCaptionFromTemplate = (
   reportData: ReportSharingData,
   tone: CaptionTone,
-  platform: Platform
+  platform: Platform,
 ): AppResult<CaptionResponse> => {
   try {
     // Get the template for the specified tone
@@ -341,36 +356,36 @@ export const generateCaptionFromTemplate = (
     const response: CaptionResponse = {
       caption,
       hashtags: optimizedHashtags,
-      characterCount: `${caption} ${optimizedHashtags.join(' ')}`.length,
+      characterCount: `${caption} ${optimizedHashtags.join(" ")}`.length,
       platformOptimized: optimized,
     };
 
     return createSuccess(response);
   } catch (error) {
     return createError(
-      `Failed to generate caption: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      500
+      `Failed to generate caption: ${error instanceof Error ? error.message : "Unknown error"}`,
+      500,
     );
   }
 };
 
 export const generateFallbackCaption = (
   reportData: ReportSharingData,
-  platform: Platform
+  platform: Platform,
 ): CaptionResponse => {
   const fallbackText = `Kerusakan jalan dilaporkan di ${reportData.street_name}, ${reportData.district}. #ViralkanJalan`;
-  const hashtags = ['#ViralkanJalan'];
+  const hashtags = ["#ViralkanJalan"];
 
   const { caption, hashtags: optimizedHashtags } = optimizeForPlatform(
     fallbackText,
     hashtags,
-    platform
+    platform,
   );
 
   return {
     caption,
     hashtags: optimizedHashtags,
-    characterCount: `${caption} ${optimizedHashtags.join(' ')}`.length,
+    characterCount: `${caption} ${optimizedHashtags.join(" ")}`.length,
     platformOptimized: true,
   };
 };
@@ -378,19 +393,19 @@ export const generateFallbackCaption = (
 export const sanitizeCaptionContent = (caption: string): string => {
   // Remove potentially harmful content
   return caption
-    .replace(/[<>]/g, '') // Remove HTML-like brackets
-    .replace(/javascript:/gi, '') // Remove javascript: protocol
-    .replace(/on\w+=/gi, '') // Remove event handlers
+    .replace(/[<>]/g, "") // Remove HTML-like brackets
+    .replace(/javascript:/gi, "") // Remove javascript: protocol
+    .replace(/on\w+=/gi, "") // Remove event handlers
     .trim();
 };
 
 export const validateShareCount = (count: number): AppResult<number> => {
   if (count < 0) {
-    return createError('Share count cannot be negative', 400);
+    return createError("Share count cannot be negative", 400);
   }
 
   if (count > 1000000) {
-    return createError('Share count exceeds maximum allowed value', 400);
+    return createError("Share count exceeds maximum allowed value", 400);
   }
 
   return createSuccess(count);
@@ -398,7 +413,7 @@ export const validateShareCount = (count: number): AppResult<number> => {
 
 export const calculateShareGrowth = (
   currentCount: number,
-  previousCount: number
+  previousCount: number,
 ): number => {
   if (previousCount === 0) {
     return currentCount > 0 ? 100 : 0; // 100% growth from 0
@@ -414,18 +429,18 @@ export const isHighEngagementReport = (shareCount: number): boolean => {
 
 export const getPlatformDisplayName = (platform: Platform): string => {
   const displayNames: Record<Platform, string> = {
-    whatsapp: 'WhatsApp',
-    twitter: 'Twitter/X',
-    facebook: 'Facebook',
-    threads: 'Threads',
-    telegram: 'Telegram',
+    whatsapp: "WhatsApp",
+    twitter: "Twitter/X",
+    facebook: "Facebook",
+    threads: "Threads",
+    telegram: "Telegram",
   };
 
   return displayNames[platform] || platform;
 };
 
 export const sortPlatformsByPopularity = (
-  platformBreakdown: Record<Platform, number>
+  platformBreakdown: Record<Platform, number>,
 ): Array<{ platform: Platform; count: number; displayName: string }> => {
   return Object.entries(platformBreakdown)
     .map(([platform, count]) => ({

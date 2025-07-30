@@ -58,7 +58,10 @@ export const env = {
 
   // AI Configuration - Required for AI features
   OPENROUTER_API_KEY: getRequiredEnv("OPENROUTER_API_KEY"),
-  OPENROUTER_BASE_URL: getOptionalEnv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1"),
+  OPENROUTER_BASE_URL: getOptionalEnv(
+    "OPENROUTER_BASE_URL",
+    "https://openrouter.ai/api/v1",
+  ),
 };
 
 export const validateEnv = (): void => {

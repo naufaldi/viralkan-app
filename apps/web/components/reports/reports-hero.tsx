@@ -56,35 +56,35 @@ export function ReportsHero({
     }
   };
   return (
-    <section className="bg-gradient-to-b from-neutral-50 to-background border-b border-neutral-200">
-      <div className="container mx-auto px-4 sm:px-6 py-12 lg:py-20">
-        <div className="max-w-7xl mx-auto">
+    <section className="to-background border-b border-neutral-200 bg-gradient-to-b from-neutral-50">
+      <div className="container mx-auto px-4 py-12 sm:px-6 lg:py-20">
+        <div className="mx-auto max-w-7xl">
           {/* Top Bar */}
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-10 lg:mb-12 gap-4 lg:gap-6">
+          <div className="mb-10 flex flex-col gap-4 lg:mb-12 lg:flex-row lg:items-center lg:justify-between lg:gap-6">
             <div className="flex items-center gap-3">
               <Badge
                 variant="secondary"
-                className="bg-neutral-100 text-neutral-700 border-neutral-200 px-3 py-1 rounded-md"
+                className="rounded-md border-neutral-200 bg-neutral-100 px-3 py-1 text-neutral-700"
               >
                 <Users className="mr-2 h-3 w-3" />
                 Laporan Komunitas
               </Badge>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-              <div className="relative flex-1 sm:w-80 h-12">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-neutral-500" />
+            <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
+              <div className="relative h-12 flex-1 sm:w-80">
+                <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-neutral-500" />
                 <Input
                   placeholder="Cari berdasarkan lokasi atau nama jalan..."
                   value={searchQuery}
                   onChange={(e) => handleSearchChange(e.target.value)}
-                  className="pl-10 bg-background border-neutral-200 focus:border-neutral-800 focus:ring-neutral-800/12 rounded-md "
+                  className="bg-background rounded-md border-neutral-200 pl-10 focus:border-neutral-800 focus:ring-neutral-800/12"
                   size="lg"
                 />
               </div>
               <Button
                 size="lg"
-                className="px-6 bg-neutral-800 hover:bg-neutral-900 text-white rounded-md"
+                className="rounded-md bg-neutral-800 px-6 text-white hover:bg-neutral-900"
                 asChild
               >
                 <Link href="/laporan/buat">
@@ -96,44 +96,44 @@ export function ReportsHero({
           </div>
 
           {/* Hero Content */}
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+          <div className="grid items-center gap-8 lg:grid-cols-2 lg:gap-12">
             <div className="space-y-6">
               <div className="space-y-4">
-                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-neutral-900 tracking-tight">
+                <h1 className="text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl lg:text-5xl">
                   Laporan Jalan Rusak
-                  <span className="block text-neutral-600 text-xl sm:text-2xl lg:text-3xl font-normal mt-2">
+                  <span className="mt-2 block text-xl font-normal text-neutral-600 sm:text-2xl lg:text-3xl">
                     dari Masyarakat Bekasi
                   </span>
                 </h1>
-                <p className="text-base sm:text-lg text-neutral-600 leading-relaxed">
+                <p className="text-base leading-relaxed text-neutral-600 sm:text-lg">
                   &ldquo;Dari masyarakat, untuk masyarakat&rdquo; — Platform
                   komunitas untuk melaporkan dan berbagi informasi kerusakan
                   jalan di seluruh Indonesia.
                 </p>
               </div>
 
-              <div className="flex items-center gap-4 sm:gap-6 pt-4">
+              <div className="flex items-center gap-4 pt-4 sm:gap-6">
                 <div className="text-center">
-                  <div className="text-xl sm:text-2xl font-bold text-neutral-900">
+                  <div className="text-xl font-bold text-neutral-900 sm:text-2xl">
                     {isLoading ? "..." : `${stats.totalReports}+`}
                   </div>
-                  <div className="text-xs sm:text-sm text-neutral-600">
+                  <div className="text-xs text-neutral-600 sm:text-sm">
                     Total Laporan
                   </div>
                 </div>
                 <div className="text-center">
-                  <div className="text-xl sm:text-2xl font-bold text-neutral-900">
+                  <div className="text-xl font-bold text-neutral-900 sm:text-2xl">
                     {isLoading ? "..." : stats.thisWeek}
                   </div>
-                  <div className="text-xs sm:text-sm text-neutral-600">
+                  <div className="text-xs text-neutral-600 sm:text-sm">
                     Minggu Ini
                   </div>
                 </div>
                 <div className="text-center">
-                  <div className="text-xl sm:text-2xl font-bold text-neutral-900">
+                  <div className="text-xl font-bold text-neutral-900 sm:text-2xl">
                     {isLoading ? "..." : stats.today}
                   </div>
-                  <div className="text-xs sm:text-sm text-neutral-600">
+                  <div className="text-xs text-neutral-600 sm:text-sm">
                     Hari Ini
                   </div>
                 </div>
@@ -142,38 +142,38 @@ export function ReportsHero({
 
             {/* Statistics Cards */}
             <div className="grid grid-cols-2 gap-3 sm:gap-4">
-              <Card className="p-4 sm:p-6 text-center border-neutral-200 rounded-lg shadow-sm">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-3">
-                  <AlertTriangle className="h-5 w-5 sm:h-6 sm:w-6 text-red-600" />
+              <Card className="rounded-lg border-neutral-200 p-4 text-center shadow-sm sm:p-6">
+                <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-red-100 sm:h-12 sm:w-12">
+                  <AlertTriangle className="h-5 w-5 text-red-600 sm:h-6 sm:w-6" />
                 </div>
-                <div className="text-xl sm:text-2xl font-bold text-neutral-900 mb-1">
+                <div className="mb-1 text-xl font-bold text-neutral-900 sm:text-2xl">
                   {isLoading ? "..." : stats.byCategory.berlubang}
                 </div>
-                <div className="text-xs sm:text-sm text-neutral-600">
+                <div className="text-xs text-neutral-600 sm:text-sm">
                   Jalan Berlubang
                 </div>
               </Card>
 
-              <Card className="p-4 sm:p-6 text-center border-neutral-200 rounded-lg shadow-sm">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-neutral-100 flex items-center justify-center mx-auto mb-3">
-                  <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-neutral-600" />
+              <Card className="rounded-lg border-neutral-200 p-4 text-center shadow-sm sm:p-6">
+                <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-neutral-100 sm:h-12 sm:w-12">
+                  <TrendingUp className="h-5 w-5 text-neutral-600 sm:h-6 sm:w-6" />
                 </div>
-                <div className="text-xl sm:text-2xl font-bold text-neutral-900 mb-1">
+                <div className="mb-1 text-xl font-bold text-neutral-900 sm:text-2xl">
                   {isLoading ? "..." : stats.byCategory.retak}
                 </div>
-                <div className="text-xs sm:text-sm text-neutral-600">
+                <div className="text-xs text-neutral-600 sm:text-sm">
                   Jalan Retak
                 </div>
               </Card>
 
-              <Card className="p-4 sm:p-6 text-center col-span-2 border-neutral-200 rounded-lg shadow-sm">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-neutral-100 flex items-center justify-center mx-auto mb-3">
-                  <MapPin className="h-5 w-5 sm:h-6 sm:w-6 text-neutral-600" />
+              <Card className="col-span-2 rounded-lg border-neutral-200 p-4 text-center shadow-sm sm:p-6">
+                <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-neutral-100 sm:h-12 sm:w-12">
+                  <MapPin className="h-5 w-5 text-neutral-600 sm:h-6 sm:w-6" />
                 </div>
-                <div className="text-xl sm:text-2xl font-bold text-neutral-900 mb-1">
+                <div className="mb-1 text-xl font-bold text-neutral-900 sm:text-2xl">
                   {isLoading ? "..." : stats.byCategory.lainnya}
                 </div>
-                <div className="text-xs sm:text-sm text-neutral-600">
+                <div className="text-xs text-neutral-600 sm:text-sm">
                   Masalah Lainnya
                 </div>
               </Card>

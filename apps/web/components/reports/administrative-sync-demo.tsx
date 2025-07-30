@@ -1,90 +1,95 @@
 /**
  * Administrative Sync Demo Component
- * 
- * Demonstrates Phase 3 features: visual feedback, sync status, 
+ *
+ * Demonstrates Phase 3 features: visual feedback, sync status,
  * manual override options, and progressive disclosure.
- * 
+ *
  * Following Viralkan Design System 2.0 & Frontend Development Guidelines
  */
 
-import React, { useState } from 'react';
-import { UseFormReturn } from 'react-hook-form';
-import { Button } from '@repo/ui/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@repo/ui/components/ui/card';
-import { Badge } from '@repo/ui/components/ui/badge';
-import { Separator } from '@repo/ui/components/ui/separator';
-import { 
-  MapPin, 
-  CheckCircle, 
-  AlertTriangle, 
-  XCircle, 
+import React, { useState } from "react";
+import { UseFormReturn } from "react-hook-form";
+import { Button } from "@repo/ui/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@repo/ui/components/ui/card";
+import { Badge } from "@repo/ui/components/ui/badge";
+import { Separator } from "@repo/ui/components/ui/separator";
+import {
+  MapPin,
+  CheckCircle,
+  AlertTriangle,
+  XCircle,
   Settings,
   RefreshCw,
   Play,
-  Pause
-} from 'lucide-react';
-import { AdministrativeSelect } from './administrative-select';
-import { AdministrativeSyncStatus } from './administrative-sync-status';
-import { useAdministrativeSync } from '../../hooks/reports/use-administrative-sync';
-import { CreateReportInput } from '../../lib/types/api';
-import { useForm } from 'react-hook-form';
+  Pause,
+} from "lucide-react";
+import { AdministrativeSelect } from "./administrative-select";
+import { AdministrativeSyncStatus } from "./administrative-sync-status";
+import { useAdministrativeSync } from "../../hooks/reports/use-administrative-sync";
+import { CreateReportInput } from "../../lib/types/api";
+import { useForm } from "react-hook-form";
 
 /**
  * Demo test cases for different scenarios
  */
 const DEMO_TEST_CASES = [
   {
-    id: 'bekasi-exact',
-    name: 'Bekasi - Exact Match',
+    id: "bekasi-exact",
+    name: "Bekasi - Exact Match",
     description: 'Perfect match for "Bekasi" to "Kota Bekasi"',
     geocodingData: {
-      street_name: 'Jalan Lumbu Timur IV',
-      district: 'Makrik',
-      city: 'Bekasi',
-      province: 'Jawa Barat'
+      street_name: "Jalan Lumbu Timur IV",
+      district: "Makrik",
+      city: "Bekasi",
+      province: "Jawa Barat",
     },
     expectedConfidence: 0.95,
-    expectedMatchType: 'exact'
+    expectedMatchType: "exact",
   },
   {
-    id: 'jakarta-synonym',
-    name: 'Jakarta - Synonym Match',
+    id: "jakarta-synonym",
+    name: "Jakarta - Synonym Match",
     description: 'Synonym match for "Jakarta" to "DKI Jakarta"',
     geocodingData: {
-      street_name: 'Jalan Sudirman',
-      district: 'Menteng',
-      city: 'Jakarta',
-      province: 'DKI Jakarta'
+      street_name: "Jalan Sudirman",
+      district: "Menteng",
+      city: "Jakarta",
+      province: "DKI Jakarta",
     },
     expectedConfidence: 0.85,
-    expectedMatchType: 'synonym'
+    expectedMatchType: "synonym",
   },
   {
-    id: 'surabaya-fuzzy',
-    name: 'Surabaya - Fuzzy Match',
+    id: "surabaya-fuzzy",
+    name: "Surabaya - Fuzzy Match",
     description: 'Fuzzy match for "Surabaya" to "Kota Surabaya"',
     geocodingData: {
-      street_name: 'Jalan Tunjungan',
-      district: 'Genteng',
-      city: 'Surabaya',
-      province: 'Jawa Timur'
+      street_name: "Jalan Tunjungan",
+      district: "Genteng",
+      city: "Surabaya",
+      province: "Jawa Timur",
     },
     expectedConfidence: 0.75,
-    expectedMatchType: 'fuzzy'
+    expectedMatchType: "fuzzy",
   },
   {
-    id: 'unknown-location',
-    name: 'Unknown Location - No Match',
-    description: 'No match found for unknown location',
+    id: "unknown-location",
+    name: "Unknown Location - No Match",
+    description: "No match found for unknown location",
     geocodingData: {
-      street_name: 'Jalan Tidak Dikenal',
-      district: 'Kecamatan Aneh',
-      city: 'Kota Tidak Ada',
-      province: 'Provinsi Fiktif'
+      street_name: "Jalan Tidak Dikenal",
+      district: "Kecamatan Aneh",
+      city: "Kota Tidak Ada",
+      province: "Provinsi Fiktif",
     },
     expectedConfidence: 0.0,
-    expectedMatchType: 'none'
-  }
+    expectedMatchType: "none",
+  },
 ];
 
 /**
@@ -98,7 +103,7 @@ interface AdministrativeSyncDemoProps {
  * Administrative sync demo component
  */
 export const AdministrativeSyncDemo: React.FC<AdministrativeSyncDemoProps> = ({
-  className = ''
+  className = "",
 }) => {
   const [currentTestCase, setCurrentTestCase] = useState(DEMO_TEST_CASES[0]);
   const [isDemoRunning, setIsDemoRunning] = useState(false);
@@ -107,18 +112,18 @@ export const AdministrativeSyncDemo: React.FC<AdministrativeSyncDemoProps> = ({
   // Create a demo form
   const form = useForm<CreateReportInput>({
     defaultValues: {
-      street_name: '',
-      province: '',
-      province_code: '',
-      city: '',
-      regency_code: '',
-      district: '',
-      district_code: '',
-      location_text: '',
+      street_name: "",
+      province: "",
+      province_code: "",
+      city: "",
+      regency_code: "",
+      district: "",
+      district_code: "",
+      location_text: "",
       lat: 0,
       lon: 0,
-      category: 'berlubang'
-    }
+      category: "berlubang",
+    },
   });
 
   // Enhanced administrative sync hook
@@ -131,12 +136,12 @@ export const AdministrativeSyncDemo: React.FC<AdministrativeSyncDemoProps> = ({
     clearSync,
     hasValidMatch,
     canAutoSelect,
-    confidenceLevel
+    confidenceLevel,
   } = useAdministrativeSync({
     form,
     autoApply: false, // Manual control for demo
     confidenceThreshold: 0.7,
-    enableValidation: true
+    enableValidation: true,
   });
 
   /**
@@ -147,17 +152,19 @@ export const AdministrativeSyncDemo: React.FC<AdministrativeSyncDemoProps> = ({
     setDemoStep(0);
 
     // Step 1: Set street name
-    await new Promise(resolve => setTimeout(resolve, 500));
-    form.setValue('street_name', currentTestCase.geocodingData.street_name);
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    form.setValue("street_name", currentTestCase.geocodingData.street_name, {
+      shouldValidate: true,
+    });
     setDemoStep(1);
 
     // Step 2: Process geocoding
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     await processGeocoding(currentTestCase.geocodingData);
     setDemoStep(2);
 
     // Step 3: Show results
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
     setDemoStep(3);
 
     setIsDemoRunning(false);
@@ -180,10 +187,13 @@ export const AdministrativeSyncDemo: React.FC<AdministrativeSyncDemoProps> = ({
     try {
       const result = await applyToForm();
       if (result.applied) {
-        console.log('Demo: Administrative data applied successfully:', result.appliedFields);
+        console.log(
+          "Demo: Administrative data applied successfully:",
+          result.appliedFields,
+        );
       }
     } catch (error) {
-      console.error('Demo: Failed to apply administrative sync:', error);
+      console.error("Demo: Failed to apply administrative sync:", error);
     }
   };
 
@@ -192,7 +202,7 @@ export const AdministrativeSyncDemo: React.FC<AdministrativeSyncDemoProps> = ({
    */
   const handleManualOverride = () => {
     clearSync();
-    console.log('Demo: Manual override activated');
+    console.log("Demo: Manual override activated");
   };
 
   return (
@@ -205,22 +215,25 @@ export const AdministrativeSyncDemo: React.FC<AdministrativeSyncDemoProps> = ({
             Administrative Sync Demo - Phase 3 Features
           </CardTitle>
           <p className="text-sm text-neutral-600">
-            Demonstrating enhanced user experience with visual feedback, confidence indicators, 
-            and manual override options for administrative data synchronization.
+            Demonstrating enhanced user experience with visual feedback,
+            confidence indicators, and manual override options for
+            administrative data synchronization.
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Test Case Selector */}
           <div className="space-y-3">
-            <h4 className="text-sm font-medium text-neutral-900">Test Cases:</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <h4 className="text-sm font-medium text-neutral-900">
+              Test Cases:
+            </h4>
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
               {DEMO_TEST_CASES.map((testCase) => (
                 <Card
                   key={testCase.id}
                   className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
                     currentTestCase.id === testCase.id
-                      ? 'ring-2 ring-blue-500 bg-blue-50'
-                      : 'hover:bg-neutral-50'
+                      ? "bg-blue-50 ring-2 ring-blue-500"
+                      : "hover:bg-neutral-50"
                   }`}
                   onClick={() => setCurrentTestCase(testCase)}
                 >
@@ -230,12 +243,13 @@ export const AdministrativeSyncDemo: React.FC<AdministrativeSyncDemoProps> = ({
                         <h5 className="text-sm font-medium text-neutral-900">
                           {testCase.name}
                         </h5>
-                        <p className="text-xs text-neutral-600 mt-1">
+                        <p className="mt-1 text-xs text-neutral-600">
                           {testCase.description}
                         </p>
-                        <div className="flex items-center gap-2 mt-2">
+                        <div className="mt-2 flex items-center gap-2">
                           <Badge variant="outline" className="text-xs">
-                            {Math.round(testCase.expectedConfidence * 100)}% Expected
+                            {Math.round(testCase.expectedConfidence * 100)}%
+                            Expected
                           </Badge>
                           <Badge variant="outline" className="text-xs">
                             {testCase.expectedMatchType}
@@ -286,17 +300,19 @@ export const AdministrativeSyncDemo: React.FC<AdministrativeSyncDemoProps> = ({
           {isDemoRunning && (
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-sm text-neutral-600">
-                <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse" />
-                Step {demoStep + 1}/4: {
-                  demoStep === 0 ? 'Initializing...' :
-                  demoStep === 1 ? 'Setting street name...' :
-                  demoStep === 2 ? 'Processing geocoding...' :
-                  'Showing results...'
-                }
+                <div className="h-2 w-2 animate-pulse rounded-full bg-blue-600" />
+                Step {demoStep + 1}/4:{" "}
+                {demoStep === 0
+                  ? "Initializing..."
+                  : demoStep === 1
+                    ? "Setting street name..."
+                    : demoStep === 2
+                      ? "Processing geocoding..."
+                      : "Showing results..."}
               </div>
-              <div className="w-full bg-neutral-200 rounded-full h-2">
-                <div 
-                  className="bg-blue-600 h-2 rounded-full transition-all duration-500"
+              <div className="h-2 w-full rounded-full bg-neutral-200">
+                <div
+                  className="h-2 rounded-full bg-blue-600 transition-all duration-500"
                   style={{ width: `${((demoStep + 1) / 4) * 100}%` }}
                 />
               </div>
@@ -311,22 +327,46 @@ export const AdministrativeSyncDemo: React.FC<AdministrativeSyncDemoProps> = ({
           <CardTitle className="text-lg">Test Data</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-              <h4 className="text-sm font-medium text-neutral-900 mb-2">Geocoding Response:</h4>
+              <h4 className="mb-2 text-sm font-medium text-neutral-900">
+                Geocoding Response:
+              </h4>
               <div className="space-y-2 text-sm">
-                <div><strong>Street:</strong> {currentTestCase.geocodingData.street_name}</div>
-                <div><strong>District:</strong> {currentTestCase.geocodingData.district}</div>
-                <div><strong>City:</strong> {currentTestCase.geocodingData.city}</div>
-                <div><strong>Province:</strong> {currentTestCase.geocodingData.province}</div>
+                <div>
+                  <strong>Street:</strong>{" "}
+                  {currentTestCase.geocodingData.street_name}
+                </div>
+                <div>
+                  <strong>District:</strong>{" "}
+                  {currentTestCase.geocodingData.district}
+                </div>
+                <div>
+                  <strong>City:</strong> {currentTestCase.geocodingData.city}
+                </div>
+                <div>
+                  <strong>Province:</strong>{" "}
+                  {currentTestCase.geocodingData.province}
+                </div>
               </div>
             </div>
             <div>
-              <h4 className="text-sm font-medium text-neutral-900 mb-2">Expected Results:</h4>
+              <h4 className="mb-2 text-sm font-medium text-neutral-900">
+                Expected Results:
+              </h4>
               <div className="space-y-2 text-sm">
-                <div><strong>Confidence:</strong> {Math.round(currentTestCase.expectedConfidence * 100)}%</div>
-                <div><strong>Match Type:</strong> {currentTestCase.expectedMatchType}</div>
-                <div><strong>Auto-Select:</strong> {currentTestCase.expectedConfidence >= 0.7 ? 'Yes' : 'No'}</div>
+                <div>
+                  <strong>Confidence:</strong>{" "}
+                  {Math.round(currentTestCase.expectedConfidence * 100)}%
+                </div>
+                <div>
+                  <strong>Match Type:</strong>{" "}
+                  {currentTestCase.expectedMatchType}
+                </div>
+                <div>
+                  <strong>Auto-Select:</strong>{" "}
+                  {currentTestCase.expectedConfidence >= 0.7 ? "Yes" : "No"}
+                </div>
               </div>
             </div>
           </div>
@@ -336,9 +376,12 @@ export const AdministrativeSyncDemo: React.FC<AdministrativeSyncDemoProps> = ({
       {/* Enhanced Administrative Select Component */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Enhanced Administrative Select</CardTitle>
+          <CardTitle className="text-lg">
+            Enhanced Administrative Select
+          </CardTitle>
           <p className="text-sm text-neutral-600">
-            Phase 3 features: Visual feedback, sync status, confidence indicators, and manual override options.
+            Phase 3 features: Visual feedback, sync status, confidence
+            indicators, and manual override options.
           </p>
         </CardHeader>
         <CardContent>
@@ -376,19 +419,34 @@ export const AdministrativeSyncDemo: React.FC<AdministrativeSyncDemoProps> = ({
           <CardTitle className="text-lg">Current Form Values</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+          <div className="grid grid-cols-1 gap-4 text-sm md:grid-cols-2">
             <div>
-              <h4 className="font-medium text-neutral-900 mb-2">Street Information:</h4>
+              <h4 className="mb-2 font-medium text-neutral-900">
+                Street Information:
+              </h4>
               <div className="space-y-1">
-                <div><strong>Street Name:</strong> {form.watch('street_name') || 'Not set'}</div>
+                <div>
+                  <strong>Street Name:</strong>{" "}
+                  {form.watch("street_name") || "Not set"}
+                </div>
               </div>
             </div>
             <div>
-              <h4 className="font-medium text-neutral-900 mb-2">Administrative Data:</h4>
+              <h4 className="mb-2 font-medium text-neutral-900">
+                Administrative Data:
+              </h4>
               <div className="space-y-1">
-                <div><strong>Province:</strong> {form.watch('province') || 'Not set'}</div>
-                <div><strong>City:</strong> {form.watch('city') || 'Not set'}</div>
-                <div><strong>District:</strong> {form.watch('district') || 'Not set'}</div>
+                <div>
+                  <strong>Province:</strong>{" "}
+                  {form.watch("province") || "Not set"}
+                </div>
+                <div>
+                  <strong>City:</strong> {form.watch("city") || "Not set"}
+                </div>
+                <div>
+                  <strong>District:</strong>{" "}
+                  {form.watch("district") || "Not set"}
+                </div>
               </div>
             </div>
           </div>
@@ -398,12 +456,16 @@ export const AdministrativeSyncDemo: React.FC<AdministrativeSyncDemoProps> = ({
       {/* Feature Summary */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Phase 3 Features Demonstrated</CardTitle>
+          <CardTitle className="text-lg">
+            Phase 3 Features Demonstrated
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div className="space-y-3">
-              <h4 className="font-medium text-neutral-900">Visual Feedback & Status Indicators</h4>
+              <h4 className="font-medium text-neutral-900">
+                Visual Feedback & Status Indicators
+              </h4>
               <ul className="space-y-2 text-sm text-neutral-600">
                 <li className="flex items-center gap-2">
                   <CheckCircle className="h-4 w-4 text-green-600" />
@@ -424,7 +486,9 @@ export const AdministrativeSyncDemo: React.FC<AdministrativeSyncDemoProps> = ({
               </ul>
             </div>
             <div className="space-y-3">
-              <h4 className="font-medium text-neutral-900">Manual Override & Progressive Disclosure</h4>
+              <h4 className="font-medium text-neutral-900">
+                Manual Override & Progressive Disclosure
+              </h4>
               <ul className="space-y-2 text-sm text-neutral-600">
                 <li className="flex items-center gap-2">
                   <CheckCircle className="h-4 w-4 text-green-600" />
@@ -451,4 +515,4 @@ export const AdministrativeSyncDemo: React.FC<AdministrativeSyncDemoProps> = ({
   );
 };
 
-export default AdministrativeSyncDemo; 
+export default AdministrativeSyncDemo;

@@ -13,16 +13,16 @@ export default async function CreateReportPage() {
       <Header />
       <div className="min-h-screen bg-neutral-50">
         {/* Main Content Container */}
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
+        <div className="container mx-auto px-4 py-8 sm:px-6 sm:py-12 lg:px-8 lg:py-16">
           {/* Page Header Section */}
-          <div className="max-w-4xl mx-auto mb-12 lg:mb-16">
-            <div className="text-center lg:text-left lg:grid lg:grid-cols-2 lg:gap-16 lg:items-center">
+          <div className="mx-auto mb-12 max-w-4xl lg:mb-16">
+            <div className="text-center lg:grid lg:grid-cols-2 lg:items-center lg:gap-16 lg:text-left">
               {/* Left Column - Introduction */}
               <div className="mb-8 lg:mb-0">
-                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-neutral-900 tracking-tight mb-4">
+                <h1 className="mb-4 text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl lg:text-5xl">
                   Bagikan Kondisi Jalan Rusak
                 </h1>
-                <p className="text-lg sm:text-xl text-neutral-600 leading-relaxed max-w-2xl lg:max-w-none">
+                <p className="max-w-2xl text-lg leading-relaxed text-neutral-600 sm:text-xl lg:max-w-none">
                   Bantu komunitas menghindari jalan rusak dan tingkatkan
                   kesadaran publik tentang masalah infrastruktur di sekitar
                   kita.
@@ -30,14 +30,14 @@ export default async function CreateReportPage() {
               </div>
 
               {/* Right Column - Platform Benefits */}
-              <div className="bg-white rounded-xl border border-neutral-200 shadow-sm p-6 lg:p-8">
+              <div className="rounded-xl border border-neutral-200 bg-white p-6 shadow-sm lg:p-8">
                 <div className="space-y-4">
                   <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 bg-neutral-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <div className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-neutral-100">
                       <Users className="h-4 w-4 text-neutral-600" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-neutral-900 mb-1">
+                      <h3 className="mb-1 font-semibold text-neutral-900">
                         Bantu Komunitas
                       </h3>
                       <p className="text-sm text-neutral-600">
@@ -47,11 +47,11 @@ export default async function CreateReportPage() {
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 bg-neutral-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <div className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-neutral-100">
                       <Share2 className="h-4 w-4 text-neutral-600" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-neutral-900 mb-1">
+                      <h3 className="mb-1 font-semibold text-neutral-900">
                         Tingkatkan Kesadaran
                       </h3>
                       <p className="text-sm text-neutral-600">
@@ -61,11 +61,11 @@ export default async function CreateReportPage() {
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 bg-neutral-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <div className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-neutral-100">
                       <Eye className="h-4 w-4 text-neutral-600" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-neutral-900 mb-1">
+                      <h3 className="mb-1 font-semibold text-neutral-900">
                         Platform Komunitas
                       </h3>
                       <p className="text-sm text-neutral-600">
@@ -80,7 +80,7 @@ export default async function CreateReportPage() {
           </div>
 
           {/* Form Section */}
-          <div className="max-w-4xl mx-auto">
+          <div className="mx-auto max-w-4xl">
             <CreateReportForm />
           </div>
         </div>

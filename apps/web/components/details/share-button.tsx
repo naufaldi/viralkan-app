@@ -38,16 +38,36 @@ interface ShareButtonProps {
 }
 
 const PLATFORMS = [
-  { value: "whatsapp", label: "WhatsApp", icon: MessageCircle, color: "text-green-600" },
-  { value: "twitter", label: "Twitter/X", icon: Twitter, color: "text-blue-500" },
-  { value: "facebook", label: "Facebook", icon: Facebook, color: "text-blue-600" },
-  { value: "threads", label: "Threads", icon: AtSign, color: "text-purple-600" },
+  {
+    value: "whatsapp",
+    label: "WhatsApp",
+    icon: MessageCircle,
+    color: "text-green-600",
+  },
+  {
+    value: "twitter",
+    label: "Twitter/X",
+    icon: Twitter,
+    color: "text-blue-500",
+  },
+  {
+    value: "facebook",
+    label: "Facebook",
+    icon: Facebook,
+    color: "text-blue-600",
+  },
+  {
+    value: "threads",
+    label: "Threads",
+    icon: AtSign,
+    color: "text-purple-600",
+  },
   { value: "telegram", label: "Telegram", icon: Send, color: "text-blue-400" },
 ] as const;
 
 const SIZE_CLASSES = {
   sm: "w-8 h-8",
-  md: "w-10 h-10", 
+  md: "w-10 h-10",
   lg: "w-12 h-12",
 };
 
@@ -107,23 +127,34 @@ export function ShareButton({
       }
     };
 
-    document.addEventListener('shareCountUpdated', handleShareCountUpdate as EventListener);
-    
+    document.addEventListener(
+      "shareCountUpdated",
+      handleShareCountUpdate as EventListener,
+    );
+
     return () => {
-      document.removeEventListener('shareCountUpdated', handleShareCountUpdate as EventListener);
+      document.removeEventListener(
+        "shareCountUpdated",
+        handleShareCountUpdate as EventListener,
+      );
     };
   }, [showShareCount]);
 
   const handleQuickShare = async (platform: string) => {
     setIsSharing(true);
-    
+
     try {
       // Generate a simple caption for quick sharing
       const caption = `Laporan kerusakan jalan di ${report.street_name}, ${report.district}, ${report.city}, ${report.province}. Kategori: ${report.category}`;
       const hashtags = ["#JALANBERLUBANG", "#ROADSAFETY", "#VIRALKANJALAN"];
-      
-      const success = await shareToPlatform(platform, caption, hashtags, reportId);
-      
+
+      const success = await shareToPlatform(
+        platform,
+        caption,
+        hashtags,
+        reportId,
+      );
+
       if (success) {
         // Success is handled by the hook
       }
@@ -148,18 +179,20 @@ export function ShareButton({
   };
 
   const renderButton = (children: React.ReactNode, onClick?: () => void) => (
-    <div className="relative group">
+    <div className="group relative">
       <Button
         onClick={onClick}
-        className={`${SIZE_CLASSES[size]} ${className} bg-white/95 backdrop-blur-md border border-white/20 text-neutral-700 shadow-lg hover:bg-white hover:scale-105 hover:shadow-xl transition-all duration-300 ease-out rounded-full p-0`}
+        className={`${SIZE_CLASSES[size]} ${className} rounded-full border border-white/20 bg-white/95 p-0 text-neutral-700 shadow-lg backdrop-blur-md transition-all duration-300 ease-out hover:scale-105 hover:bg-white hover:shadow-xl`}
         disabled={isSharing}
       >
         {children}
       </Button>
-      
+
       {/* Share Count Badge */}
       {showShareCount && shareCount > 0 && (
-        <div className={`absolute ${BADGE_SIZES[size]} bg-neutral-800 text-white font-bold rounded-full flex items-center justify-center shadow-md border-2 border-white transition-all duration-300 ease-out group-hover:scale-110 group-hover:shadow-lg group-hover:bg-neutral-900`}>
+        <div
+          className={`absolute ${BADGE_SIZES[size]} flex items-center justify-center rounded-full border-2 border-white bg-neutral-800 font-bold text-white shadow-md transition-all duration-300 ease-out group-hover:scale-110 group-hover:bg-neutral-900 group-hover:shadow-lg`}
+        >
           {isLoading ? "..." : formatShareCount(shareCount)}
         </div>
       )}
@@ -175,7 +208,7 @@ export function ShareButton({
           ) : (
             <Share2 className={ICON_SIZES[size]} />
           ),
-          () => setIsDialogOpen(true)
+          () => setIsDialogOpen(true),
         )}
 
         <ShareDialog
@@ -196,7 +229,7 @@ export function ShareButton({
             <Loader2 className={`${ICON_SIZES[size]} animate-spin`} />
           ) : (
             <Share2 className={ICON_SIZES[size]} />
-          )
+          ),
         )}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
@@ -206,7 +239,7 @@ export function ShareButton({
             <DropdownMenuItem
               key={platform.value}
               onClick={() => handleQuickShare(platform.value)}
-              className="flex items-center gap-2 cursor-pointer"
+              className="flex cursor-pointer items-center gap-2"
             >
               <Icon className={`h-4 w-4 ${platform.color}`} />
               <span>{platform.label}</span>

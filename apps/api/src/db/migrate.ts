@@ -1,24 +1,24 @@
-import { sql, testConnection } from './connection';
-import { readFileSync } from 'fs';
-import { join } from 'path';
+import { sql, testConnection } from "./connection";
+import { readFileSync } from "fs";
+import { join } from "path";
 
 const runMigrations = async () => {
-  console.log('🔄 Running database migrations...');
+  console.log("🔄 Running database migrations...");
 
   try {
     // Test connection first
     const isConnected = await testConnection();
     if (!isConnected) {
-      console.error('❌ Cannot connect to database');
+      console.error("❌ Cannot connect to database");
       process.exit(1);
     }
 
     // Run admin system migration
-    console.log('📋 Applying admin system migration...');
+    console.log("📋 Applying admin system migration...");
 
     // Step 1: Add role field to users table
     await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'admin'))`;
-    console.log('✅ Added role column to users table');
+    console.log("✅ Added role column to users table");
 
     // Step 2: Add verification fields to reports table
     await sql`ALTER TABLE reports ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'verified', 'rejected', 'deleted'))`;
@@ -26,11 +26,11 @@ const runMigrations = async () => {
     await sql`ALTER TABLE reports ADD COLUMN IF NOT EXISTS verified_by UUID REFERENCES users(id) ON DELETE SET NULL`;
     await sql`ALTER TABLE reports ADD COLUMN IF NOT EXISTS rejection_reason TEXT`;
     await sql`ALTER TABLE reports ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ`;
-    console.log('✅ Added verification fields to reports table');
+    console.log("✅ Added verification fields to reports table");
 
     // Step 3: Update existing reports to pending status if status is NULL
     await sql`UPDATE reports SET status = 'pending' WHERE status IS NULL`;
-    console.log('✅ Updated existing reports to pending status');
+    console.log("✅ Updated existing reports to pending status");
 
     // Step 4: Create admin actions logging table
     await sql`
@@ -44,7 +44,7 @@ const runMigrations = async () => {
         created_at TIMESTAMPTZ DEFAULT now()
       )
     `;
-    console.log('✅ Created admin_actions table');
+    console.log("✅ Created admin_actions table");
 
     // Step 5: Add indexes
     await sql`CREATE INDEX IF NOT EXISTS reports_status_idx ON reports(status)`;
@@ -54,10 +54,10 @@ const runMigrations = async () => {
     await sql`CREATE INDEX IF NOT EXISTS admin_actions_action_type_idx ON admin_actions(action_type)`;
     await sql`CREATE INDEX IF NOT EXISTS admin_actions_target_idx ON admin_actions(target_type, target_id)`;
     await sql`CREATE INDEX IF NOT EXISTS admin_actions_created_at_idx ON admin_actions(created_at DESC)`;
-    console.log('✅ Added admin system indexes');
+    console.log("✅ Added admin system indexes");
 
     // Step 6: Create administrative tables
-    console.log('📋 Creating administrative tables...');
+    console.log("📋 Creating administrative tables...");
 
     // Provinces table (38 provinces)
     await sql`
@@ -116,14 +116,14 @@ const runMigrations = async () => {
     // Composite index for administrative hierarchy filtering
     await sql`CREATE INDEX IF NOT EXISTS idx_reports_admin_hierarchy ON reports(province_code, regency_code, district_code) WHERE province_code IS NOT NULL`;
 
-    console.log('✅ Created administrative tables and indexes');
+    console.log("✅ Created administrative tables and indexes");
 
     // Step 7: Add social media sharing functionality
-    console.log('📋 Adding social media sharing functionality...');
+    console.log("📋 Adding social media sharing functionality...");
 
     // Add share_count column to existing reports table
     await sql`ALTER TABLE reports ADD COLUMN IF NOT EXISTS share_count INTEGER DEFAULT 0`;
-    console.log('✅ Added share_count column to reports table');
+    console.log("✅ Added share_count column to reports table");
 
     // Create shares table for tracking individual share events
     await sql`
@@ -137,12 +137,12 @@ const runMigrations = async () => {
         user_agent TEXT
       )
     `;
-    console.log('✅ Created shares table');
+    console.log("✅ Created shares table");
 
     // Performance indexes for share_count queries
     await sql`CREATE INDEX IF NOT EXISTS reports_share_count_idx ON reports(share_count DESC)`;
     await sql`CREATE INDEX IF NOT EXISTS reports_status_share_count_idx ON reports(status, share_count DESC) WHERE status = 'verified'`;
-    console.log('✅ Added share count indexes');
+    console.log("✅ Added share count indexes");
 
     // Analytics and performance indexes for shares table
     await sql`CREATE INDEX IF NOT EXISTS shares_report_id_idx ON shares(report_id)`;
@@ -154,11 +154,11 @@ const runMigrations = async () => {
     await sql`CREATE INDEX IF NOT EXISTS shares_ip_time_idx ON shares(ip_address, shared_at DESC) WHERE ip_address IS NOT NULL`;
     // Note: Removed recent shares index due to PostgreSQL IMMUTABLE function requirement
     // Can be added later with a different approach if needed for performance
-    console.log('✅ Added shares table indexes');
+    console.log("✅ Added shares table indexes");
 
-    console.log('✅ Social media sharing functionality added successfully');
+    console.log("✅ Social media sharing functionality added successfully");
 
-    console.log('✅ Database migrations completed successfully');
+    console.log("✅ Database migrations completed successfully");
 
     // Create a test user if none exists
     const existingUsers = await sql`SELECT COUNT(*) as count FROM users`;
@@ -169,10 +169,10 @@ const runMigrations = async () => {
         INSERT INTO users (firebase_uid, email, name, avatar_url)
         VALUES ('test-google-id', 'test@viralkan.app', 'Test User', 'https://via.placeholder.com/150')
       `;
-      console.log('👤 Created test user');
+      console.log("👤 Created test user");
     }
   } catch (error) {
-    console.error('❌ Migration failed:', error);
+    console.error("❌ Migration failed:", error);
     process.exit(1);
   } finally {
     await sql.end();

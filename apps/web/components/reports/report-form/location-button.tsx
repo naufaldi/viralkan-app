@@ -17,12 +17,13 @@ export const LocationButton = ({
   return (
     <div className="flex flex-col items-center space-y-3 pt-4">
       {/* Contextual Help Text */}
-      <div className="text-center max-w-md">
-        <p className="text-sm text-neutral-600 mb-2">
+      <div className="max-w-md text-center">
+        <p className="mb-2 text-sm text-neutral-600">
           📍 <strong>Lokasi tidak ditemukan dalam foto</strong>
         </p>
         <p className="text-xs text-neutral-500">
-          Klik tombol di bawah untuk menggunakan lokasi perangkat Anda secara otomatis
+          Klik tombol di bawah untuk menggunakan lokasi perangkat Anda secara
+          otomatis
         </p>
       </div>
 
@@ -31,15 +32,15 @@ export const LocationButton = ({
         type="button"
         onClick={onGetLocation}
         disabled={disabled || !isFormActivated}
-        className={`h-12 px-8 font-semibold transition-all duration-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 ${
+        className={`h-12 px-8 font-semibold shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${
           isFormActivated
-            ? "bg-neutral-900 hover:bg-neutral-800 text-white border-neutral-900 hover:border-neutral-800"
-            : "bg-neutral-200 text-neutral-400 border-neutral-200 cursor-not-allowed"
+            ? "border-neutral-900 bg-neutral-900 text-white hover:border-neutral-800 hover:bg-neutral-800"
+            : "cursor-not-allowed border-neutral-200 bg-neutral-200 text-neutral-400"
         }`}
       >
         {isLoading ? (
           <>
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+            <div className="mr-2 h-4 w-4 animate-spin rounded-full border-b-2 border-white"></div>
             Mendapatkan Lokasi...
           </>
         ) : (
@@ -52,7 +53,7 @@ export const LocationButton = ({
 
       {/* Fallback Hint */}
       {isFormActivated && !isLoading && (
-        <p className="text-xs text-neutral-500 text-center">
+        <p className="text-center text-xs text-neutral-500">
           Atau isi koordinat secara manual di bawah ini
         </p>
       )}

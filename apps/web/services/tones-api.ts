@@ -16,7 +16,7 @@ class TonesAPI {
   private cache: ToneConfig[] | null = null;
 
   constructor() {
-    this.baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+    this.baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
   }
 
   /**
@@ -31,9 +31,9 @@ class TonesAPI {
 
     try {
       const response = await fetch(`${this.baseUrl}/api/sharing/tones`, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       });
 
@@ -42,39 +42,39 @@ class TonesAPI {
       }
 
       const data: TonesResponse = await response.json();
-      
+
       // Cache the result
       this.cache = data.tones;
-      
+
       return data.tones;
     } catch (error) {
-      console.error('Failed to fetch tones from API:', error);
-      
+      console.error("Failed to fetch tones from API:", error);
+
       // Fallback to hardcoded tones if API fails
       const fallbackTones: ToneConfig[] = [
-        { 
-          value: "formal", 
-          label: "Formal", 
+        {
+          value: "formal",
+          label: "Formal",
           description: "Bahasa resmi untuk pemerintah",
-          icon: "building"
+          icon: "building",
         },
-        { 
-          value: "urgent", 
-          label: "Urgent", 
+        {
+          value: "urgent",
+          label: "Urgent",
           description: "Mendesak untuk perbaikan cepat",
-          icon: "alert-circle"
+          icon: "alert-circle",
         },
-        { 
-          value: "community", 
-          label: "Community", 
+        {
+          value: "community",
+          label: "Community",
           description: "Ramah untuk komunitas",
-          icon: "users"
+          icon: "users",
         },
-        { 
-          value: "informative", 
-          label: "Informative", 
+        {
+          value: "informative",
+          label: "Informative",
           description: "Informatif dengan data",
-          icon: "bar-chart"
+          icon: "bar-chart",
         },
       ];
 
@@ -95,7 +95,7 @@ class TonesAPI {
    */
   async getToneByValue(value: string): Promise<ToneConfig | undefined> {
     const tones = await this.getAvailableTones();
-    return tones.find(tone => tone.value === value);
+    return tones.find((tone) => tone.value === value);
   }
 }
 
@@ -103,4 +103,4 @@ class TonesAPI {
 export const tonesAPI = new TonesAPI();
 
 // Export types for convenience
-export type Tone = ToneConfig['value'];
+export type Tone = ToneConfig["value"];

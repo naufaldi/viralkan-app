@@ -87,7 +87,7 @@ export function LoginForm({ onSuccess, redirectUrl }: LoginFormProps) {
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto border border-neutral-200 shadow-sm">
+    <Card className="mx-auto w-full max-w-md border border-neutral-200 shadow-sm">
       <CardHeader className="text-center">
         <CardTitle className="text-2xl font-bold text-neutral-900">
           Masuk ke Viralkan
@@ -102,7 +102,7 @@ export function LoginForm({ onSuccess, redirectUrl }: LoginFormProps) {
         <Button
           onClick={handleGoogleSignIn}
           disabled={isLoading || isAuthenticated}
-          className="w-full bg-white border border-neutral-300 text-neutral-700 hover:bg-neutral-50 hover:border-neutral-400 transition-colors disabled:opacity-50"
+          className="w-full border border-neutral-300 bg-white text-neutral-700 transition-colors hover:border-neutral-400 hover:bg-neutral-50 disabled:opacity-50"
           size="lg"
         >
           {isAuthenticated ? (
@@ -134,18 +134,18 @@ export function LoginForm({ onSuccess, redirectUrl }: LoginFormProps) {
 
         {/* Status Message */}
         {getStatusMessage() && (
-          <div className="text-sm text-blue-600 bg-blue-50 p-3 rounded-lg border border-blue-200">
+          <div className="rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-600">
             {getStatusMessage()}
           </div>
         )}
 
         {/* Error Message */}
         {showError && (
-          <div className="text-sm text-red-600 bg-red-50 p-3 rounded-lg border border-red-200">
+          <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600">
             {authError}
             <button
               onClick={clearError}
-              className="ml-2 text-red-800 hover:text-red-900 underline"
+              className="ml-2 text-red-800 underline hover:text-red-900"
             >
               Tutup
             </button>
@@ -153,7 +153,7 @@ export function LoginForm({ onSuccess, redirectUrl }: LoginFormProps) {
         )}
 
         {/* Terms */}
-        <p className="text-xs text-neutral-500 text-center leading-relaxed">
+        <p className="text-center text-xs leading-relaxed text-neutral-500">
           Dengan masuk, Anda menyetujui{" "}
           <a href="#" className="text-primary-600 hover:underline">
             Syarat & Ketentuan

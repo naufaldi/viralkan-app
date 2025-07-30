@@ -32,7 +32,7 @@ export function AdministrativeInfo({
 
   return (
     <section
-      className={`space-y-2 pt-3 border-t border-neutral-100 ${className}`}
+      className={`space-y-2 border-t border-neutral-100 pt-3 ${className}`}
       aria-label="Administrative Information"
     >
       <div className="flex items-center gap-2 text-sm text-neutral-500">
@@ -43,7 +43,7 @@ export function AdministrativeInfo({
       <dl className="space-y-1">
         {kecamatanValue && (
           <div className="flex items-center gap-2">
-            <dt className="text-sm font-medium text-neutral-600 min-w-[80px]">
+            <dt className="min-w-[80px] text-sm font-medium text-neutral-600">
               Kecamatan:
             </dt>
             <dd className="text-sm text-neutral-500">{kecamatanValue}</dd>
@@ -52,7 +52,7 @@ export function AdministrativeInfo({
 
         {kabupatenKotaValue && (
           <div className="flex items-center gap-2">
-            <dt className="text-sm font-medium text-neutral-600 min-w-[80px]">
+            <dt className="min-w-[80px] text-sm font-medium text-neutral-600">
               Kabupaten/Kota:
             </dt>
             <dd className="text-sm text-neutral-500">{kabupatenKotaValue}</dd>
@@ -61,7 +61,7 @@ export function AdministrativeInfo({
 
         {provinsiValue && (
           <div className="flex items-center gap-2">
-            <dt className="text-sm font-medium text-neutral-600 min-w-[80px]">
+            <dt className="min-w-[80px] text-sm font-medium text-neutral-600">
               Provinsi:
             </dt>
             <dd className="text-sm text-neutral-500">{provinsiValue}</dd>

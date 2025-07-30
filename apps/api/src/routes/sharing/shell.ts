@@ -1,5 +1,5 @@
-import { createSuccess, createError } from '@/types';
-import type { AppResult } from '@/types';
+import { createSuccess, createError } from "@/types";
+import type { AppResult } from "@/types";
 import type {
   TrackShareRequest,
   GenerateCaptionRequest,
@@ -11,9 +11,9 @@ import type {
   AnalyticsFilters,
   ShareAnalyticsData,
   ShareAnalytics,
-} from './types';
-import * as core from './core';
-import * as data from './data';
+} from "./types";
+import * as core from "./core";
+import * as data from "./data";
 
 // Business logic orchestration for sharing functionality
 
@@ -22,7 +22,7 @@ export const trackReportShare = async (
   shareRequest: TrackShareRequest,
   userId?: string,
   ipAddress?: string,
-  userAgent?: string
+  userAgent?: string,
 ): Promise<AppResult<{ success: boolean; newShareCount: number }>> => {
   try {
     // Validate request
@@ -34,7 +34,7 @@ export const trackReportShare = async (
     // Check if report exists and is eligible for sharing
     const reportExists = await data.checkReportExists(reportId);
     if (!reportExists) {
-      return createError('Report not found or not eligible for sharing', 404);
+      return createError("Report not found or not eligible for sharing", 404);
     }
 
     // Use transaction to ensure data consistency
@@ -57,7 +57,7 @@ export const trackReportShare = async (
       const shareEventResult = await data.recordShareEvent(shareEventData);
       if (!shareEventResult.success) {
         // Log error but don't fail the entire operation
-        console.error('Failed to record share event:', shareEventResult.error);
+        console.error("Failed to record share event:", shareEventResult.error);
       }
 
       return createSuccess({
@@ -67,20 +67,20 @@ export const trackReportShare = async (
     });
   } catch (error) {
     return createError(
-      `Failed to track share: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      500
+      `Failed to track share: ${error instanceof Error ? error.message : "Unknown error"}`,
+      500,
     );
   }
 };
 
 export const generateReportCaption = async (
   reportId: string,
-  captionRequest: GenerateCaptionRequest
+  captionRequest: GenerateCaptionRequest,
 ): Promise<AppResult<CaptionResponse>> => {
   try {
     // DEPRECATED: This endpoint is kept for backward compatibility
     // All caption generation should now use AI by default
-    
+
     // Validate request
     const validation = core.validateCaptionRequest(captionRequest);
     if (!validation.success) {
@@ -98,7 +98,7 @@ export const generateReportCaption = async (
       reportResult.data,
       captionRequest.tone,
       captionRequest.platform,
-      false // Use free model by default
+      false, // Use free model by default
     );
 
     if (!aiResult.success) {
@@ -114,8 +114,8 @@ export const generateReportCaption = async (
     });
   } catch (error) {
     return createError(
-      `Failed to generate caption: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      500
+      `Failed to generate caption: ${error instanceof Error ? error.message : "Unknown error"}`,
+      500,
     );
   }
 };
@@ -123,7 +123,7 @@ export const generateReportCaption = async (
 // New AI-powered caption generation endpoint
 export const generateAIReportCaption = async (
   reportId: string,
-  captionRequest: GenerateAICaptionRequest
+  captionRequest: GenerateAICaptionRequest,
 ): Promise<AppResult<AICaptionResponse>> => {
   try {
     // Validate request
@@ -143,26 +143,26 @@ export const generateAIReportCaption = async (
       reportResult.data,
       captionRequest.tone,
       captionRequest.platform,
-      captionRequest.usePaidModel
+      captionRequest.usePaidModel,
     );
 
     return aiResult;
   } catch (error) {
     return createError(
-      `Failed to generate AI caption: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      500
+      `Failed to generate AI caption: ${error instanceof Error ? error.message : "Unknown error"}`,
+      500,
     );
   }
 };
 
 export const getShareAnalytics = async (
-  filters: AnalyticsFilters
+  filters: AnalyticsFilters,
 ): Promise<AppResult<ShareAnalytics>> => {
   try {
     // Validate date range if provided
     if (filters.startDate && filters.endDate) {
       if (filters.startDate > filters.endDate) {
-        return createError('Start date must be before end date', 400);
+        return createError("Start date must be before end date", 400);
       }
     }
 
@@ -194,14 +194,14 @@ export const getShareAnalytics = async (
     return createSuccess(response);
   } catch (error) {
     return createError(
-      `Failed to fetch analytics: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      500
+      `Failed to fetch analytics: ${error instanceof Error ? error.message : "Unknown error"}`,
+      500,
     );
   }
 };
 
 export const getReportShareDetails = async (
-  reportId: string
+  reportId: string,
 ): Promise<
   AppResult<{
     shareCount: number;
@@ -217,7 +217,7 @@ export const getReportShareDetails = async (
     // Check if report exists
     const reportExists = await data.checkReportExists(reportId);
     if (!reportExists) {
-      return createError('Report not found', 404);
+      return createError("Report not found", 404);
     }
 
     // Get share count
@@ -243,14 +243,14 @@ export const getReportShareDetails = async (
     });
   } catch (error) {
     return createError(
-      `Failed to fetch share details: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      500
+      `Failed to fetch share details: ${error instanceof Error ? error.message : "Unknown error"}`,
+      500,
     );
   }
 };
 
 export const validateReportForSharing = async (
-  reportId: string
+  reportId: string,
 ): Promise<AppResult<{ eligible: boolean; reason?: string }>> => {
   try {
     // Check if report exists
@@ -258,7 +258,7 @@ export const validateReportForSharing = async (
     if (!reportExists) {
       return createSuccess({
         eligible: false,
-        reason: 'Report not found or has been deleted',
+        reason: "Report not found or has been deleted",
       });
     }
 
@@ -267,7 +267,7 @@ export const validateReportForSharing = async (
     if (!reportResult.success) {
       return createSuccess({
         eligible: false,
-        reason: 'Report not accessible',
+        reason: "Report not accessible",
       });
     }
 
@@ -279,15 +279,15 @@ export const validateReportForSharing = async (
     });
   } catch (error) {
     return createError(
-      `Failed to validate report: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      500
+      `Failed to validate report: ${error instanceof Error ? error.message : "Unknown error"}`,
+      500,
     );
   }
 };
 
 export const getMostSharedReports = async (
   limit: number = 10,
-  timeframe?: { start: Date; end: Date }
+  timeframe?: { start: Date; end: Date },
 ): Promise<
   AppResult<
     Array<{
@@ -301,7 +301,7 @@ export const getMostSharedReports = async (
   try {
     // Validate limit
     if (limit < 1 || limit > 100) {
-      return createError('Limit must be between 1 and 100', 400);
+      return createError("Limit must be between 1 and 100", 400);
     }
 
     // Get most shared reports
@@ -318,8 +318,8 @@ export const getMostSharedReports = async (
     return createSuccess(transformedReports);
   } catch (error) {
     return createError(
-      `Failed to fetch most shared reports: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      500
+      `Failed to fetch most shared reports: ${error instanceof Error ? error.message : "Unknown error"}`,
+      500,
     );
   }
 };

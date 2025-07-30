@@ -27,7 +27,10 @@ interface UseAdministrativeReturn {
   refetchProvinces: () => void;
   refetchRegencies: (provinceCode: string) => void;
   refetchDistricts: (regencyCode: string) => void;
-  addDynamicOption: (type: 'province' | 'regency' | 'district', option: Province | Regency | District) => void;
+  addDynamicOption: (
+    type: "province" | "regency" | "district",
+    option: Province | Regency | District,
+  ) => void;
 }
 
 export function useAdministrative(): UseAdministrativeReturn {
@@ -114,34 +117,46 @@ export function useAdministrative(): UseAdministrativeReturn {
   }, []);
 
   // Add dynamic option (for search results)
-  const addDynamicOption = useCallback((type: 'province' | 'regency' | 'district', option: Province | Regency | District) => {
-    setData((prev) => {
-      const newData = { ...prev };
-      
-      if (type === 'province') {
-        const province = option as Province;
-        // Check if option already exists
-        const existingIndex = newData.provinces.findIndex(p => p.code === province.code);
-        if (existingIndex === -1) {
-          newData.provinces = [...newData.provinces, province];
+  const addDynamicOption = useCallback(
+    (
+      type: "province" | "regency" | "district",
+      option: Province | Regency | District,
+    ) => {
+      setData((prev) => {
+        const newData = { ...prev };
+
+        if (type === "province") {
+          const province = option as Province;
+          // Check if option already exists
+          const existingIndex = newData.provinces.findIndex(
+            (p) => p.code === province.code,
+          );
+          if (existingIndex === -1) {
+            newData.provinces = [...newData.provinces, province];
+          }
+        } else if (type === "regency") {
+          const regency = option as Regency;
+          const existingIndex = newData.regencies.findIndex(
+            (r) => r.code === regency.code,
+          );
+          if (existingIndex === -1) {
+            newData.regencies = [...newData.regencies, regency];
+          }
+        } else if (type === "district") {
+          const district = option as District;
+          const existingIndex = newData.districts.findIndex(
+            (d) => d.code === district.code,
+          );
+          if (existingIndex === -1) {
+            newData.districts = [...newData.districts, district];
+          }
         }
-      } else if (type === 'regency') {
-        const regency = option as Regency;
-        const existingIndex = newData.regencies.findIndex(r => r.code === regency.code);
-        if (existingIndex === -1) {
-          newData.regencies = [...newData.regencies, regency];
-        }
-      } else if (type === 'district') {
-        const district = option as District;
-        const existingIndex = newData.districts.findIndex(d => d.code === district.code);
-        if (existingIndex === -1) {
-          newData.districts = [...newData.districts, district];
-        }
-      }
-      
-      return newData;
-    });
-  }, []);
+
+        return newData;
+      });
+    },
+    [],
+  );
 
   // Refetch functions - memoized to prevent infinite re-renders
   const refetchProvinces = useCallback(() => fetchProvinces(), []);

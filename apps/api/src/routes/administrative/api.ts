@@ -229,19 +229,23 @@ const searchProvinceRoute = createRoute({
   path: "/provinces/search",
   request: {
     query: z.object({
-      q: z.string().min(2).openapi({
-        param: {
-          name: "q",
-          in: "query",
-          required: true,
-        },
-        example: "Jawa Barat",
-        description: "Province name to search for (minimum 2 characters)",
-      }),
+      q: z
+        .string()
+        .min(2)
+        .openapi({
+          param: {
+            name: "q",
+            in: "query",
+            required: true,
+          },
+          example: "Jawa Barat",
+          description: "Province name to search for (minimum 2 characters)",
+        }),
     }),
   },
   summary: "Search province by name",
-  description: "Search for a province by name using fuzzy matching. Returns the best match with ranking: exact > starts-with > contains.",
+  description:
+    "Search for a province by name using fuzzy matching. Returns the best match with ranking: exact > starts-with > contains.",
   tags: ["Administrative", "Search"],
   responses: {
     200: {
@@ -283,19 +287,23 @@ const searchRegencyRoute = createRoute({
         }),
     }),
     query: z.object({
-      q: z.string().min(2).openapi({
-        param: {
-          name: "q",
-          in: "query",
-          required: true,
-        },
-        example: "Kab Bekasi",
-        description: "Regency name to search for (minimum 2 characters)",
-      }),
+      q: z
+        .string()
+        .min(2)
+        .openapi({
+          param: {
+            name: "q",
+            in: "query",
+            required: true,
+          },
+          example: "Kab Bekasi",
+          description: "Regency name to search for (minimum 2 characters)",
+        }),
     }),
   },
   summary: "Search regency by name within province",
-  description: "Search for a regency by name within a specific province using fuzzy matching.",
+  description:
+    "Search for a regency by name within a specific province using fuzzy matching.",
   tags: ["Administrative", "Search"],
   responses: {
     200: {
@@ -341,19 +349,23 @@ const searchDistrictRoute = createRoute({
         }),
     }),
     query: z.object({
-      q: z.string().min(2).openapi({
-        param: {
-          name: "q",
-          in: "query",
-          required: true,
-        },
-        example: "Jatiwangi",
-        description: "District name to search for (minimum 2 characters)",
-      }),
+      q: z
+        .string()
+        .min(2)
+        .openapi({
+          param: {
+            name: "q",
+            in: "query",
+            required: true,
+          },
+          example: "Jatiwangi",
+          description: "District name to search for (minimum 2 characters)",
+        }),
     }),
   },
   summary: "Search district by name within regency",
-  description: "Search for a district by name within a specific regency using fuzzy matching.",
+  description:
+    "Search for a district by name within a specific regency using fuzzy matching.",
   tags: ["Administrative", "Search"],
   responses: {
     200: {
@@ -564,8 +576,12 @@ administrativeRouter.openapi(searchRegencyRoute, async (c) => {
     return c.json(
       {
         error: {
-          code: result.statusCode === 400 ? "INVALID_QUERY" : 
-                result.statusCode === 404 ? "NOT_FOUND" : "SEARCH_ERROR",
+          code:
+            result.statusCode === 400
+              ? "INVALID_QUERY"
+              : result.statusCode === 404
+                ? "NOT_FOUND"
+                : "SEARCH_ERROR",
           message: result.error,
           timestamp: new Date().toISOString(),
         },
@@ -600,8 +616,12 @@ administrativeRouter.openapi(searchDistrictRoute, async (c) => {
     return c.json(
       {
         error: {
-          code: result.statusCode === 400 ? "INVALID_QUERY" : 
-                result.statusCode === 404 ? "NOT_FOUND" : "SEARCH_ERROR",
+          code:
+            result.statusCode === 400
+              ? "INVALID_QUERY"
+              : result.statusCode === 404
+                ? "NOT_FOUND"
+                : "SEARCH_ERROR",
           message: result.error,
           timestamp: new Date().toISOString(),
         },

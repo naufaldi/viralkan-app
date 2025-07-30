@@ -60,7 +60,7 @@ export default async function LaporanPage({ searchParams }: LaporanPageProps) {
   // Handle error states
   if (reportsError) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="bg-background min-h-screen">
         <Header />
         <div className="container mx-auto px-4 py-12">
           <ReportsErrorState error={reportsError} />
@@ -70,7 +70,7 @@ export default async function LaporanPage({ searchParams }: LaporanPageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background min-h-screen">
       <Header />
 
       <main className="relative">

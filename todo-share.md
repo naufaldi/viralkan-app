@@ -15,8 +15,9 @@ Enhance the report detail page (`/laporan/[id]`) with:
 ### AI Architecture Overview
 
 **Technology Stack:**
+
 - **OpenRouter API**: Unified interface for multiple AI models
-- **DeepSeek Models**: 
+- **DeepSeek Models**:
   - Free: `deepseek/deepseek-chat-v3-0324:free`
   - Paid: `deepseek/deepseek-chat-v3-0324`
 - **OpenAI Node.js SDK**: For API integration
@@ -84,33 +85,37 @@ const AI_PROMPTS = {
 - Request for official attention
 - Appropriate hashtags for civic engagement
 - Platform-specific optimization (${platform} character limits)`,
-  
+
   urgent: `You are an urgent civic alert system. Generate an urgent, attention-grabbing caption for sharing critical road damage reports. Focus on:
 - Emergency/urgent language with safety emphasis
 - Immediate action required messaging
 - Emotional appeal for public safety
 - High-engagement hashtags
 - Platform-specific optimization (${platform} character limits)`,
-  
+
   community: `You are a community advocate. Generate a community-focused caption for sharing road damage reports. Focus on:
 - Community solidarity and collective action
 - Local pride and neighborhood improvement
 - Encouraging community participation
 - Community-focused hashtags
 - Platform-specific optimization (${platform} character limits)`,
-  
+
   informative: `You are a data-driven civic reporter. Generate an informative, fact-based caption for sharing road damage reports. Focus on:
 - Objective reporting of facts
 - Data transparency and accountability
 - Government responsibility emphasis
 - Information-focused hashtags
-- Platform-specific optimization (${platform} character limits)`
+- Platform-specific optimization (${platform} character limits)`,
 };
 ```
 
 **User Prompt Template:**
+
 ```typescript
-const generateUserPrompt = (reportData: ReportSharingData, platform: Platform) => `
+const generateUserPrompt = (
+  reportData: ReportSharingData,
+  platform: Platform,
+) => `
 Generate a social media caption for sharing this road damage report:
 
 REPORT DATA:
@@ -149,7 +154,7 @@ export const generateAICaption = async (
   reportData: ReportSharingData,
   tone: CaptionTone,
   platform: Platform,
-  usePaidModel: boolean = false
+  usePaidModel: boolean = false,
 ): Promise<AppResult<AICaptionResponse>> => {
   try {
     // Call AI service
@@ -157,7 +162,7 @@ export const generateAICaption = async (
       reportData,
       tone,
       platform,
-      usePaidModel
+      usePaidModel,
     });
 
     if (!aiResponse.success) {
@@ -167,15 +172,15 @@ export const generateAICaption = async (
 
     // Process AI response
     const { caption, hashtags } = aiResponse.data;
-    
+
     // Optimize for platform constraints
     const optimized = optimizeForPlatform(caption, hashtags, platform);
-    
+
     return createSuccess({
       ...optimized,
       aiGenerated: true,
       modelUsed: aiResponse.data.modelUsed,
-      tokenUsage: aiResponse.data.tokenUsage
+      tokenUsage: aiResponse.data.tokenUsage,
     });
   } catch (error) {
     // Fallback to template-based generation
@@ -190,7 +195,7 @@ export const generateAICaption = async (
 // New AI-powered caption generation endpoint
 export const generateAIReportCaption = async (
   reportId: string,
-  captionRequest: GenerateAICaptionRequest
+  captionRequest: GenerateAICaptionRequest,
 ): Promise<AppResult<AICaptionResponse>> => {
   try {
     // Validate request
@@ -210,14 +215,14 @@ export const generateAIReportCaption = async (
       reportResult.data,
       captionRequest.tone,
       captionRequest.platform,
-      captionRequest.usePaidModel
+      captionRequest.usePaidModel,
     );
 
     return aiResult;
   } catch (error) {
     return createError(
-      `Failed to generate AI caption: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      500
+      `Failed to generate AI caption: ${error instanceof Error ? error.message : "Unknown error"}`,
+      500,
     );
   }
 };
@@ -228,39 +233,40 @@ export const generateAIReportCaption = async (
 ```typescript
 // New AI caption generation endpoint
 const generateAICaptionRoute = createRoute({
-  method: 'post',
-  path: '/{id}/generate-ai-caption',
+  method: "post",
+  path: "/{id}/generate-ai-caption",
   request: {
     params: SharingReportParamsSchema,
     body: {
       content: {
-        'application/json': {
+        "application/json": {
           schema: GenerateAICaptionSchema,
         },
       },
     },
   },
-  summary: 'Generate AI-powered sharing caption',
-  description: 'Generate a context-aware caption using AI for social media sharing',
-  tags: ['Sharing', 'AI'],
+  summary: "Generate AI-powered sharing caption",
+  description:
+    "Generate a context-aware caption using AI for social media sharing",
+  tags: ["Sharing", "AI"],
   responses: {
     200: {
-      description: 'AI caption generated successfully',
+      description: "AI caption generated successfully",
       content: {
-        'application/json': { schema: AICaptionResponseSchema },
+        "application/json": { schema: AICaptionResponseSchema },
       },
     },
     400: {
-      description: 'Invalid request data',
-      content: { 'application/json': { schema: SharingErrorResponseSchema } },
+      description: "Invalid request data",
+      content: { "application/json": { schema: SharingErrorResponseSchema } },
     },
     404: {
-      description: 'Report not found or not eligible for sharing',
-      content: { 'application/json': { schema: SharingErrorResponseSchema } },
+      description: "Report not found or not eligible for sharing",
+      content: { "application/json": { schema: SharingErrorResponseSchema } },
     },
     500: {
-      description: 'Internal server error or AI service unavailable',
-      content: { 'application/json': { schema: SharingErrorResponseSchema } },
+      description: "Internal server error or AI service unavailable",
+      content: { "application/json": { schema: SharingErrorResponseSchema } },
     },
   },
 });
@@ -268,8 +274,8 @@ const generateAICaptionRoute = createRoute({
 // AI caption handler
 sharingRouter.openapi(generateAICaptionRoute, async (c) => {
   try {
-    const { id } = c.req.valid('param');
-    const captionRequest = c.req.valid('json');
+    const { id } = c.req.valid("param");
+    const captionRequest = c.req.valid("json");
 
     const result = await shell.generateAIReportCaption(id, captionRequest);
 
@@ -277,29 +283,30 @@ sharingRouter.openapi(generateAICaptionRoute, async (c) => {
       return c.json(result.data, 200);
     }
 
-    const statusCode = result.statusCode === 404 ? 404 : result.statusCode === 400 ? 400 : 500;
+    const statusCode =
+      result.statusCode === 404 ? 404 : result.statusCode === 400 ? 400 : 500;
 
     return c.json(
       {
         error: {
-          code: 'AI_CAPTION_GENERATION_FAILED',
+          code: "AI_CAPTION_GENERATION_FAILED",
           message: result.error,
           timestamp: new Date().toISOString(),
         },
       },
-      statusCode
+      statusCode,
     );
   } catch (error) {
-    console.error('Error in AI caption generation handler:', error);
+    console.error("Error in AI caption generation handler:", error);
     return c.json(
       {
         error: {
-          code: 'INTERNAL_ERROR',
-          message: 'Failed to generate AI caption',
+          code: "INTERNAL_ERROR",
+          message: "Failed to generate AI caption",
           timestamp: new Date().toISOString(),
         },
       },
-      500
+      500,
     );
   }
 });
@@ -310,12 +317,14 @@ sharingRouter.openapi(generateAICaptionRoute, async (c) => {
 #### 1. Smart Caption Generation
 
 **Context-Aware Messaging:**
+
 - Analyzes report category, location, and severity
 - Adapts tone based on damage type and urgency
 - Considers local government structure and responsibilities
 - Incorporates current events and seasonal factors
 
 **Platform Optimization:**
+
 - Character limit awareness for each platform
 - Platform-specific hashtag strategies
 - URL handling optimization
@@ -324,12 +333,14 @@ sharingRouter.openapi(generateAICaptionRoute, async (c) => {
 #### 2. Advanced Hashtag Generation
 
 **Dynamic Hashtag Strategies:**
+
 - Category-specific hashtags (e.g., #PotholeAlert for berlubang)
 - Location-based hashtags (e.g., #JakartaPusat, #Menteng)
 - Government accountability hashtags (e.g., #FixOurRoads, #PublicService)
 - Viral engagement hashtags (e.g., #ViralkanJalan, #CommunityAction)
 
 **Hashtag Optimization:**
+
 - Trending hashtag integration
 - Platform-specific hashtag density
 - Character count optimization
@@ -338,12 +349,14 @@ sharingRouter.openapi(generateAICaptionRoute, async (c) => {
 #### 3. Multi-Language Support
 
 **Indonesian Language Optimization:**
+
 - Natural Indonesian language generation
 - Local slang and expressions
 - Cultural context awareness
 - Regional dialect adaptation
 
 **Future Language Support:**
+
 - English caption generation
 - Regional language support (Javanese, Sundanese, etc.)
 - Multi-language caption generation
@@ -351,12 +364,14 @@ sharingRouter.openapi(generateAICaptionRoute, async (c) => {
 #### 4. AI Model Selection
 
 **Free Model Usage:**
+
 - Default for all users
 - Good quality for basic caption generation
 - Rate limiting and usage tracking
 - Fallback to template-based generation
 
 **Paid Model Usage:**
+
 - Premium users or high-priority reports
 - Enhanced creativity and context awareness
 - Better multilingual support
@@ -371,13 +386,16 @@ const handleAIFailure = async (
   reportData: ReportSharingData,
   tone: CaptionTone,
   platform: Platform,
-  error: Error
+  error: Error,
 ): Promise<AppResult<CaptionResponse>> => {
-  console.warn('AI caption generation failed, falling back to template:', error.message);
-  
+  console.warn(
+    "AI caption generation failed, falling back to template:",
+    error.message,
+  );
+
   // Log AI failure for monitoring
   await logAIFailure(error, reportData.id, tone, platform);
-  
+
   // Fallback to template-based generation
   return generateCaptionFromTemplate(reportData, tone, platform);
 };
@@ -398,7 +416,7 @@ const trackAIMetrics = async (
   success: boolean,
   modelUsed: string,
   responseTime: number,
-  fallbackUsed: boolean
+  fallbackUsed: boolean,
 ) => {
   // Track AI performance metrics
   // Monitor for service degradation
@@ -426,13 +444,13 @@ const rateLimitConfig = {
   freeModel: {
     requestsPerMinute: 10,
     requestsPerHour: 100,
-    requestsPerDay: 1000
+    requestsPerDay: 1000,
   },
   paidModel: {
     requestsPerMinute: 30,
     requestsPerHour: 500,
-    requestsPerDay: 5000
-  }
+    requestsPerDay: 5000,
+  },
 };
 ```
 
@@ -1018,7 +1036,7 @@ interface ReportWithShareCount extends ReportWithUser {
 ### API Considerations
 
 - **Backend changes required** for share count tracking and AI integration
-- **New endpoints**: 
+- **New endpoints**:
   - `POST /api/reports/:id/share` for incrementing share count
   - `POST /api/reports/:id/generate-ai-caption` for AI caption generation
 - **Database migration**: Add `share_count` column to reports table

@@ -127,8 +127,8 @@ export function LaporanClientWrapper({
       <section className="py-12">
         <div className="container mx-auto px-4">
           {/* Results Summary */}
-          <div className="flex items-center justify-between mb-8">
-            <div className="text-sm text-muted-foreground">
+          <div className="mb-8 flex items-center justify-between">
+            <div className="text-muted-foreground text-sm">
               Menampilkan {initialReports?.items?.length || 0} dari{" "}
               {initialReports?.total || 0} laporan
               {selectedCategory && ` untuk kategori "${selectedCategory}"`}
@@ -145,7 +145,7 @@ export function LaporanClientWrapper({
 
           {/* Pagination */}
           {initialReports && initialReports.pages > 1 && (
-            <div className="flex justify-center mt-12">
+            <div className="mt-12 flex justify-center">
               <Pagination
                 currentPage={currentPage}
                 totalPages={initialReports.pages}

@@ -44,7 +44,7 @@ interface ReportFormFieldsProps {
   // Administrative sync props
   syncStatus?: any; // TODO: Import proper type
   hasValidMatch?: boolean;
-  confidenceLevel?: 'high' | 'medium' | 'low' | 'none';
+  confidenceLevel?: "high" | "medium" | "low" | "none";
   canAutoSelect?: boolean;
   isProcessingAdminSync?: boolean;
 }
@@ -67,7 +67,7 @@ export const ReportFormFields = ({
   // Administrative sync props
   syncStatus,
   hasValidMatch = false,
-  confidenceLevel = 'none',
+  confidenceLevel = "none",
   canAutoSelect = false,
   isProcessingAdminSync = false,
 }: ReportFormFieldsProps) => {
@@ -75,17 +75,18 @@ export const ReportFormFields = ({
     <>
       {/* Progressive Activation Notice */}
       {!isFormActivated && (
-        <div className="p-6 bg-neutral-50 border border-neutral-200 rounded-lg text-center">
+        <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-6 text-center">
           <div className="space-y-3">
-            <div className="w-12 h-12 bg-neutral-200 rounded-full flex items-center justify-center mx-auto">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-neutral-200">
               <MapPin className="h-6 w-6 text-neutral-500" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-neutral-700 mb-2">
+              <h3 className="mb-2 text-lg font-semibold text-neutral-700">
                 Formulir akan aktif setelah foto diunggah
               </h3>
-              <p className="text-sm text-neutral-600 max-w-md mx-auto">
-                Unggah foto jalan rusak terlebih dahulu. Sistem akan mengekstrak informasi lokasi dari foto untuk mempermudah pengisian formulir.
+              <p className="mx-auto max-w-md text-sm text-neutral-600">
+                Unggah foto jalan rusak terlebih dahulu. Sistem akan mengekstrak
+                informasi lokasi dari foto untuk mempermudah pengisian formulir.
               </p>
             </div>
           </div>
@@ -93,9 +94,11 @@ export const ReportFormFields = ({
       )}
 
       {/* Form Fields Grid - Responsive Layout */}
-      <div className={`grid grid-cols-1 lg:grid-cols-2 gap-6 transition-all duration-300 ${
-        !isFormActivated ? 'opacity-40 pointer-events-none' : 'opacity-100'
-      }`}>
+      <div
+        className={`grid grid-cols-1 gap-6 transition-all duration-300 lg:grid-cols-2 ${
+          !isFormActivated ? "pointer-events-none opacity-40" : "opacity-100"
+        }`}
+      >
         {/* Category Selection */}
         <FormField
           control={form.control}
@@ -113,7 +116,7 @@ export const ReportFormFields = ({
                 <FormControl>
                   <SelectTrigger
                     size="lg"
-                    className="border-neutral-300 focus:border-neutral-600 focus:ring-neutral-600/20 bg-white"
+                    className="border-neutral-300 bg-white focus:border-neutral-600 focus:ring-neutral-600/20"
                   >
                     <SelectValue placeholder="Pilih kategori kerusakan">
                       {field.value && (
@@ -137,7 +140,7 @@ export const ReportFormFields = ({
                     </SelectValue>
                   </SelectTrigger>
                 </FormControl>
-                <SelectContent className="border-neutral-200 shadow-lg bg-white">
+                <SelectContent className="border-neutral-200 bg-white shadow-lg">
                   {REPORT_CATEGORIES.map((option) => (
                     <SelectItem
                       key={option.value}
@@ -171,7 +174,7 @@ export const ReportFormFields = ({
           name="street_name"
           render={({ field }) => (
             <FormItem className="space-y-3">
-              <FormLabel className="text-base font-semibold text-neutral-900 flex items-center gap-2">
+              <FormLabel className="flex items-center gap-2 text-base font-semibold text-neutral-900">
                 Nama Jalan *
                 {isGeocodingFromCoords && (
                   <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
@@ -183,14 +186,16 @@ export const ReportFormFields = ({
               <FormControl>
                 <Input
                   placeholder="Contoh: Jl. Sudirman"
-                  disabled={disabled || isGeocodingFromCoords || !isFormActivated}
+                  disabled={
+                    disabled || isGeocodingFromCoords || !isFormActivated
+                  }
                   size="lg"
-                  className={`border-neutral-300 focus:border-neutral-600 focus:ring-neutral-600/20 transition-all duration-200 ${
+                  className={`border-neutral-300 transition-all duration-200 focus:border-neutral-600 focus:ring-neutral-600/20 ${
                     lastGeocodingSource === "coordinates"
                       ? "border-green-300 bg-green-50/30"
                       : isFormActivated
-                      ? "bg-white hover:border-neutral-400"
-                      : "bg-neutral-100 cursor-not-allowed"
+                        ? "bg-white hover:border-neutral-400"
+                        : "cursor-not-allowed bg-neutral-100"
                   }`}
                   {...field}
                   onChange={(e) => {
@@ -230,18 +235,24 @@ export const ReportFormFields = ({
       {/* Location Status Indicator - UX Enhancement - Only show when form is activated */}
       {isFormActivated && (
         <div className="flex justify-center">
-          <div className={`inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium ${
-            hasExifData 
-              ? "bg-green-50 text-green-700 border border-green-200"
-              : "bg-blue-50 text-blue-700 border border-blue-200"
-          }`}>
+          <div
+            className={`inline-flex items-center rounded-lg px-3 py-2 text-sm font-medium ${
+              hasExifData
+                ? "border border-green-200 bg-green-50 text-green-700"
+                : "border border-blue-200 bg-blue-50 text-blue-700"
+            }`}
+          >
             {hasExifData ? (
               <>
-                ✅ <span className="ml-2">Lokasi berhasil diekstrak dari foto</span>
+                ✅{" "}
+                <span className="ml-2">
+                  Lokasi berhasil diekstrak dari foto
+                </span>
               </>
             ) : (
               <>
-                📍 <span className="ml-2">Pilih metode lokasi di bawah ini</span>
+                📍{" "}
+                <span className="ml-2">Pilih metode lokasi di bawah ini</span>
               </>
             )}
           </div>
@@ -261,8 +272,8 @@ export const ReportFormFields = ({
       {/* Progressive Disclosure: Manual Location Buttons - Only show when form is activated and EXIF unavailable */}
       {isFormActivated && onGetCoordinates && !hasExifData && (
         <div className="flex flex-col items-center space-y-3 pt-4">
-          <div className="text-center max-w-md">
-            <p className="text-sm text-neutral-600 mb-2">
+          <div className="max-w-md text-center">
+            <p className="mb-2 text-sm text-neutral-600">
               🗺️ <strong>Dapatkan koordinat dari alamat</strong>
             </p>
             <p className="text-xs text-neutral-500">
@@ -280,15 +291,17 @@ export const ReportFormFields = ({
 
       {/* Geocoding Error Display */}
       {geocodingError && (
-        <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+        <div className="rounded-lg border border-red-200 bg-red-50 p-3">
           <p className="text-sm text-red-800">{geocodingError}</p>
         </div>
       )}
 
       {/* Location Description - Full Width */}
-      <div className={`transition-all duration-300 ${
-        !isFormActivated ? 'opacity-40 pointer-events-none' : 'opacity-100'
-      }`}>
+      <div
+        className={`transition-all duration-300 ${
+          !isFormActivated ? "pointer-events-none opacity-40" : "opacity-100"
+        }`}
+      >
         <FormField
           control={form.control}
           name="location_text"
@@ -302,13 +315,13 @@ export const ReportFormFields = ({
                   placeholder="Contoh: Depan Mall Tunjungan Plaza, sebelah kiri arah Surabaya"
                   rows={4}
                   disabled={disabled || !isFormActivated}
-                  className="border-neutral-300 focus:border-neutral-600 focus:ring-neutral-600/20 resize-none bg-white min-h-[120px]"
+                  className="min-h-[120px] resize-none border-neutral-300 bg-white focus:border-neutral-600 focus:ring-neutral-600/20"
                   {...field}
                 />
               </FormControl>
               <FormDescription className="text-sm text-neutral-600">
-                Deskripsi detail lokasi kerusakan jalan untuk memudahkan komunitas
-                menemukan lokasi (maksimal 500 karakter).
+                Deskripsi detail lokasi kerusakan jalan untuk memudahkan
+                komunitas menemukan lokasi (maksimal 500 karakter).
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -317,16 +330,18 @@ export const ReportFormFields = ({
       </div>
 
       {/* Latitude and Longitude Inputs with Get Address Button */}
-      <div className={`space-y-6 transition-all duration-300 ${
-        !isFormActivated ? 'opacity-40 pointer-events-none' : 'opacity-100'
-      }`}>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div
+        className={`space-y-6 transition-all duration-300 ${
+          !isFormActivated ? "pointer-events-none opacity-40" : "opacity-100"
+        }`}
+      >
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <FormField
             control={form.control}
             name="lat"
             render={({ field }) => (
               <FormItem className="space-y-3">
-                <FormLabel className="text-base font-semibold text-neutral-900 flex items-center gap-2">
+                <FormLabel className="flex items-center gap-2 text-base font-semibold text-neutral-900">
                   Latitude *
                   {isGeocodingFromAddress && (
                     <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
@@ -340,9 +355,11 @@ export const ReportFormFields = ({
                     type="number"
                     step="any"
                     placeholder="Contoh: -7.260000"
-                    disabled={disabled || isGeocodingFromAddress || !isFormActivated}
+                    disabled={
+                      disabled || isGeocodingFromAddress || !isFormActivated
+                    }
                     size="lg"
-                    className={`border-neutral-300 focus:border-neutral-600 focus:ring-neutral-600/20 bg-white ${
+                    className={`border-neutral-300 bg-white focus:border-neutral-600 focus:ring-neutral-600/20 ${
                       lastGeocodingSource === "address"
                         ? "border-green-300 bg-green-50/30"
                         : ""
@@ -354,7 +371,6 @@ export const ReportFormFields = ({
                       onClearGeocodingError?.();
                     }}
                     value={field.value === 0 ? "" : field.value}
-                  
                   />
                 </FormControl>
                 <FormDescription className="text-sm text-neutral-600">
@@ -369,7 +385,7 @@ export const ReportFormFields = ({
             name="lon"
             render={({ field }) => (
               <FormItem className="space-y-3">
-                <FormLabel className="text-base font-semibold text-neutral-900 flex items-center gap-2">
+                <FormLabel className="flex items-center gap-2 text-base font-semibold text-neutral-900">
                   Longitude *
                   {isGeocodingFromAddress && (
                     <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
@@ -383,9 +399,11 @@ export const ReportFormFields = ({
                     type="number"
                     step="any"
                     placeholder="Contoh: 112.780000"
-                    disabled={disabled || isGeocodingFromAddress || !isFormActivated}
+                    disabled={
+                      disabled || isGeocodingFromAddress || !isFormActivated
+                    }
                     size="lg"
-                    className={`border-neutral-300 focus:border-neutral-600 focus:ring-neutral-600/20 bg-white ${
+                    className={`border-neutral-300 bg-white focus:border-neutral-600 focus:ring-neutral-600/20 ${
                       lastGeocodingSource === "address"
                         ? "border-green-300 bg-green-50/30"
                         : ""
@@ -411,8 +429,8 @@ export const ReportFormFields = ({
         {/* Progressive Disclosure: Manual Address Button - Only show when form is activated and EXIF unavailable */}
         {isFormActivated && onGetAddress && !hasExifData && (
           <div className="flex flex-col items-center space-y-3 pt-4">
-            <div className="text-center max-w-md">
-              <p className="text-sm text-neutral-600 mb-2">
+            <div className="max-w-md text-center">
+              <p className="mb-2 text-sm text-neutral-600">
                 📍 <strong>Dapatkan alamat dari koordinat</strong>
               </p>
               <p className="text-xs text-neutral-500">

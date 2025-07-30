@@ -27,11 +27,11 @@ export const ReportImageUpload = ({
 }: ReportImageUploadProps) => {
   return (
     <div className="space-y-3">
-      <FormLabel className="text-base font-semibold text-neutral-900 flex items-center gap-2">
+      <FormLabel className="flex items-center gap-2 text-base font-semibold text-neutral-900">
         <Upload className="h-4 w-4 text-neutral-600" />
         Foto Jalan Rusak *
         {isUploading && (
-          <span className="text-xs text-neutral-500 font-normal">
+          <span className="text-xs font-normal text-neutral-500">
             • Mengekstrak lokasi dari foto...
           </span>
         )}
