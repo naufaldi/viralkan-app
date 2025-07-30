@@ -14,6 +14,7 @@ import {
 import { Alert, AlertDescription } from "@repo/ui/components/ui/alert";
 import { FormLabel } from "@repo/ui/components/ui/form";
 import imageCompression from "browser-image-compression";
+import heic2any from "heic2any";
 
 interface EditImageUploadProps {
   existingImageUrl?: string | null;
@@ -28,7 +29,7 @@ interface EditImageUploadProps {
 }
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-const ACCEPTED_FORMATS = ["image/jpeg", "image/png", "image/webp"];
+const ACCEPTED_FORMATS = ["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"];
 const MAX_RETRIES = 3;
 
 export default function EditImageUpload({
@@ -48,6 +49,44 @@ export default function EditImageUpload({
   const [retryCount, setRetryCount] = useState(0);
   const [isCompressing, setIsCompressing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const convertHeicToJpeg = useCallback(async (file: File): Promise<File> => {
+    try {
+      console.log("Converting HEIC to JPEG:", file.name);
+      const convertedBlob = await heic2any({
+        blob: file,
+        toType: "image/jpeg",
+        quality: 0.9,
+      });
+      
+      // Handle both single blob and array of blobs
+      const blob = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
+      
+      if (!blob) {
+        throw new Error("Gagal mengkonversi file HEIC. Hasil konversi tidak valid.");
+      }
+      
+      // Create a new File object with the converted data
+      const originalName = file.name;
+      const nameWithoutExt = originalName.substring(0, originalName.lastIndexOf("."));
+      const newFileName = nameWithoutExt ? `${nameWithoutExt}.jpg` : `converted_${Date.now()}.jpg`;
+      
+      const convertedFile = new File([blob], newFileName, {
+        type: "image/jpeg",
+        lastModified: Date.now(),
+      });
+      
+      console.log("HEIC conversion successful:", {
+        original: `${(file.size / 1024 / 1024).toFixed(2)}MB`,
+        converted: `${(convertedFile.size / 1024 / 1024).toFixed(2)}MB`,
+      });
+      
+      return convertedFile;
+    } catch (error) {
+      console.error("HEIC conversion failed:", error);
+      throw new Error("Gagal mengkonversi file HEIC. Silakan gunakan format JPEG, PNG, atau WebP.");
+    }
+  }, []);
 
   const compressImage = useCallback(async (file: File): Promise<File> => {
     try {
@@ -97,18 +136,35 @@ export default function EditImageUpload({
         return;
       }
 
-      if (!ACCEPTED_FORMATS.includes(file.type)) {
+      // Check if file is HEIC/HEIF and convert it
+      let processedFile = file;
+      if (file.type === "image/heic" || file.type === "image/heif" || file.name.toLowerCase().endsWith('.heic') || file.name.toLowerCase().endsWith('.heif')) {
+        try {
+          setIsCompressing(true);
+          processedFile = await convertHeicToJpeg(file);
+        } catch (error: any) {
+          const errorMsg = error.message || "Gagal mengkonversi file HEIC. Silakan gunakan format JPEG, PNG, atau WebP.";
+          setUploadError(errorMsg);
+          onUploadError?.(errorMsg);
+          setIsCompressing(false);
+          return;
+        }
+      }
+
+      // Validate file type after HEIC conversion
+      if (!ACCEPTED_FORMATS.includes(processedFile.type) && processedFile.type !== "image/jpeg") {
         const errorMsg =
-          "Format file tidak didukung. Gunakan JPEG, PNG, atau WebP";
+          "Format file tidak didukung. Gunakan JPEG, PNG, WebP, atau HEIC";
         setUploadError(errorMsg);
         onUploadError?.(errorMsg);
+        setIsCompressing(false);
         return;
       }
 
       try {
         setIsCompressing(true);
 
-        const compressedFile = await compressImage(file);
+        const compressedFile = await compressImage(processedFile);
 
         const reader = new FileReader();
         reader.onload = (e) => {
@@ -126,7 +182,7 @@ export default function EditImageUpload({
         setIsCompressing(false);
       }
     },
-    [compressImage, onImageSelect, onUploadError, onUploadSuccess],
+    [compressImage, onImageSelect, onUploadError, onUploadSuccess, convertHeicToJpeg],
   );
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -145,7 +201,7 @@ export default function EditImageUpload({
       setDragOver(false);
 
       const files = Array.from(e.dataTransfer.files);
-      if (files.length > 0) {
+      if (files.length > 0 && files[0]) {
         handleFileSelect(files[0]);
       }
     },
@@ -221,7 +277,7 @@ export default function EditImageUpload({
                     : "atau klik untuk memilih file dari perangkat"}
                 </p>
                 <p className="text-sm text-neutral-600 mt-3">
-                  Format: JPEG, PNG, WebP • Maksimal 10MB • Otomatis dikompres
+                  Format: JPEG, PNG, WebP, HEIC • Maksimal 10MB • Otomatis dikompres
                   ke WebP
                 </p>
               </div>
@@ -349,7 +405,7 @@ export default function EditImageUpload({
       <input
         ref={fileInputRef}
         type="file"
-        accept={ACCEPTED_FORMATS.join(",")}
+        accept={ACCEPTED_FORMATS.join(",") + ",.heic,.heif"}
         onChange={handleFileInputChange}
         className="hidden"
         disabled={disabled}

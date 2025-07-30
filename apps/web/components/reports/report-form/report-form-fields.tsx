@@ -19,6 +19,7 @@ import {
 import { CreateReportInput, REPORT_CATEGORIES } from "../../../lib/types/api";
 import { GetCoordinatesButton } from "./get-coordinates-button";
 import { GetAddressButton } from "./get-address-button";
+import { LocationButton } from "./location-button";
 import { AdministrativeSelect } from "../administrative-select";
 import { Loader2, MapPin } from "lucide-react";
 
@@ -35,6 +36,17 @@ interface ReportFormFieldsProps {
   onGetAddress?: () => void;
   onGetCoordinates?: () => void;
   onClearGeocodingError?: () => void;
+  // Progressive disclosure props
+  hasExifData?: boolean;
+  // Location props
+  onGetLocation?: () => void;
+  isGettingLocation?: boolean;
+  // Administrative sync props
+  syncStatus?: any; // TODO: Import proper type
+  hasValidMatch?: boolean;
+  confidenceLevel?: 'high' | 'medium' | 'low' | 'none';
+  canAutoSelect?: boolean;
+  isProcessingAdminSync?: boolean;
 }
 
 export const ReportFormFields = ({
@@ -49,6 +61,15 @@ export const ReportFormFields = ({
   onGetAddress,
   onGetCoordinates,
   onClearGeocodingError,
+  hasExifData = false,
+  onGetLocation,
+  isGettingLocation = false,
+  // Administrative sync props
+  syncStatus,
+  hasValidMatch = false,
+  confidenceLevel = 'none',
+  canAutoSelect = false,
+  isProcessingAdminSync = false,
 }: ReportFormFieldsProps) => {
   return (
     <>
@@ -188,7 +209,7 @@ export const ReportFormFields = ({
         />
       </div>
 
-      {/* Administrative Boundaries - Cascading Dropdowns */}
+      {/* Administrative Boundaries - Enhanced with Sync Features */}
       <AdministrativeSelect
         form={form}
         disabled={disabled}
@@ -196,11 +217,58 @@ export const ReportFormFields = ({
         isGeocodingFromCoords={isGeocodingFromCoords}
         lastGeocodingSource={lastGeocodingSource}
         onClearGeocodingError={onClearGeocodingError}
+        enableAutoSync={true}
+        showSyncStatus={true}
+        // Administrative sync status props
+        syncStatus={syncStatus}
+        hasValidMatch={hasValidMatch}
+        confidenceLevel={confidenceLevel}
+        canAutoSelect={canAutoSelect}
+        isProcessingAdminSync={isProcessingAdminSync}
       />
 
-      {/* Get Coordinates Button */}
-      {onGetCoordinates && (
+      {/* Location Status Indicator - UX Enhancement - Only show when form is activated */}
+      {isFormActivated && (
         <div className="flex justify-center">
+          <div className={`inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium ${
+            hasExifData 
+              ? "bg-green-50 text-green-700 border border-green-200"
+              : "bg-blue-50 text-blue-700 border border-blue-200"
+          }`}>
+            {hasExifData ? (
+              <>
+                ✅ <span className="ml-2">Lokasi berhasil diekstrak dari foto</span>
+              </>
+            ) : (
+              <>
+                📍 <span className="ml-2">Pilih metode lokasi di bawah ini</span>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Smart Fallback: Current Location Button - Only show when form is activated and EXIF unavailable */}
+      {isFormActivated && !hasExifData && onGetLocation && (
+        <LocationButton
+          onGetLocation={onGetLocation}
+          isLoading={isGettingLocation}
+          disabled={disabled}
+          isFormActivated={isFormActivated}
+        />
+      )}
+
+      {/* Progressive Disclosure: Manual Location Buttons - Only show when form is activated and EXIF unavailable */}
+      {isFormActivated && onGetCoordinates && !hasExifData && (
+        <div className="flex flex-col items-center space-y-3 pt-4">
+          <div className="text-center max-w-md">
+            <p className="text-sm text-neutral-600 mb-2">
+              🗺️ <strong>Dapatkan koordinat dari alamat</strong>
+            </p>
+            <p className="text-xs text-neutral-500">
+              Isi nama jalan dan kabupaten/kota, lalu klik tombol di bawah
+            </p>
+          </div>
           <GetCoordinatesButton
             onClick={onGetCoordinates}
             isLoading={isGeocodingFromAddress}
@@ -340,9 +408,17 @@ export const ReportFormFields = ({
           />
         </div>
 
-        {/* Get Address Button */}
-        {onGetAddress && (
-          <div className="flex justify-center">
+        {/* Progressive Disclosure: Manual Address Button - Only show when form is activated and EXIF unavailable */}
+        {isFormActivated && onGetAddress && !hasExifData && (
+          <div className="flex flex-col items-center space-y-3 pt-4">
+            <div className="text-center max-w-md">
+              <p className="text-sm text-neutral-600 mb-2">
+                📍 <strong>Dapatkan alamat dari koordinat</strong>
+              </p>
+              <p className="text-xs text-neutral-500">
+                Isi latitude dan longitude, lalu klik tombol di bawah
+              </p>
+            </div>
             <GetAddressButton
               onClick={onGetAddress}
               isLoading={isGeocodingFromCoords}

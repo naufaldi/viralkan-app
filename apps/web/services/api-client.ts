@@ -480,6 +480,54 @@ export const administrativeService = {
       `/api/administrative/validate/${provinceCode}/${regencyCode}/${districtCode}`,
     );
   },
+
+  // Search province by name with fuzzy matching
+  searchProvinces: async (query: string): Promise<Province | null> => {
+    if (!query || query.trim().length < 2) {
+      return null;
+    }
+    
+    const searchParams = new URLSearchParams();
+    searchParams.append('q', query.trim());
+    
+    return apiRequest<Province | null>(
+      `/api/administrative/provinces/search?${searchParams.toString()}`
+    );
+  },
+
+  // Search regencies by name within province with fuzzy matching
+  searchRegencies: async (
+    query: string,
+    provinceCode: string
+  ): Promise<Regency | null> => {
+    if (!query || query.trim().length < 2 || !provinceCode) {
+      return null;
+    }
+    
+    const searchParams = new URLSearchParams();
+    searchParams.append('q', query.trim());
+    
+    return apiRequest<Regency | null>(
+      `/api/administrative/regencies/${provinceCode}/search?${searchParams.toString()}`
+    );
+  },
+
+  // Search districts by name within regency with fuzzy matching
+  searchDistricts: async (
+    query: string,
+    regencyCode: string
+  ): Promise<District | null> => {
+    if (!query || query.trim().length < 2 || !regencyCode) {
+      return null;
+    }
+    
+    const searchParams = new URLSearchParams();
+    searchParams.append('q', query.trim());
+    
+    return apiRequest<District | null>(
+      `/api/administrative/districts/${regencyCode}/search?${searchParams.toString()}`
+    );
+  },
 };
 
 // Re-export types for convenience

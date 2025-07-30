@@ -436,3 +436,89 @@ export function getCacheStats() {
     rateLimiterQueueSize: rateLimiter.queueSize,
   };
 }
+
+/**
+ * Enhanced reverse geocoding with detailed Nominatim response
+ * Returns both parsed LocationData and raw Nominatim address structure
+ */
+export async function reverseGeocodeWithNominatimData(
+  lat: number,
+  lon: number,
+): Promise<GeocodingResult & { nominatimAddress?: NominatimResponse["address"] }> {
+  try {
+    // Validate coordinates
+    const validation = CoordinatesSchema.safeParse({ lat, lon });
+    if (!validation.success) {
+      return {
+        success: false,
+        error: {
+          code: "INVALID_COORDINATES",
+          message: "Invalid latitude or longitude values",
+        },
+      };
+    }
+
+    // Check cache first
+    const cacheKey = `reverse:${lat.toFixed(6)}:${lon.toFixed(6)}`;
+    const cached = cache.get(cacheKey);
+    if (cached) {
+      return {
+        success: true,
+        data: {
+          ...cached,
+          geocoded_at: new Date().toISOString(),
+          geocoding_source: "nominatim" as const,
+        },
+      };
+    }
+
+    // Make API request
+    const url = new URL("/reverse", NOMINATIM_CONFIG.BASE_URL);
+    url.searchParams.set("lat", lat.toString());
+    url.searchParams.set("lon", lon.toString());
+    url.searchParams.set("format", "json");
+    url.searchParams.set("addressdetails", "1");
+    url.searchParams.set("zoom", "18"); // High detail level
+
+    const response = await makeNominatimRequest(url.toString());
+
+    if (!response) {
+      return {
+        success: false,
+        error: {
+          code: "LOCATION_NOT_FOUND",
+          message: "No address found for these coordinates",
+        },
+      };
+    }
+
+    // Parse response
+    const locationData = parseNominatimAddress(response.address);
+    const result: LocationData = {
+      lat,
+      lon,
+      ...locationData,
+      geocoded_at: new Date().toISOString(),
+      geocoding_source: "nominatim",
+    };
+
+    // Cache successful result
+    cache.set(cacheKey, result, CACHE_CONFIG.TTL_SUCCESS);
+
+    return {
+      success: true,
+      data: result,
+      nominatimAddress: response.address,
+    };
+  } catch (error) {
+    console.error("Enhanced reverse geocoding error:", error);
+    return {
+      success: false,
+      error: {
+        code: "GEOCODING_ERROR",
+        message:
+          error instanceof Error ? error.message : "Unknown geocoding error",
+      },
+    };
+  }
+}

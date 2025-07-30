@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 // Icons removed - not used in this file
 import { useCreateReport } from "../../../hooks/use-create-report";
 import { useGeocoding } from "../../../hooks/use-geocoding";
+import { useAdministrativeSync } from "../../../hooks/reports/use-administrative-sync";
 import { uploadImage } from "../../../services/upload";
 import { useAuth } from "../../../hooks/useAuth";
 import { useInvalidateDashboard } from "../../../hooks/dashboard";
@@ -18,7 +19,9 @@ import {
   extractGPSFromImage,
   getExifErrorMessage,
 } from "../../../lib/utils/exif-extraction";
-import { reverseGeocode } from "../../../lib/services/geocoding";
+import { reverseGeocode, reverseGeocodeWithNominatimData } from "../../../lib/services/geocoding";
+import { processNominatimAddressWithAPI } from "../../../lib/utils/enhanced-geocoding-handler";
+import { administrativeService } from "../../../services/api-client";
 import { CreateReportSchema, CreateReportInput } from "../../../lib/types/api";
 
 interface UseReportFormProps {
@@ -35,6 +38,7 @@ export const useReportForm = ({ onSuccess }: UseReportFormProps) => {
   const [isExtractingExif, setIsExtractingExif] = useState(false);
   const [exifError, setExifError] = useState<string | undefined>(undefined);
   const [hasExifWarning, setHasExifWarning] = useState(false);
+  const [hasExifData, setHasExifData] = useState(false);
 
   const { getToken, isAuthenticated } = useAuth();
   const { invalidateAll } = useInvalidateDashboard();
@@ -46,7 +50,6 @@ export const useReportForm = ({ onSuccess }: UseReportFormProps) => {
     isGeocodingFromAddress,
     lastGeocodingSource,
     geocodingError,
-    geocodeFromCoordinatesManual,
     geocodeFromAddress,
     clearError: clearGeocodingError,
     isValidCoordinates,
@@ -101,6 +104,67 @@ export const useReportForm = ({ onSuccess }: UseReportFormProps) => {
     },
   });
 
+  // Administrative synchronization hook for enhanced geocoding processing
+  const {
+    syncStatus,
+    hasValidMatch,
+    confidenceLevel,
+    canAutoSelect,
+    isProcessing: isProcessingAdminSync,
+    clearSync,
+  } = useAdministrativeSync({
+    form,
+    autoApply: true,
+    confidenceThreshold: 0.7,
+    enableValidation: true,
+  });
+
+  // Helper function to apply search results and ensure data loading
+  const applyAdministrativeSearchResults = async (enhancedResult: { administrative: { province: { code: string | null; name: string | null }; regency: { code: string | null; name: string | null }; district: { code: string | null; name: string | null } } }) => {
+    try {
+      // Apply province first
+      if (enhancedResult.administrative.province.code) {
+        form.setValue("province_code", enhancedResult.administrative.province.code);
+        form.setValue("province", enhancedResult.administrative.province.name || "");
+        
+        // Ensure regency data is loaded for this province
+        if (enhancedResult.administrative.regency.code) {
+          try {
+            await administrativeService.getRegencies(enhancedResult.administrative.province.code);
+          } catch (error) {
+            console.warn("Failed to preload regency data:", error);
+          }
+        }
+      }
+      
+      // Apply regency
+      if (enhancedResult.administrative.regency.code) {
+        form.setValue("regency_code", enhancedResult.administrative.regency.code);
+        form.setValue("city", enhancedResult.administrative.regency.name || "");
+        
+        // Ensure district data is loaded for this regency
+        if (enhancedResult.administrative.district.code) {
+          try {
+            await administrativeService.getDistricts(enhancedResult.administrative.regency.code);
+          } catch (error) {
+            console.warn("Failed to preload district data:", error);
+          }
+        }
+      }
+      
+      // Apply district
+      if (enhancedResult.administrative.district.code) {
+        form.setValue("district_code", enhancedResult.administrative.district.code);
+        form.setValue("district", enhancedResult.administrative.district.name || "");
+      }
+      
+      // Force form to re-render by triggering validation
+      await form.trigger();
+    } catch (error) {
+      console.error("Error applying administrative search results:", error);
+    }
+  };
+
   // Clear form errors when user starts typing
   const watchedValues = form.watch();
   useEffect(() => {
@@ -109,7 +173,7 @@ export const useReportForm = ({ onSuccess }: UseReportFormProps) => {
     }
   }, [watchedValues, formError]);
 
-  const handleImageSelect = async (file: File) => {
+  const handleImageSelect = async (file: File, originalFile?: File) => {
     setSelectedImage(file);
     setImageUploadFailed(false);
     const dummyUrl = "https://picsum.photos/800/600?random=1";
@@ -120,44 +184,67 @@ export const useReportForm = ({ onSuccess }: UseReportFormProps) => {
     setHasExifWarning(false);
     clearError();
 
-    // Extract EXIF GPS data from the image
+    // Extract EXIF GPS data from the original file (before compression) if available
+    const fileForExif = originalFile || file;
+    console.log("EXIF extraction started:", {
+      compressedFile: file.name,
+      originalFile: originalFile?.name,
+      usingFile: fileForExif.name,
+      fileSize: fileForExif.size,
+      fileType: fileForExif.type
+    });
     setIsExtractingExif(true);
 
     try {
-      const exifResult = await extractGPSFromImage(file);
+      const exifResult = await extractGPSFromImage(fileForExif);
 
       if (exifResult.success && exifResult.gpsData) {
         // Auto-fill coordinates from EXIF data
         form.setValue("lat", exifResult.gpsData.lat);
         form.setValue("lon", exifResult.gpsData.lon);
+        setHasExifData(true);
 
-        // Perform reverse geocoding to auto-fill administrative boundaries
+        // Perform enhanced reverse geocoding with API-based administrative matching
         try {
-          const geocodingResult = await reverseGeocode(
+          const geocodingResult = await reverseGeocodeWithNominatimData(
             exifResult.gpsData.lat,
             exifResult.gpsData.lon,
           );
 
           if (geocodingResult.success && geocodingResult.data) {
-            // Auto-fill administrative boundary fields
+            // Process with new API-based progressive population
+            const enhancedResult = await processNominatimAddressWithAPI(geocodingResult.data);
+            
+            // Apply the enhanced result to the form with proper data loading
+            await applyAdministrativeSearchResults(enhancedResult);
+
+            // Set basic address fields
             if (geocodingResult.data.street_name) {
               form.setValue("street_name", geocodingResult.data.street_name);
             }
-            if (geocodingResult.data.district) {
-              form.setValue("district", geocodingResult.data.district);
-            }
-            if (geocodingResult.data.city) {
-              form.setValue("city", geocodingResult.data.city);
-            }
-            if (geocodingResult.data.province) {
-              form.setValue("province", geocodingResult.data.province);
-            }
 
-            // Show success message with all auto-filled data
-            toast.success("Lokasi dan alamat berhasil diekstrak dari foto", {
-              description: `${geocodingResult.data.district || ""}, ${geocodingResult.data.city || ""}, ${geocodingResult.data.province || ""}`,
-              duration: 5000,
-            });
+            // Show success message based on overall confidence
+            if (enhancedResult.overallConfidence >= 0.9) {
+              toast.success("Lokasi dan alamat berhasil diekstrak dengan AI", {
+                description: "Data administratif telah divalidasi dengan akurasi tinggi",
+                duration: 5000,
+              });
+            } else if (enhancedResult.overallConfidence >= 0.7) {
+              toast.success("Lokasi berhasil diekstrak dari foto", {
+                description: "Silakan periksa keakuratan data administratif",
+                duration: 5000,
+              });
+            } else if (enhancedResult.overallConfidence > 0) {
+              toast.success("Koordinat dan sebagian alamat berhasil diekstrak", {
+                description: "Beberapa data administratif ditemukan - silakan verifikasi",
+                duration: 5000,
+              });
+            } else {
+              toast.success("Koordinat berhasil diekstrak dari foto", {
+                description: `${geocodingResult.data.district || ""}, ${geocodingResult.data.city || ""} - Silakan verifikasi data administratif`,
+                duration: 5000,
+              });
+            }
           } else {
             // Only coordinates extracted, show partial success
             toast.success("Koordinat berhasil diekstrak dari foto", {
@@ -178,6 +265,7 @@ export const useReportForm = ({ onSuccess }: UseReportFormProps) => {
         const errorMessage = getExifErrorMessage(exifResult);
         setExifError(errorMessage);
         setHasExifWarning(true);
+        setHasExifData(false);
 
         // Don't show toast error immediately, let user see the warning in the form
         console.log("EXIF extraction failed:", errorMessage);
@@ -190,6 +278,7 @@ export const useReportForm = ({ onSuccess }: UseReportFormProps) => {
         "Gambar tidak memiliki data lokasi GPS. Silakan gunakan tombol lokasi atau isi koordinat secara manual.",
       );
       setHasExifWarning(true);
+      setHasExifData(false);
 
       // Don't throw or break the flow - this is expected for many images
     } finally {
@@ -203,6 +292,9 @@ export const useReportForm = ({ onSuccess }: UseReportFormProps) => {
     form.setValue("image_url", "");
     setUploadError(undefined);
     setFormError(undefined);
+    setHasExifData(false);
+    // Clear administrative sync state when image is removed
+    clearSync();
   };
 
   const handleImageUploadError = (error: string) => {
@@ -242,12 +334,67 @@ export const useReportForm = ({ onSuccess }: UseReportFormProps) => {
         form.setValue("lat", lat);
         form.setValue("lon", lon);
 
-        // The geocoding will be handled automatically by the useGeocoding hook
-        toast.success("Lokasi berhasil diperoleh", {
+        toast.loading("Mencari alamat dengan AI...", {
           id: "location",
-          description: `Lat: ${lat.toFixed(6)}, Lon: ${lon.toFixed(6)}. Mencari alamat...`,
-          duration: 3000,
         });
+
+        // Use enhanced geocoding with API-based administrative matching
+        try {
+          const geocodingResult = await reverseGeocodeWithNominatimData(lat, lon);
+
+          if (geocodingResult.success && geocodingResult.data) {
+            // Process with new API-based progressive population
+            const enhancedResult = await processNominatimAddressWithAPI(geocodingResult.data);
+            
+            // Apply the enhanced result to the form with proper data loading
+            await applyAdministrativeSearchResults(enhancedResult);
+
+            // Set basic address fields
+            if (geocodingResult.data.street_name) {
+              form.setValue("street_name", geocodingResult.data.street_name);
+            }
+
+            // Show success message based on overall confidence
+            if (enhancedResult.overallConfidence >= 0.9) {
+              toast.success("Lokasi dan alamat berhasil ditemukan dengan AI", {
+                id: "location",
+                description: "Data administratif telah divalidasi dengan akurasi tinggi",
+                duration: 5000,
+              });
+            } else if (enhancedResult.overallConfidence >= 0.7) {
+              toast.success("Lokasi berhasil diperoleh", {
+                id: "location",
+                description: "Silakan periksa keakuratan data administratif",
+                duration: 5000,
+              });
+            } else if (enhancedResult.overallConfidence > 0) {
+              toast.success("Lokasi diperoleh dengan sebagian data administratif", {
+                id: "location",
+                description: "Beberapa data administratif ditemukan - silakan verifikasi",
+                duration: 5000,
+              });
+            } else {
+              toast.success("Lokasi berhasil diperoleh", {
+                id: "location",
+                description: `${geocodingResult.data.district || ""}, ${geocodingResult.data.city || ""} - Silakan verifikasi data administratif`,
+                duration: 3000,
+              });
+            }
+          } else {
+            toast.success("Lokasi berhasil diperoleh", {
+              id: "location",
+              description: `Lat: ${lat.toFixed(6)}, Lon: ${lon.toFixed(6)}. Silakan isi alamat secara manual.`,
+              duration: 3000,
+            });
+          }
+        } catch (error) {
+          console.error("Enhanced geocoding error:", error);
+          toast.success("Lokasi berhasil diperoleh", {
+            id: "location",
+            description: `Lat: ${lat.toFixed(6)}, Lon: ${lon.toFixed(6)}. Silakan isi alamat secara manual.`,
+            duration: 3000,
+          });
+        }
 
         setIsGettingLocation(false);
       },
@@ -263,7 +410,7 @@ export const useReportForm = ({ onSuccess }: UseReportFormProps) => {
     );
   };
 
-  // Manual geocoding from coordinates
+  // Manual geocoding from coordinates with API-based administrative matching
   const handleGetAddressFromCoordinates = async () => {
     const lat = form.getValues("lat");
     const lon = form.getValues("lon");
@@ -276,7 +423,73 @@ export const useReportForm = ({ onSuccess }: UseReportFormProps) => {
       return;
     }
 
-    await geocodeFromCoordinatesManual(lat, lon);
+    toast.loading("Mencari alamat dengan AI...", {
+      id: "manual-geocode",
+    });
+
+    try {
+      const geocodingResult = await reverseGeocodeWithNominatimData(lat, lon);
+
+      if (geocodingResult.success && geocodingResult.data) {
+        // Process with new API-based progressive population
+        const enhancedResult = await processNominatimAddressWithAPI(geocodingResult.data);
+        
+        // Apply the enhanced result to the form
+        if (enhancedResult.administrative.province.code) {
+          form.setValue("province_code", enhancedResult.administrative.province.code);
+          form.setValue("province", enhancedResult.administrative.province.name || "");
+        }
+        
+        if (enhancedResult.administrative.regency.code) {
+          form.setValue("regency_code", enhancedResult.administrative.regency.code);
+          form.setValue("city", enhancedResult.administrative.regency.name || "");
+        }
+        
+        if (enhancedResult.administrative.district.code) {
+          form.setValue("district_code", enhancedResult.administrative.district.code);
+          form.setValue("district", enhancedResult.administrative.district.name || "");
+        }
+
+        // Set basic address fields
+        if (geocodingResult.data.street_name) {
+          form.setValue("street_name", geocodingResult.data.street_name);
+        }
+
+        // Show success message based on overall confidence
+        if (enhancedResult.overallConfidence >= 0.7) {
+          toast.success("Alamat berhasil ditemukan dengan AI", {
+            id: "manual-geocode",
+            description: "Data administratif telah divalidasi",
+            duration: 4000,
+          });
+        } else if (enhancedResult.overallConfidence > 0) {
+          toast.success("Sebagian alamat berhasil ditemukan", {
+            id: "manual-geocode",
+            description: "Beberapa data administratif ditemukan - silakan verifikasi",
+            duration: 4000,
+          });
+        } else {
+          toast.success("Alamat dasar berhasil ditemukan", {
+            id: "manual-geocode",
+            description: "Silakan verifikasi dan lengkapi data administratif",
+            duration: 4000,
+          });
+        }
+      } else {
+        toast.error("Alamat tidak ditemukan", {
+          id: "manual-geocode",
+          description: "Tidak dapat menemukan alamat untuk koordinat tersebut",
+          duration: 4000,
+        });
+      }
+    } catch (error) {
+      console.error("Manual geocoding error:", error);
+      toast.error("Gagal mencari alamat", {
+        id: "manual-geocode",
+        description: "Terjadi kesalahan saat mencari alamat",
+        duration: 4000,
+      });
+    }
   };
 
   // Manual geocoding from address
@@ -369,7 +582,8 @@ export const useReportForm = ({ onSuccess }: UseReportFormProps) => {
     isGettingLocation ||
     isExtractingExif ||
     isGeocodingFromCoords ||
-    isGeocodingFromAddress;
+    isGeocodingFromAddress ||
+    isProcessingAdminSync;
 
   return {
     form,
@@ -383,12 +597,19 @@ export const useReportForm = ({ onSuccess }: UseReportFormProps) => {
     isExtractingExif,
     exifError,
     hasExifWarning,
+    hasExifData,
     submitError,
     // Geocoding states
     isGeocodingFromCoords,
     isGeocodingFromAddress,
     lastGeocodingSource,
     geocodingError,
+    // Administrative sync states
+    syncStatus,
+    hasValidMatch,
+    confidenceLevel,
+    canAutoSelect,
+    isProcessingAdminSync,
     // Handlers
     handleImageSelect,
     handleImageRemove,

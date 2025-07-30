@@ -257,3 +257,137 @@ export const getAdministrativeNames = async (
     return createError("Failed to get administrative names", 500);
   }
 };
+
+/**
+ * Search province by name
+ *
+ * Searches for a province by name using fuzzy matching.
+ * Returns the best match with ranking: exact > starts-with > contains.
+ */
+export const searchProvinceByName = async (
+  name: string,
+): Promise<AppResult<Province | null>> => {
+  try {
+    // Core validation: Check search term
+    if (!name || name.trim().length === 0) {
+      return createError("Search term cannot be empty", 400);
+    }
+
+    if (name.trim().length < 2) {
+      return createError("Search term must be at least 2 characters", 400);
+    }
+
+    // Data operation: Search province by name
+    const result = await data.findProvinceByName(name.trim());
+
+    if (!result.success) {
+      return result;
+    }
+
+    return createSuccess(result.data);
+  } catch (error) {
+    console.error("Error in searchProvinceByName shell:", error);
+    return createError("Failed to search province by name", 500);
+  }
+};
+
+/**
+ * Search regency by name within province
+ *
+ * Searches for a regency by name within a specific province.
+ * Validates province code and existence before searching.
+ */
+export const searchRegencyByName = async (
+  name: string,
+  provinceCode: string,
+): Promise<AppResult<Regency | null>> => {
+  try {
+    // Core validation: Check search term
+    if (!name || name.trim().length === 0) {
+      return createError("Search term cannot be empty", 400);
+    }
+
+    if (name.trim().length < 2) {
+      return createError("Search term must be at least 2 characters", 400);
+    }
+
+    // Core validation: Check province code format
+    if (!core.isValidProvinceCode(provinceCode)) {
+      return createError(
+        "Invalid province code format. Must be 2 digits.",
+        400,
+      );
+    }
+
+    // Data validation: Check if province exists
+    const provinceExists = await data.checkProvinceExists(provinceCode);
+    if (!provinceExists.success) {
+      return provinceExists;
+    }
+
+    if (!provinceExists.data) {
+      return createError(`Province with code ${provinceCode} not found`, 404);
+    }
+
+    // Data operation: Search regency by name within province
+    const result = await data.findRegencyByName(name.trim(), provinceCode);
+
+    if (!result.success) {
+      return result;
+    }
+
+    return createSuccess(result.data);
+  } catch (error) {
+    console.error("Error in searchRegencyByName shell:", error);
+    return createError("Failed to search regency by name", 500);
+  }
+};
+
+/**
+ * Search district by name within regency
+ *
+ * Searches for a district by name within a specific regency.
+ * Validates regency code and existence before searching.
+ */
+export const searchDistrictByName = async (
+  name: string,
+  regencyCode: string,
+): Promise<AppResult<District | null>> => {
+  try {
+    // Core validation: Check search term
+    if (!name || name.trim().length === 0) {
+      return createError("Search term cannot be empty", 400);
+    }
+
+    if (name.trim().length < 2) {
+      return createError("Search term must be at least 2 characters", 400);
+    }
+
+    // Core validation: Check regency code format
+    if (!core.isValidRegencyCode(regencyCode)) {
+      return createError("Invalid regency code format. Must be 4 digits.", 400);
+    }
+
+    // Data validation: Check if regency exists
+    const regencyExists = await data.checkRegencyExists(regencyCode);
+    if (!regencyExists.success) {
+      return regencyExists;
+    }
+
+    if (!regencyExists.data) {
+      return createError(`Regency with code ${regencyCode} not found`, 404);
+    }
+
+    // Data operation: Search district by name within regency
+    const result = await data.findDistrictByName(name.trim(), regencyCode);
+
+    if (!result.success) {
+      return result;
+    }
+
+    return createSuccess(result.data);
+  } catch (error) {
+    console.error("Error in searchDistrictByName shell:", error);
+    return createError("Failed to search district by name", 500);
+  }
+};

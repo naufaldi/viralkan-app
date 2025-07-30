@@ -33,12 +33,19 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
     isUploadingImage,
     isExtractingExif,
     hasExifWarning,
+    hasExifData,
     submitError,
     // Geocoding states
     isGeocodingFromCoords,
     isGeocodingFromAddress,
     lastGeocodingSource,
     geocodingError,
+    // Administrative sync states
+    syncStatus,
+    hasValidMatch,
+    confidenceLevel,
+    canAutoSelect,
+    isProcessingAdminSync,
     // Handlers
     handleImageSelect,
     handleImageRemove,
@@ -120,18 +127,18 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
               onGetAddress={handleGetAddressFromCoordinates}
               onGetCoordinates={handleGetCoordinatesFromAddress}
               onClearGeocodingError={clearGeocodingError}
+              hasExifData={hasExifData}
+              onGetLocation={getCurrentLocation}
+              isGettingLocation={isGettingLocation}
+              // Administrative sync props
+              syncStatus={syncStatus}
+              hasValidMatch={hasValidMatch}
+              confidenceLevel={confidenceLevel}
+              canAutoSelect={canAutoSelect}
+              isProcessingAdminSync={isProcessingAdminSync}
             />
 
-            <div className={`transition-all duration-300 ${
-              !isFormActivated ? 'opacity-40 pointer-events-none' : 'opacity-100'
-            }`}>
-              <LocationButton
-                onGetLocation={getCurrentLocation}
-                isLoading={isGettingLocation}
-                disabled={isLoading || !isFormActivated}
-              />
-            </div>
-
+            {/* Primary Action - Following Fitts's Law */}
             <div className={`transition-all duration-300 ${
               !isFormActivated ? 'opacity-40 pointer-events-none' : 'opacity-100'
             }`}>

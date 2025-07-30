@@ -19,6 +19,7 @@
     "@types/leaflet": "^1.9.20",
     "browser-image-compression": "^2.0.2",
     "firebase": "^11.10.0",
+    "heic2any": "^0.0.4",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.525.0",
     "next": "^15.3.0",

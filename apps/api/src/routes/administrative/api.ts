@@ -222,6 +222,163 @@ const getSyncStatusRoute = createRoute({
   },
 });
 
+// --- NEW: Search Routes for Nominatim Integration ---
+
+const searchProvinceRoute = createRoute({
+  method: "get",
+  path: "/provinces/search",
+  request: {
+    query: z.object({
+      q: z.string().min(2).openapi({
+        param: {
+          name: "q",
+          in: "query",
+          required: true,
+        },
+        example: "Jawa Barat",
+        description: "Province name to search for (minimum 2 characters)",
+      }),
+    }),
+  },
+  summary: "Search province by name",
+  description: "Search for a province by name using fuzzy matching. Returns the best match with ranking: exact > starts-with > contains.",
+  tags: ["Administrative", "Search"],
+  responses: {
+    200: {
+      description: "Successfully found province or null if no match",
+      content: {
+        "application/json": {
+          schema: ProvinceSchema.nullable(),
+        },
+      },
+    },
+    400: {
+      description: "Invalid search query",
+      content: { "application/json": { schema: ErrorResponseSchema } },
+    },
+    500: {
+      description: "Internal server error",
+      content: { "application/json": { schema: ErrorResponseSchema } },
+    },
+  },
+});
+
+const searchRegencyRoute = createRoute({
+  method: "get",
+  path: "/regencies/{provinceCode}/search",
+  request: {
+    params: z.object({
+      provinceCode: z
+        .string()
+        .length(2)
+        .regex(/^\d{2}$/)
+        .openapi({
+          param: {
+            name: "provinceCode",
+            in: "path",
+            required: true,
+          },
+          example: "32",
+          description: "Province code (2 digits)",
+        }),
+    }),
+    query: z.object({
+      q: z.string().min(2).openapi({
+        param: {
+          name: "q",
+          in: "query",
+          required: true,
+        },
+        example: "Kab Bekasi",
+        description: "Regency name to search for (minimum 2 characters)",
+      }),
+    }),
+  },
+  summary: "Search regency by name within province",
+  description: "Search for a regency by name within a specific province using fuzzy matching.",
+  tags: ["Administrative", "Search"],
+  responses: {
+    200: {
+      description: "Successfully found regency or null if no match",
+      content: {
+        "application/json": {
+          schema: RegencySchema.nullable(),
+        },
+      },
+    },
+    400: {
+      description: "Invalid province code or search query",
+      content: { "application/json": { schema: ErrorResponseSchema } },
+    },
+    404: {
+      description: "Province not found",
+      content: { "application/json": { schema: ErrorResponseSchema } },
+    },
+    500: {
+      description: "Internal server error",
+      content: { "application/json": { schema: ErrorResponseSchema } },
+    },
+  },
+});
+
+const searchDistrictRoute = createRoute({
+  method: "get",
+  path: "/districts/{regencyCode}/search",
+  request: {
+    params: z.object({
+      regencyCode: z
+        .string()
+        .length(4)
+        .regex(/^\d{4}$/)
+        .openapi({
+          param: {
+            name: "regencyCode",
+            in: "path",
+            required: true,
+          },
+          example: "3275",
+          description: "Regency code (4 digits)",
+        }),
+    }),
+    query: z.object({
+      q: z.string().min(2).openapi({
+        param: {
+          name: "q",
+          in: "query",
+          required: true,
+        },
+        example: "Jatiwangi",
+        description: "District name to search for (minimum 2 characters)",
+      }),
+    }),
+  },
+  summary: "Search district by name within regency",
+  description: "Search for a district by name within a specific regency using fuzzy matching.",
+  tags: ["Administrative", "Search"],
+  responses: {
+    200: {
+      description: "Successfully found district or null if no match",
+      content: {
+        "application/json": {
+          schema: DistrictSchema.nullable(),
+        },
+      },
+    },
+    400: {
+      description: "Invalid regency code or search query",
+      content: { "application/json": { schema: ErrorResponseSchema } },
+    },
+    404: {
+      description: "Regency not found",
+      content: { "application/json": { schema: ErrorResponseSchema } },
+    },
+    500: {
+      description: "Internal server error",
+      content: { "application/json": { schema: ErrorResponseSchema } },
+    },
+  },
+});
+
 // --- Route Handlers ---
 
 administrativeRouter.openapi(getProvincesRoute, async (c) => {
@@ -350,6 +507,114 @@ administrativeRouter.openapi(getSyncStatusRoute, async (c) => {
         error: {
           code: "INTERNAL_ERROR",
           message: "Failed to fetch sync status",
+          timestamp: new Date().toISOString(),
+        },
+      },
+      500,
+    );
+  }
+});
+
+// --- NEW: Search Route Handlers ---
+
+administrativeRouter.openapi(searchProvinceRoute, async (c) => {
+  try {
+    const { q } = c.req.valid("query");
+    const result = await shell.searchProvinceByName(q);
+
+    if (result.success) {
+      return c.json(result.data, 200);
+    }
+
+    return c.json(
+      {
+        error: {
+          code: result.statusCode === 400 ? "INVALID_QUERY" : "SEARCH_ERROR",
+          message: result.error,
+          timestamp: new Date().toISOString(),
+        },
+      },
+      result.statusCode as 400 | 500,
+    );
+  } catch (error) {
+    console.error("Error searching province:", error);
+    return c.json(
+      {
+        error: {
+          code: "INTERNAL_ERROR",
+          message: "Failed to search province",
+          timestamp: new Date().toISOString(),
+        },
+      },
+      500,
+    );
+  }
+});
+
+administrativeRouter.openapi(searchRegencyRoute, async (c) => {
+  try {
+    const { provinceCode } = c.req.valid("param");
+    const { q } = c.req.valid("query");
+    const result = await shell.searchRegencyByName(q, provinceCode);
+
+    if (result.success) {
+      return c.json(result.data, 200);
+    }
+
+    return c.json(
+      {
+        error: {
+          code: result.statusCode === 400 ? "INVALID_QUERY" : 
+                result.statusCode === 404 ? "NOT_FOUND" : "SEARCH_ERROR",
+          message: result.error,
+          timestamp: new Date().toISOString(),
+        },
+      },
+      result.statusCode as 400 | 404 | 500,
+    );
+  } catch (error) {
+    console.error("Error searching regency:", error);
+    return c.json(
+      {
+        error: {
+          code: "INTERNAL_ERROR",
+          message: "Failed to search regency",
+          timestamp: new Date().toISOString(),
+        },
+      },
+      500,
+    );
+  }
+});
+
+administrativeRouter.openapi(searchDistrictRoute, async (c) => {
+  try {
+    const { regencyCode } = c.req.valid("param");
+    const { q } = c.req.valid("query");
+    const result = await shell.searchDistrictByName(q, regencyCode);
+
+    if (result.success) {
+      return c.json(result.data, 200);
+    }
+
+    return c.json(
+      {
+        error: {
+          code: result.statusCode === 400 ? "INVALID_QUERY" : 
+                result.statusCode === 404 ? "NOT_FOUND" : "SEARCH_ERROR",
+          message: result.error,
+          timestamp: new Date().toISOString(),
+        },
+      },
+      result.statusCode as 400 | 404 | 500,
+    );
+  } catch (error) {
+    console.error("Error searching district:", error);
+    return c.json(
+      {
+        error: {
+          code: "INTERNAL_ERROR",
+          message: "Failed to search district",
           timestamp: new Date().toISOString(),
         },
       },

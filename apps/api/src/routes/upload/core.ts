@@ -4,8 +4,8 @@ import type { FileValidationResult, FileValidationConfig } from "./types";
 // File validation configuration
 export const FILE_VALIDATION_CONFIG: FileValidationConfig = {
   maxSize: 10 * 1024 * 1024, // 10MB
-  allowedTypes: ["image/jpeg", "image/png", "image/webp"],
-  allowedExtensions: [".jpg", ".jpeg", ".png", ".webp"],
+  allowedTypes: ["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"],
+  allowedExtensions: [".jpg", ".jpeg", ".png", ".webp", ".heic", ".heif"],
 };
 
 /**
@@ -82,6 +82,8 @@ export const validateUploadedFile = (file: any): FileValidationResult => {
       "image/jpeg": [".jpg", ".jpeg"],
       "image/png": [".png"],
       "image/webp": [".webp"],
+      "image/heic": [".heic"],
+      "image/heif": [".heif"],
     };
 
     const expectedExtensions = typeExtensionMap[type];

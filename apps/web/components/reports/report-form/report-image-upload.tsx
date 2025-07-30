@@ -4,7 +4,7 @@ import ImageUpload from "../../forms/image-upload";
 
 interface ReportImageUploadProps {
   selectedImage: File | null;
-  onImageSelect: (file: File) => void;
+  onImageSelect: (file: File, originalFile?: File) => void;
   onImageRemove: () => void;
   onUploadError: (error: string) => void;
   onUploadSuccess: () => void;
