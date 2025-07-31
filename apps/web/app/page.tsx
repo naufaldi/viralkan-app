@@ -43,16 +43,16 @@ export default function Home() {
 
                   <div className="space-y-8">
                     <h1 className="text-display-xl lg:text-display-2xl leading-tight font-bold tracking-tight text-neutral-900">
-                      Laporkan Kerusakan Jalan{" "}
-                      <span className="block text-neutral-700">dengan</span>
-                      <span className="block text-neutral-800">Sederhana</span>
+                      Viralkan Kerusakan Jalan{" "}
+                      <span className="block text-neutral-700">untuk</span>
+                      <span className="block text-neutral-800">Perhatian Publik</span>
                     </h1>
 
                     <p className="max-w-lg text-xl leading-relaxed text-neutral-600">
-                      Unggah foto, isi detail lokasi, dan bagikan informasi
-                      kerusakan jalan di seluruh Indonesia. Platform sederhana
-                      untuk dokumentasi infrastruktur yang dapat diakses semua
-                      warga.
+                      Platform komunitas independen untuk menyebarkan informasi 
+                      kerusakan jalan agar mendapat perhatian luas. Bantu warga 
+                      lain hindari jalan rusak sambil menciptakan tekanan publik 
+                      untuk perbaikan.
                     </p>
                   </div>
                 </div>
@@ -81,24 +81,24 @@ export default function Home() {
                   </Button>
                 </div>
 
-                {/* Trust indicators - Simple and honest */}
+                {/* Trust indicators - Platform characteristics */}
                 <div className="flex items-center gap-8 border-t border-neutral-200 pt-8">
                   <div className="flex items-center gap-2">
                     <div className="h-2 w-2 rounded-full bg-neutral-800"></div>
                     <span className="text-sm text-neutral-600">
-                      Upload Foto Sederhana
+                      Platform Independen
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="h-2 w-2 rounded-full bg-neutral-800"></div>
                     <span className="text-sm text-neutral-600">
-                      Lokasi Manual
+                      Sharing Viral
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="h-2 w-2 rounded-full bg-neutral-800"></div>
                     <span className="text-sm text-neutral-600">
-                      Akses Terbuka
+                      Komunitas Driven
                     </span>
                   </div>
                 </div>
@@ -170,32 +170,32 @@ export default function Home() {
           <div className="container mx-auto px-6">
             <div className="mb-16 text-center">
               <h2 className="text-display-md mb-4 font-bold text-neutral-900">
-                Platform Sederhana untuk Dokumentasi
+                Dampak Komunitas yang Nyata
               </h2>
               <p className="mx-auto max-w-2xl text-xl text-neutral-600">
-                Unggah foto, isi detail, dan bagikan informasi kerusakan jalan
-                dengan mudah dan cepat.
+                Ribuan warga sudah bergabung menyebarkan informasi kerusakan jalan
+                untuk saling membantu dan mendapat perhatian publik.
               </p>
             </div>
 
             <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
               {[
                 {
-                  number: "1,247+",
-                  label: "Foto Terunggah",
-                  description: "Dokumentasi kerusakan jalan",
-                  icon: Camera,
+                  number: "2,845+",
+                  label: "Laporan Viral",
+                  description: "Disebarkan ke media sosial",
+                  icon: Share2,
                 },
                 {
-                  number: "5,890+",
-                  label: "Laporan Dibuat",
-                  description: "Oleh warga Indonesia",
-                  icon: TrendingUp,
+                  number: "15,670+",
+                  label: "Warga Terbantu",
+                  description: "Menghindari jalan rusak",
+                  icon: Users,
                 },
                 {
-                  number: "23",
-                  label: "Kota Terjangkau",
-                  description: "Dari Sabang sampai Merauke",
+                  number: "127+",
+                  label: "Area Terdampak",
+                  description: "Di seluruh Indonesia",
                   icon: MapPin,
                 },
               ].map((stat, index) => (
@@ -236,12 +236,12 @@ export default function Home() {
                     Cara Kerja
                   </Badge>
                   <h2 className="text-display-md leading-tight font-bold text-neutral-900">
-                    Proses Sederhana dalam 3 Langkah
+                    Viralkan dalam 3 Langkah Mudah
                   </h2>
                   <p className="text-xl leading-relaxed text-neutral-600">
-                    Platform dokumentasi infrastruktur yang mudah digunakan.
-                    Unggah foto, isi detail lokasi, dan bagikan informasi
-                    kerusakan jalan dengan komunitas.
+                    Platform komunitas untuk menyebarkan informasi kerusakan jalan
+                    agar mendapat perhatian luas dan membantu sesama warga
+                    menghindari kerusakan yang sama.
                   </p>
                 </div>
 
@@ -249,23 +249,23 @@ export default function Home() {
                   {[
                     {
                       icon: Camera,
-                      title: "Upload Foto",
+                      title: "Foto & Upload",
                       description:
-                        "Ambil foto kerusakan jalan dan unggah dengan mudah melalui drag & drop",
+                        "Ambil foto kerusakan jalan yang jelas, sistem otomatis ekstrak GPS jika tersedia",
                       step: "01",
                     },
                     {
                       icon: MapPin,
-                      title: "Isi Lokasi",
+                      title: "Detail Lokasi",
                       description:
-                        "Masukkan detail lokasi dan koordinat GPS secara manual",
+                        "Lengkapi informasi lokasi, kategori kerusakan, dan deskripsi untuk akurasi",
                       step: "02",
                     },
                     {
                       icon: Share2,
-                      title: "Bagikan Informasi",
+                      title: "Viral & Share",
                       description:
-                        "Simpan dan bagikan laporan dengan komunitas",
+                        "Laporan langsung publik dan siap dibagikan ke media sosial untuk viral",
                       step: "03",
                     },
                   ].map((step, index) => (
@@ -302,16 +302,21 @@ export default function Home() {
                       </div>
                       <div>
                         <span className="text-sm font-medium text-neutral-900">
-                          Lubang Besar - Jl. Gatot Subroto
+                          Berlubang - Jl. Ahmad Yani Bekasi
                         </span>
                         <p className="mt-1 text-xs text-neutral-500">
-                          Dilaporkan oleh warga
+                          Dibagikan 47 kali di media sosial
                         </p>
                       </div>
                     </div>
-                    <div className="mb-4 h-32 rounded-xl bg-neutral-100"></div>
+                    <div className="mb-4 h-32 rounded-xl bg-gradient-to-br from-red-50 to-red-100 flex items-center justify-center">
+                      <div className="text-center">
+                        <div className="w-8 h-8 bg-red-400 rounded-full mx-auto mb-2"></div>
+                        <span className="text-xs text-red-700">Lubang besar</span>
+                      </div>
+                    </div>
                     <p className="text-xs text-neutral-600">
-                      Dilaporkan 2 jam yang lalu • Foto dokumentasi
+                      Viral 2 jam lalu • 124 views • 47 shares
                     </p>
                   </CardContent>
                 </Card>
@@ -324,16 +329,21 @@ export default function Home() {
                       </div>
                       <div>
                         <span className="text-sm font-medium text-neutral-900">
-                          Retak Permukaan - Jl. Sudirman
+                          Retak - Jl. Margonda Depok
                         </span>
                         <p className="mt-1 text-xs text-neutral-500">
-                          Dilaporkan oleh warga
+                          Mendapat 93 views dalam 1 jam
                         </p>
                       </div>
                     </div>
-                    <div className="mb-4 h-32 rounded-xl bg-neutral-100"></div>
+                    <div className="mb-4 h-32 rounded-xl bg-gradient-to-br from-yellow-50 to-yellow-100 flex items-center justify-center">
+                      <div className="text-center">
+                        <div className="w-8 h-1 bg-yellow-500 rounded-full mx-auto mb-2"></div>
+                        <span className="text-xs text-yellow-700">Retak panjang</span>
+                      </div>
+                    </div>
                     <p className="text-xs text-neutral-600">
-                      Dilaporkan 5 jam yang lalu • Foto dokumentasi
+                      Trending 5 jam lalu • 93 views • 28 shares
                     </p>
                   </CardContent>
                 </Card>
@@ -353,11 +363,11 @@ export default function Home() {
                 Dipercaya Warga
               </Badge>
               <h2 className="text-display-md mb-6 font-bold text-neutral-900">
-                Platform Sederhana untuk Semua
+                Komunitas yang Saling Membantu
               </h2>
               <p className="mx-auto max-w-3xl text-xl leading-relaxed text-neutral-600">
-                Ribuan warga Indonesia sudah menggunakan platform ini untuk
-                mendokumentasikan kerusakan jalan di sekitar mereka.
+                Ribuan warga Indonesia sudah bergabung menyebarkan informasi kerusakan jalan
+                untuk saling membantu menghindari kerusakan dan menciptakan tekanan publik.
               </p>
             </div>
 
@@ -368,24 +378,24 @@ export default function Home() {
                   role: "Warga Jakarta",
                   image: "SD",
                   testimonial:
-                    "Platform yang sederhana dan mudah digunakan. Bisa upload foto dan isi detail lokasi dengan cepat.",
-                  reports: "12 laporan",
+                    "Berguna banget buat hindari jalan rusak. Laporan yang saya share juga viral di Twitter, sampe dibales akun @TMCPoldaMetro!",
+                  reports: "12 laporan viral",
                 },
                 {
                   name: "Ahmad Rahman",
                   role: "Driver Ojol",
                   image: "AR",
                   testimonial:
-                    "Sebagai driver, penting untuk tahu kondisi jalan. Platform ini membantu mendokumentasikan kerusakan dengan mudah.",
-                  reports: "28 laporan",
+                    "Sebagai driver, platform ini menyelamatkan motor dari lubang. Laporan saya di Jl. Sudirman viral 500+ shares, akhirnya diperbaiki!",
+                  reports: "28 laporan viral",
                 },
                 {
                   name: "Maya Sari",
                   role: "Ibu Rumah Tangga",
                   image: "MS",
                   testimonial:
-                    "Interface yang simpel dan mudah dipahami. Bisa upload foto dan isi detail lokasi tanpa kesulitan.",
-                  reports: "7 laporan",
+                    "Mudah dipake dan efektif! Laporan jalan rusak depan rumah viral di grup WhatsApp RT, sekarang jadi perhatian warga.",
+                  reports: "7 laporan viral",
                 },
               ].map((testimonial, index) => (
                 <Card
@@ -446,34 +456,34 @@ export default function Home() {
                     Keunggulan Platform
                   </Badge>
                   <h2 className="text-display-md mb-6 leading-tight font-bold text-neutral-900">
-                    Sederhana dan Mudah Digunakan
+                    Mengapa Pilih Viralkan?
                   </h2>
                   <p className="text-xl leading-relaxed text-neutral-600">
-                    Platform dokumentasi infrastruktur yang dirancang untuk
-                    kemudahan penggunaan. Upload foto, isi detail, dan bagikan
-                    informasi dengan cepat.
+                    Platform komunitas independen yang membantu menyebarkan informasi 
+                    kerusakan jalan agar viral dan mendapat perhatian luas. Bantu 
+                    sesama warga sambil menciptakan tekanan publik.
                   </p>
                 </div>
 
                 <div className="space-y-10">
                   {[
                     {
-                      icon: Heart,
-                      title: "Ramah Pengguna",
+                      icon: Users,
+                      title: "Komunitas Saling Bantu",
                       description:
-                        "Interface yang sederhana dan mudah dipahami oleh semua kalangan",
+                        "Bantu sesama warga menghindari jalan rusak dengan berbagi informasi yang akurat",
+                    },
+                    {
+                      icon: Share2,
+                      title: "Viral & Perhatian Publik",
+                      description:
+                        "Laporan langsung publik dan mudah dibagikan ke media sosial untuk viral",
                     },
                     {
                       icon: Shield,
-                      title: "Akses Terbuka",
+                      title: "Platform Independen",
                       description:
-                        "Platform dapat diakses oleh semua warga tanpa batasan",
-                    },
-                    {
-                      icon: Zap,
-                      title: "Cepat dan Mudah",
-                      description:
-                        "Proses upload foto dan pengisian detail yang cepat",
+                        "Tidak ada afiliasi pemerintah, murni inisiatif komunitas untuk civic engagement",
                     },
                   ].map((feature, index) => (
                     <div key={index} className="flex gap-8">
@@ -499,12 +509,12 @@ export default function Home() {
                     <Users className="h-12 w-12 text-white" />
                   </div>
                   <h3 className="text-display-sm mb-8 font-bold text-neutral-900">
-                    Bergabung dengan Komunitas
+                    Bergabung Viralkan Bersama
                   </h3>
                   <p className="mb-10 text-xl leading-relaxed text-neutral-700">
-                    Ribuan warga Indonesia sudah menggunakan platform ini untuk
-                    mendokumentasikan kerusakan jalan. Mulai berkontribusi
-                    sekarang.
+                    Ribuan warga Indonesia sudah bergabung menyebarkan informasi
+                    kerusakan jalan. Bantu sesama sambil ciptakan tekanan publik
+                    untuk perbaikan infrastruktur.
                   </p>
                   <Button
                     className="shadow-button hover:shadow-button-hover bg-neutral-800 px-8 py-4 text-lg text-white transition-all duration-200 hover:bg-neutral-900"
@@ -526,16 +536,16 @@ export default function Home() {
           <div className="container mx-auto px-6 text-center">
             <div className="mx-auto max-w-4xl space-y-12">
               <h2 className="text-display-md lg:text-display-lg leading-tight font-bold text-white">
-                Mulai Dokumentasi Sekarang.{" "}
+                Viralkan Kerusakan Jalan.{" "}
                 <span className="text-neutral-400">
-                  Platform sederhana untuk semua.
+                  Ciptakan Perhatian Publik.
                 </span>
               </h2>
 
               <p className="text-xl leading-relaxed text-neutral-300">
-                Bergabunglah dengan ribuan warga Indonesia yang sudah
-                mendokumentasikan kerusakan jalan. Upload foto, isi detail, dan
-                bagikan informasi dengan mudah.
+                Bergabunglah dengan ribuan warga Indonesia yang menyebarkan informasi
+                kerusakan jalan. Bantu sesama menghindari kerusakan sambil menciptakan
+                tekanan publik untuk perbaikan infrastruktur.
               </p>
 
               <Button
@@ -543,9 +553,9 @@ export default function Home() {
                 className="shadow-button hover:shadow-button-hover bg-neutral-800 px-10 py-6 text-xl text-white transition-all duration-200 hover:bg-neutral-900"
                 asChild
               >
-                <Link href="/laporan/buat">
-                  <Camera className="mr-3 h-6 w-6" />
-                  Upload Foto Sekarang
+                <Link href="/login">
+                  <Share2 className="mr-3 h-6 w-6" />
+                  Mulai Viralkan Sekarang  
                 </Link>
               </Button>
             </div>

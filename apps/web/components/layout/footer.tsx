@@ -22,60 +22,55 @@ const Footer = () => {
             <h3 className="mb-4 font-semibold text-white">Platform</h3>
             <ul className="space-y-2">
               <li>
-                <a href="#" className="transition-colors hover:text-white">
-                  Cara Kerja
+                <a href="/tentang" className="transition-colors hover:text-white">
+                  Tentang
                 </a>
               </li>
               <li>
-                <a href="#" className="transition-colors hover:text-white">
+                <a href="/panduan" className="transition-colors hover:text-white">
                   Panduan
                 </a>
               </li>
               <li>
-                <a href="#" className="transition-colors hover:text-white">
-                  FAQ
+                <a href="/privasi" className="transition-colors hover:text-white">
+                  Kebijakan Privasi
                 </a>
               </li>
             </ul>
           </div>
 
           <div>
-            <h3 className="mb-4 font-semibold text-white">Komunitas</h3>
+            <h3 className="mb-4 font-semibold text-white">Laporan</h3>
             <ul className="space-y-2">
               <li>
-                <a href="#" className="transition-colors hover:text-white">
-                  Testimoni
+                <a href="/laporan" className="transition-colors hover:text-white">
+                  Lihat Laporan
                 </a>
               </li>
               <li>
-                <a href="#" className="transition-colors hover:text-white">
-                  Blog
+                <a href="/login" className="transition-colors hover:text-white">
+                  Buat Laporan
                 </a>
               </li>
               <li>
-                <a href="#" className="transition-colors hover:text-white">
-                  Events
+                <a href="/dashboard" className="transition-colors hover:text-white">
+                  Dashboard
                 </a>
               </li>
             </ul>
           </div>
 
           <div>
-            <h3 className="mb-4 font-semibold text-white">Dukungan</h3>
+            <h3 className="mb-4 font-semibold text-white">Akun</h3>
             <ul className="space-y-2">
               <li>
-                <a href="#" className="transition-colors hover:text-white">
-                  Kontak
+                <a href="/login" className="transition-colors hover:text-white">
+                  Masuk
                 </a>
               </li>
               <li>
-                <a href="#" className="transition-colors hover:text-white">
-                  Privasi
-                </a>
-              </li>
-              <li>
-                <a href="#" className="transition-colors hover:text-white">
-                  Syarat
+                <a href="/dashboard" className="transition-colors hover:text-white">
+                  Laporan Saya
                 </a>
               </li>
             </ul>
