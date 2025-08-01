@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import Header from "components/layout/header";
 import Footer from "components/layout/footer";
+import Image from "next/image";
 
 export default function Home() {
   return (
@@ -45,13 +46,15 @@ export default function Home() {
                     <h1 className="text-display-xl lg:text-display-2xl leading-tight font-bold tracking-tight text-neutral-900">
                       Viralkan Kerusakan Jalan{" "}
                       <span className="block text-neutral-700">untuk</span>
-                      <span className="block text-neutral-800">Perhatian Publik</span>
+                      <span className="block text-neutral-800">
+                        Perhatian Publik
+                      </span>
                     </h1>
 
                     <p className="max-w-lg text-xl leading-relaxed text-neutral-600">
-                      Platform komunitas independen untuk menyebarkan informasi 
-                      kerusakan jalan agar mendapat perhatian luas. Bantu warga 
-                      lain hindari jalan rusak sambil menciptakan tekanan publik 
+                      Platform komunitas independen untuk menyebarkan informasi
+                      kerusakan jalan agar mendapat perhatian luas. Bantu warga
+                      lain hindari jalan rusak sambil menciptakan tekanan publik
                       untuk perbaikan.
                     </p>
                   </div>
@@ -131,15 +134,23 @@ export default function Home() {
                         </p>
                       </div>
 
-                      <div className="flex h-52 items-center justify-center rounded-xl border border-neutral-200 bg-gradient-to-br from-neutral-50 to-neutral-100 p-8">
-                        <div className="space-y-4 text-center">
-                          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-neutral-800 shadow-lg">
-                            <Camera className="h-8 w-8 text-white" />
+                      <div className="relative h-52 overflow-hidden rounded-xl border border-neutral-200">
+                        <Image
+                          width={500}
+                          height={500}
+                          src="/images/road-damage.png"
+                          alt="Contoh foto jalan rusak dengan lubang besar di tengah jalan"
+                          className="h-full w-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-neutral-900/60 to-transparent" />
+                        <div className="absolute right-4 bottom-4 left-4 text-center">
+                          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-white/90 shadow-lg">
+                            <Camera className="h-6 w-6 text-neutral-800" />
                           </div>
-                          <p className="text-sm font-medium text-neutral-700">
+                          <p className="text-sm font-medium text-white">
                             Upload Foto Jalan Rusak
                           </p>
-                          <p className="text-xs text-neutral-500">
+                          <p className="text-xs text-neutral-200">
                             Drag & drop atau klik untuk pilih
                           </p>
                         </div>
@@ -173,8 +184,8 @@ export default function Home() {
                 Dampak Komunitas yang Nyata
               </h2>
               <p className="mx-auto max-w-2xl text-xl text-neutral-600">
-                Ribuan warga sudah bergabung menyebarkan informasi kerusakan jalan
-                untuk saling membantu dan mendapat perhatian publik.
+                Ribuan warga sudah bergabung menyebarkan informasi kerusakan
+                jalan untuk saling membantu dan mendapat perhatian publik.
               </p>
             </div>
 
@@ -239,8 +250,8 @@ export default function Home() {
                     Viralkan dalam 3 Langkah Mudah
                   </h2>
                   <p className="text-xl leading-relaxed text-neutral-600">
-                    Platform komunitas untuk menyebarkan informasi kerusakan jalan
-                    agar mendapat perhatian luas dan membantu sesama warga
+                    Platform komunitas untuk menyebarkan informasi kerusakan
+                    jalan agar mendapat perhatian luas dan membantu sesama warga
                     menghindari kerusakan yang sama.
                   </p>
                 </div>
@@ -309,10 +320,22 @@ export default function Home() {
                         </p>
                       </div>
                     </div>
-                    <div className="mb-4 h-32 rounded-xl bg-gradient-to-br from-red-50 to-red-100 flex items-center justify-center">
-                      <div className="text-center">
-                        <div className="w-8 h-8 bg-red-400 rounded-full mx-auto mb-2"></div>
-                        <span className="text-xs text-red-700">Lubang besar</span>
+                    <div className="relative mb-4 h-32 overflow-hidden rounded-xl">
+                      <Image
+                        width={500}
+                        height={500}
+                        src="/images/road-damage-2.png"
+                        alt="Jalan rusak dengan banyak lubang dan genangan air"
+                        className="h-full w-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-neutral-900/50 to-transparent" />
+                      <div className="absolute right-2 bottom-2 left-2 text-center">
+                        <div className="inline-flex items-center gap-1 rounded-full bg-white/90 px-2 py-1">
+                          <div className="h-2 w-2 rounded-full bg-red-500"></div>
+                          <span className="text-xs font-medium text-neutral-800">
+                            Lubang besar
+                          </span>
+                        </div>
                       </div>
                     </div>
                     <p className="text-xs text-neutral-600">
@@ -336,10 +359,22 @@ export default function Home() {
                         </p>
                       </div>
                     </div>
-                    <div className="mb-4 h-32 rounded-xl bg-gradient-to-br from-yellow-50 to-yellow-100 flex items-center justify-center">
-                      <div className="text-center">
-                        <div className="w-8 h-1 bg-yellow-500 rounded-full mx-auto mb-2"></div>
-                        <span className="text-xs text-yellow-700">Retak panjang</span>
+                    <div className="relative mb-4 h-32 overflow-hidden rounded-xl">
+                      <Image
+                        src="/images/road-damage.png"
+                        alt="Jalan dengan lubang besar dan kerusakan aspal"
+                        className="h-full w-full object-cover"
+                        width={500}
+                        height={500}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-neutral-900/50 to-transparent" />
+                      <div className="absolute right-2 bottom-2 left-2 text-center">
+                        <div className="inline-flex items-center gap-1 rounded-full bg-white/90 px-2 py-1">
+                          <div className="h-2 w-2 rounded-full bg-neutral-600"></div>
+                          <span className="text-xs font-medium text-neutral-800">
+                            Retak panjang
+                          </span>
+                        </div>
                       </div>
                     </div>
                     <p className="text-xs text-neutral-600">
@@ -366,8 +401,9 @@ export default function Home() {
                 Komunitas yang Saling Membantu
               </h2>
               <p className="mx-auto max-w-3xl text-xl leading-relaxed text-neutral-600">
-                Ribuan warga Indonesia sudah bergabung menyebarkan informasi kerusakan jalan
-                untuk saling membantu menghindari kerusakan dan menciptakan tekanan publik.
+                Ribuan warga Indonesia sudah bergabung menyebarkan informasi
+                kerusakan jalan untuk saling membantu menghindari kerusakan dan
+                menciptakan tekanan publik.
               </p>
             </div>
 
@@ -459,9 +495,9 @@ export default function Home() {
                     Mengapa Pilih Viralkan?
                   </h2>
                   <p className="text-xl leading-relaxed text-neutral-600">
-                    Platform komunitas independen yang membantu menyebarkan informasi 
-                    kerusakan jalan agar viral dan mendapat perhatian luas. Bantu 
-                    sesama warga sambil menciptakan tekanan publik.
+                    Platform komunitas independen yang membantu menyebarkan
+                    informasi kerusakan jalan agar viral dan mendapat perhatian
+                    luas. Bantu sesama warga sambil menciptakan tekanan publik.
                   </p>
                 </div>
 
@@ -543,9 +579,9 @@ export default function Home() {
               </h2>
 
               <p className="text-xl leading-relaxed text-neutral-300">
-                Bergabunglah dengan ribuan warga Indonesia yang menyebarkan informasi
-                kerusakan jalan. Bantu sesama menghindari kerusakan sambil menciptakan
-                tekanan publik untuk perbaikan infrastruktur.
+                Bergabunglah dengan ribuan warga Indonesia yang menyebarkan
+                informasi kerusakan jalan. Bantu sesama menghindari kerusakan
+                sambil menciptakan tekanan publik untuk perbaikan infrastruktur.
               </p>
 
               <Button
@@ -553,9 +589,9 @@ export default function Home() {
                 className="shadow-button hover:shadow-button-hover bg-neutral-800 px-10 py-6 text-xl text-white transition-all duration-200 hover:bg-neutral-900"
                 asChild
               >
-                <Link href="/login">
+                <Link href="/laporan">
                   <Share2 className="mr-3 h-6 w-6" />
-                  Mulai Viralkan Sekarang  
+                  Mulai Viralkan Sekarang
                 </Link>
               </Button>
             </div>
