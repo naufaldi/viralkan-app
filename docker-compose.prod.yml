@@ -1,0 +1,107 @@
+services:
+  watchtower:
+    image: containrrr/watchtower
+    command:
+      - "--label-enable"
+      - "--interval"
+      - "30"
+      - "--rolling-restart"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - web
+
+  reverse-proxy:
+    image: traefik:v3.1
+    command:
+      - "--providers.docker"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entryPoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.email=${ACME_EMAIL}"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - letsencrypt:/letsencrypt
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - web
+
+  api:
+    image: ghcr.io/${GITHUB_REPOSITORY}/viralkan-api:${IMAGE_TAG:-latest}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api-router.rule=Host(`${DOMAIN}`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.api-router.entrypoints=websecure"
+      - "traefik.http.routers.api-router.tls.certresolver=myresolver"
+      - "traefik.http.services.api-service.loadbalancer.server.port=3000"
+      - "traefik.docker.network=web"
+      - "com.centurylinklabs.watchtower.enable=true"
+    ports:
+      - "3001"
+    environment:
+      - NODE_ENV=production
+      - FIREBASE_SERVICE_ACCOUNT_JSON=${FIREBASE_SERVICE_ACCOUNT_JSON}
+      - DATABASE_URL=${DATABASE_URL}
+      - JWT_SECRET=${JWT_SECRET}
+      - R2_ACCESS_KEY_ID=${R2_ACCESS_KEY_ID}
+      - R2_SECRET_ACCESS_KEY=${R2_SECRET_ACCESS_KEY}
+      - R2_BUCKET_NAME=${R2_BUCKET_NAME}
+      - R2_ENDPOINT=${R2_ENDPOINT}
+      - R2_PUBLIC_URL=${R2_PUBLIC_URL}
+      - ADMIN_EMAILS=${ADMIN_EMAILS}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - OPENROUTER_BASE_URL=${OPENROUTER_BASE_URL}
+      - AI_MODEL_FREE=${AI_MODEL_FREE}
+      - AI_MODEL_PAID=${AI_MODEL_PAID}
+      - AI_MAX_TOKENS=${AI_MAX_TOKENS}
+      - AI_TEMPERATURE=${AI_TEMPERATURE}
+      - PORT=3000
+    deploy:
+      mode: replicated
+      replicas: 2
+    restart: always
+    networks:
+      - web
+
+  web:
+    image: ghcr.io/${GITHUB_REPOSITORY}/viralkan-web:${IMAGE_TAG:-latest}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.web-router.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.web-router.entrypoints=websecure"
+      - "traefik.http.routers.web-router.tls.certresolver=myresolver"
+      - "traefik.http.services.web-service.loadbalancer.server.port=3000"
+      - "traefik.docker.network=web"
+      - "com.centurylinklabs.watchtower.enable=true"
+    ports:
+      - "3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_FIREBASE_API_KEY=${NEXT_PUBLIC_FIREBASE_API_KEY}
+      - NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=${NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN}
+      - NEXT_PUBLIC_FIREBASE_PROJECT_ID=${NEXT_PUBLIC_FIREBASE_PROJECT_ID}
+      - NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=${NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET}
+      - NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=${NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID}
+      - NEXT_PUBLIC_FIREBASE_APP_ID=${NEXT_PUBLIC_FIREBASE_APP_ID}
+      - NEXT_PUBLIC_API_URL=https://${DOMAIN}/api
+    deploy:
+      mode: replicated
+      replicas: 2
+    depends_on:
+      - api
+    restart: always
+    networks:
+      - web
+
+volumes:
+  letsencrypt:
+
+networks:
+  web:
+    driver: bridge

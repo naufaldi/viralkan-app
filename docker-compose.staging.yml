@@ -1,0 +1,61 @@
+services:
+  # Traefik reverse proxy for staging
+  reverse-proxy:
+    command:
+      - "--providers.docker"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entryPoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.email=${ACME_EMAIL}"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      - "--api.dashboard=true"
+      - "--api.insecure=false"
+      - "--log.level=DEBUG"
+
+  # API service for staging
+  api:
+    image: ghcr.io/${GITHUB_REPOSITORY}/viralkan-api:staging
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api-staging.rule=Host(`staging.${DOMAIN}`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.api-staging.entrypoints=websecure"
+      - "traefik.http.routers.api-staging.tls.certresolver=myresolver"
+      - "traefik.http.services.api-staging.loadbalancer.server.port=3000"
+      - "traefik.docker.network=viralkan_viralkan"
+      - "com.centurylinklabs.watchtower.enable=true"
+    environment:
+      - NODE_ENV=staging
+      - DATABASE_URL=postgresql://viralkan:$(cat /run/secrets/db-password)@db:5432/viralkan_staging
+      - CORS_ORIGIN=https://staging.${DOMAIN}
+    deploy:
+      mode: replicated
+      replicas: 1  # Single replica for staging
+
+  # Web service for staging
+  web:
+    image: ghcr.io/${GITHUB_REPOSITORY}/viralkan-web:staging
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.web-staging.rule=Host(`staging.${DOMAIN}`)"
+      - "traefik.http.routers.web-staging.entrypoints=websecure"
+      - "traefik.http.routers.web-staging.tls.certresolver=myresolver"
+      - "traefik.http.services.web-staging.loadbalancer.server.port=3000"
+      - "traefik.docker.network=viralkan_viralkan"
+      - "com.centurylinklabs.watchtower.enable=true"
+    environment:
+      - NODE_ENV=staging
+      - NEXT_PUBLIC_API_URL=https://staging.${DOMAIN}/api
+      - NEXTAUTH_URL=https://staging.${DOMAIN}
+    deploy:
+      mode: replicated
+      replicas: 1  # Single replica for staging
+
+  # Database with staging database
+  db:
+    environment:
+      - POSTGRES_DB=viralkan_staging
+      - POSTGRES_USER=viralkan
+      - POSTGRES_PASSWORD_FILE=/run/secrets/db-password
