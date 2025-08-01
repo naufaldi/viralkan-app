@@ -6,11 +6,13 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 hono
 
 # Copy package files and install dependencies
-COPY package.json bun.lockb ./
+COPY package.json bun.lock ./
+COPY apps/api/package.json ./apps/api/
 RUN bun install --frozen-lockfile --production
 
 # Copy source code
-COPY . .
+COPY apps/api ./apps/api
+WORKDIR /app/apps/api
 
 # Build the application
 RUN bun run build

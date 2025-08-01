@@ -6,11 +6,14 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
 # Copy package files and install dependencies
-COPY package.json bun.lockb ./
+COPY package.json bun.lock ./
+COPY apps/web/package.json ./apps/web/
+COPY packages ./packages
 RUN bun install --frozen-lockfile --production
 
 # Copy source code
-COPY . .
+COPY apps/web ./apps/web
+WORKDIR /app/apps/web
 
 # Build the application
 RUN bun run build
