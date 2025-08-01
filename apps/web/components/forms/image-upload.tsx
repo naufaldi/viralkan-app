@@ -452,7 +452,7 @@ export default function ImageUpload({
         </div>
       ) : (
         <Card className="overflow-hidden border border-neutral-200 shadow-md">
-          <CardContent className="p-0">
+          <CardContent className="flex items-center justify-center p-0">
             <div className="relative">
               {preview && (
                 <div className="group relative">
@@ -662,12 +662,12 @@ export default function ImageUpload({
       {/* Camera Capture Dialog */}
       <Dialog open={showCamera} onOpenChange={setShowCamera}>
         <DialogContent
-          className="max-h-[90vh] overflow-y-auto sm:max-w-[500px]"
+          className="h-[95vh] max-h-none w-[95vw] max-w-none overflow-hidden p-0 sm:h-auto sm:max-h-[90vh] sm:max-w-[500px] sm:overflow-y-auto sm:p-6"
           onInteractOutside={(e) => {
             e.preventDefault();
           }}
         >
-          <DialogHeader className="space-y-4">
+          <DialogHeader className="space-y-4 p-6 sm:p-0">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-neutral-100">
                 <Camera className="h-5 w-5 text-neutral-600" />
@@ -684,7 +684,7 @@ export default function ImageUpload({
             </div>
           </DialogHeader>
 
-          <div className="mt-6">
+          <div className="flex-1 sm:mt-6">
             <CameraCapture
               onPhotoCapture={(file) => {
                 handleFileSelect(file);

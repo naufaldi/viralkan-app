@@ -1,162 +1,54 @@
-# Turborepo starter
+# Viralkan 🇮🇩
 
-This Turborepo starter is maintained by the Turborepo core team.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Bun](https://img.shields.io/badge/Bun-1.2.4-black)](https://bun.sh)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.8.2-blue)](https://www.typescriptlang.org/)
+[![Turborepo](https://img.shields.io/badge/Turborepo-2.5.4-red)](https://turbo.build/)
 
-## Using this example
+> **Platform komunitas independen untuk menyebarkan informasi kerusakan jalan agar mendapat perhatian luas dan membantu sesama warga menghindari kerusakan sambil menciptakan tekanan publik untuk perbaikan infrastruktur.**
 
-Run the following command:
+Viralkan adalah platform open-source yang memungkinkan warga Indonesia melaporkan dan membagikan informasi kerusakan jalan untuk menciptakan kesadaran publik dan mendorong perbaikan infrastruktur melalui kekuatan komunitas.
 
-```sh
-npx create-turbo@latest
-```
+## ✨ Fitur Utama
 
-## What's inside?
+- 📸 **Upload Foto Kerusakan** - Ambil foto dan laporkan kerusakan jalan dengan mudah
+- 🗺️ **Pemetaan Lokasi** - Integrasi GPS untuk lokasi yang akurat
+- 🚀 **Viral Sharing** - Bagikan laporan ke media sosial untuk perhatian yang lebih luas
+- 👥 **Platform Komunitas** - Independen tanpa afiliasi pemerintah
+- 📊 **Dashboard Analytics** - Lihat dampak dan statistik laporan
+- 🔐 **Authentication** - Login dengan Google/Firebase
+- 📱 **Mobile-First** - Desain responsif yang dioptimalkan untuk mobile
 
-This Turborepo includes the following packages/apps:
+## 🚀 Quick Start
 
-### Apps and Packages
+### Prerequisites
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+- [Bun](https://bun.sh) (v1.2.4 atau lebih baru)
+- [PostgreSQL](https://postgresql.org) dengan ekstensi PostGIS
+- Node.js 18+ (untuk kompatibilitas)
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+### Installation
 
-### Utilities
+1. **Clone repository**:
+   ```bash
+   git clone https://github.com/yourusername/viralkan-app.git
+   cd viralkan-app
+   ```
 
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
-```
-
-You can build a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
-
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
-
-### Develop
-
-To develop all apps and packages, run the following command:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
-```
-
-You can develop a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
-
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
-
-# Viralkan App
-
-A monorepo for the Viralkan road damage reporting platform.
-
-## Quick Start
-
-1. **Install dependencies**:
-
+2. **Install dependencies**:
    ```bash
    bun install
    ```
 
-2. **Set up environment variables**:
-
+3. **Set up environment variables**:
    ```bash
    cp .env.example .env
-   # Edit .env with your database credentials
+   # Edit .env dengan kredensial database dan konfigurasi lainnya
    ```
 
-3. **Set up PostgreSQL with PostGIS**:
-
+4. **Set up PostgreSQL dengan PostGIS**:
    ```bash
-   # Using Docker
+   # Menggunakan Docker (recommended)
    docker run --name postgres-viralkan \
      -e POSTGRES_PASSWORD=password \
      -e POSTGRES_DB=viralkan \
@@ -164,71 +56,288 @@ A monorepo for the Viralkan road damage reporting platform.
      -d postgis/postgis:15
    ```
 
-4. **Run database migrations**:
-
+5. **Run database migrations**:
    ```bash
    bun run db:migrate
    ```
 
-5. **Start development servers**:
+6. **Start development servers**:
    ```bash
    bun run dev
    ```
 
-This will start:
+Server akan berjalan di:
+- 🌐 **Web App**: `http://localhost:3000`
+- 🔧 **API Server**: `http://localhost:3000/api`
+- 📚 **Docs**: `http://localhost:3001`
 
-- API server on `http://localhost:3000`
-- Web app on `http://localhost:5173` (if configured)
-
-## Project Structure
+## 🏗️ Project Structure
 
 ```
 viralkan-app/
-├─ apps/
-│  ├─ api/              # Hono API server
-│  ├─ web/              # React frontend
-│  └─ docs/             # Documentation
-├─ packages/
-│  ├─ ui/               # Shared UI components
-│  ├─ eslint-config/    # ESLint configurations
-│  └─ typescript-config/ # TypeScript configurations
-└─ docs/                # Project documentation
+├── apps/
+│   ├── api/              # Hono API server (Clean Architecture)
+│   │   ├── src/
+│   │   │   ├── routes/   # API endpoints
+│   │   │   ├── core/     # Business logic
+│   │   │   ├── data/     # Database operations
+│   │   │   └── shell/    # Service orchestration
+│   │   └── tests/        # API tests
+│   ├── web/              # Next.js 15 frontend
+│   │   ├── app/          # App Router pages
+│   │   ├── components/   # React components
+│   │   ├── hooks/        # Custom hooks
+│   │   └── services/     # API clients
+│   └── docs/             # Next.js documentation site
+├── packages/
+│   ├── ui/               # Shared React component library
+│   ├── eslint-config/    # ESLint configurations
+│   └── typescript-config/ # TypeScript configurations
+└── docs/                 # Project documentation
 ```
 
-## API Endpoints
+## 🛠️ Tech Stack
 
-- `GET /` - Health check
-- `GET /health` - Database health check
+### Core Technologies
+- **Runtime**: [Bun](https://bun.sh) 1.2.4
+- **Monorepo**: [Turborepo](https://turbo.build/) 2.5.4  
+- **Language**: [TypeScript](https://www.typescriptlang.org/) 5.8.2
+
+### Backend
+- **Framework**: [Hono](https://hono.dev/) 4.6.12
+- **Database**: PostgreSQL 15 + PostGIS
+- **Authentication**: Firebase Admin SDK
+- **Validation**: [Zod](https://zod.dev/) 4.0.5
+- **API Docs**: OpenAPI/Swagger
+
+### Frontend  
+- **Framework**: [Next.js](https://nextjs.org/) 15.3.0
+- **React**: 19.1.0
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/) v4
+- **UI Components**: Custom library dengan Radix UI primitives
+- **Forms**: React Hook Form + Zod
+
+### Infrastructure
+- **Storage**: Cloudflare R2 untuk upload gambar
+- **Deployment**: Docker + Traefik dengan Let's Encrypt
+- **Database**: PostgreSQL dengan PostGIS untuk fitur spatial
+
+## 📚 API Documentation
+
+### Core Endpoints
+
+#### Health & Status
+- `GET /` - API health check
+- `GET /health` - Database connectivity check
+- `GET /docs` - Swagger UI documentation
+- `GET /openapi` - OpenAPI specification
+
+#### Authentication
+- `POST /api/auth/verify` - Verify Firebase JWT token
+- `GET /api/auth/me` - Get current user profile
+
+#### Reports
 - `GET /api/reports` - List all reports (paginated)
+- `POST /api/reports` - Create new report (requires auth)
 - `GET /api/reports/:id` - Get specific report
-- `POST /api/reports` - Create new report
 - `GET /api/me/reports` - Get current user's reports
-- `GET /api/me/profile` - Get current user profile
 
-## Tech Stack
+### Authentication
 
-- **Runtime**: Bun
-- **API Framework**: Hono
-- **Frontend**: React + Vite + Tailwind
-- **Database**: PostgreSQL + PostGIS
-- **Monorepo**: Turborepo
-- **Validation**: Zod
+API menggunakan Firebase Authentication dengan JWT tokens:
 
-## Development Commands
+```bash
+curl -H "Authorization: Bearer YOUR_FIREBASE_JWT_TOKEN" \
+     https://api.viralkan.com/api/reports
+```
 
-- `bun run dev` - Start all development servers
-- `bun run build` - Build all apps
-- `bun run lint` - Lint all packages
-- `bun run db:migrate` - Run database migrations
-- `bun run db:reset` - Reset database
+## 🧪 Development
 
-## What's Next
+### Available Scripts
 
-1. Install dependencies and start the development servers
-2. Set up Google OAuth credentials
-3. Configure Cloudflare R2 for image uploads
-4. Implement the web frontend
-5. Add authentication middleware
-6. Deploy using Docker + Traefik
+```bash
+# Development
+bun run dev          # Start all development servers
+bun run dev:api      # Start only API server
+bun run dev:web      # Start only web app
+bun run dev:docs     # Start only docs site
 
-See the [RFC](docs/rfc.md) for the complete project roadmap.
+# Building
+bun run build        # Build all apps and packages
+bun run build:api    # Build only API
+bun run build:web    # Build only web app
+
+# Code Quality
+bun run lint         # Lint all packages
+bun run format       # Format code with Prettier
+bun run check-types  # TypeScript type checking
+
+# Database
+bun run db:migrate   # Run database migrations
+bun run db:reset     # Reset database (drops all tables)
+bun run db:seed      # Seed database with test data
+
+# Testing
+cd apps/api && bun test        # Run API tests
+cd apps/api && bun test:watch  # Run tests in watch mode
+```
+
+### Environment Variables
+
+#### Required
+```env
+DATABASE_URL=postgresql://user:password@localhost:5432/viralkan
+JWT_SECRET=your-jwt-secret
+FIREBASE_SERVICE_ACCOUNT_JSON={"type": "service_account", ...}
+```
+
+#### Optional (untuk fitur lengkap)
+```env
+# Google OAuth
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+
+# Cloudflare R2 Storage
+R2_ACCESS_KEY=your-r2-access-key
+R2_SECRET_KEY=your-r2-secret-key
+R2_BUCKET=your-r2-bucket
+R2_ENDPOINT=your-r2-endpoint
+```
+
+### Code Style & Architecture
+
+Project ini mengikuti:
+- **Clean Architecture** untuk API dengan 4 layers (API → Shell → Core → Data)
+- **TypeScript strict mode** - No `any` types allowed
+- **ESLint + Prettier** untuk konsistensi kode
+- **Zod validation** untuk semua input API
+- **React hooks pattern** untuk state management
+- **Server-side authentication** untuk performa optimal
+
+## 🧪 Testing
+
+### API Testing
+```bash
+cd apps/api
+bun test                    # Run all tests
+bun test:watch             # Watch mode
+bun test src/routes/auth   # Test specific module
+```
+
+### E2E Testing
+```bash
+bun run test:e2e           # Run Playwright tests
+```
+
+## 🚀 Deployment
+
+### Production Build
+```bash
+bun run build
+```
+
+### Docker Deployment
+```bash
+# Build dan jalankan dengan Docker Compose
+docker-compose up -d
+```
+
+### Environment Setup
+1. Set up PostgreSQL dengan PostGIS
+2. Configure Firebase project untuk authentication  
+3. Set up Cloudflare R2 bucket untuk image storage
+4. Configure environment variables
+5. Run migrations dan deploy
+
+Lihat [deployment guide](docs/deployment.md) untuk instruksi lengkap.
+
+## 🤝 Contributing
+
+Kami sangat menghargai kontribusi dari komunitas! Viralkan adalah proyek open-source yang dibangun untuk kepentingan masyarakat Indonesia.
+
+### How to Contribute
+
+1. **Fork** repository ini
+2. **Clone** fork Anda: `git clone https://github.com/yourusername/viralkan-app.git`
+3. **Create branch** untuk fitur baru: `git checkout -b feature/amazing-feature`
+4. **Make changes** dan pastikan tests lulus: `bun run lint && bun test`
+5. **Commit** perubahan: `git commit -m 'Add amazing feature'`
+6. **Push** ke branch: `git push origin feature/amazing-feature`
+7. **Open Pull Request**
+
+### Development Guidelines
+
+- Follow existing code patterns dan architecture
+- Write tests untuk fitur baru
+- Update documentation sesuai kebutuhan
+- Ensure semua linter checks pass
+- Use descriptive commit messages
+
+### Types of Contributions
+
+- 🐛 **Bug fixes**
+- ✨ **New features**
+- 📚 **Documentation improvements**  
+- 🎨 **UI/UX enhancements**
+- 🔧 **Performance optimizations**
+- 🌐 **Translations**
+
+## 📝 Documentation
+
+- 📖 **[API Documentation](docs/api.md)** - Complete API reference
+- 🏗️ **[Architecture Guide](docs/architecture.md)** - System design dan patterns
+- 🎨 **[UI Design System](docs/ui-concept.md)** - Design principles dan components
+- 🚀 **[Deployment Guide](docs/deployment.md)** - Production deployment
+- 💻 **[Frontend Development](docs/code/frontend-code.md)** - Frontend coding standards
+- 📋 **[Product Requirements](docs/prd.md)** - Project vision dan roadmap
+
+## 📄 License
+
+Viralkan dilisensikan di bawah **MIT License** - lihat file [LICENSE](LICENSE) untuk detail lengkap.
+
+```
+MIT License
+
+Copyright (c) 2025 Viralkan Contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+## 🙏 Acknowledgments
+
+- Terinspirasi oleh kebutuhan masyarakat Indonesia akan infrastruktur jalan yang lebih baik
+- Dibangun dengan teknologi open-source modern
+- Didedikasikan untuk kemajuan civic engagement di Indonesia
+
+## 📞 Support & Community
+
+- 🐛 **Issues**: [GitHub Issues](https://github.com/yourusername/viralkan-app/issues)
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/yourusername/viralkan-app/discussions)
+- 📧 **Email**: contact@viralkan.com
+- 🌐 **Website**: [viralkan.com](https://viralkan.com)
+
+---
+
+<p align="center">
+  <strong>Dibuat dengan ❤️ untuk kemajuan infrastruktur Indonesia</strong>
+</p>
+
+<p align="center">
+  <a href="#viralkan--">⬆️ Back to Top</a>
+</p>
