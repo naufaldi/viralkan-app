@@ -20,7 +20,7 @@ import {
   MapPin,
   Settings,
 } from "lucide-react";
-import type { AdministrativeSyncStatus } from "../../lib/utils/enhanced-geocoding-handler";
+import type { AdministrativeSyncStatus as AdministrativeSyncStatusType } from "../../lib/utils/enhanced-geocoding-handler";
 import {
   getConfidenceDescription,
   getMatchTypeDescription,
@@ -30,7 +30,7 @@ import {
  * Component props
  */
 interface AdministrativeSyncStatusComponentProps {
-  syncStatus: AdministrativeSyncStatus | null;
+  syncStatus: AdministrativeSyncStatusType | null;
   isProcessing?: boolean;
   onApply?: () => Promise<void>;
   onManualOverride?: () => void;

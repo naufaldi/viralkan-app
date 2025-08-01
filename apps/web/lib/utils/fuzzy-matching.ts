@@ -254,6 +254,8 @@ export interface AdministrativeOption {
   code: string;
   name: string;
   searchValue?: string;
+  province_code?: string;
+  regency_code?: string;
 }
 
 /**
@@ -381,19 +383,19 @@ export function batchFuzzyMatch(
   overallConfidence: number;
 } {
   const provinceMatch = fuzzyMatchAdministrative(
-    geocodingData.province,
+    geocodingData.province ?? null,
     administrativeData.provinces,
     "province",
   );
 
   const regencyMatch = fuzzyMatchAdministrative(
-    geocodingData.city,
+    geocodingData.city ?? null,
     administrativeData.regencies,
     "regency",
   );
 
   const districtMatch = fuzzyMatchAdministrative(
-    geocodingData.district,
+    geocodingData.district ?? null,
     administrativeData.districts,
     "district",
   );

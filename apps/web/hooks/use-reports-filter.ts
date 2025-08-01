@@ -1,8 +1,8 @@
+import { ReportWithUser } from "@/services/api-client";
 import { useState, useMemo } from "react";
-import { MockReportWithUser } from "../lib/mock-data";
 
 interface UseReportsFilterOptions {
-  reports: MockReportWithUser[];
+  reports: ReportWithUser[];
   reportsPerPage?: number;
 }
 
@@ -14,7 +14,7 @@ interface UseReportsFilterReturn {
 
   // Computed values
   filteredAndPaginatedReports: {
-    items: MockReportWithUser[];
+    items: ReportWithUser[];
     total: number;
     page: number;
     limit: number;

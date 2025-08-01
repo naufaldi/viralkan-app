@@ -3,8 +3,8 @@ import { CreateReportInput } from "../lib/types/api";
 export const cleanFormData = (data: CreateReportInput): CreateReportInput => {
   return {
     ...data,
-    lat: data.lat || undefined,
-    lon: data.lon || undefined,
+    lat: data.lat ?? null,
+    lon: data.lon ?? null,
   };
 };
 

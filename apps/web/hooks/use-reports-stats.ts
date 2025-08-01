@@ -1,8 +1,8 @@
 import { useMemo } from "react";
-import { MockReportWithUser } from "../lib/mock-data";
+import { ReportWithUser } from "@/services/api-client";
 
 interface UseReportsStatsOptions {
-  reports: MockReportWithUser[];
+  reports: ReportWithUser[];
 }
 
 interface ReportsStats {
