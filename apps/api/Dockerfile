@@ -1,30 +1,25 @@
 FROM oven/bun:1.2.4-alpine
+
 WORKDIR /app
+
+# Copy root package.json and lockfile
+COPY package.json ./
+COPY bun.lock ./
+
+# Copy the api package.json
+COPY apps/api/package.json ./apps/api/package.json
+
+RUN bun install
+
+# Copy app source
+COPY . .
 
 # Create non-root user
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 hono
-
-# Copy package files and install dependencies
-COPY package.json bun.lock ./
-COPY apps/api/package.json ./apps/api/
-RUN bun install --frozen-lockfile --production
-
-# Copy source code
-COPY apps/api ./apps/api
-WORKDIR /app/apps/api
-
-# Build the application
-RUN bun run build
-
-# Set ownership and switch to non-root user
 RUN chown -R hono:nodejs /app
 USER hono
 
 EXPOSE 3000
 
-# Simple health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:3000/health || exit 1
-
-CMD ["bun", "run", "./dist/index.js"]
+CMD ["bun", "run", "apps/api/src/index.ts"]

@@ -1,46 +1,80 @@
 # Viralkan VPS Deployment Guide
 
-This guide covers deploying Viralkan to a VPS using Docker and Traefik with automatic SSL certificates.
+## Overview
 
-## 🚀 Quick Deployment
+This guide covers deploying the Viralkan application to a VPS using GitHub Container Registry and Docker Compose with Traefik for SSL termination.
 
-### Prerequisites
+## Architecture
 
-- Fresh Ubuntu 20.04+ VPS
-- Domain name pointed to your VPS IP
-- SSH access to the server
-- GitHub account for container registry
+- **Frontend**: Next.js application (viralkan-web)
+- **Backend**: Hono API server (viralkan-api)  
+- **Database**: External PostgreSQL on VPS
+- **Reverse Proxy**: Traefik with automatic SSL
+- **Container Registry**: GitHub Container Registry (GHCR)
+- **Auto-updates**: Watchtower
 
-### 1. Initial VPS Setup
+## Deployment Workflow
 
-```bash
-# Run the setup script on your VPS
-curl -sSL https://raw.githubusercontent.com/yourusername/viralkan-app/main/scripts/setup.sh | bash
+### 1. Development to Production
 
-# Reboot the system
-sudo reboot
+```
+Local Development → Git Push to main → GitHub Actions Build → Push to GHCR → Manual Deploy on VPS → Live Application
 ```
 
-### 2. Clone and Configure
+### 2. GitHub Actions (Automatic)
+
+When you push to the `main` branch:
+
+1. **Commit Hash**: Generates unique tag for this deployment
+2. **Build API**: Creates Docker image from `./apps/api/Dockerfile`
+3. **Build Web**: Creates Docker image from `./apps/web/Dockerfile` 
+4. **Push Images**: Uploads to GitHub Container Registry
+   - `ghcr.io/naufaldi/viralkan-app/viralkan-api:latest`
+   - `ghcr.io/naufaldi/viralkan-app/viralkan-web:latest`
+
+### 3. VPS Deployment (Manual)
+
+After GitHub Actions completes (2-5 minutes):
 
 ```bash
-# Clone the repository
-git clone https://github.com/yourusername/viralkan-app.git ~/viralkan-app
-cd ~/viralkan-app
-
-# Configure environment
-cp .env.production .env.production.local
-nano .env.production.local  # Edit with your values
-
-# Add Firebase service account
-nano secrets/firebase-service-account.json  # Paste your Firebase config
+ssh user@103.59.160.70
+cd viralkan-app
+docker-compose -f docker-compose.prod.yml --env-file .env.production pull
+docker-compose -f docker-compose.prod.yml --env-file .env.production up -d
 ```
 
-### 3. Deploy
+## First Time Setup
+
+### Prerequisites on VPS
 
 ```bash
-# Deploy to production
-./scripts/deploy.sh production
+# Install Docker
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+sudo usermod -aG docker $USER
+
+# Install Git
+sudo apt update && sudo apt install git -y
+
+# Logout and login again to apply docker group
+```
+
+### Initial Deployment
+
+```bash
+# 1. Clone repository
+git clone https://github.com/naufaldi/viralkan-app.git
+cd viralkan-app
+
+# 2. Setup environment
+cp .env.production.example .env.production
+nano .env.production  # Configure your values
+
+# 3. First deployment
+docker-compose -f docker-compose.prod.yml --env-file .env.production up -d
+
+# 4. Check logs
+docker-compose -f docker-compose.prod.yml logs -f
 ```
 
 ## 🏗️ Architecture Overview
