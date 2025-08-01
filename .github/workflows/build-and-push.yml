@@ -82,3 +82,40 @@ jobs:
           tags: |
             ghcr.io/naufaldi/viralkan-app/viralkan-web:${{ needs.commit-hash.outputs.commit_hash }}
             ghcr.io/naufaldi/viralkan-app/viralkan-web:latest
+
+  deploy-to-vps:
+    needs: [build-and-push-api, build-and-push-web]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            # Navigate to project directory
+            cd ~/projects/viralkan-app || {
+              echo "Project directory not found. Creating projects directory and cloning repository..."
+              mkdir -p ~/projects
+              git clone https://github.com/naufaldi/viralkan-app.git ~/projects/viralkan-app
+              cd ~/projects/viralkan-app
+            }
+            
+            # Update to latest code (optional - images are already built)
+            git pull origin main || true
+            
+            # Login to GitHub Container Registry
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            
+            # Pull the latest images
+            docker-compose -f docker-compose.prod.yml --env-file .env.production pull
+            
+            # Deploy with new images
+            docker-compose -f docker-compose.prod.yml --env-file .env.production up -d
+            
+            # Clean up old images to save space
+            docker image prune -f
+            
+            # Show running containers
+            docker-compose -f docker-compose.prod.yml ps

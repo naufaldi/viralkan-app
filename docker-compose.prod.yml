@@ -44,6 +44,8 @@ services:
       - "com.centurylinklabs.watchtower.enable=true"
     ports:
       - "3001"
+    secrets:
+      - db-password
     environment:
       - NODE_ENV=production
       - FIREBASE_SERVICE_ACCOUNT_JSON=${FIREBASE_SERVICE_ACCOUNT_JSON}
@@ -65,6 +67,9 @@ services:
     deploy:
       mode: replicated
       replicas: 2
+    depends_on:
+      db:
+        condition: service_healthy
     restart: always
     networks:
       - web
@@ -99,8 +104,34 @@ services:
     networks:
       - web
 
+  db:
+    image: postgis/postgis:15
+    restart: always
+    user: postgres
+    secrets:
+      - db-password
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=viralkan
+      - POSTGRES_PASSWORD_FILE=/run/secrets/db-password
+    expose:
+      - 5432
+    healthcheck:
+      test: [ "CMD", "pg_isready" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - web
+
 volumes:
+  db-data:
   letsencrypt:
+
+secrets:
+  db-password:
+    file: db/password.txt
 
 networks:
   web:
