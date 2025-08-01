@@ -387,6 +387,15 @@ export const useReportForm = ({ onSuccess }: UseReportFormProps) => {
   const getCurrentLocation = async () => {
     setIsGettingLocation(true);
 
+    // Check if we're in the browser environment
+    if (typeof window === "undefined") {
+      toast.error("Geolokasi tidak tersedia di server", {
+        duration: 3000,
+      });
+      setIsGettingLocation(false);
+      return;
+    }
+
     if (!navigator.geolocation) {
       toast.error("Browser Anda tidak mendukung geolokasi", {
         duration: 3000,

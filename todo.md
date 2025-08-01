@@ -39,7 +39,7 @@ After GitHub finishes building (usually 2-5 minutes):
 ssh user@103.59.160.70
 
 # 2. Navigate to project
-cd viralkan-app
+cd ~/projects/viralkan-app
 
 # 3. Pull latest images from GitHub Container Registry
 docker-compose -f docker-compose.prod.yml --env-file .env.production pull
@@ -64,8 +64,9 @@ sudo usermod -aG docker $USER
 # Logout and login again
 
 # 3. Clone repository
-git clone https://github.com/naufaldi/viralkan-app.git
-cd viralkan-app
+mkdir -p ~/projects
+git clone https://github.com/naufaldi/viralkan-app.git ~/projects/viralkan-app
+cd ~/projects/viralkan-app
 
 # 4. Create production environment file
 cp .env.production.example .env.production
@@ -124,16 +125,55 @@ AI_TEMPERATURE=
 
 - [ ] Test first deployment on VPS
 - [ ] Document any issues encountered
-- [ ] Consider adding auto-deploy to GitHub Actions (optional)
+- [x] ✅ Add auto-deploy to GitHub Actions
 - [ ] Set up monitoring/logging (optional)
 
-## 🔄 Daily Workflow
+## 🚀 AUTOMATED DEPLOYMENT SETUP
+
+### Required GitHub Secrets
+
+Add these secrets in GitHub → Settings → Secrets and variables → Actions:
+
+```
+VPS_HOST=103.59.160.70
+VPS_USERNAME=your_vps_username
+SSH_PRIVATE_KEY=-----BEGIN OPENSSH PRIVATE KEY-----
+your_private_key_content_here
+-----END OPENSSH PRIVATE KEY-----
+```
+
+### Generate SSH Key for GitHub Actions
+
+On your local machine:
+```bash
+# Generate SSH key pair
+ssh-keygen -t rsa -b 4096 -C "github-actions" -f ~/.ssh/github_actions_key
+
+# Copy public key to VPS
+ssh-copy-id -i ~/.ssh/github_actions_key.pub user@103.59.160.70
+
+# Copy private key content for GitHub secret
+cat ~/.ssh/github_actions_key
+```
+
+### How Auto-Deploy Works Now
+
+**When you push to main:**
+1. ✅ GitHub builds Docker images
+2. ✅ GitHub pushes images to GHCR  
+3. ✅ **NEW**: GitHub automatically deploys to VPS via SSH
+4. ✅ VPS pulls latest images and restarts containers
+
+**No more manual SSH needed!** 🎉
+
+## 🔄 Daily Workflow (Now Fully Automated!)
 
 1. **Develop locally**: Make changes, test with `bun run dev`
 2. **Commit & push**: `git push origin main`
-3. **Wait for build**: Check GitHub Actions tab (2-5 minutes)
-4. **Deploy to VPS**: SSH and run the pull/restart commands above
-5. **Verify**: Check https://viral.faldi.xyz
+3. **Wait for auto-deploy**: Check GitHub Actions tab (3-7 minutes total)
+4. **Verify**: Check https://viral.faldi.xyz
+
+**That's it!** GitHub handles everything: build → push → deploy → restart 🚀
 
 ## 🆘 Troubleshooting
 
@@ -151,11 +191,24 @@ docker-compose -f docker-compose.prod.yml down
 docker-compose -f docker-compose.prod.yml up -d
 ```
 
-**If images fail to pull:**
+**If images fail to pull (GHCR Authentication Required):**
+
+**One-time setup on VPS:**
 ```bash
-# Login to GitHub Container Registry
+# 1. Create GitHub Personal Access Token:
+#    - Go to GitHub → Settings → Developer settings → Personal access tokens
+#    - Generate new token (classic) with 'read:packages' scope
+#    - Copy the token
+
+# 2. Login to GitHub Container Registry on VPS
 echo "YOUR_GITHUB_TOKEN" | docker login ghcr.io -u naufaldi --password-stdin
 
-# Then try pull again
-docker-compose -f docker-compose.prod.yml pull
+# Should see: "Login Succeeded"
 ```
+
+**After authentication, try pull again:**
+```bash
+docker-compose -f docker-compose.prod.yml --env-file .env.production pull
+```
+
+**Note:** Docker login credentials are cached, so you only need to do this once per VPS.

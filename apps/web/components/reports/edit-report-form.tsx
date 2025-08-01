@@ -69,6 +69,13 @@ export default function EditReportForm({
   const getCurrentLocation = () => {
     setIsGettingLocation(true);
 
+    // Check if we're in the browser environment
+    if (typeof window === "undefined") {
+      setUploadError("Geolokasi tidak tersedia di server");
+      setIsGettingLocation(false);
+      return;
+    }
+
     if (!navigator.geolocation) {
       setUploadError("Geolokasi tidak didukung di browser ini");
       setIsGettingLocation(false);
