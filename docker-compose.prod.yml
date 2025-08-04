@@ -105,7 +105,7 @@ services:
       - web
 
   db:
-    image: postgis/postgis:15
+    image: postgis/postgis:15-3.3
     restart: always
     user: postgres
     secrets:
@@ -118,7 +118,7 @@ services:
     expose:
       - 5432
     healthcheck:
-      test: [ "CMD", "pg_isready" ]
+      test: ["CMD", "pg_isready"]
       interval: 10s
       timeout: 5s
       retries: 5
