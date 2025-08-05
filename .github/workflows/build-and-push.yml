@@ -108,21 +108,39 @@ jobs:
               git clone https://github.com/naufaldi/viralkan-app.git ~/projects/viralkan-app
               cd ~/projects/viralkan-app
             }
-            
+
             # Update to latest code (optional - images are already built)
             git pull origin main || true
-            
+
             # Login to GitHub Container Registry
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            
+
             # Pull the latest images
             docker-compose -f docker-compose.prod.yml --env-file .env.production pull
-            
+
+            # Copy PostgreSQL configuration if it exists
+            if [ -f "postgresql.conf" ]; then
+              echo "📋 Copying PostgreSQL configuration..."
+              cp postgresql.conf ~/projects/viralkan-app/
+            fi
+
             # Deploy with new images
             docker-compose -f docker-compose.prod.yml --env-file .env.production up -d
-            
+
+            # Restart database to apply new configuration
+            echo "🔄 Restarting database to apply new configuration..."
+            docker-compose -f docker-compose.prod.yml --env-file .env.production restart db
+
+            # Wait for database to be ready
+            echo "⏳ Waiting for database to be ready..."
+            sleep 30
+
+            # Verify database health
+            echo "🔍 Checking database health..."
+            docker-compose -f docker-compose.prod.yml --env-file .env.production exec db pg_isready -U postgres
+
             # Clean up old images to save space
             docker image prune -f
-            
+
             # Show running containers
             docker-compose -f docker-compose.prod.yml ps
