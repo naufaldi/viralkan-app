@@ -44,8 +44,6 @@ services:
       - "com.centurylinklabs.watchtower.enable=true"
     ports:
       - "3001"
-    secrets:
-      - db-password
     environment:
       - NODE_ENV=production
       - FIREBASE_SERVICE_ACCOUNT_JSON=${FIREBASE_SERVICE_ACCOUNT_JSON}
@@ -107,14 +105,11 @@ services:
   db:
     image: postgis/postgis:15-3.3
     restart: always
-    user: postgres
-    secrets:
-      - db-password
     volumes:
       - db-data:/var/lib/postgresql/data
     environment:
       - POSTGRES_DB=viralkan
-      - POSTGRES_PASSWORD_FILE=/run/secrets/db-password
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
     expose:
       - 5432
     healthcheck:
@@ -128,10 +123,6 @@ services:
 volumes:
   db-data:
   letsencrypt:
-
-secrets:
-  db-password:
-    file: db/password.txt
 
 networks:
   web:
