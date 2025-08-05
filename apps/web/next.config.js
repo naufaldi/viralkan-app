@@ -33,12 +33,9 @@ const nextConfig = {
   // Disable SWC lockfile patching to avoid workspace issues
   experimental: {
     useWasmBinary: false,
-    optimizeCss: true,
     scrollRestoration: true,
   },
   output: "standalone",
-  // Enable SWC minification for better performance
-  swcMinify: true,
   // Optimize bundle
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
