@@ -39,6 +39,7 @@ app.use(
       "http://localhost:3000", // Backup port for frontend
       "https://viralkan.app",
       "https://www.viralkan.app",
+      "https://viral.faldi.xyz", // Your deployed domain
     ],
     credentials: true,
   }),
@@ -99,7 +100,7 @@ app.doc("/openapi", {
     {
       url:
         env.NODE_ENV === "production"
-          ? "https://api.viralkan.app"
+          ? "https://viral.faldi.xyz"
           : `http://localhost:${env.PORT}`,
       description:
         env.NODE_ENV === "production"
@@ -174,11 +175,15 @@ app.onError((err, c) => {
   );
 });
 
+const baseUrl = env.NODE_ENV === "production" 
+  ? "https://viral.faldi.xyz" 
+  : `http://localhost:${env.PORT}`;
+
 console.log(`🚀 Viralkan API starting on port ${env.PORT}`);
-console.log(
-  `📚 API Documentation available at http://localhost:${env.PORT}/docs`,
-);
-console.log(`📄 OpenAPI Specification at http://localhost:${env.PORT}/openapi`);
+console.log(`📚 API Documentation available at ${baseUrl}/docs`);
+console.log(`📄 OpenAPI Specification at ${baseUrl}/openapi`);
+console.log(`🌍 Environment: ${env.NODE_ENV}`);
+console.log(`🔗 Base URL: ${baseUrl}`);
 
 serve({
   fetch: app.fetch,
