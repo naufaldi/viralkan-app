@@ -4,8 +4,9 @@ services:
     command:
       - "--label-enable"
       - "--interval"
-      - "30"
+      - "3600"
       - "--rolling-restart"
+      - "--cleanup"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
@@ -107,17 +108,27 @@ services:
     restart: always
     volumes:
       - db-data:/var/lib/postgresql/data
+      - ./postgresql.conf:/etc/postgresql/postgresql.conf
     environment:
       - POSTGRES_DB=viralkan
       - POSTGRES_PASSWORD=${DB_PASSWORD}
       - POSTGRES_USER=postgres
+      - POSTGRES_INITDB_ARGS=--data-checksums
+      - PGDATA=/var/lib/postgresql/data/pgdata
     expose:
       - 5432
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
     networks:
       - web
 
