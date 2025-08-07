@@ -10,7 +10,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
-      - web
+      - viralkan-web
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
 
@@ -19,21 +19,21 @@ services:
     command:
       - "--providers.docker"
       - "--providers.docker.exposedbydefault=false"
-      - "--entryPoints.websecure.address=:443"
+      - "--entryPoints.websecure.address=:8444"
       - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
       - "--certificatesresolvers.myresolver.acme.email=${ACME_EMAIL}"
       - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
-      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.address=:8081"
       - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
       - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
     ports:
-      - "8080:80"
-      - "8443:443"
+      - "8081:8081"
+      - "8444:8444"
     volumes:
       - viralkan-letsencrypt:/letsencrypt
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
-      - web
+      - viralkan-web
 
   api:
     image: ghcr.io/${GITHUB_REPOSITORY}/viralkan-api:${IMAGE_TAG:-latest}
@@ -43,7 +43,7 @@ services:
       - "traefik.http.routers.viralkan-api-router.entrypoints=websecure"
       - "traefik.http.routers.viralkan-api-router.tls.certresolver=myresolver"
       - "traefik.http.services.viralkan-api-service.loadbalancer.server.port=3000"
-      - "traefik.docker.network=web"
+      - "traefik.docker.network=viralkan-web"
       - "com.centurylinklabs.watchtower.enable=true"
     expose:
       - "3000"
@@ -79,7 +79,7 @@ services:
         condition: service_healthy
     restart: always
     networks:
-      - web
+      - viralkan-web
     healthcheck:
       test:
         [
@@ -103,7 +103,7 @@ services:
       - "traefik.http.routers.viralkan-web-router.entrypoints=websecure"
       - "traefik.http.routers.viralkan-web-router.tls.certresolver=myresolver"
       - "traefik.http.services.viralkan-web-service.loadbalancer.server.port=3000"
-      - "traefik.docker.network=web"
+      - "traefik.docker.network=viralkan-web"
       - "com.centurylinklabs.watchtower.enable=true"
     expose:
       - "3000"
@@ -130,7 +130,7 @@ services:
         condition: service_healthy
     restart: always
     networks:
-      - web
+      - viralkan-web
     healthcheck:
       test:
         [
@@ -186,12 +186,12 @@ services:
         reservations:
           memory: 512M
     networks:
-      - web
+      - viralkan-web
 
 volumes:
   viralkan-db-data:
   viralkan-letsencrypt:
 
 networks:
-  web:
+  viralkan-web:
     driver: bridge
