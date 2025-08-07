@@ -3,34 +3,22 @@ FROM oven/bun:1.2.4-alpine AS base
 # Install wget for health checks
 RUN apk add --no-cache wget
 
-# Install turbo globally
-RUN bun add -g turbo
-
-FROM base AS pruner
-WORKDIR /app
-
-# Copy the entire monorepo
-COPY . .
-
-# Generate a partial monorepo with a pruned lockfile for the web app
-RUN turbo prune web --docker
-
-FROM base AS installer
-WORKDIR /app
-
-# Copy the pruned package.json files and lockfile
-COPY --from=pruner /app/out/json/ .
-COPY --from=pruner /app/out/bun.lock ./bun.lock
-
-# Install dependencies
-RUN bun install --frozen-lockfile
-
 FROM base AS builder
 WORKDIR /app
 
-# Copy the pruned source code
-COPY --from=pruner /app/out/full/ .
-COPY --from=installer /app/node_modules ./node_modules
+# Copy root package.json and lockfile
+COPY package.json ./
+COPY bun.lock ./
+
+# Copy the web package.json and packages
+COPY apps/web/package.json ./apps/web/package.json
+COPY packages ./packages
+
+# Install dependencies
+RUN bun install
+
+# Copy app source
+COPY . .
 
 # Accept Firebase build arguments
 ARG NEXT_PUBLIC_FIREBASE_API_KEY
@@ -71,5 +59,5 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-# Fix: server.js is at the root of standalone directory, not in apps/web/
-CMD ["bun", "server.js"]
+# Use the working path but with Bun instead of Node
+CMD ["bun", "apps/web/server.js"]
