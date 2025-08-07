@@ -40,7 +40,7 @@ services:
       - "traefik.http.routers.api-router.rule=Host(`${DOMAIN}`) && PathPrefix(`/api`)"
       - "traefik.http.routers.api-router.entrypoints=websecure"
       - "traefik.http.routers.api-router.tls.certresolver=myresolver"
-      - "traefik.http.services.api-service.loadbalancer.server.port=3000"
+      - "traefik.http.services.api-service.loadbalancer.server.port=3001"
       - "traefik.docker.network=web"
       - "com.centurylinklabs.watchtower.enable=true"
     ports:
@@ -141,7 +141,7 @@ services:
       - POSTGRES_INITDB_ARGS=--data-checksums
       - PGDATA=/var/lib/postgresql/data/pgdata
     expose:
-      - 5432
+      - 5431
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "postgres"]
       interval: 30s
