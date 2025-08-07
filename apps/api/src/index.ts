@@ -21,30 +21,27 @@ const app = new OpenAPIHono();
 validateEnv();
 
 // Initialize Firebase Admin SDK
-try {
-  initializeFirebase();
-} catch (error) {
-  console.error("Failed to initialize Firebase:", error);
-  if (env.NODE_ENV === "production") {
-    process.exit(1);
-  }
-}
+initializeFirebase();
 
+// Test database connection
+testConnection();
+
+// Middleware
 app.use("*", logger());
 app.use(
   "*",
   cors({
     origin: [
+      "http://localhost:3000",
       "http://localhost:5173",
-      "http://localhost:3000", // Backup port for frontend
-      "https://viralkan.app",
-      "https://www.viralkan.app",
-      "https://viral.faldi.xyz", // Your deployed domain
+      "https://viral.faldi.xyz",
+      "https://viral-api.faldi.xyz",
     ],
     credentials: true,
   }),
 );
 
+// Health check endpoint
 app.get("/", (c) => {
   return c.json({
     message: "Viralkan API v1",
@@ -55,96 +52,72 @@ app.get("/", (c) => {
   });
 });
 
-app.get("/health", async (c) => {
-  const dbConnected = await testConnection();
-  return c.json({
-    status: dbConnected ? "healthy" : "unhealthy",
-    database: dbConnected ? "connected" : "disconnected",
-    timestamp: new Date().toISOString(),
-  });
-});
-
-// API Routes
-app.route("/api/reports", reportsRouter);
+// API routes
 app.route("/api/auth", authRouter);
+app.route("/api/reports", reportsRouter);
 app.route("/api/upload", uploadRouter);
-app.route("/api/admin", adminRouter);
 app.route("/api/administrative", administrativeRouter);
 app.route("/api/sharing", sharingRouter);
+app.route("/api/admin", adminRouter);
 
-// Configure OpenAPI documentation
-app.openAPIRegistry.registerComponent("securitySchemes", "bearerAuth", {
-  type: "http",
-  scheme: "bearer",
-  bearerFormat: "JWT",
-  description: "Firebase JWT token for authentication",
-});
-
-app.doc("/openapi", {
-  openapi: "3.0.0",
-  info: {
-    title: "Viralkan API",
-    version: "1.0.0",
-    description:
-      "API for reporting road damage and infrastructure issues in Indonesia",
-    contact: {
-      name: "Viralkan Team",
-      url: "https://viralkan.app",
+// OpenAPI specification
+app.openapi(
+  {
+    openapi: "3.0.0",
+    info: {
+      title: "Viralkan API",
+      version: "1.0.0",
+      description:
+        "API for reporting road damage and infrastructure issues in Indonesia",
+      contact: {
+        name: "Viralkan Team",
+        url: "https://viralkan.app",
+      },
+      license: {
+        name: "MIT",
+        url: "https://opensource.org/licenses/MIT",
+      },
     },
-    license: {
-      name: "MIT",
-      url: "https://opensource.org/licenses/MIT",
+    servers: [
+      {
+        url:
+          env.NODE_ENV === "production"
+            ? "https://viral-api.faldi.xyz"
+            : `http://localhost:${env.PORT}`,
+        description:
+          env.NODE_ENV === "production"
+            ? "Production server"
+            : "Development server",
+      },
+    ],
+    security: [
+      {
+        bearerAuth: [],
+      },
+    ],
+    tags: [
+      "Reports",
+      "Auth",
+      "Upload",
+      "Admin",
+      "Administrative",
+      "Sharing",
+      "Analytics",
+    ],
+  },
+  {
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+          description: "Firebase JWT token for authentication",
+        },
+      },
     },
   },
-  servers: [
-    {
-      url:
-        env.NODE_ENV === "production"
-          ? "https://viral.faldi.xyz"
-          : `http://localhost:${env.PORT}`,
-      description:
-        env.NODE_ENV === "production"
-          ? "Production server"
-          : "Development server",
-    },
-  ],
-  security: [
-    {
-      bearerAuth: [],
-    },
-  ],
-  tags: [
-    {
-      name: "Reports",
-      description: "Road damage and infrastructure issue reports",
-    },
-    {
-      name: "Auth",
-      description: "Authentication and user management",
-    },
-    {
-      name: "Upload",
-      description: "Image upload and file management",
-    },
-    {
-      name: "Admin",
-      description: "Admin operations for report verification and management",
-    },
-    {
-      name: "Administrative",
-      description:
-        "Indonesian administrative data (provinces, regencies, districts)",
-    },
-    {
-      name: "Sharing",
-      description: "Social media sharing functionality and analytics",
-    },
-    {
-      name: "Analytics",
-      description: "Sharing analytics and statistics",
-    },
-  ],
-});
+);
 
 // Swagger UI Documentation
 app.get(
@@ -175,11 +148,14 @@ app.onError((err, c) => {
   );
 });
 
-const baseUrl = env.NODE_ENV === "production" 
-  ? "https://viral.faldi.xyz" 
-  : `http://localhost:${env.PORT}`;
+const baseUrl =
+  env.NODE_ENV === "production"
+    ? "https://viral-api.faldi.xyz"
+    : `http://localhost:${env.PORT}`;
 
-console.log(`🚀 Viralkan API starting on port ${env.PORT}`);
+const port = env.PORT || 3000;
+
+console.log(`🚀 Viralkan API starting on port ${port}`);
 console.log(`📚 API Documentation available at ${baseUrl}/docs`);
 console.log(`📄 OpenAPI Specification at ${baseUrl}/openapi`);
 console.log(`🌍 Environment: ${env.NODE_ENV}`);
@@ -187,5 +163,5 @@ console.log(`🔗 Base URL: ${baseUrl}`);
 
 serve({
   fetch: app.fetch,
-  port: env.PORT,
+  port,
 });
