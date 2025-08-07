@@ -74,7 +74,6 @@ services:
           cpus: "0.5"
         reservations:
           memory: 256M
-          cpus: "0.25"
     depends_on:
       viralkan-db:
         condition: service_healthy
@@ -126,7 +125,6 @@ services:
           cpus: "0.5"
         reservations:
           memory: 256M
-          cpus: "0.25"
     depends_on:
       api:
         condition: service_healthy
