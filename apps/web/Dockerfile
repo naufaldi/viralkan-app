@@ -3,8 +3,34 @@ FROM oven/bun:1.2.4-alpine AS base
 # Install wget for health checks
 RUN apk add --no-cache wget
 
+# Install turbo globally
+RUN bun add -g turbo
+
+FROM base AS pruner
+WORKDIR /app
+
+# Copy the entire monorepo
+COPY . .
+
+# Generate a partial monorepo with a pruned lockfile for the web app
+RUN turbo prune web --docker
+
+FROM base AS installer
+WORKDIR /app
+
+# Copy the pruned package.json files and lockfile
+COPY --from=pruner /app/out/json/ .
+COPY --from=pruner /app/out/bun.lock ./bun.lock
+
+# Install dependencies
+RUN bun install --frozen-lockfile
+
 FROM base AS builder
 WORKDIR /app
+
+# Copy the pruned source code
+COPY --from=pruner /app/out/full/ .
+COPY --from=installer /app/node_modules ./node_modules
 
 # Accept Firebase build arguments
 ARG NEXT_PUBLIC_FIREBASE_API_KEY
@@ -24,20 +50,7 @@ ENV NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=$NEXT_PUBLIC_FIREBASE_MESSAGING_SEN
 ENV NEXT_PUBLIC_FIREBASE_APP_ID=$NEXT_PUBLIC_FIREBASE_APP_ID
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
-# Copy root package.json and lockfile
-COPY package.json ./
-COPY bun.lock ./
-
-# Copy the web package.json and packages
-COPY apps/web/package.json ./apps/web/package.json
-COPY packages ./packages
-
-RUN bun install
-
-# Copy app source
-COPY . .
-
-# Build the project
+# Build the web app
 RUN cd apps/web && bun run build
 
 FROM base AS runner
