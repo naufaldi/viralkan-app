@@ -27,8 +27,8 @@ services:
       - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
       - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
     ports:
-      - "80:80"
-      - "443:443"
+      - "8080:80"
+      - "8443:443"
     volumes:
       - viralkan-letsencrypt:/letsencrypt
       - /var/run/docker.sock:/var/run/docker.sock
@@ -196,4 +196,4 @@ volumes:
 
 networks:
   web:
-    external: true
+    driver: bridge
