@@ -29,4 +29,4 @@ USER hono
 
 EXPOSE 3000
 
-CMD ["bun", "run", "apps/api/src/index.ts"]
+CMD ["bun", "run", "apps/api/dist/index.js"]
