@@ -123,7 +123,7 @@ services:
     volumes:
       - db-data:/var/lib/postgresql/data
       - ./postgresql.conf:/etc/postgresql/postgresql.conf
-      - ./password.txt:/var/lib/postgresql/password.txt
+      - ./logs:/var/log/postgresql
     command:
       - "postgres"
       - "-c"
