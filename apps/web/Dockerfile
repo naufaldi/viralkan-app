@@ -71,4 +71,5 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["node", "apps/web/server.js"]
+# Fix: server.js is at the root of standalone directory, not in apps/web/
+CMD ["bun", "server.js"]
