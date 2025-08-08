@@ -10,49 +10,52 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
-      - web
+      - viralkan-web
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
 
   reverse-proxy:
     image: traefik:v3.1
     command:
       - "--providers.docker"
       - "--providers.docker.exposedbydefault=false"
-      - "--entryPoints.websecure.address=:443"
+      - "--entryPoints.websecure.address=:8444"
       - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
       - "--certificatesresolvers.myresolver.acme.email=${ACME_EMAIL}"
       - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
-      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.address=:8081"
       - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
       - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
     ports:
-      - "80:80"
-      - "443:443"
+      - "8081:8081"
+      - "8444:8444"
     volumes:
-      - letsencrypt:/letsencrypt
+      - viralkan-letsencrypt:/letsencrypt
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
-      - web
+      - viralkan-web
 
   api:
     image: ghcr.io/${GITHUB_REPOSITORY}/viralkan-api:${IMAGE_TAG:-latest}
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.api-router.rule=Host(`${DOMAIN}`) && PathPrefix(`/api`)"
-      - "traefik.http.routers.api-subdomain.rule=Host(`viral-api.faldi.xyz`)"
-      - "traefik.http.routers.api-subdomain.entrypoints=websecure"
-      - "traefik.http.routers.api-subdomain.tls.certresolver=myresolver"
-      - "traefik.http.routers.api-subdomain.service=api-service"
-      - "traefik.http.routers.api-router.entrypoints=websecure"
-      - "traefik.http.routers.api-router.tls.certresolver=myresolver"
-      - "traefik.http.services.api-service.loadbalancer.server.port=3000"
-      - "traefik.docker.network=web"
+      - "traefik.http.routers.viralkan-api-subdomain.rule=Host(`viral-api.faldi.xyz`)"
+      - "traefik.http.routers.viralkan-api-subdomain.entrypoints=websecure"
+      - "traefik.http.routers.viralkan-api-subdomain.tls.certresolver=myresolver"
+      - "traefik.http.routers.viralkan-api-subdomain.service=viralkan-api-service"
+      - "traefik.http.routers.viralkan-api-path.rule=Host(`${DOMAIN}`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.viralkan-api-path.entrypoints=websecure"
+      - "traefik.http.routers.viralkan-api-path.tls.certresolver=myresolver"
+      - "traefik.http.routers.viralkan-api-path.service=viralkan-api-service"
+      - "traefik.http.services.viralkan-api-service.loadbalancer.server.port=3000"
+      - "traefik.docker.network=viralkan-web"
       - "com.centurylinklabs.watchtower.enable=true"
-    ports:
-      - "3001"
+    expose:
+      - "3000"
     environment:
       - NODE_ENV=production
       - FIREBASE_SERVICE_ACCOUNT_JSON=${FIREBASE_SERVICE_ACCOUNT_JSON}
-      - DATABASE_URL=${DATABASE_URL}
+      - DATABASE_URL=postgresql://postgres:${DB_PASSWORD}@viralkan-db:5431/viralkan
       - JWT_SECRET=${JWT_SECRET}
       - R2_ACCESS_KEY_ID=${R2_ACCESS_KEY_ID}
       - R2_SECRET_ACCESS_KEY=${R2_SECRET_ACCESS_KEY}
@@ -73,28 +76,41 @@ services:
       resources:
         limits:
           memory: 512M
-          cpus: '0.5'
+          cpus: "0.5"
         reservations:
           memory: 256M
-          cpus: '0.25'
     depends_on:
-      db:
+      viralkan-db:
         condition: service_healthy
     restart: always
     networks:
-      - web
+      - viralkan-web
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:3000/health",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   web:
     image: ghcr.io/${GITHUB_REPOSITORY}/viralkan-web:${IMAGE_TAG:-latest}
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.web-router.rule=Host(`${DOMAIN}`)"
-      - "traefik.http.routers.web-router.entrypoints=websecure"
-      - "traefik.http.routers.web-router.tls.certresolver=myresolver"
-      - "traefik.http.services.web-service.loadbalancer.server.port=3000"
-      - "traefik.docker.network=web"
+      - "traefik.http.routers.viralkan-web-router.rule=Host(`viral.faldi.xyz`)"
+      - "traefik.http.routers.viralkan-web-router.entrypoints=websecure"
+      - "traefik.http.routers.viralkan-web-router.tls.certresolver=myresolver"
+      - "traefik.http.services.viralkan-web-service.loadbalancer.server.port=3000"
+      - "traefik.docker.network=viralkan-web"
       - "com.centurylinklabs.watchtower.enable=true"
-    ports:
+    expose:
       - "3000"
     environment:
       - NODE_ENV=production
@@ -111,22 +127,49 @@ services:
       resources:
         limits:
           memory: 512M
-          cpus: '0.5'
+          cpus: "0.5"
         reservations:
           memory: 256M
-          cpus: '0.25'
     depends_on:
-      - api
+      api:
+        condition: service_healthy
     restart: always
     networks:
-      - web
+      - viralkan-web
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:3000/",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
-  db:
+  viralkan-db:
     image: postgis/postgis:15-3.3
     restart: always
     volumes:
-      - db-data:/var/lib/postgresql/data
+      - viralkan-db-data:/var/lib/postgresql/data
       - ./postgresql.conf:/etc/postgresql/postgresql.conf
+      - ./logs:/var/log/postgresql
+    command:
+      - "postgres"
+      - "-c"
+      - "logging_collector=on"
+      - "-c"
+      - "log_directory=/var/log/postgresql"
+      - "-c"
+      - "log_filename=postgresql-%Y-%m-%d.log"
+      - "-c"
+      - "log_statement=all"
+      - "-c"
+      - "port=5431"
     environment:
       - POSTGRES_DB=viralkan
       - POSTGRES_PASSWORD=${DB_PASSWORD}
@@ -134,9 +177,9 @@ services:
       - POSTGRES_INITDB_ARGS=--data-checksums
       - PGDATA=/var/lib/postgresql/data/pgdata
     expose:
-      - 5432
+      - 5431
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "postgres"]
+      test: ["CMD", "pg_isready", "-U", "postgres", "-p", "5431"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -148,12 +191,12 @@ services:
         reservations:
           memory: 512M
     networks:
-      - web
+      - viralkan-web
 
 volumes:
-  db-data:
-  letsencrypt:
+  viralkan-db-data:
+  viralkan-letsencrypt:
 
 networks:
-  web:
+  viralkan-web:
     driver: bridge

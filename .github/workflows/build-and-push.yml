@@ -48,8 +48,8 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: |
-            ghcr.io/naufaldi/viralkan-app/viralkan-api:${{ needs.commit-hash.outputs.commit_hash }}
-            ghcr.io/naufaldi/viralkan-app/viralkan-api:latest
+            ghcr.io/${{ github.repository }}/viralkan-api:${{ needs.commit-hash.outputs.commit_hash }}
+            ghcr.io/${{ github.repository }}/viralkan-api:latest
 
   build-and-push-web:
     needs:
@@ -86,7 +86,7 @@ jobs:
             NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=${{ vars.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET }}
             NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=${{ vars.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
             NEXT_PUBLIC_FIREBASE_APP_ID=${{ vars.NEXT_PUBLIC_FIREBASE_APP_ID }}
-            NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL }}
+            NEXT_PUBLIC_API_URL=https://viral-api.faldi.xyz
           tags: |
             ghcr.io/naufaldi/viralkan-app/viralkan-web:${{ needs.commit-hash.outputs.commit_hash }}
             ghcr.io/naufaldi/viralkan-app/viralkan-web:latest
@@ -110,14 +110,14 @@ jobs:
               cd ~/projects/viralkan-app
             }
 
-            # Update to latest code (optional - images are already built)
+            # Update to latest code
             git pull origin main || true
 
             # Login to GitHub Container Registry
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
             # Pull the latest images
-            docker-compose -f docker-compose.prod.yml --env-file .env.production pull
+            GITHUB_REPOSITORY=${{ github.repository }} docker-compose -f docker-compose.prod.yml --env-file .env.production pull
 
             # Copy PostgreSQL configuration if it exists
             if [ -f "postgresql.conf" ]; then
@@ -126,11 +126,11 @@ jobs:
             fi
 
             # Deploy with new images
-            docker-compose -f docker-compose.prod.yml --env-file .env.production up -d
+            GITHUB_REPOSITORY=${{ github.repository }} docker-compose -f docker-compose.prod.yml --env-file .env.production up -d
 
             # Restart database to apply new configuration
             echo "🔄 Restarting database to apply new configuration..."
-            docker-compose -f docker-compose.prod.yml --env-file .env.production restart db
+            GITHUB_REPOSITORY=${{ github.repository }} docker-compose -f docker-compose.prod.yml --env-file .env.production restart viralkan-db
 
             # Wait for database to be ready
             echo "⏳ Waiting for database to be ready..."
@@ -138,10 +138,10 @@ jobs:
 
             # Verify database health
             echo "🔍 Checking database health..."
-            docker-compose -f docker-compose.prod.yml --env-file .env.production exec db pg_isready -U postgres
+            GITHUB_REPOSITORY=${{ github.repository }} docker-compose -f docker-compose.prod.yml --env-file .env.production exec viralkan-db pg_isready -U postgres -p 5431
 
             # Clean up old images to save space
             docker image prune -f
 
             # Show running containers
-            docker-compose -f docker-compose.prod.yml ps
+            GITHUB_REPOSITORY=${{ github.repository }} docker-compose -f docker-compose.prod.yml ps
