@@ -28,7 +28,7 @@ export const reportsRouter = new OpenAPIHono<Env>();
 reportsRouter.use(
   "*",
   cors({
-    origin: ["http://localhost:3000", "https://viralkan.com"],
+    origin: ["http://localhost:3000", "https://viral.faldi.xyz"],
     credentials: true,
     allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization"],

@@ -300,7 +300,7 @@ export const generateAICaption = async (
             },
             {
               headers: {
-                "HTTP-Referer": "https://viralkan.com",
+                "HTTP-Referer": "https://viral.faldi.xyz",
                 "X-Title": "Viralkan Road Damage AI Caption",
                 // Specify provider preference order: Targon -> DeepInfra -> Lambda
                 "OpenRouter-Provider-Order": "Targon,DeepInfra,Lambda",
@@ -479,7 +479,7 @@ export const checkAIHealth = async (): Promise<
       },
       {
         headers: {
-          "HTTP-Referer": "https://viralkan.com",
+          "HTTP-Referer": "https://viral.faldi.xyz",
           "X-Title": "Viralkan Health Check",
           // Use same provider order for health checks
           "OpenRouter-Provider-Order": "Targon,DeepInfra,Lambda",

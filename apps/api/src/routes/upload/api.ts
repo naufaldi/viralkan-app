@@ -17,7 +17,7 @@ export const uploadRouter = new OpenAPIHono<Env>();
 uploadRouter.use(
   "*",
   cors({
-    origin: ["http://localhost:3000", "https://viralkan.com"],
+    origin: ["http://localhost:3000", "https://viral.faldi.xyz"],
     credentials: true,
     allowMethods: ["POST", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization"],

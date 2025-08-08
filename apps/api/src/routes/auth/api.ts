@@ -23,7 +23,7 @@ export const authRouter = new OpenAPIHono<Env>();
 authRouter.use(
   "*",
   cors({
-    origin: ["http://localhost:3000", "https://viralkan.app"],
+    origin: ["http://localhost:3000", "https://viral.faldi.xyz"],
     allowHeaders: ["Content-Type", "Authorization"],
     allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true,

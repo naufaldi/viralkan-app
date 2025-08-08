@@ -36,9 +36,8 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      "http://localhost:3000", // Backup port for frontend
-      "https://viralkan.app",
-      "https://www.viralkan.app",
+      "http://localhost:3000",
+      "https://viral.faldi.xyz",
     ],
     credentials: true,
   }),
@@ -99,7 +98,7 @@ app.doc("/openapi", {
     {
       url:
         env.NODE_ENV === "production"
-          ? "https://api.viralkan.app"
+          ? "https://viral-api.faldi.xyz"
           : `http://localhost:${env.PORT}`,
       description:
         env.NODE_ENV === "production"

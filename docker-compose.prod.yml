@@ -38,6 +38,10 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.api-router.rule=Host(`${DOMAIN}`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.api-subdomain.rule=Host(`viral-api.faldi.xyz`)"
+      - "traefik.http.routers.api-subdomain.entrypoints=websecure"
+      - "traefik.http.routers.api-subdomain.tls.certresolver=myresolver"
+      - "traefik.http.routers.api-subdomain.service=api-service"
       - "traefik.http.routers.api-router.entrypoints=websecure"
       - "traefik.http.routers.api-router.tls.certresolver=myresolver"
       - "traefik.http.services.api-service.loadbalancer.server.port=3000"
@@ -100,7 +104,7 @@ services:
       - NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=${NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET}
       - NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=${NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID}
       - NEXT_PUBLIC_FIREBASE_APP_ID=${NEXT_PUBLIC_FIREBASE_APP_ID}
-      - NEXT_PUBLIC_API_URL=https://${DOMAIN}
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
     deploy:
       mode: replicated
       replicas: 1
