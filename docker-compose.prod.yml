@@ -39,14 +39,14 @@ services:
     image: ghcr.io/${GITHUB_REPOSITORY}/viralkan-api:${IMAGE_TAG:-latest}
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.viralkan-api-subdomain.rule=Host(`viral-api.faldi.xyz`)"
-      - "traefik.http.routers.viralkan-api-subdomain.entrypoints=websecure"
-      - "traefik.http.routers.viralkan-api-subdomain.tls.certresolver=myresolver"
-      - "traefik.http.routers.viralkan-api-subdomain.service=viralkan-api-service"
       - "traefik.http.routers.viralkan-api-path.rule=Host(`${DOMAIN}`) && PathPrefix(`/api`)"
       - "traefik.http.routers.viralkan-api-path.entrypoints=websecure"
       - "traefik.http.routers.viralkan-api-path.tls.certresolver=myresolver"
       - "traefik.http.routers.viralkan-api-path.service=viralkan-api-service"
+      - "traefik.http.routers.viralkan-api-subdomain.rule=Host(`viral-api.faldi.xyz`)"
+      - "traefik.http.routers.viralkan-api-subdomain.entrypoints=websecure"
+      - "traefik.http.routers.viralkan-api-subdomain.tls.certresolver=myresolver"
+      - "traefik.http.routers.viralkan-api-subdomain.service=viralkan-api-service"
       - "traefik.http.services.viralkan-api-service.loadbalancer.server.port=3000"
       - "traefik.docker.network=viralkan-web"
       - "com.centurylinklabs.watchtower.enable=true"

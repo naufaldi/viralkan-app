@@ -31,12 +31,11 @@ app.use("*", logger());
 app.use(
   "*",
   cors({
-    origin: [
-      "http://localhost:3000",
-      "http://localhost:5173",
-      "https://viral.faldi.xyz",
-      "https://viral-api.faldi.xyz",
-    ],
+      origin: [
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "https://viral.faldi.xyz",
+      ],
     credentials: true,
   }),
 );
@@ -96,13 +95,30 @@ app.openapi(
       },
     ],
     tags: [
-      "Reports",
-      "Auth",
-      "Upload",
-      "Admin",
-      "Administrative",
-      "Sharing",
-      "Analytics",
+      {
+        name: "Reports",
+        description: "Road damage and infrastructure issue reports",
+      },
+      { name: "Auth", description: "Authentication and user management" },
+      {
+        name: "Upload",
+        description: "Image upload and file management",
+      },
+      {
+        name: "Admin",
+        description:
+          "Admin operations for report verification and management",
+      },
+      {
+        name: "Administrative",
+        description:
+          "Indonesian administrative data (provinces, regencies, districts)",
+      },
+      {
+        name: "Sharing",
+        description: "Social media sharing functionality and analytics",
+      },
+      { name: "Analytics", description: "Sharing analytics and statistics" },
     ],
   },
   {
