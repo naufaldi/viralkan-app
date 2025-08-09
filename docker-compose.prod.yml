@@ -39,10 +39,6 @@ services:
     image: ghcr.io/${GITHUB_REPOSITORY}/viralkan-api:${IMAGE_TAG:-latest}
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.viralkan-api-path.rule=Host(`${DOMAIN}`) && PathPrefix(`/api`)"
-      - "traefik.http.routers.viralkan-api-path.entrypoints=websecure"
-      - "traefik.http.routers.viralkan-api-path.tls.certresolver=myresolver"
-      - "traefik.http.routers.viralkan-api-path.service=viralkan-api-service"
       - "traefik.http.routers.viralkan-api-subdomain.rule=Host(`viral-api.faldi.xyz`)"
       - "traefik.http.routers.viralkan-api-subdomain.entrypoints=websecure"
       - "traefik.http.routers.viralkan-api-subdomain.tls.certresolver=myresolver"
@@ -55,7 +51,7 @@ services:
     environment:
       - NODE_ENV=production
       - FIREBASE_SERVICE_ACCOUNT_JSON=${FIREBASE_SERVICE_ACCOUNT_JSON}
-      - DATABASE_URL=postgresql://postgres:${DB_PASSWORD}@viralkan-db:5431/viralkan
+      - DATABASE_URL=postgresql://postgres:${DB_PASSWORD}@db:5432/viralkan
       - JWT_SECRET=${JWT_SECRET}
       - R2_ACCESS_KEY_ID=${R2_ACCESS_KEY_ID}
       - R2_SECRET_ACCESS_KEY=${R2_SECRET_ACCESS_KEY}
@@ -79,12 +75,10 @@ services:
           cpus: "0.5"
         reservations:
           memory: 256M
-    depends_on:
-      viralkan-db:
-        condition: service_healthy
     restart: always
     networks:
       - viralkan-web
+      - viralkan-app_default
     healthcheck:
       test:
         [
@@ -151,52 +145,11 @@ services:
       retries: 3
       start_period: 40s
 
-  viralkan-db:
-    image: postgis/postgis:15-3.3
-    restart: always
-    volumes:
-      - viralkan-db-data:/var/lib/postgresql/data
-      - ./postgresql.conf:/etc/postgresql/postgresql.conf
-      - ./logs:/var/log/postgresql
-    command:
-      - "postgres"
-      - "-c"
-      - "logging_collector=on"
-      - "-c"
-      - "log_directory=/var/log/postgresql"
-      - "-c"
-      - "log_filename=postgresql-%Y-%m-%d.log"
-      - "-c"
-      - "log_statement=all"
-      - "-c"
-      - "port=5431"
-    environment:
-      - POSTGRES_DB=viralkan
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_USER=postgres
-      - POSTGRES_INITDB_ARGS=--data-checksums
-      - PGDATA=/var/lib/postgresql/data/pgdata
-    expose:
-      - 5431
-    healthcheck:
-      test: ["CMD", "pg_isready", "-U", "postgres", "-p", "5431"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-    deploy:
-      resources:
-        limits:
-          memory: 1G
-        reservations:
-          memory: 512M
-    networks:
-      - viralkan-web
-
 volumes:
-  viralkan-db-data:
   viralkan-letsencrypt:
 
 networks:
   viralkan-web:
     driver: bridge
+  viralkan-app_default:
+    external: true
