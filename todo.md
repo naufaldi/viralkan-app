@@ -88,7 +88,9 @@ GITHUB_REPOSITORY=naufaldi/viralkan-app
 IMAGE_TAG=latest
 
 # Database (Your PostgreSQL on VPS)
-DATABASE_URL=postgresql://username:password@localhost:5432/viralkan
+DB_PASSWORD=your_db_password
+# IMPORTANT: When running in Docker, use host 'db' (service name), not 'localhost'
+DATABASE_URL=postgresql://postgres:${DB_PASSWORD}@db:5432/viralkan
 
 # Security
 JWT_SECRET=your-super-secret-jwt-key
@@ -111,9 +113,9 @@ R2_BUCKET_NAME=
 R2_ENDPOINT=
 R2_PUBLIC_URL=
 
-# Optional: AI Features
+# AI Features (Required for API to start)
 ADMIN_EMAILS=
-OPENROUTER_API_KEY=
+OPENROUTER_API_KEY=your_openrouter_api_key
 OPENROUTER_BASE_URL=
 AI_MODEL_FREE=
 AI_MODEL_PAID=
@@ -212,3 +214,41 @@ docker-compose -f docker-compose.prod.yml --env-file .env.production pull
 ```
 
 **Note:** Docker login credentials are cached, so you only need to do this once per VPS.
+
+## 🐛 Incident: 404 Not Found at https://viral-api.faldi.xyz/
+
+- Root cause: Current Traefik config routes the API only under the main domain with a path prefix. In `docker-compose.prod.yml` the API router is:
+  - `Host(${DOMAIN}) && PathPrefix(/api)` → service `api-service` (port 3000)
+  - There is NO router defined for the host `viral-api.faldi.xyz`, so Traefik returns 404 for that hostname.
+- Impact: Visiting `https://viral-api.faldi.xyz/` returns 404. The correct API base is `https://viral.faldi.xyz/api` (single domain + path-based routing). Frontend should use `NEXT_PUBLIC_API_URL=https://viral.faldi.xyz` so requests become `${BASE}/api/...`.
+- Verification:
+  - OK: `curl -sS https://viral.faldi.xyz/api/health`
+  - 404: `curl -I https://viral-api.faldi.xyz/`
+- Contributing config issues found:
+  - `.env.production` template used `localhost` in `DATABASE_URL`, which is incorrect inside containers. It must use host `db`. Fixed above.
+  - `OPENROUTER_API_KEY` is required by the API at startup, but was marked optional. Marked as required above.
+
+### Options to resolve
+- Option A (recommended): Keep path-based routing
+  - Use only `DOMAIN=viral.faldi.xyz`
+  - Access API at `https://viral.faldi.xyz/api/...`
+  - Ensure frontend sets `NEXT_PUBLIC_API_URL=https://viral.faldi.xyz`
+  - Remove/avoid references to `viral-api.faldi.xyz`
+
+- Option B: Add dedicated API subdomain
+  - Add another router on the API service:
+    - `traefik.http.routers.api-subdomain.rule=Host(\`viral-api.faldi.xyz\`)`
+    - `traefik.http.routers.api-subdomain.entrypoints=websecure`
+    - `traefik.http.routers.api-subdomain.tls.certresolver=myresolver`
+    - Reuse `traefik.http.services.api-service.loadbalancer.server.port=3000`
+  - Ensure DNS A record for `viral-api.faldi.xyz` points to the VPS IP
+  - Then both `https://viral.faldi.xyz/api/...` and `https://viral-api.faldi.xyz/...` will work
+
+### Action items
+- [x] Decide: Option B (subdomain)
+- [x] Add Traefik labels for `api-subdomain` in `docker-compose.prod.yml`
+- [x] Configure `NEXT_PUBLIC_API_URL=https://viral-api.faldi.xyz` (compose reads from env)
+- [x] Fix `.env.production` template: `DB_PASSWORD`, `DATABASE_URL` host `db`, and require `OPENROUTER_API_KEY`
+- [ ] DNS: Ensure A record `viral-api.faldi.xyz` → VPS IP (103.59.160.70)
+- [ ] Deploy: `docker-compose -f docker-compose.prod.yml --env-file .env.production up -d`
+- [ ] Verify: `curl -sS https://viral-api.faldi.xyz/health` and `/docs`

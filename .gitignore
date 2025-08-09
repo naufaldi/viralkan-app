@@ -46,3 +46,4 @@ yarn-error.log*
 secrets/
 *.key
 *.crt
+db/password.txt

@@ -39,9 +39,14 @@ services:
     image: ghcr.io/${GITHUB_REPOSITORY}/viralkan-api:${IMAGE_TAG:-latest}
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.viralkan-api-router.rule=Host(`viral-api.faldi.xyz`)"
-      - "traefik.http.routers.viralkan-api-router.entrypoints=websecure"
-      - "traefik.http.routers.viralkan-api-router.tls.certresolver=myresolver"
+      - "traefik.http.routers.viralkan-api-subdomain.rule=Host(`viral-api.faldi.xyz`)"
+      - "traefik.http.routers.viralkan-api-subdomain.entrypoints=websecure"
+      - "traefik.http.routers.viralkan-api-subdomain.tls.certresolver=myresolver"
+      - "traefik.http.routers.viralkan-api-subdomain.service=viralkan-api-service"
+      - "traefik.http.routers.viralkan-api-path.rule=Host(`${DOMAIN}`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.viralkan-api-path.entrypoints=websecure"
+      - "traefik.http.routers.viralkan-api-path.tls.certresolver=myresolver"
+      - "traefik.http.routers.viralkan-api-path.service=viralkan-api-service"
       - "traefik.http.services.viralkan-api-service.loadbalancer.server.port=3000"
       - "traefik.docker.network=viralkan-web"
       - "com.centurylinklabs.watchtower.enable=true"
@@ -115,11 +120,7 @@ services:
       - NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=${NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET}
       - NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=${NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID}
       - NEXT_PUBLIC_FIREBASE_APP_ID=${NEXT_PUBLIC_FIREBASE_APP_ID}
-<<<<<<< HEAD
-      - NEXT_PUBLIC_API_URL=https://viral-api.faldi.xyz
-=======
-      - NEXT_PUBLIC_API_URL=https://${DOMAIN}
->>>>>>> ad55054 (ci: update NEXT_PUBLIC_API_URL environment variable in prod config)
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
     deploy:
       mode: replicated
       replicas: 1
