@@ -101,14 +101,6 @@ services:
     networks:
       - edge
       - viralkan-private
-    healthcheck:
-      test:
-        ["CMD-SHELL", "ps aux | grep 'bun.*server.js' | grep -v grep || exit 0"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-      disable: true
 
 volumes:
   db_data:
