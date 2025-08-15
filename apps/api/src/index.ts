@@ -31,11 +31,11 @@ app.use("*", logger());
 app.use(
   "*",
   cors({
-      origin: [
-        "http://localhost:3000",
-        "http://localhost:5173",
-        "https://viral.faldi.xyz",
-      ],
+    origin: [
+      "http://localhost:3000",
+      "http://localhost:5173",
+      "https://viral.faldi.xyz",
+    ],
     credentials: true,
   }),
 );
@@ -60,80 +60,65 @@ app.route("/api/sharing", sharingRouter);
 app.route("/api/admin", adminRouter);
 
 // OpenAPI specification
-app.openapi(
-  {
-    openapi: "3.0.0",
-    info: {
-      title: "Viralkan API",
-      version: "1.0.0",
+app.doc("/openapi", {
+  openapi: "3.0.0",
+  info: {
+    title: "Viralkan API",
+    version: "1.0.0",
+    description:
+      "API for reporting road damage and infrastructure issues in Indonesia",
+    contact: {
+      name: "Viralkan Team",
+      url: "https://viral.faldi.xyz",
+    },
+    license: {
+      name: "MIT",
+      url: "https://opensource.org/licenses/MIT",
+    },
+  },
+  servers: [
+    {
+      url:
+        env.NODE_ENV === "production"
+          ? "https://viral-api.faldi.xyz"
+          : `http://localhost:${env.PORT}`,
       description:
-        "API for reporting road damage and infrastructure issues in Indonesia",
-      contact: {
-        name: "Viralkan Team",
-        url: "https://viralkan.app",
-      },
-      license: {
-        name: "MIT",
-        url: "https://opensource.org/licenses/MIT",
-      },
+        env.NODE_ENV === "production"
+          ? "Production server"
+          : "Development server",
     },
-    servers: [
-      {
-        url:
-          env.NODE_ENV === "production"
-            ? "https://viral-api.faldi.xyz"
-            : `http://localhost:${env.PORT}`,
-        description:
-          env.NODE_ENV === "production"
-            ? "Production server"
-            : "Development server",
-      },
-    ],
-    security: [
-      {
-        bearerAuth: [],
-      },
-    ],
-    tags: [
-      {
-        name: "Reports",
-        description: "Road damage and infrastructure issue reports",
-      },
-      { name: "Auth", description: "Authentication and user management" },
-      {
-        name: "Upload",
-        description: "Image upload and file management",
-      },
-      {
-        name: "Admin",
-        description:
-          "Admin operations for report verification and management",
-      },
-      {
-        name: "Administrative",
-        description:
-          "Indonesian administrative data (provinces, regencies, districts)",
-      },
-      {
-        name: "Sharing",
-        description: "Social media sharing functionality and analytics",
-      },
-      { name: "Analytics", description: "Sharing analytics and statistics" },
-    ],
-  },
-  {
-    components: {
-      securitySchemes: {
-        bearerAuth: {
-          type: "http",
-          scheme: "bearer",
-          bearerFormat: "JWT",
-          description: "Firebase JWT token for authentication",
-        },
-      },
+  ],
+  security: [
+    {
+      bearerAuth: [],
     },
-  },
-);
+  ],
+  tags: [
+    {
+      name: "Reports",
+      description: "Road damage and infrastructure issue reports",
+    },
+    { name: "Auth", description: "Authentication and user management" },
+    {
+      name: "Upload",
+      description: "Image upload and file management",
+    },
+    {
+      name: "Admin",
+      description: "Admin operations for report verification and management",
+    },
+    {
+      name: "Administrative",
+      description:
+        "Indonesian administrative data (provinces, regencies, districts)",
+    },
+    {
+      name: "Sharing",
+      description: "Social media sharing functionality and analytics",
+    },
+    { name: "Analytics", description: "Sharing analytics and statistics" },
+  ],
+});
 
 // Swagger UI Documentation
 app.get(
