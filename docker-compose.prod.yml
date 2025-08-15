@@ -1,53 +1,11 @@
 services:
-  watchtower:
-    image: containrrr/watchtower
-    command:
-      - "--label-enable"
-      - "--interval"
-      - "3600"
-      - "--rolling-restart"
-      - "--cleanup"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    networks:
-      - viralkan-web
-    labels:
-      - "com.centurylinklabs.watchtower.enable=true"
-
-  reverse-proxy:
-    image: traefik:v3.1
-    command:
-      - "--providers.docker"
-      - "--providers.docker.exposedbydefault=false"
-      - "--entryPoints.websecure.address=:8444"
-      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
-      - "--certificatesresolvers.myresolver.acme.email=${ACME_EMAIL}"
-      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
-      - "--entrypoints.web.address=:8081"
-      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
-      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
-    ports:
-      - "8081:8081"
-      - "8444:8444"
-    volumes:
-      - viralkan-letsencrypt:/letsencrypt
-      - /var/run/docker.sock:/var/run/docker.sock
-    networks:
-      - viralkan-web
 
   api:
     image: ghcr.io/${GITHUB_REPOSITORY}/viralkan-api:${IMAGE_TAG:-latest}
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.viralkan-api-subdomain.rule=Host(`viral-api.faldi.xyz`)"
-      - "traefik.http.routers.viralkan-api-subdomain.entrypoints=websecure"
-      - "traefik.http.routers.viralkan-api-subdomain.tls.certresolver=myresolver"
-      - "traefik.http.routers.viralkan-api-subdomain.service=viralkan-api-service"
-      - "traefik.http.services.viralkan-api-service.loadbalancer.server.port=3000"
-      - "traefik.docker.network=viralkan-web"
-      - "com.centurylinklabs.watchtower.enable=true"
-    expose:
-      - "3000"
+      caddy: viral-api.faldi.xyz
+      caddy.reverse_proxy: "{{upstreams 3000}}"
+      com.centurylinklabs.watchtower.enable: "true"
     environment:
       - NODE_ENV=production
       - FIREBASE_SERVICE_ACCOUNT_JSON=${FIREBASE_SERVICE_ACCOUNT_JSON}
@@ -77,8 +35,8 @@ services:
           memory: 256M
     restart: always
     networks:
-      - viralkan-web
-      - viralkan-app_default
+      - edge
+      - viralkan-private
     healthcheck:
       test:
         [
@@ -97,15 +55,9 @@ services:
   web:
     image: ghcr.io/${GITHUB_REPOSITORY}/viralkan-web:${IMAGE_TAG:-latest}
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.viralkan-web-router.rule=Host(`viral.faldi.xyz`)"
-      - "traefik.http.routers.viralkan-web-router.entrypoints=websecure"
-      - "traefik.http.routers.viralkan-web-router.tls.certresolver=myresolver"
-      - "traefik.http.services.viralkan-web-service.loadbalancer.server.port=3000"
-      - "traefik.docker.network=viralkan-web"
-      - "com.centurylinklabs.watchtower.enable=true"
-    expose:
-      - "3000"
+      caddy: viral.faldi.xyz
+      caddy.reverse_proxy: "{{upstreams 3000}}"
+      com.centurylinklabs.watchtower.enable: "true"
     environment:
       - NODE_ENV=production
       - NEXT_PUBLIC_FIREBASE_API_KEY=${NEXT_PUBLIC_FIREBASE_API_KEY}
@@ -129,7 +81,8 @@ services:
         condition: service_healthy
     restart: always
     networks:
-      - viralkan-web
+      - edge
+      - viralkan-private
     healthcheck:
       test:
         [
@@ -145,11 +98,8 @@ services:
       retries: 3
       start_period: 40s
 
-volumes:
-  viralkan-letsencrypt:
-
 networks:
-  viralkan-web:
-    driver: bridge
-  viralkan-app_default:
+  edge:
     external: true
+  viralkan-private:
+    driver: bridge
