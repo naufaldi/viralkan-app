@@ -145,3 +145,15 @@ jobs:
 
             # Show running containers
             GITHUB_REPOSITORY=${{ github.repository }} docker-compose -f docker-compose.prod.yml ps
+
+            # Verify deployment
+            echo "🔍 Verifying deployment..."
+            sleep 10
+
+            # Check if containers are properly isolated
+            echo "🔒 Checking port isolation..."
+            docker ps --format 'table {{.Names}}\t{{.Ports}}' | grep -v "edge-proxy" | grep -v "80\|443" && echo "⚠️  Warning: Some containers still exposing ports" || echo "✅ Port isolation verified"
+
+            # Test Caddy routing
+            echo "🌐 Testing Caddy routing..."
+            curl -I -H "Host: viral.faldi.xyz" http://localhost || echo "⚠️  Caddy routing test failed"
