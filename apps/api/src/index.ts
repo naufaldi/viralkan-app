@@ -36,7 +36,10 @@ app.use(
       "http://localhost:5173",
       "https://viral.faldi.xyz",
     ],
+    allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowHeaders: ["Content-Type", "Authorization"],
     credentials: true,
+    maxAge: 86400,
   }),
 );
 

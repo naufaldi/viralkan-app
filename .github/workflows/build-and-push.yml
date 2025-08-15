@@ -130,7 +130,7 @@ jobs:
 
             # Restart database to apply new configuration
             echo "🔄 Restarting database to apply new configuration..."
-            GITHUB_REPOSITORY=${{ github.repository }} docker-compose -f docker-compose.prod.yml --env-file .env.production restart viralkan-db
+            GITHUB_REPOSITORY=${{ github.repository }} docker-compose -f docker-compose.prod.yml --env-file .env.production restart db
 
             # Wait for database to be ready
             echo "⏳ Waiting for database to be ready..."
@@ -138,7 +138,7 @@ jobs:
 
             # Verify database health
             echo "🔍 Checking database health..."
-            GITHUB_REPOSITORY=${{ github.repository }} docker-compose -f docker-compose.prod.yml --env-file .env.production exec viralkan-db pg_isready -U postgres -p 5431
+            GITHUB_REPOSITORY=${{ github.repository }} docker-compose -f docker-compose.prod.yml --env-file .env.production exec db pg_isready -U postgres -p 5432 | cat
 
             # Clean up old images to save space
             docker image prune -f

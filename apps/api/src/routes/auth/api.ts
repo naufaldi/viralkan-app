@@ -1,5 +1,4 @@
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
-import { cors } from "hono/cors";
 import { sql } from "../../db/connection";
 import * as shell from "./shell";
 import {
@@ -18,17 +17,6 @@ type Env = {
 };
 
 export const authRouter = new OpenAPIHono<Env>();
-
-// CORS middleware
-authRouter.use(
-  "*",
-  cors({
-    origin: ["http://localhost:3000", "https://viral.faldi.xyz"],
-    allowHeaders: ["Content-Type", "Authorization"],
-    allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    credentials: true,
-  }),
-);
 
 // --- Route Definitions ---
 
@@ -228,7 +216,7 @@ authRouter.openapi(verifyRoute, async (c) => {
           statusCode: result.statusCode,
           timestamp: new Date().toISOString(),
         },
-        result.statusCode as any,
+        result.statusCode as number,
       );
     }
   } catch (error) {
@@ -271,7 +259,7 @@ authRouter.openapi(getMeRoute, async (c) => {
           statusCode: result.statusCode,
           timestamp: new Date().toISOString(),
         },
-        result.statusCode as any,
+        result.statusCode as number,
       );
     }
   } catch (error) {
@@ -314,7 +302,7 @@ authRouter.openapi(getUserStatsRoute, async (c) => {
           statusCode: result.statusCode,
           timestamp: new Date().toISOString(),
         },
-        result.statusCode as any,
+        result.statusCode as number,
       );
     }
   } catch (error) {
@@ -357,7 +345,7 @@ authRouter.openapi(logoutRoute, async (c) => {
           statusCode: result.statusCode,
           timestamp: new Date().toISOString(),
         },
-        result.statusCode as any,
+        result.statusCode as number,
       );
     }
   } catch (error) {
