@@ -68,7 +68,6 @@ services:
       timeout: 10s
       retries: 5
       start_period: 60s
-      disable: false
 
   web:
     image: ghcr.io/${GITHUB_REPOSITORY}/viralkan-web:${IMAGE_TAG:-latest}
