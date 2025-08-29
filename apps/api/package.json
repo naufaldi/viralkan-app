@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "bun run --hot src/index.ts",
-    "build": "bun build src/index.ts --outdir dist --target bun",
+    "build": "bun build src/index.ts --outdir dist --target bun --sourcemap --minify=false",
     "start": "bun run dist/index.js",
     "test": "bun test",
     "test:watch": "bun test --watch",

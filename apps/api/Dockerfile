@@ -18,8 +18,8 @@ RUN bun install
 # Copy app source
 COPY . .
 
-# Build the API
-RUN cd apps/api && bun run build
+# Build the API (with sourcemaps, no minify for diagnosis)
+RUN cd apps/api && bun build src/index.ts --outdir dist --target bun --sourcemap --minify=false
 
 # Create non-root user
 RUN addgroup --system --gid 1001 nodejs
