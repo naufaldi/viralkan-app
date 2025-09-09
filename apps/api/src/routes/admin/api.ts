@@ -50,7 +50,6 @@ adminRouter.use(
 const getAdminStatsRoute = createRoute({
   method: "get",
   path: "/stats",
-  middleware: [requireAdmin],
   summary: "Get admin statistics",
   description: "Get comprehensive dashboard statistics for admin",
   tags: ["Admin"],
@@ -110,7 +109,6 @@ const getAdminStatsRoute = createRoute({
 const getAdminReportsRoute = createRoute({
   method: "get",
   path: "/reports",
-  middleware: [requireAdmin],
   request: {
     query: z.object({
       page: z
@@ -185,7 +183,6 @@ const getAdminReportsRoute = createRoute({
 const verifyReportRoute = createRoute({
   method: "post",
   path: "/reports/{id}/verify",
-  middleware: [requireAdmin],
   request: {
     params: z.object({
       id: z.string(),
@@ -264,7 +261,6 @@ const verifyReportRoute = createRoute({
 const rejectReportRoute = createRoute({
   method: "post",
   path: "/reports/{id}/reject",
-  middleware: [requireAdmin],
   request: {
     params: z.object({
       id: z.string(),
@@ -366,7 +362,6 @@ const rejectReportRoute = createRoute({
 const toggleReportStatusRoute = createRoute({
   method: "post",
   path: "/reports/{id}/toggle-status",
-  middleware: [requireAdmin],
   request: {
     params: z.object({
       id: z.string(),
@@ -468,7 +463,6 @@ const toggleReportStatusRoute = createRoute({
 const deleteReportRoute = createRoute({
   method: "post",
   path: "/reports/{id}/delete",
-  middleware: [requireAdmin],
   request: {
     params: z.object({
       id: z.string(),
@@ -547,7 +541,6 @@ const deleteReportRoute = createRoute({
 const restoreReportRoute = createRoute({
   method: "post",
   path: "/reports/{id}/restore",
-  middleware: [requireAdmin],
   request: {
     params: z.object({
       id: z.string(),
@@ -626,7 +619,6 @@ const restoreReportRoute = createRoute({
 const getReportDetailRoute = createRoute({
   method: "get",
   path: "/reports/{id}",
-  middleware: [requireAdmin],
   request: {
     params: z.object({
       id: z.string(),
@@ -707,7 +699,6 @@ const getReportDetailRoute = createRoute({
 const getShareAnalyticsRoute = createRoute({
   method: "get",
   path: "/analytics/shares",
-  middleware: [requireAdmin],
   request: {
     query: ShareAnalyticsQuerySchema,
   },
@@ -744,7 +735,6 @@ const getShareAnalyticsRoute = createRoute({
 const healthCheckRoute = createRoute({
   method: "get",
   path: "/health",
-  middleware: [requireAdmin],
   summary: "Admin health check",
   description: "Health check endpoint for admin routes",
   tags: ["Admin"],
@@ -795,7 +785,7 @@ const healthCheckRoute = createRoute({
 
 // --- Route Handlers ---
 
-adminRouter.openapi(getAdminStatsRoute, async (c) => {
+adminRouter.openapi(getAdminStatsRoute, requireAdmin, async (c) => {
   try {
     const result = await adminShell.getAdminStats();
 
@@ -828,7 +818,7 @@ adminRouter.openapi(getAdminStatsRoute, async (c) => {
   }
 });
 
-adminRouter.openapi(getAdminReportsRoute, async (c) => {
+adminRouter.openapi(getAdminReportsRoute, requireAdmin, async (c) => {
   try {
     const userId = c.get("user_id");
     console.log(`[DEBUG] getAdminReportsRoute - userId: ${userId}`);
@@ -887,7 +877,7 @@ adminRouter.openapi(getAdminReportsRoute, async (c) => {
   }
 });
 
-adminRouter.openapi(verifyReportRoute, async (c) => {
+adminRouter.openapi(verifyReportRoute, requireAdmin, async (c) => {
   try {
     const paramData = c.req.valid("param");
     const adminUserId = c.get("user_id");
@@ -936,7 +926,7 @@ adminRouter.openapi(verifyReportRoute, async (c) => {
   }
 });
 
-adminRouter.openapi(rejectReportRoute, async (c) => {
+adminRouter.openapi(rejectReportRoute, requireAdmin, async (c) => {
   try {
     const paramData = c.req.valid("param");
     const bodyData = c.req.valid("json");
@@ -990,7 +980,7 @@ adminRouter.openapi(rejectReportRoute, async (c) => {
   }
 });
 
-adminRouter.openapi(toggleReportStatusRoute, async (c) => {
+adminRouter.openapi(toggleReportStatusRoute, requireAdmin, async (c) => {
   try {
     const paramData = c.req.valid("param");
     const bodyData = c.req.valid("json");
@@ -1044,7 +1034,7 @@ adminRouter.openapi(toggleReportStatusRoute, async (c) => {
   }
 });
 
-adminRouter.openapi(deleteReportRoute, async (c) => {
+adminRouter.openapi(deleteReportRoute, requireAdmin, async (c) => {
   try {
     const paramData = c.req.valid("param");
     const adminUserId = c.get("user_id");
@@ -1093,7 +1083,7 @@ adminRouter.openapi(deleteReportRoute, async (c) => {
   }
 });
 
-adminRouter.openapi(restoreReportRoute, async (c) => {
+adminRouter.openapi(restoreReportRoute, requireAdmin, async (c) => {
   try {
     const paramData = c.req.valid("param");
     const adminUserId = c.get("user_id");
@@ -1142,7 +1132,7 @@ adminRouter.openapi(restoreReportRoute, async (c) => {
   }
 });
 
-adminRouter.openapi(getReportDetailRoute, async (c) => {
+adminRouter.openapi(getReportDetailRoute, requireAdmin, async (c) => {
   try {
     const paramData = c.req.valid("param");
 
@@ -1197,7 +1187,7 @@ adminRouter.openapi(getReportDetailRoute, async (c) => {
 });
 
 // Share analytics handler (admin only)
-adminRouter.openapi(getShareAnalyticsRoute, async (c) => {
+adminRouter.openapi(getShareAnalyticsRoute, requireAdmin, async (c) => {
   try {
     const query = c.req.valid("query");
 
@@ -1248,7 +1238,7 @@ adminRouter.openapi(getShareAnalyticsRoute, async (c) => {
   }
 });
 
-adminRouter.openapi(healthCheckRoute, async (c) => {
+adminRouter.openapi(healthCheckRoute, requireAdmin, async (c) => {
   return c.json(
     {
       status: "healthy",

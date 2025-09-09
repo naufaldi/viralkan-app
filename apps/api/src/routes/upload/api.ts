@@ -45,7 +45,6 @@ const uploadImageRoute = createRoute({
       },
     },
   },
-  middleware: [firebaseAuthMiddleware],
   summary: "Upload image file",
   description:
     "Upload an image file to Cloudflare R2 storage for use in reports",
@@ -83,7 +82,7 @@ const uploadImageRoute = createRoute({
 
 // --- Route Handlers ---
 
-uploadRouter.openapi(uploadImageRoute, async (c) => {
+uploadRouter.openapi(uploadImageRoute, firebaseAuthMiddleware, async (c) => {
   const requestId = crypto.randomUUID();
   const startTime = Date.now();
 

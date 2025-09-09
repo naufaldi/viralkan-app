@@ -78,7 +78,6 @@ const getMeRoute = createRoute({
   description: "Get current authenticated user profile",
   tags: ["Auth"],
   security: [{ bearerAuth: [] }],
-  middleware: [firebaseAuthMiddleware],
   responses: {
     200: {
       description: "User profile retrieved successfully",
@@ -106,7 +105,6 @@ const getUserStatsRoute = createRoute({
   description: "Get current user statistics and activity summary",
   tags: ["Auth"],
   security: [{ bearerAuth: [] }],
-  middleware: [firebaseAuthMiddleware],
   responses: {
     200: {
       description: "User statistics retrieved successfully",
@@ -134,7 +132,6 @@ const logoutRoute = createRoute({
   description: "Logout current user (client-side token cleanup required)",
   tags: ["Auth"],
   security: [{ bearerAuth: [] }],
-  middleware: [firebaseAuthMiddleware],
   responses: {
     200: {
       description: "Logout processed successfully",
@@ -232,7 +229,7 @@ authRouter.openapi(verifyRoute, async (c) => {
   }
 });
 
-authRouter.openapi(getMeRoute, async (c) => {
+authRouter.openapi(getMeRoute, firebaseAuthMiddleware, async (c) => {
   try {
     const userId = c.get("user_id");
 
@@ -275,7 +272,7 @@ authRouter.openapi(getMeRoute, async (c) => {
   }
 });
 
-authRouter.openapi(getUserStatsRoute, async (c) => {
+authRouter.openapi(getUserStatsRoute, firebaseAuthMiddleware, async (c) => {
   try {
     const userId = c.get("user_id");
 
@@ -318,7 +315,7 @@ authRouter.openapi(getUserStatsRoute, async (c) => {
   }
 });
 
-authRouter.openapi(logoutRoute, async (c) => {
+authRouter.openapi(logoutRoute, firebaseAuthMiddleware, async (c) => {
   try {
     const userId = c.get("user_id");
 
