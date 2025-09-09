@@ -41,15 +41,6 @@ services:
       - AI_MAX_TOKENS=${AI_MAX_TOKENS}
       - AI_TEMPERATURE=${AI_TEMPERATURE}
       - PORT=3000
-    deploy:
-      mode: replicated
-      replicas: 1
-      resources:
-        limits:
-          memory: 512M
-          cpus: "0.5"
-        reservations:
-          memory: 256M
     restart: always
     networks:
       - edge
