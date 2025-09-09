@@ -162,6 +162,37 @@ jobs:
 
             # Deploy using the actual docker-compose.prod.yml
             docker-compose -f docker-compose.prod.yml --env-file .env.production down || true
+
+            # Start only the DB so we can run migrations against it
+            docker-compose -f docker-compose.prod.yml --env-file .env.production up -d db
+
+            # Wait for Postgres to be ready (tries ~60s)
+            echo "Waiting for Postgres to be ready..."
+            for i in $(seq 1 30); do
+              docker-compose -f docker-compose.prod.yml --env-file .env.production exec -T db pg_isready -U postgres &>/dev/null && { echo "Postgres is ready"; break; }
+              echo "Waiting for Postgres... attempt $i"
+              sleep 2
+            done
+
+            # Ensure PostGIS extension exists (best-effort)
+            docker-compose -f docker-compose.prod.yml --env-file .env.production exec -T db psql -U postgres -d viralkan -c "CREATE EXTENSION IF NOT EXISTS postgis;" || echo "Warning: couldn't create postgis extension (image may not support it)"
+
+            # Check whether key application tables exist. If missing, run migrations.
+            echo "Checking if 'reports' table exists..."
+            REPORTS_EXISTS=$(docker-compose -f docker-compose.prod.yml --env-file .env.production exec -T db psql -U postgres -d viralkan -tAc "SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='reports');")
+
+            if [ "${REPORTS_EXISTS}" != "t" ]; then
+              echo "Reports table not found — running migrations"
+              docker run --rm --network viralkan-private --env-file .env.production ghcr.io/${{ github.repository }}/viralkan-api:${{ needs.commit-hash.outputs.commit_hash }} bun run db:migrate || {
+                echo "Migrations failed" >&2
+                docker-compose -f docker-compose.prod.yml --env-file .env.production logs db --tail=200
+                exit 1
+              }
+            else
+              echo "Reports table exists — skipping migrations"
+            fi
+
+            # Bring up remaining services
             docker-compose -f docker-compose.prod.yml --env-file .env.production up -d
 
             # Clean up old images

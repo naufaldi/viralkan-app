@@ -2,7 +2,7 @@ version: "3.7"
 
 services:
   db:
-    image: postgres:15
+    image: postgis/postgis:15-3.4
     environment:
       - POSTGRES_DB=viralkan
       - POSTGRES_USER=postgres
