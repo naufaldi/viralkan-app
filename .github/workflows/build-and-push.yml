@@ -185,7 +185,7 @@ jobs:
               echo "Reports table not found — running migrations"
               docker run --rm --network viralkan-private --env-file .env.production ghcr.io/${{ github.repository }}/viralkan-api:${{ needs.commit-hash.outputs.commit_hash }} bun run db:migrate || {
                 echo "Migrations failed" >&2
-                docker-compose -f docker-compose.prod.yml --env-file .env.production logs db --tail=200
+                docker-compose -f docker-compose.prod.yml --env-file .env.production logs --tail=200 db
                 exit 1
               }
             else
@@ -200,12 +200,15 @@ jobs:
               echo "Administrative tables empty — running CSV importer via API image"
               docker run --rm --network viralkan-private --env-file .env.production ghcr.io/${{ github.repository }}/viralkan-api:${{ needs.commit-hash.outputs.commit_hash }} bun run import:admin-data || {
                 echo "CSV import failed" >&2
-                docker-compose -f docker-compose.prod.yml --env-file .env.production logs db --tail=200
+                docker-compose -f docker-compose.prod.yml --env-file .env.production logs --tail=200 db
                 exit 1
               }
             else
               echo "Administrative tables populated (count=${PROVINCES_COUNT}) — skipping CSV import"
             fi
+
+            # Ensure external 'edge' network exists (used by caddy reverse proxy)
+            docker network create edge || true
 
             # Bring up remaining services
             docker-compose -f docker-compose.prod.yml --env-file .env.production up -d

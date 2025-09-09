@@ -89,4 +89,5 @@ networks:
   edge:
     external: true
   viralkan-private:
+    name: viralkan-private
     driver: bridge
