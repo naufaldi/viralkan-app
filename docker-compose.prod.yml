@@ -62,7 +62,7 @@ services:
           "--no-verbose",
           "--tries=1",
           "--spider",
-          "http://localhost:3000/",
+          "http://localhost:3000/health",
         ]
       interval: 30s
       timeout: 10s
@@ -84,18 +84,6 @@ services:
       - NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=${NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID}
       - NEXT_PUBLIC_FIREBASE_APP_ID=${NEXT_PUBLIC_FIREBASE_APP_ID}
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
-    deploy:
-      mode: replicated
-      replicas: 1
-      resources:
-        limits:
-          memory: 512M
-          cpus: "0.5"
-        reservations:
-          memory: 256M
-    depends_on:
-      - api
-      - db
     restart: always
     networks:
       - edge

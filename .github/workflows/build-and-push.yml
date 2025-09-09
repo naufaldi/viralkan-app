@@ -116,9 +116,12 @@ jobs:
             # Login to GitHub Container Registry
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-            # Pull the latest images
+            # Set environment variables
             export GITHUB_REPOSITORY=${{ github.repository }}
             export IMAGE_TAG=${{ needs.commit-hash.outputs.commit_hash }}
+
+            # Pull the latest images
+            echo "📦 Pulling latest images..."
             docker-compose -f docker-compose.prod.yml --env-file .env.production pull
 
             # Copy PostgreSQL configuration if it exists
@@ -127,35 +130,56 @@ jobs:
               cp postgresql.conf ~/projects/viralkan-app/
             fi
 
-            # Deploy with new images
-            docker-compose -f docker-compose.prod.yml --env-file .env.production up -d
-
-            # Restart database to apply new configuration
-            echo "🔄 Restarting database to apply new configuration..."
-            docker-compose -f docker-compose.prod.yml --env-file .env.production restart db
+            # PHASE 1: Start Database First
+            echo "🐘 PHASE 1: Starting Database..."
+            docker-compose -f docker-compose.prod.yml --env-file .env.production up -d db
 
             # Wait for database to be ready
-            echo "⏳ Waiting for database to be ready..."
+            echo "⏳ Waiting for database to be healthy..."
             sleep 30
 
             # Verify database health
             echo "🔍 Checking database health..."
             docker-compose -f docker-compose.prod.yml --env-file .env.production exec db pg_isready -U postgres -p 5432 | cat
 
-            # Clean up old images to save space
-            docker image prune -f
+            # PHASE 2: Start API Service
+            echo "🚀 PHASE 2: Starting API Service..."
+            docker-compose -f docker-compose.prod.yml --env-file .env.production up -d api
+
+            # Wait for API to be ready
+            echo "⏳ Waiting for API to be healthy..."
+            sleep 20
+
+            # Test API health
+            echo "🔍 Testing API health..."
+            for i in {1..5}; do
+              if curl -f http://localhost:3000/health >/dev/null 2>&1; then
+                echo "✅ API is healthy"
+                break
+              else
+                echo "⏳ API not ready yet, waiting..."
+                sleep 10
+              fi
+            done
+
+            # PHASE 3: Start Web Service
+            echo "🌐 PHASE 3: Starting Web Service..."
+            docker-compose -f docker-compose.prod.yml --env-file .env.production up -d web
+
+            # Final verification
+            echo "🔍 Final deployment verification..."
+            sleep 10
 
             # Show running containers
             docker-compose -f docker-compose.prod.yml ps
 
-            # Verify deployment
-            echo "🔍 Verifying deployment..."
-            sleep 10
+            # Test web application
+            echo "🌐 Testing web application..."
+            curl -I -H "Host: viral.faldi.xyz" http://localhost || echo "⚠️  Web application test failed"
+
+            # Clean up old images to save space
+            docker image prune -f
 
             # Check if containers are properly isolated
             echo "🔒 Checking port isolation..."
             docker ps --format 'table {{.Names}}\t{{.Ports}}' | grep -v "edge-proxy" | grep -v "80\|443" && echo "⚠️  Warning: Some containers still exposing ports" || echo "✅ Port isolation verified"
-
-            # Test Caddy routing
-            echo "🌐 Testing Caddy routing..."
-            curl -I -H "Host: viral.faldi.xyz" http://localhost || echo "⚠️  Caddy routing test failed"
