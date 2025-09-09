@@ -1,18 +1,10 @@
-FROM ubuntu:24.04
-
-ENV DEBIAN_FRONTEND=noninteractive
-
-# Install curl, wget, CA certs
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    ca-certificates curl wget \
- && rm -rf /var/lib/apt/lists/*
-
-# Install Bun (pinned)
-ENV BUN_INSTALL=/bun
-RUN curl -fsSL https://bun.sh/install | bash -s -- bun-v1.2.4
-ENV PATH="/bun/bin:${PATH}"
-
+FROM oven/bun:1.2.4 AS base
 WORKDIR /app
+
+# Install wget for health checks (Debian-based official Bun image)
+USER root
+RUN apt-get update && apt-get install -y --no-install-recommends wget ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
 
 # Copy root package.json and lockfile
 COPY package.json ./

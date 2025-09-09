@@ -8,19 +8,19 @@ import { LaporanClientWrapper } from "../../components/reports/laporan-client-wr
 type CategoryType = "berlubang" | "retak" | "lainnya";
 
 interface LaporanPageProps {
-  searchParams?: {
+  searchParams: Promise<{
     page?: string;
     category?: CategoryType;
     search?: string;
     provinsi?: string;
     kabupaten_kota?: string;
     kecamatan?: string;
-  };
+  }>;
 }
 
 export default async function LaporanPage({ searchParams }: LaporanPageProps) {
-  // Parse search params with defaults
-  const params = searchParams || {};
+  // Parse search params with defaults (Promise-based per project convention)
+  const params = await searchParams;
   const currentPage = parseInt(params.page || "1");
   const selectedCategory = params.category;
   const searchQuery = params.search || "";

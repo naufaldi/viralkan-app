@@ -1,7 +1,9 @@
-FROM oven/bun:1.2.4-alpine AS base
+FROM oven/bun:1.2.4 AS base
 
-# Install wget for health checks
-RUN apk add --no-cache wget
+# Install wget for health checks (Debian-based official Bun image)
+USER root
+RUN apt-get update && apt-get install -y --no-install-recommends wget ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
 
 FROM base AS builder
 WORKDIR /app
@@ -45,8 +47,8 @@ FROM base AS runner
 WORKDIR /app
 
 # Don't run production as root
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
+RUN addgroup --system --gid 1001 nodejs \
+  && adduser --system --uid 1001 --ingroup nodejs nextjs
 USER nextjs
 
 # Copy the standalone output
