@@ -1,3 +1,5 @@
+version: "3.7"
+
 services:
   db:
     image: postgres:15
@@ -60,23 +62,6 @@ services:
       retries: 5
       start_period: 60s
 
-  caddy:
-    image: lucaslorentz/caddy-docker-proxy:2.8-alpine
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - caddy_data:/data
-      - caddy_config:/config
-    networks:
-      - edge
-    environment:
-      - CADDY_INGRESS_NETWORKS=edge
-    restart: always
-    labels:
-      com.centurylinklabs.watchtower.enable: "true"
-
   web:
     image: ghcr.io/${GITHUB_REPOSITORY}/viralkan-web:${IMAGE_TAG:-latest}
     labels:
@@ -99,8 +84,6 @@ services:
 
 volumes:
   db_data:
-  caddy_data:
-  caddy_config:
 
 networks:
   edge:

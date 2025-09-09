@@ -92,7 +92,7 @@ jobs:
             ghcr.io/${{ github.repository }}/viralkan-web:latest
 
   deploy-to-vps:
-    needs: [build-and-push-api, build-and-push-web]
+    needs: [build-and-push-api, build-and-push-web, commit-hash]
     runs-on: ubuntu-latest
     steps:
       - name: Deploy to VPS
@@ -116,70 +116,53 @@ jobs:
             # Login to GitHub Container Registry
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-            # Set environment variables
-            export GITHUB_REPOSITORY=${{ github.repository }}
-            export IMAGE_TAG=${{ needs.commit-hash.outputs.commit_hash }}
-
-            # Pull the latest images
+            # Pull the latest images (both commit-specific and latest tags)
             echo "📦 Pulling latest images..."
-            docker-compose -f docker-compose.prod.yml --env-file .env.production pull
+            docker pull ghcr.io/${{ github.repository }}/viralkan-api:${{ needs.commit-hash.outputs.commit_hash }}
+            docker pull ghcr.io/${{ github.repository }}/viralkan-api:latest
+            docker pull ghcr.io/${{ github.repository }}/viralkan-web:${{ needs.commit-hash.outputs.commit_hash }}
+            docker pull ghcr.io/${{ github.repository }}/viralkan-web:latest
 
-            # Copy PostgreSQL configuration if it exists
-            if [ -f "postgresql.conf" ]; then
-              echo "📋 Copying PostgreSQL configuration..."
-              cp postgresql.conf ~/projects/viralkan-app/
+            # Create environment file if it doesn't exist
+            if [ ! -f .env.production ]; then
+              echo "Creating .env.production file..."
+              cat > .env.production << EOF
+            GITHUB_REPOSITORY=${{ github.repository }}
+            IMAGE_TAG=${{ needs.commit-hash.outputs.commit_hash }}
+            DB_PASSWORD=your_secure_password
+            FIREBASE_SERVICE_ACCOUNT_JSON=your_firebase_json
+            JWT_SECRET=your_jwt_secret
+            R2_ACCESS_KEY_ID=your_r2_access_key
+            R2_SECRET_ACCESS_KEY=your_r2_secret_key
+            R2_BUCKET_NAME=your_bucket_name
+            R2_ENDPOINT=your_r2_endpoint
+            R2_PUBLIC_URL=your_r2_public_url
+            ADMIN_EMAILS=your_admin_emails
+            OPENROUTER_API_KEY=your_openrouter_key
+            OPENROUTER_BASE_URL=your_openrouter_url
+            AI_MODEL_FREE=your_free_model
+            AI_MODEL_PAID=your_paid_model
+            AI_MAX_TOKENS=your_max_tokens
+            AI_TEMPERATURE=your_temperature
+            NEXT_PUBLIC_FIREBASE_API_KEY=your_firebase_api_key
+            NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_firebase_auth_domain
+            NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_firebase_project_id
+            NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_firebase_storage_bucket
+            NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_firebase_messaging_sender_id
+            NEXT_PUBLIC_FIREBASE_APP_ID=your_firebase_app_id
+            NEXT_PUBLIC_API_URL=https://viral-api.faldi.xyz
+            EOF
             fi
 
-            # PHASE 1: Start Database First
-            echo "🐘 PHASE 1: Starting Database..."
-            docker-compose -f docker-compose.prod.yml --env-file .env.production up -d db
+            # Download the actual docker-compose.prod.yml from the repository
+            curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                 -H "Accept: application/vnd.github.v3.raw" \
+                 -o docker-compose.prod.yml \
+                 https://api.github.com/repos/${{ github.repository }}/contents/docker-compose.prod.yml
 
-            # Wait for database to be ready
-            echo "⏳ Waiting for database to be healthy..."
-            sleep 30
+            # Deploy using the actual docker-compose.prod.yml
+            docker-compose -f docker-compose.prod.yml --env-file .env.production down || true
+            docker-compose -f docker-compose.prod.yml --env-file .env.production up -d
 
-            # Verify database health
-            echo "🔍 Checking database health..."
-            docker-compose -f docker-compose.prod.yml --env-file .env.production exec db pg_isready -U postgres -p 5432 | cat
-
-            # PHASE 2: Start API Service
-            echo "🚀 PHASE 2: Starting API Service..."
-            docker-compose -f docker-compose.prod.yml --env-file .env.production up -d api
-
-            # Wait for API to be ready
-            echo "⏳ Waiting for API to be healthy..."
-            sleep 20
-
-            # Test API health
-            echo "🔍 Testing API health..."
-            for i in {1..5}; do
-              if curl -f http://localhost:3000/health >/dev/null 2>&1; then
-                echo "✅ API is healthy"
-                break
-              else
-                echo "⏳ API not ready yet, waiting..."
-                sleep 10
-              fi
-            done
-
-            # PHASE 3: Start Web Service
-            echo "🌐 PHASE 3: Starting Web Service..."
-            docker-compose -f docker-compose.prod.yml --env-file .env.production up -d web
-
-            # Final verification
-            echo "🔍 Final deployment verification..."
-            sleep 10
-
-            # Show running containers
-            docker-compose -f docker-compose.prod.yml ps
-
-            # Test web application
-            echo "🌐 Testing web application..."
-            curl -I -H "Host: viral.faldi.xyz" http://localhost || echo "⚠️  Web application test failed"
-
-            # Clean up old images to save space
+            # Clean up old images
             docker image prune -f
-
-            # Check if containers are properly isolated
-            echo "🔒 Checking port isolation..."
-            docker ps --format 'table {{.Names}}\t{{.Ports}}' | grep -v "edge-proxy" | grep -v "80\|443" && echo "⚠️  Warning: Some containers still exposing ports" || echo "✅ Port isolation verified"
