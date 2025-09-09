@@ -192,6 +192,21 @@ jobs:
               echo "Reports table exists — skipping migrations"
             fi
 
+            # After migrations, ensure administrative data exists (provinces/regencies/districts)
+            echo "Checking administrative tables (provinces)..."
+            PROVINCES_COUNT=$(docker-compose -f docker-compose.prod.yml --env-file .env.production exec -T db psql -U postgres -d viralkan -tAc "SELECT COUNT(*) FROM provinces;" || echo "0")
+
+            if [ "${PROVINCES_COUNT}" = "0" ]; then
+              echo "Administrative tables empty — running CSV importer via API image"
+              docker run --rm --network viralkan-private --env-file .env.production ghcr.io/${{ github.repository }}/viralkan-api:${{ needs.commit-hash.outputs.commit_hash }} bun run import:admin-data || {
+                echo "CSV import failed" >&2
+                docker-compose -f docker-compose.prod.yml --env-file .env.production logs db --tail=200
+                exit 1
+              }
+            else
+              echo "Administrative tables populated (count=${PROVINCES_COUNT}) — skipping CSV import"
+            fi
+
             # Bring up remaining services
             docker-compose -f docker-compose.prod.yml --env-file .env.production up -d
 
