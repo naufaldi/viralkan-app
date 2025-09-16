@@ -38,6 +38,8 @@ Thumbs.db
 # Documentation
 README.md
 docs/
+!docs/admin-id/
+!docs/admin-id/**
 *.md
 !package.json
 

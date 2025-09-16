@@ -33,9 +33,9 @@ async function main() {
     console.log("🔍 Troubleshooting tips:");
     console.log("1. Ensure DATABASE_URL environment variable is set");
     console.log("2. Check that CSV files exist in docs/admin-id directory:");
-    console.log("   - Provinces (1).csv");
-    console.log("   - Regencies Data.csv");
-    console.log("   - Districts Data.csv");
+    console.log("   - provinces.csv");
+    console.log("   - regencies.csv");
+    console.log("   - districts.csv");
     console.log("3. Verify database connection and permissions");
     console.log("4. Check that database tables exist (run migrations first)");
 

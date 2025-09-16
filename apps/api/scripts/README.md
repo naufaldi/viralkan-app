@@ -38,7 +38,7 @@ bun run import:admin-data
 
 The script expects three CSV files in the `docs/admin-id` directory:
 
-1. **Provinces (1).csv** - Contains province codes and names
+1. **provinces.csv** - Contains province codes and names
 
    ```csv
    code,name
@@ -46,7 +46,7 @@ The script expects three CSV files in the `docs/admin-id` directory:
    12,SUMATERA UTARA
    ```
 
-2. **Regencies Data.csv** - Contains regency codes, province codes, and names
+2. **regencies.csv** - Contains regency codes, province codes, and names
 
    ```csv
    code,province_code,name
@@ -54,7 +54,7 @@ The script expects three CSV files in the `docs/admin-id` directory:
    11.02,11,KABUPATEN ACEH TENGGARA
    ```
 
-3. **Districts Data.csv** - Contains district codes, regency codes, and names
+3. **districts.csv** - Contains district codes, regency codes, and names
    ```csv
    code,regency_code,name
    11.01.01,11.01,Bakongan

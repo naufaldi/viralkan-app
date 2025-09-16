@@ -33,7 +33,7 @@ export class CsvParserService {
    * Parse provinces CSV file
    */
   async parseProvincesCSV(): Promise<ProvinceCSVRow[]> {
-    const filePath = join(this.csvDirectory, "Provinces (1).csv");
+    const filePath = join(this.csvDirectory, "provinces.csv");
     return this.parseCSV<ProvinceCSVRow>(filePath);
   }
 
@@ -41,7 +41,7 @@ export class CsvParserService {
    * Parse regencies CSV file
    */
   async parseRegenciesCSV(): Promise<RegencyCSVRow[]> {
-    const filePath = join(this.csvDirectory, "Regencies Data.csv");
+    const filePath = join(this.csvDirectory, "regencies.csv");
     return this.parseCSV<RegencyCSVRow>(filePath);
   }
 
@@ -49,7 +49,7 @@ export class CsvParserService {
    * Parse districts CSV file
    */
   async parseDistrictsCSV(): Promise<DistrictCSVRow[]> {
-    const filePath = join(this.csvDirectory, "Districts Data.csv");
+    const filePath = join(this.csvDirectory, "districts.csv");
     return this.parseCSV<DistrictCSVRow>(filePath);
   }
 
