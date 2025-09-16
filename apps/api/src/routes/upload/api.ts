@@ -82,13 +82,20 @@ const uploadImageRoute = createRoute({
 
 // --- Route Handlers ---
 
-uploadRouter.openapi(uploadImageRoute, firebaseAuthMiddleware, async (c) => {
+uploadRouter.use("/", firebaseAuthMiddleware);
+
+uploadRouter.openapi(uploadImageRoute, async (c) => {
   const requestId = crypto.randomUUID();
   const startTime = Date.now();
+  let userIdForLog: string | undefined;
 
   try {
     // Enhanced authentication error handling
-    const userId = c.get("user_id");
+    const userId =
+      typeof (c as { get?: (key: string) => unknown }).get === "function"
+        ? (c.get("user_id") as string | undefined)
+        : undefined;
+    userIdForLog = userId;
 
     if (!userId || typeof userId !== "string" || userId.trim().length === 0) {
       console.warn(
@@ -215,10 +222,16 @@ uploadRouter.openapi(uploadImageRoute, firebaseAuthMiddleware, async (c) => {
     );
   } catch (error: any) {
     const processingTime = Date.now() - startTime;
+    const fallbackUserId =
+      userIdForLog ??
+      (typeof (c as { get?: (key: string) => unknown }).get === "function"
+        ? (c.get("user_id") as string | undefined)
+        : undefined);
+
     console.error(`Unexpected error in upload endpoint:`, {
-      error: error.message,
-      stack: error.stack,
-      userId: c.get("user_id"),
+      error: error?.message ?? String(error),
+      stack: error?.stack,
+      userId: fallbackUserId,
       processingTime,
       requestId,
     });
