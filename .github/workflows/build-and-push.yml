@@ -177,34 +177,38 @@ jobs:
             # Ensure PostGIS extension exists (best-effort)
             docker-compose -f docker-compose.prod.yml --env-file .env.production exec -T db psql -U postgres -d viralkan -c "CREATE EXTENSION IF NOT EXISTS postgis;" || echo "Warning: couldn't create postgis extension (image may not support it)"
 
-            # Check whether key application tables exist. If missing, run migrations.
-            echo "Checking if 'reports' table exists..."
-            REPORTS_EXISTS=$(docker-compose -f docker-compose.prod.yml --env-file .env.production exec -T db psql -U postgres -d viralkan -tAc "SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='reports');")
-
-            if [ "${REPORTS_EXISTS}" != "t" ]; then
-              echo "Reports table not found — running migrations"
-              docker run --rm --network viralkan-private --env-file .env.production ghcr.io/${{ github.repository }}/viralkan-api:${{ needs.commit-hash.outputs.commit_hash }} bun run db:migrate || {
-                echo "Migrations failed" >&2
-                docker-compose -f docker-compose.prod.yml --env-file .env.production logs --tail=200 db
-                exit 1
-              }
-            else
-              echo "Reports table exists — skipping migrations"
-            fi
+            # Run database migrations (idempotent) every deploy
+            echo "Running database migrations..."
+            docker run --rm --network viralkan-private --env-file .env.production ghcr.io/${{ github.repository }}/viralkan-api:${{ needs.commit-hash.outputs.commit_hash }} bun run db:migrate || {
+              echo "Migrations failed" >&2
+              docker-compose -f docker-compose.prod.yml --env-file .env.production logs --tail=200 db
+              exit 1
+            }
 
             # After migrations, ensure administrative data exists (provinces/regencies/districts)
             echo "Checking administrative tables (provinces)..."
-            PROVINCES_COUNT=$(docker-compose -f docker-compose.prod.yml --env-file .env.production exec -T db psql -U postgres -d viralkan -tAc "SELECT COUNT(*) FROM provinces;" || echo "0")
+            PROVINCES_EXISTS=$(docker-compose -f docker-compose.prod.yml --env-file .env.production exec -T db psql -U postgres -d viralkan -tAc "SELECT to_regclass('public.provinces') IS NOT NULL;")
 
-            if [ "${PROVINCES_COUNT}" = "0" ]; then
-              echo "Administrative tables empty — running CSV importer via API image"
-              docker run --rm --network viralkan-private --env-file .env.production ghcr.io/${{ github.repository }}/viralkan-api:${{ needs.commit-hash.outputs.commit_hash }} bun run import:admin-data || {
+            if [ "${PROVINCES_EXISTS}" != "t" ]; then
+              echo "Provinces table missing — running CSV importer via API image"
+              RUN_IMPORT="yes"
+            else
+              PROVINCES_COUNT=$(docker-compose -f docker-compose.prod.yml --env-file .env.production exec -T db psql -U postgres -d viralkan -tAc "SELECT COUNT(*) FROM provinces;" || echo "0")
+              if [ "${PROVINCES_COUNT}" = "0" ]; then
+                echo "Administrative tables empty — running CSV importer via API image"
+                RUN_IMPORT="yes"
+              else
+                echo "Administrative tables populated (count=${PROVINCES_COUNT}) — skipping CSV import"
+                RUN_IMPORT="no"
+              fi
+            fi
+
+            if [ "${RUN_IMPORT}" = "yes" ]; then
+              docker run --rm --network viralkan-private --env-file .env.production ghcr.io/${{ github.repository }}/viralkan-api:${{ needs.commit-hash.outputs.commit_hash }} sh -c "cd apps/api && bun run import:admin-data" || {
                 echo "CSV import failed" >&2
                 docker-compose -f docker-compose.prod.yml --env-file .env.production logs --tail=200 db
                 exit 1
               }
-            else
-              echo "Administrative tables populated (count=${PROVINCES_COUNT}) — skipping CSV import"
             fi
 
             # Ensure external 'edge' network exists (used by caddy reverse proxy)
