@@ -56,7 +56,66 @@ const runMigrations = async () => {
     await sql`CREATE INDEX IF NOT EXISTS admin_actions_created_at_idx ON admin_actions(created_at DESC)`;
     console.log("✅ Added admin system indexes");
 
-    // Step 6: Create administrative tables
+    // Step 6: Ensure English administrative columns exist and legacy data migrates
+    console.log("📋 Ensuring English administrative columns exist...");
+
+    await sql`ALTER TABLE reports ADD COLUMN IF NOT EXISTS district TEXT`;
+    await sql`ALTER TABLE reports ADD COLUMN IF NOT EXISTS city TEXT`;
+    await sql`ALTER TABLE reports ADD COLUMN IF NOT EXISTS province TEXT`;
+
+    // Copy data from legacy Indonesian columns if they still exist
+    await sql`
+      DO $$
+      BEGIN
+        IF EXISTS (
+          SELECT 1
+          FROM information_schema.columns
+          WHERE table_name = 'reports' AND column_name = 'kecamatan'
+        ) THEN
+          EXECUTE 'UPDATE reports SET district = kecamatan WHERE (district IS NULL OR district = '''') AND kecamatan IS NOT NULL';
+          EXECUTE 'ALTER TABLE reports DROP COLUMN IF EXISTS kecamatan';
+        END IF;
+
+        IF EXISTS (
+          SELECT 1
+          FROM information_schema.columns
+          WHERE table_name = 'reports' AND column_name = 'kota'
+        ) THEN
+          EXECUTE 'UPDATE reports SET city = kota WHERE (city IS NULL OR city = '''') AND kota IS NOT NULL';
+          EXECUTE 'ALTER TABLE reports DROP COLUMN IF EXISTS kota';
+        END IF;
+
+        IF EXISTS (
+          SELECT 1
+          FROM information_schema.columns
+          WHERE table_name = 'reports' AND column_name = 'provinsi'
+        ) THEN
+          EXECUTE 'UPDATE reports SET province = provinsi WHERE (province IS NULL OR province = '''') AND provinsi IS NOT NULL';
+          EXECUTE 'ALTER TABLE reports DROP COLUMN IF EXISTS provinsi';
+        END IF;
+      END
+      $$;
+    `;
+
+    // Recreate indexes on the new English columns
+    await sql`DROP INDEX IF EXISTS reports_kecamatan_idx`;
+    await sql`DROP INDEX IF EXISTS reports_kota_idx`;
+    await sql`DROP INDEX IF EXISTS reports_provinsi_idx`;
+    await sql`DROP INDEX IF EXISTS reports_location_filter_idx`;
+    await sql`DROP INDEX IF EXISTS reports_gis_status_idx`;
+
+    await sql`CREATE INDEX IF NOT EXISTS reports_district_idx ON reports(district)`;
+    await sql`CREATE INDEX IF NOT EXISTS reports_city_idx ON reports(city)`;
+    await sql`CREATE INDEX IF NOT EXISTS reports_province_idx ON reports(province)`;
+    await sql`CREATE INDEX IF NOT EXISTS reports_location_filter_idx ON reports(province, city, district)`;
+    await sql`
+      CREATE INDEX IF NOT EXISTS reports_gis_status_idx ON reports(status, province, city, district)
+      WHERE status IN ('pending', 'verified')
+    `;
+
+    console.log("✅ English administrative columns ensured");
+
+    // Step 7: Create administrative tables
     console.log("📋 Creating administrative tables...");
 
     // Provinces table (38 provinces)
@@ -118,7 +177,7 @@ const runMigrations = async () => {
 
     console.log("✅ Created administrative tables and indexes");
 
-    // Step 7: Add social media sharing functionality
+    // Step 8: Add social media sharing functionality
     console.log("📋 Adding social media sharing functionality...");
 
     // Add share_count column to existing reports table
