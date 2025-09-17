@@ -30,23 +30,27 @@ Viralkan adalah platform open-source yang memungkinkan warga Indonesia melaporka
 ### Installation
 
 1. **Clone repository**:
+
    ```bash
    git clone https://github.com/yourusername/viralkan-app.git
    cd viralkan-app
    ```
 
 2. **Install dependencies**:
+
    ```bash
    bun install
    ```
 
 3. **Set up environment variables**:
+
    ```bash
    cp .env.example .env
    # Edit .env dengan kredensial database dan konfigurasi lainnya
    ```
 
 4. **Set up PostgreSQL dengan PostGIS**:
+
    ```bash
    # Menggunakan Docker (recommended)
    docker run --name postgres-viralkan \
@@ -57,6 +61,7 @@ Viralkan adalah platform open-source yang memungkinkan warga Indonesia melaporka
    ```
 
 5. **Run database migrations**:
+
    ```bash
    bun run db:migrate
    ```
@@ -67,6 +72,7 @@ Viralkan adalah platform open-source yang memungkinkan warga Indonesia melaporka
    ```
 
 Server akan berjalan di:
+
 - 🌐 **Web App**: `http://localhost:3000`
 - 🔧 **API Server**: `http://localhost:3000/api`
 - 📚 **Docs**: `http://localhost:3001`
@@ -99,18 +105,21 @@ viralkan-app/
 ## 🛠️ Tech Stack
 
 ### Core Technologies
+
 - **Runtime**: [Bun](https://bun.sh) 1.2.4
-- **Monorepo**: [Turborepo](https://turbo.build/) 2.5.4  
+- **Monorepo**: [Turborepo](https://turbo.build/) 2.5.4
 - **Language**: [TypeScript](https://www.typescriptlang.org/) 5.8.2
 
 ### Backend
+
 - **Framework**: [Hono](https://hono.dev/) 4.6.12
 - **Database**: PostgreSQL 15 + PostGIS
 - **Authentication**: Firebase Admin SDK
 - **Validation**: [Zod](https://zod.dev/) 4.0.5
 - **API Docs**: OpenAPI/Swagger
 
-### Frontend  
+### Frontend
+
 - **Framework**: [Next.js](https://nextjs.org/) 15.3.0
 - **React**: 19.1.0
 - **Styling**: [Tailwind CSS](https://tailwindcss.com/) v4
@@ -118,6 +127,7 @@ viralkan-app/
 - **Forms**: React Hook Form + Zod
 
 ### Infrastructure
+
 - **Storage**: Cloudflare R2 untuk upload gambar
 - **Deployment**: Docker + Traefik dengan Let's Encrypt
 - **Database**: PostgreSQL dengan PostGIS untuk fitur spatial
@@ -127,16 +137,19 @@ viralkan-app/
 ### Core Endpoints
 
 #### Health & Status
+
 - `GET /` - API health check
 - `GET /health` - Database connectivity check
 - `GET /docs` - Swagger UI documentation
 - `GET /openapi` - OpenAPI specification
 
 #### Authentication
+
 - `POST /api/auth/verify` - Verify Firebase JWT token
 - `GET /api/auth/me` - Get current user profile
 
 #### Reports
+
 - `GET /api/reports` - List all reports (paginated)
 - `POST /api/reports` - Create new report (requires auth)
 - `GET /api/reports/:id` - Get specific report
@@ -185,6 +198,7 @@ cd apps/api && bun test:watch  # Run tests in watch mode
 ### Environment Variables
 
 #### Required
+
 ```env
 DATABASE_URL=postgresql://user:password@localhost:5432/viralkan
 JWT_SECRET=your-jwt-secret
@@ -192,6 +206,7 @@ FIREBASE_SERVICE_ACCOUNT_JSON={"type": "service_account", ...}
 ```
 
 #### Optional (untuk fitur lengkap)
+
 ```env
 # Google OAuth
 GOOGLE_CLIENT_ID=your-google-client-id
@@ -207,6 +222,7 @@ R2_ENDPOINT=your-r2-endpoint
 ### Code Style & Architecture
 
 Project ini mengikuti:
+
 - **Clean Architecture** untuk API dengan 4 layers (API → Shell → Core → Data)
 - **TypeScript strict mode** - No `any` types allowed
 - **ESLint + Prettier** untuk konsistensi kode
@@ -217,6 +233,7 @@ Project ini mengikuti:
 ## 🧪 Testing
 
 ### API Testing
+
 ```bash
 cd apps/api
 bun test                    # Run all tests
@@ -225,6 +242,7 @@ bun test src/routes/auth   # Test specific module
 ```
 
 ### E2E Testing
+
 ```bash
 bun run test:e2e           # Run Playwright tests
 ```
@@ -232,19 +250,22 @@ bun run test:e2e           # Run Playwright tests
 ## 🚀 Deployment
 
 ### Production Build
+
 ```bash
 bun run build
 ```
 
 ### Docker Deployment
+
 ```bash
 # Build dan jalankan dengan Docker Compose
 docker-compose up -d
 ```
 
 ### Environment Setup
+
 1. Set up PostgreSQL dengan PostGIS
-2. Configure Firebase project untuk authentication  
+2. Configure Firebase project untuk authentication
 3. Set up Cloudflare R2 bucket untuk image storage
 4. Configure environment variables
 5. Run migrations dan deploy
@@ -277,7 +298,7 @@ Kami sangat menghargai kontribusi dari komunitas! Viralkan adalah proyek open-so
 
 - 🐛 **Bug fixes**
 - ✨ **New features**
-- 📚 **Documentation improvements**  
+- 📚 **Documentation improvements**
 - 🎨 **UI/UX enhancements**
 - 🔧 **Performance optimizations**
 - 🌐 **Translations**

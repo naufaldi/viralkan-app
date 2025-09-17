@@ -24,6 +24,11 @@ type Env = {
 // Create router for reports
 export const reportsRouter = new OpenAPIHono<Env>();
 
+const getUserIdFromContext = (c: { get?: (key: string) => unknown }) =>
+  typeof c.get === "function"
+    ? (c.get("user_id") as string | undefined)
+    : undefined;
+
 // Global middleware for all routes
 reportsRouter.use(
   "*",
@@ -45,6 +50,7 @@ const testAuthRoute = createRoute({
   description: "Simple endpoint to test if authentication is working",
   tags: ["Reports"],
   security: [{ bearerAuth: [] }],
+  middleware: [firebaseAuthMiddleware],
   responses: {
     200: {
       description: "Authentication successful",
@@ -150,6 +156,7 @@ const getMyReportsRoute = createRoute({
   description: "Get reports created by the authenticated user",
   tags: ["Reports"],
   security: [{ bearerAuth: [] }],
+  middleware: [firebaseAuthMiddleware],
   responses: {
     200: {
       description: "Successfully retrieved user reports",
@@ -217,6 +224,7 @@ const createReportRoute = createRoute({
   description: "Create a new road damage report",
   tags: ["Reports"],
   security: [{ bearerAuth: [] }],
+  middleware: [firebaseAuthMiddleware],
   responses: {
     201: {
       description: "Report created successfully",
@@ -262,6 +270,7 @@ const updateReportRoute = createRoute({
   description: "Update an existing report (requires ownership)",
   tags: ["Reports"],
   security: [{ bearerAuth: [] }],
+  middleware: [firebaseAuthMiddleware],
   responses: {
     200: {
       description: "Report updated successfully",
@@ -300,6 +309,7 @@ const deleteReportRoute = createRoute({
   description: "Delete a report (requires ownership)",
   tags: ["Reports"],
   security: [{ bearerAuth: [] }],
+  middleware: [firebaseAuthMiddleware],
   responses: {
     200: {
       description: "Report deleted successfully",
@@ -340,6 +350,7 @@ const validateOwnershipRoute = createRoute({
   description: "Check if the authenticated user owns the specified report",
   tags: ["Reports"],
   security: [{ bearerAuth: [] }],
+  middleware: [firebaseAuthMiddleware],
   responses: {
     200: {
       description: "Ownership validation successful",
@@ -377,9 +388,9 @@ const validateOwnershipRoute = createRoute({
 
 // --- Route Handlers ---
 
-reportsRouter.openapi(testAuthRoute, firebaseAuthMiddleware, async (c) => {
+reportsRouter.openapi(testAuthRoute, async (c) => {
   try {
-    const userId = c.get("user_id");
+    const userId = getUserIdFromContext(c);
     return c.json(
       { message: "Authentication successful", user_id: userId },
       200,
@@ -474,9 +485,9 @@ reportsRouter.openapi(getEnrichedReportsRoute, async (c) => {
   }
 });
 
-reportsRouter.openapi(getMyReportsRoute, firebaseAuthMiddleware, async (c) => {
+reportsRouter.openapi(getMyReportsRoute, async (c) => {
   try {
-    const userId = c.get("user_id");
+    const userId = getUserIdFromContext(c);
 
     if (!userId) {
       return c.json(
@@ -557,9 +568,9 @@ reportsRouter.openapi(getReportByIdRoute, async (c) => {
   }
 });
 
-reportsRouter.openapi(createReportRoute, firebaseAuthMiddleware, async (c) => {
+reportsRouter.openapi(createReportRoute, async (c) => {
   try {
-    const userId = c.get("user_id");
+    const userId = getUserIdFromContext(c);
 
     if (!userId) {
       return c.json(
@@ -614,9 +625,9 @@ reportsRouter.openapi(createReportRoute, firebaseAuthMiddleware, async (c) => {
   }
 });
 
-reportsRouter.openapi(updateReportRoute, firebaseAuthMiddleware, async (c) => {
+reportsRouter.openapi(updateReportRoute, async (c) => {
   try {
-    const userId = c.get("user_id");
+    const userId = getUserIdFromContext(c);
 
     if (!userId) {
       return c.json(
@@ -673,9 +684,9 @@ reportsRouter.openapi(updateReportRoute, firebaseAuthMiddleware, async (c) => {
   }
 });
 
-reportsRouter.openapi(deleteReportRoute, firebaseAuthMiddleware, async (c) => {
+reportsRouter.openapi(deleteReportRoute, async (c) => {
   try {
-    const userId = c.get("user_id");
+    const userId = getUserIdFromContext(c);
 
     if (!userId) {
       return c.json(
@@ -727,9 +738,9 @@ reportsRouter.openapi(deleteReportRoute, firebaseAuthMiddleware, async (c) => {
   }
 });
 
-reportsRouter.openapi(validateOwnershipRoute, firebaseAuthMiddleware, async (c) => {
+reportsRouter.openapi(validateOwnershipRoute, async (c) => {
   try {
-    const userId = c.get("user_id");
+    const userId = getUserIdFromContext(c);
 
     if (!userId) {
       return c.json(

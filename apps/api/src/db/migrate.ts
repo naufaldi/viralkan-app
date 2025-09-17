@@ -13,6 +13,9 @@ const runMigrations = async () => {
       process.exit(1);
     }
 
+    // Ensure uploads metadata schema exists before other dependent steps run
+    await ensureUploadsInfrastructure();
+
     // Run admin system migration
     console.log("📋 Applying admin system migration...");
 
@@ -244,3 +247,70 @@ if (import.meta.main) {
 }
 
 export { runMigrations };
+
+async function ensureUploadsInfrastructure() {
+  console.log("📦 Ensuring uploads metadata tables exist...");
+
+  // R2 uploads rely on reports.image_key for correlation
+  await sql`ALTER TABLE reports ADD COLUMN IF NOT EXISTS image_key TEXT`;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS uploads (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+      image_key TEXT UNIQUE NOT NULL,
+      image_url TEXT NOT NULL,
+      file_size INTEGER NOT NULL,
+      file_type TEXT NOT NULL,
+      created_at TIMESTAMPTZ DEFAULT now()
+    )
+  `;
+
+  // Align defaults in case the table pre-dates DEFAULT clauses
+  await sql`ALTER TABLE uploads ALTER COLUMN id SET DEFAULT gen_random_uuid()`;
+
+  // Add guard rails only if they aren't already present
+  await sql.unsafe(`
+    DO $$
+    BEGIN
+      IF NOT EXISTS (
+        SELECT 1
+        FROM information_schema.table_constraints
+        WHERE constraint_name = 'uploads_file_size_positive'
+          AND table_name = 'uploads'
+          AND table_schema = 'public'
+      ) THEN
+        ALTER TABLE uploads
+          ADD CONSTRAINT uploads_file_size_positive CHECK (file_size > 0);
+      END IF;
+    END
+    $$;
+  `);
+
+  await sql.unsafe(`
+    DO $$
+    BEGIN
+      IF NOT EXISTS (
+        SELECT 1
+        FROM information_schema.table_constraints
+        WHERE constraint_name = 'uploads_file_type_valid'
+          AND table_name = 'uploads'
+          AND table_schema = 'public'
+      ) THEN
+        ALTER TABLE uploads
+          ADD CONSTRAINT uploads_file_type_valid CHECK (
+            file_type IN ('image/jpeg', 'image/png', 'image/webp')
+          );
+      END IF;
+    END
+    $$;
+  `);
+
+  // Recreate indexes with IF NOT EXISTS to keep calls idempotent
+  await sql`CREATE INDEX IF NOT EXISTS uploads_user_id_idx ON uploads(user_id)`;
+  await sql`CREATE INDEX IF NOT EXISTS uploads_image_key_idx ON uploads(image_key)`;
+  await sql`CREATE INDEX IF NOT EXISTS uploads_created_at_idx ON uploads(created_at DESC)`;
+  await sql`CREATE INDEX IF NOT EXISTS reports_image_key_idx ON reports(image_key)`;
+
+  console.log("✅ Uploads metadata schema verified");
+}

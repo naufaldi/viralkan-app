@@ -26,7 +26,7 @@ db:
   volumes:
     - db_data:/var/lib/postgresql/data
   networks:
-    - viralkan-private  # Only private network - NOT connected to edge
+    - viralkan-private # Only private network - NOT connected to edge
   restart: always
   healthcheck:
     test: ["CMD-SHELL", "pg_isready -U postgres"]
@@ -71,6 +71,7 @@ DATABASE_URL=postgresql://postgres:${DB_PASSWORD}@db:5432/viralkan
 ```
 
 Note the differences:
+
 - `postgres://` vs `postgresql://` (both work, but the latter is more explicit)
 - `localhost:5432` vs `db:5432` (in Docker, we use the service name as hostname)
 - `viralkan-app` vs `viralkan` (database name difference)

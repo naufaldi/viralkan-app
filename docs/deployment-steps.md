@@ -1,6 +1,7 @@
 # VPS Deployment Steps
 
 ## Prerequisites on VPS
+
 ```bash
 # Install Docker & Docker Compose
 curl -fsSL https://get.docker.com -o get-docker.sh
@@ -15,6 +16,7 @@ sudo apt update && sudo apt install git -y
 ## Deployment Steps
 
 ### 1. Clone Repository
+
 ```bash
 cd /home/your-username
 git clone https://github.com/your-username/viralkan-app.git
@@ -22,6 +24,7 @@ cd viralkan-app
 ```
 
 ### 2. Create Production Environment File
+
 ```bash
 # Copy the example file
 cp .env.production.example .env.production
@@ -31,6 +34,7 @@ nano .env.production
 ```
 
 **Fill in these values in .env.production:**
+
 ```env
 DOMAIN=103.59.160.70  # or your domain name
 ACME_EMAIL=your-email@example.com
@@ -45,6 +49,7 @@ JWT_SECRET=your-secret-here
 ```
 
 ### 3. Build and Deploy
+
 ```bash
 # Build Docker images
 docker-compose -f docker-compose.prod.yml build
@@ -57,6 +62,7 @@ docker-compose -f docker-compose.prod.yml logs -f
 ```
 
 ### 4. Update Deployment (when you push new code)
+
 ```bash
 # Pull latest code
 git pull
@@ -68,6 +74,7 @@ docker-compose -f docker-compose.prod.yml up -d --build
 ```
 
 ### 5. Useful Commands
+
 ```bash
 # Check running containers
 docker ps
@@ -84,6 +91,7 @@ docker-compose -f docker-compose.prod.yml restart api
 ```
 
 ## Access Your App
+
 - **Website**: http://103.59.160.70 (redirects to HTTPS)
 - **API**: http://103.59.160.70/api
 - **SSL**: Automatic via Traefik + Let's Encrypt

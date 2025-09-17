@@ -23,10 +23,10 @@ console.log("🔥 Final Firebase Config:", firebaseConfig);
 
 // Check for invalid values
 Object.entries(firebaseConfig).forEach(([key, value]) => {
-  if (!value || value === 'undefined' || value === '') {
+  if (!value || value === "undefined" || value === "") {
     console.error(`❌ Firebase ${key} is invalid:`, value);
   } else {
-    console.log(`✅ Firebase ${key}:`, value.substring(0, 20) + '...');
+    console.log(`✅ Firebase ${key}:`, value.substring(0, 20) + "...");
   }
 });
 

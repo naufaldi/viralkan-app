@@ -60,10 +60,10 @@ export default function EditImageUpload({
   const convertHeicToJpeg = useCallback(async (file: File): Promise<File> => {
     try {
       console.log("Converting HEIC to JPEG:", file.name);
-      
+
       // Dynamic import for browser-only library
       const heic2any = (await import("heic2any")).default;
-      
+
       const convertedBlob = await heic2any({
         blob: file,
         toType: "image/jpeg",
@@ -122,8 +122,9 @@ export default function EditImageUpload({
       };
 
       // Dynamic import for browser-only library
-      const imageCompression = (await import("browser-image-compression")).default;
-      
+      const imageCompression = (await import("browser-image-compression"))
+        .default;
+
       const compressedFile = await imageCompression(file, options);
 
       // Ensure the compressed file has the correct filename with .webp extension

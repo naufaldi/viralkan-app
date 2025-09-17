@@ -22,17 +22,26 @@ const Footer = () => {
             <h3 className="mb-4 font-semibold text-white">Platform</h3>
             <ul className="space-y-2">
               <li>
-                <a href="/tentang" className="transition-colors hover:text-white">
+                <a
+                  href="/tentang"
+                  className="transition-colors hover:text-white"
+                >
                   Tentang
                 </a>
               </li>
               <li>
-                <a href="/panduan" className="transition-colors hover:text-white">
+                <a
+                  href="/panduan"
+                  className="transition-colors hover:text-white"
+                >
                   Panduan
                 </a>
               </li>
               <li>
-                <a href="/privasi" className="transition-colors hover:text-white">
+                <a
+                  href="/privasi"
+                  className="transition-colors hover:text-white"
+                >
                   Kebijakan Privasi
                 </a>
               </li>
@@ -43,7 +52,10 @@ const Footer = () => {
             <h3 className="mb-4 font-semibold text-white">Laporan</h3>
             <ul className="space-y-2">
               <li>
-                <a href="/laporan" className="transition-colors hover:text-white">
+                <a
+                  href="/laporan"
+                  className="transition-colors hover:text-white"
+                >
                   Lihat Laporan
                 </a>
               </li>
@@ -53,7 +65,10 @@ const Footer = () => {
                 </a>
               </li>
               <li>
-                <a href="/dashboard" className="transition-colors hover:text-white">
+                <a
+                  href="/dashboard"
+                  className="transition-colors hover:text-white"
+                >
                   Dashboard
                 </a>
               </li>
@@ -69,7 +84,10 @@ const Footer = () => {
                 </a>
               </li>
               <li>
-                <a href="/dashboard" className="transition-colors hover:text-white">
+                <a
+                  href="/dashboard"
+                  className="transition-colors hover:text-white"
+                >
                   Laporan Saya
                 </a>
               </li>

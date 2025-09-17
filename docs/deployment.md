@@ -7,7 +7,7 @@ This guide covers deploying the Viralkan application to a VPS using GitHub Conta
 ## Architecture
 
 - **Frontend**: Next.js application (viralkan-web)
-- **Backend**: Hono API server (viralkan-api)  
+- **Backend**: Hono API server (viralkan-api)
 - **Database**: External PostgreSQL on VPS
 - **Reverse Proxy**: Traefik with automatic SSL
 - **Container Registry**: GitHub Container Registry (GHCR)
@@ -27,7 +27,7 @@ When you push to the `main` branch:
 
 1. **Commit Hash**: Generates unique tag for this deployment
 2. **Build API**: Creates Docker image from `./apps/api/Dockerfile`
-3. **Build Web**: Creates Docker image from `./apps/web/Dockerfile` 
+3. **Build Web**: Creates Docker image from `./apps/web/Dockerfile`
 4. **Push Images**: Uploads to GitHub Container Registry
    - `ghcr.io/naufaldi/viralkan-app/viralkan-api:latest`
    - `ghcr.io/naufaldi/viralkan-app/viralkan-web:latest`
@@ -123,7 +123,7 @@ docker-compose -f docker-compose.prod.yml logs -f
 # Build API image
 docker build -f apps/api/Dockerfile -t viralkan-api .
 
-# Build Web image  
+# Build Web image
 docker build -f apps/web/Dockerfile -t viralkan-web .
 
 # Build with multi-target
@@ -148,18 +148,21 @@ docker push ghcr.io/yourusername/viralkan-app/web:latest
 ## 🌍 Environment Configurations
 
 ### Development
+
 - Uses local Docker build
 - HTTP only (no SSL)
 - Single replica
 - Debug logging enabled
 
 ### Staging
+
 - Uses GitHub Container Registry images
 - SSL with Let's Encrypt
 - Single replica
 - Staging subdomain
 
 ### Production
+
 - Uses GitHub Container Registry images
 - SSL with Let's Encrypt
 - Multiple replicas
@@ -260,6 +263,8 @@ docker-compose -f docker-compose.prod.yml exec api bun run db:migrate
 # Reset database (DANGER!)
 docker-compose -f docker-compose.prod.yml exec api bun run db:reset
 ```
+
+> **Heads-up:** Migration `010_ensure_uploads_table.sql` must be applied before enabling the new upload rate limiting. Run the migrate command above on production to backfill the `uploads` table structure if it was skipped in earlier deploys.
 
 ## 📊 Monitoring & Logs
 
@@ -421,10 +426,10 @@ deploy:
   resources:
     limits:
       memory: 512M
-      cpus: '0.5'
+      cpus: "0.5"
     reservations:
       memory: 256M
-      cpus: '0.25'
+      cpus: "0.25"
 ```
 
 ### Database Optimization
@@ -462,6 +467,7 @@ location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
 ## Support
 
 For deployment issues:
+
 1. Check the logs first
 2. Review this documentation
 3. Open an issue on GitHub

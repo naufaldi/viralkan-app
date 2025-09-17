@@ -6,7 +6,7 @@ import { CreateReportInput } from "../lib/types/api";
 import { useAuthContext } from "../contexts/AuthContext";
 
 interface UseCreateReportOptions {
-  onSuccess?: (reportId: number) => void;
+  onSuccess?: (reportId: string) => void;
   onError?: (error: string) => void;
 }
 
@@ -22,7 +22,7 @@ export function useCreateReport(options?: UseCreateReportOptions) {
       const errorMessage = "Anda harus login terlebih dahulu";
       setError(errorMessage);
       options?.onError?.(errorMessage);
-      return;
+      throw new Error(errorMessage);
     }
 
     setIsSubmitting(true);
@@ -40,20 +40,24 @@ export function useCreateReport(options?: UseCreateReportOptions) {
         body: JSON.stringify(reportData),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error?.message || "Failed to create report");
+      const rawPayload = await response.json();
+
+      if (!response.ok || !rawPayload?.success) {
+        const apiMessage =
+          rawPayload?.error?.message ?? "Failed to create report";
+        throw new Error(apiMessage);
       }
 
-      const result = await response.json();
+      const result: { id: string; message: string; success: boolean } =
+        rawPayload;
 
-      // Success callback
       if (options?.onSuccess) {
         options.onSuccess(result.id);
       } else {
-        // Default success behavior - redirect to dashboard for better UX
         router.push(`/dashboard?success=true&reportId=${result.id}`);
       }
+
+      return result;
     } catch (err) {
       const errorMessage =
         err instanceof Error
@@ -61,6 +65,7 @@ export function useCreateReport(options?: UseCreateReportOptions) {
           : "Terjadi kesalahan saat membuat laporan";
       setError(errorMessage);
       options?.onError?.(errorMessage);
+      throw err instanceof Error ? err : new Error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }

@@ -29,7 +29,7 @@ import { administrativeService } from "../../../services/api-client";
 import { CreateReportSchema, CreateReportInput } from "../../../lib/types/api";
 
 interface UseReportFormProps {
-  onSuccess?: (reportId: number) => void;
+  onSuccess?: (reportId: string) => void;
 }
 
 export const useReportForm = ({ onSuccess }: UseReportFormProps) => {

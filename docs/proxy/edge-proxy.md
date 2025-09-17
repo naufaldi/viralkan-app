@@ -7,10 +7,11 @@ This documentation explains the **Edge Proxy Architecture** using Caddy for cont
 ## The Problem
 
 ### Before Edge Proxy
+
 ```bash
 # Multiple containers exposing random ports
 docker ps --format 'table {{.Names}}\t{{.Ports}}'
-NAMES                        PORTS 
+NAMES                        PORTS
 viralkan-app_web_1           0.0.0.0:41451->3000/tcp
 image-extract-app-1          0.0.0.0:32772->3000/tcp
 image-extract-app-2          0.0.0.0:32771->3000/tcp
@@ -19,6 +20,7 @@ viralkan-app_db_1            5432/tcp
 ```
 
 **Issues:**
+
 - Multiple random ports exposed (41451, 32772, 32771)
 - Security risk: databases exposing ports
 - No automatic TLS certificates
@@ -26,6 +28,7 @@ viralkan-app_db_1            5432/tcp
 - No centralized routing
 
 ### After Edge Proxy
+
 ```bash
 # Only Caddy exposes standard ports
 docker ps --format 'table {{.Names}}\t{{.Ports}}'
@@ -35,6 +38,7 @@ other-containers        (no ports exposed)
 ```
 
 **Benefits:**
+
 - Single entry point (ports 80/443)
 - Automatic TLS certificates via Let's Encrypt
 - Domain-based routing
@@ -106,22 +110,24 @@ docker logs -f edge-proxy-caddy-1
 For each application, modify `docker-compose.yml`:
 
 #### Remove Port Mappings
+
 ```yaml
 # BEFORE (❌ Remove this)
 services:
   web:
     ports:
-      - "3000:3000"  # Remove all port mappings
+      - "3000:3000" # Remove all port mappings
 ```
 
 #### Add Caddy Labels
+
 ```yaml
 # AFTER (✅ Add this)
 services:
   web:
     image: your-app
     labels:
-      caddy: dev.faldi.xyz  # Your domain
+      caddy: dev.faldi.xyz # Your domain
       caddy.reverse_proxy: "{{upstreams 3000}}"
     networks:
       - edge
@@ -129,6 +135,7 @@ services:
 ```
 
 #### Configure Networks
+
 ```yaml
 networks:
   edge:
@@ -138,13 +145,14 @@ networks:
 ```
 
 #### Secure Databases
+
 ```yaml
 services:
   db:
     image: postgres
     # NO ports: section
     networks:
-      - app-private  # Only private network
+      - app-private # Only private network
 ```
 
 ### Step 3: Complete Example
@@ -175,7 +183,7 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
     networks:
-      - guestbook-private  # Only private network
+      - guestbook-private # Only private network
 
 volumes:
   db_data:
@@ -190,6 +198,7 @@ networks:
 ## Caddy Labels Reference
 
 ### Basic Routing
+
 ```yaml
 labels:
   caddy: example.com
@@ -197,6 +206,7 @@ labels:
 ```
 
 ### Path-based Routing
+
 ```yaml
 labels:
   caddy: example.com
@@ -204,6 +214,7 @@ labels:
 ```
 
 ### Multiple Domains
+
 ```yaml
 labels:
   caddy_0: app.example.com
@@ -213,11 +224,12 @@ labels:
 ```
 
 ### Custom TLS
+
 ```yaml
 labels:
   caddy: example.com
   caddy.reverse_proxy: "{{upstreams 3000}}"
-  caddy.tls: "internal"  # For development
+  caddy.tls: "internal" # For development
 ```
 
 ## Troubleshooting
@@ -225,12 +237,15 @@ labels:
 ### Common Issues
 
 #### 1. Containers Still Exposing Ports
+
 **Problem:** `docker ps` shows random ports
 **Solution:** Remove all `ports:` sections from docker-compose.yml
 
 #### 2. 404 Not Found
+
 **Problem:** Domain returns 404
 **Checks:**
+
 - Verify Caddy labels are correct
 - Ensure container is on `edge` network
 - Check DNS resolution
@@ -243,8 +258,10 @@ curl -H "Host: dev.faldi.xyz" http://localhost
 ```
 
 #### 3. TLS Certificate Issues
+
 **Problem:** SSL/TLS errors
 **Checks:**
+
 - Verify DNS points to VPS IP
 - Ensure ports 80/443 are open
 - Check Caddy logs for ACME challenges
@@ -255,6 +272,7 @@ docker exec edge-proxy-caddy-1 caddy list-certificates
 ```
 
 #### 4. Database Connection Issues
+
 **Problem:** App can't connect to database
 **Solution:** Ensure both app and DB are on same private network
 
@@ -264,7 +282,7 @@ services:
   web:
     networks: [edge, app-private]
   db:
-    networks: [app-private]  # No edge network
+    networks: [app-private] # No edge network
 ```
 
 ### Verification Commands
@@ -298,11 +316,13 @@ docker logs edge-proxy-watchtower-1
 ## Maintenance
 
 ### Updates
+
 - Watchtower automatically updates containers with label `com.centurylinklabs.watchtower.enable=true`
 - Scheduled daily at 3 AM
 - Rolling restart to minimize downtime
 
 ### Monitoring
+
 ```bash
 # Check all services
 docker compose -f /projects/edge-proxy/docker-compose.yml ps
@@ -313,6 +333,7 @@ docker logs -f edge-proxy-watchtower-1
 ```
 
 ### Backup
+
 ```bash
 # Backup Caddy data (certificates, config)
 docker run --rm -v edge-proxy_caddy_data:/data -v $(pwd):/backup alpine tar czf /backup/caddy-backup.tar.gz /data
