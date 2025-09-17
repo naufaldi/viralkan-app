@@ -15,7 +15,7 @@ import {
 } from "./report-form";
 
 interface CreateReportFormProps {
-  onSuccess?: (reportId: number) => void;
+  onSuccess?: (reportId: string) => void;
 }
 
 export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
