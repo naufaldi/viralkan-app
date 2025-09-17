@@ -16,6 +16,11 @@ const nextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'b9a99e8b2fe716b07096322bf85db654.r2.cloudflarestorage.com',
+        pathname: '/viralkan-app/**',
+      },
+      {
+        protocol: 'https',
         hostname: 'lh3.googleusercontent.com',
       },
       {
