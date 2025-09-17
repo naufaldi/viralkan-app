@@ -172,6 +172,7 @@ const getShareAnalyticsRoute = createRoute({
   description: "Retrieve sharing statistics and analytics (admin only)",
   tags: ["Sharing", "Analytics"],
   security: [{ bearerAuth: [] }],
+  middleware: [requireAdmin],
   responses: {
     200: {
       description: "Analytics retrieved successfully",
@@ -465,7 +466,7 @@ sharingRouter.openapi(generateAICaptionRoute, async (c) => {
 });
 
 // Share analytics handler (admin only)
-sharingRouter.openapi(getShareAnalyticsRoute, requireAdmin, async (c) => {
+sharingRouter.openapi(getShareAnalyticsRoute, async (c) => {
   try {
     const query = c.req.valid("query");
 

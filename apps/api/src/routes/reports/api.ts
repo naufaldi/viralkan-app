@@ -391,6 +391,20 @@ const validateOwnershipRoute = createRoute({
 reportsRouter.openapi(testAuthRoute, async (c) => {
   try {
     const userId = getUserIdFromContext(c);
+
+    if (!userId) {
+      return c.json(
+        {
+          error: {
+            code: "UNAUTHORIZED",
+            message: "User not authenticated",
+            timestamp: new Date().toISOString(),
+          },
+        },
+        401,
+      );
+    }
+
     return c.json(
       { message: "Authentication successful", user_id: userId },
       200,

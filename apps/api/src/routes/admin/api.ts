@@ -9,7 +9,7 @@
 
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { cors } from "hono/cors";
-import { requireAdmin, firebaseAuthMiddleware } from "../auth/middleware";
+import { requireAdmin } from "../auth/middleware";
 import * as adminShell from "./shell";
 import {
   AdminStatsResponseSchema,
@@ -54,6 +54,7 @@ const getAdminStatsRoute = createRoute({
   description: "Get comprehensive dashboard statistics for admin",
   tags: ["Admin"],
   security: [{ bearerAuth: [] }],
+  middleware: [requireAdmin],
   responses: {
     200: {
       description: "Successfully retrieved admin statistics",
@@ -128,6 +129,7 @@ const getAdminReportsRoute = createRoute({
   description: "Get reports for admin management with filters and pagination",
   tags: ["Admin"],
   security: [{ bearerAuth: [] }],
+  middleware: [requireAdmin],
   responses: {
     200: {
       description: "Successfully retrieved admin reports",
@@ -192,6 +194,7 @@ const verifyReportRoute = createRoute({
   description: "Verify a pending report as an admin",
   tags: ["Admin"],
   security: [{ bearerAuth: [] }],
+  middleware: [requireAdmin],
   responses: {
     200: {
       description: "Report verified successfully",
@@ -279,6 +282,7 @@ const rejectReportRoute = createRoute({
   description: "Reject a report with a reason",
   tags: ["Admin"],
   security: [{ bearerAuth: [] }],
+  middleware: [requireAdmin],
   responses: {
     200: {
       description: "Report rejected successfully",
@@ -380,6 +384,7 @@ const toggleReportStatusRoute = createRoute({
   description: "Change report status between pending, verified, and rejected",
   tags: ["Admin"],
   security: [{ bearerAuth: [] }],
+  middleware: [requireAdmin],
   responses: {
     200: {
       description: "Report status changed successfully",
@@ -472,6 +477,7 @@ const deleteReportRoute = createRoute({
   description: "Soft delete a report (sets status to deleted)",
   tags: ["Admin"],
   security: [{ bearerAuth: [] }],
+  middleware: [requireAdmin],
   responses: {
     200: {
       description: "Report deleted successfully",
@@ -550,6 +556,7 @@ const restoreReportRoute = createRoute({
   description: "Restore a soft-deleted report to pending status",
   tags: ["Admin"],
   security: [{ bearerAuth: [] }],
+  middleware: [requireAdmin],
   responses: {
     200: {
       description: "Report restored successfully",
@@ -628,6 +635,7 @@ const getReportDetailRoute = createRoute({
   description: "Get detailed information about a specific report for admin",
   tags: ["Admin"],
   security: [{ bearerAuth: [] }],
+  middleware: [requireAdmin],
   responses: {
     200: {
       description: "Successfully retrieved report detail",
@@ -706,6 +714,7 @@ const getShareAnalyticsRoute = createRoute({
   description: "Retrieve sharing statistics and analytics (admin only)",
   tags: ["Admin", "Analytics"],
   security: [{ bearerAuth: [] }],
+  middleware: [requireAdmin],
   responses: {
     200: {
       description: "Analytics retrieved successfully",
@@ -739,6 +748,7 @@ const healthCheckRoute = createRoute({
   description: "Health check endpoint for admin routes",
   tags: ["Admin"],
   security: [{ bearerAuth: [] }],
+  middleware: [requireAdmin],
   responses: {
     200: {
       description: "Admin API is healthy",
@@ -785,7 +795,7 @@ const healthCheckRoute = createRoute({
 
 // --- Route Handlers ---
 
-adminRouter.openapi(getAdminStatsRoute, requireAdmin, async (c) => {
+adminRouter.openapi(getAdminStatsRoute, async (c) => {
   try {
     const result = await adminShell.getAdminStats();
 
@@ -818,7 +828,7 @@ adminRouter.openapi(getAdminStatsRoute, requireAdmin, async (c) => {
   }
 });
 
-adminRouter.openapi(getAdminReportsRoute, requireAdmin, async (c) => {
+adminRouter.openapi(getAdminReportsRoute, async (c) => {
   try {
     const userId = c.get("user_id");
     console.log(`[DEBUG] getAdminReportsRoute - userId: ${userId}`);
@@ -877,7 +887,7 @@ adminRouter.openapi(getAdminReportsRoute, requireAdmin, async (c) => {
   }
 });
 
-adminRouter.openapi(verifyReportRoute, requireAdmin, async (c) => {
+adminRouter.openapi(verifyReportRoute, async (c) => {
   try {
     const paramData = c.req.valid("param");
     const adminUserId = c.get("user_id");
@@ -926,7 +936,7 @@ adminRouter.openapi(verifyReportRoute, requireAdmin, async (c) => {
   }
 });
 
-adminRouter.openapi(rejectReportRoute, requireAdmin, async (c) => {
+adminRouter.openapi(rejectReportRoute, async (c) => {
   try {
     const paramData = c.req.valid("param");
     const bodyData = c.req.valid("json");
@@ -980,7 +990,7 @@ adminRouter.openapi(rejectReportRoute, requireAdmin, async (c) => {
   }
 });
 
-adminRouter.openapi(toggleReportStatusRoute, requireAdmin, async (c) => {
+adminRouter.openapi(toggleReportStatusRoute, async (c) => {
   try {
     const paramData = c.req.valid("param");
     const bodyData = c.req.valid("json");
@@ -1034,7 +1044,7 @@ adminRouter.openapi(toggleReportStatusRoute, requireAdmin, async (c) => {
   }
 });
 
-adminRouter.openapi(deleteReportRoute, requireAdmin, async (c) => {
+adminRouter.openapi(deleteReportRoute, async (c) => {
   try {
     const paramData = c.req.valid("param");
     const adminUserId = c.get("user_id");
@@ -1083,7 +1093,7 @@ adminRouter.openapi(deleteReportRoute, requireAdmin, async (c) => {
   }
 });
 
-adminRouter.openapi(restoreReportRoute, requireAdmin, async (c) => {
+adminRouter.openapi(restoreReportRoute, async (c) => {
   try {
     const paramData = c.req.valid("param");
     const adminUserId = c.get("user_id");
@@ -1132,7 +1142,7 @@ adminRouter.openapi(restoreReportRoute, requireAdmin, async (c) => {
   }
 });
 
-adminRouter.openapi(getReportDetailRoute, requireAdmin, async (c) => {
+adminRouter.openapi(getReportDetailRoute, async (c) => {
   try {
     const paramData = c.req.valid("param");
 
@@ -1187,7 +1197,7 @@ adminRouter.openapi(getReportDetailRoute, requireAdmin, async (c) => {
 });
 
 // Share analytics handler (admin only)
-adminRouter.openapi(getShareAnalyticsRoute, requireAdmin, async (c) => {
+adminRouter.openapi(getShareAnalyticsRoute, async (c) => {
   try {
     const query = c.req.valid("query");
 
@@ -1238,7 +1248,7 @@ adminRouter.openapi(getShareAnalyticsRoute, requireAdmin, async (c) => {
   }
 });
 
-adminRouter.openapi(healthCheckRoute, requireAdmin, async (c) => {
+adminRouter.openapi(healthCheckRoute, async (c) => {
   return c.json(
     {
       status: "healthy",
