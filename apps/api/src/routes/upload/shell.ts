@@ -14,6 +14,7 @@ import {
   validateR2Config,
 } from "./core";
 import { createR2Client, uploadToR2, getUserUploadCount } from "./data";
+import { env } from "@/config/env";
 
 // Rate limiting configuration (for future implementation)
 // const UPLOAD_RATE_LIMIT = 10; // uploads per hour
@@ -247,9 +248,6 @@ export const validateUploadRequest = async (
  * @returns R2Config object
  */
 export const getR2Config = (): R2Config => {
-  // Import env configuration
-  const { env } = require("@/config/env");
-
   const config: R2Config = {
     bucketName: env.R2_BUCKET_NAME,
     endpoint: env.R2_ENDPOINT,
