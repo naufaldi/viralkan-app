@@ -133,8 +133,11 @@ jobs:
 
             # Update IMAGE_TAG in .env.production without recreating the whole file
             if [ -f .env.production ]; then
-              sed -i "s/IMAGE_TAG=.*/IMAGE_TAG=${{ needs.commit-hash.outputs.commit_hash }}/" .env.production
-              sed -i "s/GITHUB_REPOSITORY=.*/GITHUB_REPOSITORY=${{ github.repository }}/" .env.production
+              # Remove old values and append new ones (works on both Linux and macOS)
+              grep -v "^IMAGE_TAG=" .env.production | grep -v "^GITHUB_REPOSITORY=" > .env.production.tmp
+              echo "IMAGE_TAG=${{ needs.commit-hash.outputs.commit_hash }}" >> .env.production.tmp
+              echo "GITHUB_REPOSITORY=${{ github.repository }}" >> .env.production.tmp
+              mv .env.production.tmp .env.production
             else
               echo "Warning: .env.production not found. Please create it manually with all required variables."
               exit 1
