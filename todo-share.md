@@ -10,6 +10,79 @@ Enhance the report detail page (`/laporan/[id]`) with:
 
 ---
 
+## 🚀 Deployment: API Container Exit 1 — Diagnosis & Fix
+
+Symptoms
+
+- `api` service exits with code 1, while `db` is healthy and `web` is up.
+- `docker ps -a` shows an old API container created weeks ago, suggesting an outdated image may be running.
+
+Likely causes
+
+- New image not pulled or `IMAGE_TAG` not set at deploy time, so compose used `latest` or an old cached tag.
+- Runtime crash due to configuration (e.g., malformed `FIREBASE_SERVICE_ACCOUNT_JSON`) or the previous OpenAPI bug if the old image is still used.
+
+What is already fixed in code/build
+
+- Upgraded API deps (avoid prior OpenAPI crash): `hono` ^4.9.6, `@hono/zod-openapi` ^1.1.0.
+- Middleware passed to `.openapi(route, ...middleware, handler)` instead of inside `createRoute({ middleware })`.
+- Dockerfiles now use official Bun image `oven/bun:1.2.4` as per Bun Docker guide.
+- CI/CD updated to use `$GITHUB_OUTPUT` and to deploy with `IMAGE_TAG`.
+
+VPS recovery steps
+
+1. Export repository and the exact image tag (from CI commit SHA):
+
+```
+export GITHUB_REPOSITORY=naufaldi/viralkan-app
+export IMAGE_TAG=<commit_sha_from_workflow>
+```
+
+2. Pull and recreate API with pinned tag:
+
+```
+docker compose -f docker-compose.prod.yml --env-file .env.production pull api web
+docker compose -f docker-compose.prod.yml --env-file .env.production up -d --force-recreate api
+```
+
+3. Confirm which image the API uses:
+
+```
+docker compose -f docker-compose.prod.yml --env-file .env.production images | grep viralkan-api
+docker inspect $(docker compose -f docker-compose.prod.yml ps -q api) --format '{{.Config.Image}}'
+```
+
+4. Inspect logs to identify the crash:
+
+```
+docker compose -f docker-compose.prod.yml --env-file .env.production logs api --tail=200
+```
+
+- If you see `TypeError: undefined is not an object (evaluating 'route.path.replaceAll')`, it’s an old image; repeat steps 1–3 to ensure the new image runs.
+- If you see Firebase key parse errors (`Invalid PEM formatted message`), fix `FIREBASE_SERVICE_ACCOUNT_JSON` in `.env.production` to use escaped newlines: `\n`.
+
+5. Healthcheck alignment
+
+- Compose healthcheck calls `GET /` which returns health JSON from the API.
+
+6. Optional cleanup and stable names
+
+```
+docker image prune -f
+export COMPOSE_PROJECT_NAME=viralkan-app
+```
+
+CI/CD note
+
+- Deploy step should set `IMAGE_TAG` so the VPS pulls the exact commit image. Inline alternative:
+
+```
+GITHUB_REPOSITORY=${GITHUB_REPOSITORY} IMAGE_TAG=${IMAGE_TAG} \
+docker compose -f docker-compose.prod.yml --env-file .env.production up -d
+```
+
+---
+
 ## 🤖 AI Integration for Caption Generation
 
 ### AI Architecture Overview
