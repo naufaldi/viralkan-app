@@ -13,14 +13,19 @@ import {
   ExifWarning,
   useReportForm,
 } from "./report-form";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/ui/components/ui/tabs";
+import { ReportResponse } from "@/lib/types/api";
 
 interface CreateReportFormProps {
   onSuccess?: (reportId: string) => void;
+  initialData?: ReportResponse;
+  isEditing?: boolean;
 }
 
-export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
+export default function CreateReportForm({ onSuccess, initialData, isEditing = false }: CreateReportFormProps) {
   // Start with form explicitly disabled
-  const [isFormActivated, setIsFormActivated] = useState(false);
+  const [isFormActivated, setIsFormActivated] = useState(isEditing);
+  const [activeTab, setActiveTab] = useState("auto"); // "auto" or "manual"
 
   const {
     form,
@@ -56,7 +61,7 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
     handleGetCoordinatesFromAddress,
     clearGeocodingError,
     onSubmit,
-  } = useReportForm({ onSuccess });
+  } = useReportForm({ onSuccess, initialData, isEditing });
 
   const handleFormActivation = () => {
     setIsFormActivated(true);
@@ -68,14 +73,16 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
     handleImageRemove();
   };
 
-  // Set form activation based on existing selected image
+  // Set form activation based on existing selected image or editing mode
   useEffect(() => {
-    if (selectedImage && !isFormActivated) {
+    if (isEditing) {
       setIsFormActivated(true);
-    } else if (!selectedImage && isFormActivated) {
+    } else if (selectedImage && !isFormActivated) {
+      setIsFormActivated(true);
+    } else if (!selectedImage && !isEditing && isFormActivated) {
       setIsFormActivated(false);
     }
-  }, [selectedImage, isFormActivated]);
+  }, [selectedImage, isFormActivated, isEditing]);
 
   const displayError = formError || submitError || undefined;
 
@@ -88,7 +95,7 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
 
   return (
     <Card className="overflow-hidden rounded-xl border-neutral-200 shadow-lg hover:translate-0">
-      <ReportFormHeader />
+      <ReportFormHeader title={isEditing ? "Edit Laporan" : "Buat Laporan Baru"} />
 
       <CardContent className="p-6 lg:p-8">
         <ReportFormError error={displayError} />
@@ -100,20 +107,44 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
             })}
             className="space-y-6"
           >
-            <ReportImageUpload
-              selectedImage={selectedImage}
-              onImageSelect={handleImageSelect}
-              onImageRemove={handleImageRemoveWithReset}
-              onUploadError={handleImageUploadError}
-              onUploadSuccess={handleImageUploadSuccess}
-              isUploading={isUploadingImage || isExtractingExif}
-              error={uploadError}
-              disabled={isLoading}
-              onFormActivation={handleFormActivation}
-            />
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="auto">Foto & Lokasi Otomatis</TabsTrigger>
+                <TabsTrigger value="manual">Foto & Alamat Manual</TabsTrigger>
+              </TabsList>
+              
+              <div className="mt-6">
+                <ReportImageUpload
+                  selectedImage={selectedImage}
+                  onImageSelect={handleImageSelect}
+                  onImageRemove={handleImageRemoveWithReset}
+                  onUploadError={handleImageUploadError}
+                  onUploadSuccess={handleImageUploadSuccess}
+                  isUploading={isUploadingImage || isExtractingExif}
+                  error={uploadError}
+                  disabled={isLoading}
+                  onFormActivation={handleFormActivation}
+                  initialImageUrl={initialData?.image_url}
+                />
 
-            {/* EXIF Warning - Shows when GPS metadata is missing */}
-            <ExifWarning isVisible={hasExifWarning} />
+                {/* EXIF Warning - Shows when GPS metadata is missing (Only in Auto mode) */}
+                <div className={activeTab === "auto" ? "block" : "hidden"}>
+                  <ExifWarning isVisible={hasExifWarning} />
+                </div>
+
+                <TabsContent value="auto" className="mt-4">
+                  <div className="rounded-md bg-blue-50 p-4 text-sm text-blue-700">
+                    <p>Mode ini akan mencoba mengambil lokasi dari GPS foto atau lokasi perangkat Anda secara otomatis.</p>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="manual" className="mt-4">
+                  <div className="rounded-md bg-amber-50 p-4 text-sm text-amber-700">
+                    <p>Mode ini memungkinkan Anda mengisi alamat secara manual. Koordinat akan dicari berdasarkan alamat yang Anda masukkan.</p>
+                  </div>
+                </TabsContent>
+              </div>
+            </Tabs>
 
             <ReportFormFields
               form={form}
@@ -136,6 +167,8 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
               confidenceLevel={confidenceLevel}
               canAutoSelect={canAutoSelect}
               isProcessingAdminSync={isProcessingAdminSync}
+              // Pass active tab to control field visibility/behavior if needed
+              mode={activeTab as "auto" | "manual"}
             />
 
             {/* Primary Action - Following Fitts's Law */}
@@ -153,6 +186,7 @@ export default function CreateReportForm({ onSuccess }: CreateReportFormProps) {
                 imageUploadFailed={imageUploadFailed}
                 selectedImage={selectedImage}
                 disabled={isLoading || !isFormActivated}
+                isEditing={isEditing}
               />
             </div>
           </form>

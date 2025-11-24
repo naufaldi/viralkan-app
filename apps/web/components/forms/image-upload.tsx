@@ -35,6 +35,7 @@ interface ImageUploadProps {
   onUploadSuccess?: () => void;
   enableCameraMode?: boolean;
   onFormActivation?: () => void;
+  initialImageUrl?: string;
 }
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB - matches backend limit
@@ -58,8 +59,9 @@ export default function ImageUpload({
   onUploadSuccess,
   enableCameraMode = true,
   onFormActivation,
+  initialImageUrl,
 }: ImageUploadProps) {
-  const [preview, setPreview] = useState<string | null>(null);
+  const [preview, setPreview] = useState<string | null>(initialImageUrl || null);
   const [dragOver, setDragOver] = useState(false);
   const [uploadError, setUploadError] = useState<string | undefined>(undefined);
   const [retryCount, setRetryCount] = useState(0);
@@ -340,7 +342,7 @@ export default function ImageUpload({
 
   return (
     <div className="space-y-6">
-      {!selectedImage ? (
+      {!selectedImage && !initialImageUrl ? (
         <div className="space-y-4">
           {/* Civic Monochrome Camera Mode Toggle */}
           {enableCameraMode && (
@@ -454,11 +456,11 @@ export default function ImageUpload({
         <Card className="overflow-hidden border border-neutral-200 shadow-md">
           <CardContent className="flex items-center justify-center p-0">
             <div className="relative">
-              {preview && (
+              {(preview || initialImageUrl) && (
                 <div className="group relative">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={preview}
+                    src={preview || initialImageUrl || ""}
                     alt="Preview foto jalan rusak"
                     className="h-72 w-full object-cover sm:h-80"
                   />
@@ -515,15 +517,18 @@ export default function ImageUpload({
                     <div className="min-w-0 flex-1">
                       <p
                         className="line-clamp-1 text-sm font-semibold text-neutral-800"
-                        title={selectedImage.name}
+                        title={selectedImage?.name || "Foto Laporan"}
                       >
-                        {selectedImage.name.length > 25
-                          ? `${selectedImage.name.substring(0, 22)}...${selectedImage.name.split(".").pop()}`
-                          : selectedImage.name}
+                        {selectedImage 
+                          ? (selectedImage.name.length > 25
+                              ? `${selectedImage.name.substring(0, 22)}...${selectedImage.name.split(".").pop()}`
+                              : selectedImage.name)
+                          : "Foto Laporan"}
                       </p>
                       <p className="text-xs font-medium text-green-700">
-                        {(selectedImage.size / 1024 / 1024).toFixed(1)} MB •
-                        Foto siap digunakan
+                        {selectedImage 
+                          ? `${(selectedImage.size / 1024 / 1024).toFixed(1)} MB • Foto siap digunakan`
+                          : "Foto tersimpan"}
                       </p>
                     </div>
                   </div>
@@ -572,13 +577,14 @@ export default function ImageUpload({
                     <div className="min-w-0 flex-1">
                       <p
                         className="truncate text-sm font-semibold text-neutral-800"
-                        title={selectedImage.name}
+                        title={selectedImage?.name || "Foto Laporan"}
                       >
-                        {selectedImage.name}
+                        {selectedImage?.name || "Foto Laporan"}
                       </p>
                       <p className="text-xs font-medium text-green-700">
-                        {(selectedImage.size / 1024 / 1024).toFixed(1)} MB •
-                        Foto siap digunakan
+                        {selectedImage 
+                          ? `${(selectedImage.size / 1024 / 1024).toFixed(1)} MB • Foto siap digunakan`
+                          : "Foto tersimpan"}
                       </p>
                     </div>
                   </div>
