@@ -18,7 +18,7 @@ import {
   type Province,
   type Regency,
   type District,
-} from "../../services/api-client";
+} from "../../services/administrative";
 
 /**
  * Enhanced geocoding response with administrative mapping

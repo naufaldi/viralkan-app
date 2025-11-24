@@ -12,7 +12,7 @@ import {
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
 // Base API request function with consistent error handling
-async function apiRequest<T>(
+export async function apiRequest<T>(
   endpoint: string,
   options: RequestInit = {},
 ): Promise<T> {
@@ -398,137 +398,6 @@ class ApiClient {
 }
 
 export const apiClient = new ApiClient();
-
-// Administrative data types
-export interface Province {
-  code: string;
-  name: string;
-}
-
-export interface Regency {
-  code: string;
-  name: string;
-  province_code: string;
-}
-
-export interface District {
-  code: string;
-  name: string;
-  regency_code: string;
-}
-
-export interface AdministrativeResponse<T> {
-  data: T[];
-  meta?: {
-    total?: number;
-    lastSync?: string;
-  };
-}
-
-// Administrative API Service
-export const administrativeService = {
-  // Get all provinces
-  getProvinces: async (): Promise<AdministrativeResponse<Province>> => {
-    const data = await apiRequest<Province[]>("/api/administrative/provinces");
-    return { data };
-  },
-
-  // Get regencies by province code
-  getRegencies: async (
-    provinceCode: string,
-  ): Promise<AdministrativeResponse<Regency>> => {
-    const data = await apiRequest<Regency[]>(
-      `/api/administrative/regencies/${provinceCode}`,
-    );
-    return { data };
-  },
-
-  // Get districts by regency code
-  getDistricts: async (
-    regencyCode: string,
-  ): Promise<AdministrativeResponse<District>> => {
-    const data = await apiRequest<District[]>(
-      `/api/administrative/districts/${regencyCode}`,
-    );
-    return { data };
-  },
-
-  // Get sync status
-  getSyncStatus: async (): Promise<{
-    provinces: number;
-    regencies: number;
-    districts: number;
-    lastSync: string | null;
-  }> => {
-    return apiRequest("/api/administrative/sync/status");
-  },
-
-  // Validate administrative hierarchy
-  validateHierarchy: async (
-    provinceCode: string,
-    regencyCode: string,
-    districtCode: string,
-  ): Promise<{
-    isValid: boolean;
-    names: {
-      province: string;
-      regency: string;
-      district: string;
-    };
-  }> => {
-    return apiRequest(
-      `/api/administrative/validate/${provinceCode}/${regencyCode}/${districtCode}`,
-    );
-  },
-
-  // Search province by name with fuzzy matching
-  searchProvinces: async (query: string): Promise<Province | null> => {
-    if (!query || query.trim().length < 2) {
-      return null;
-    }
-
-    const searchParams = new URLSearchParams();
-    searchParams.append("q", query.trim());
-
-    return apiRequest<Province | null>(
-      `/api/administrative/provinces/search?${searchParams.toString()}`,
-    );
-  },
-
-  // Search regencies by name within province with fuzzy matching
-  searchRegencies: async (
-    query: string,
-    provinceCode: string,
-  ): Promise<Regency | null> => {
-    if (!query || query.trim().length < 2 || !provinceCode) {
-      return null;
-    }
-
-    const searchParams = new URLSearchParams();
-    searchParams.append("q", query.trim());
-
-    return apiRequest<Regency | null>(
-      `/api/administrative/regencies/${provinceCode}/search?${searchParams.toString()}`,
-    );
-  },
-
-  // Search districts by name within regency with fuzzy matching
-  searchDistricts: async (
-    query: string,
-    regencyCode: string,
-  ): Promise<District | null> => {
-    if (!query || query.trim().length < 2 || !regencyCode) {
-      return null;
-    }
-
-    const searchParams = new URLSearchParams();
-    searchParams.append("q", query.trim());
-
-    return apiRequest<District | null>(
-      `/api/administrative/districts/${regencyCode}/search?${searchParams.toString()}`,
-    );
-  },
-};
 
 // Re-export types for convenience
 export type {

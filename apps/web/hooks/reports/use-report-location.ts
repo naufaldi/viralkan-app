@@ -4,7 +4,7 @@ import { CreateReportInput } from "../../lib/types/api";
 import { useGeocoding } from "../use-geocoding";
 import { useAdministrativeSync } from "./use-administrative-sync";
 import { useAdministrative } from "./use-administrative";
-import { administrativeService } from "../../services/api-client";
+import { administrativeService } from "../../services/administrative";
 import { reverseGeocodeWithNominatimData } from "../../lib/services/geocoding";
 import { processNominatimAddressWithAPI } from "../../lib/utils/enhanced-geocoding-handler";
 import { getLocationErrorMessage, geolocationOptions } from "../../utils/report-form-utils";

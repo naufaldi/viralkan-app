@@ -23,11 +23,14 @@ import { Button } from "@repo/ui/components/ui/button";
 import { Badge } from "@repo/ui/components/ui/badge";
 import { Card, CardContent } from "@repo/ui/components/ui/card";
 import { ComboboxField, ComboboxOption } from "../ui/combobox-field";
-import { useAdministrative } from "../../hooks/reports/use-administrative";
+import {
+  useAdministrative,
+  useInvalidateAdministrative,
+} from "../../hooks/reports/use-administrative";
 import { useAdministrativeSync } from "../../hooks/reports/use-administrative-sync";
 import { AdministrativeSyncStatus } from "./administrative-sync-status";
 import { CreateReportInput } from "../../lib/types/api";
-import { Province, Regency, District } from "../../services/api-client";
+import { Province, Regency, District } from "../../services/administrative";
 import { cn } from "@repo/ui/lib/utils";
 
 interface AdministrativeSelectProps {
@@ -77,12 +80,20 @@ export const AdministrativeSelect = ({
   const selectedRegencyCode = form.watch("regency_code");
   const selectedDistrictCode = form.watch("district_code");
 
-  // Get "all" states from URL params (default to "all" when no parameter exists)
-  const selectedAllProvince = !searchParams.get("provinsi");
-  const selectedAllRegency = !searchParams.get("kabupaten_kota");
-  const selectedAllDistrict = !searchParams.get("kecamatan");
+  // Get "all" states from URL params (only if form doesn't have values)
+  // When editing, form values take precedence over URL params
+  const selectedAllProvince =
+    !selectedProvinceCode && !searchParams.get("provinsi");
+  const selectedAllRegency =
+    !selectedRegencyCode && !searchParams.get("kabupaten_kota");
+  const selectedAllDistrict =
+    !selectedDistrictCode && !searchParams.get("kecamatan");
 
-  // Fetch data using our custom hook
+  // Invalidation helpers for cascading invalidation
+  const { invalidateRegencies, invalidateDistricts } =
+    useInvalidateAdministrative();
+
+  // Fetch data using our custom hook with TanStack Query
   const {
     data,
     loading,
@@ -90,7 +101,10 @@ export const AdministrativeSelect = ({
     refetchRegencies,
     refetchDistricts,
     addDynamicOption,
-  } = useAdministrative();
+  } = useAdministrative({
+    provinceCode: selectedProvinceCode || undefined,
+    regencyCode: selectedRegencyCode || undefined,
+  });
 
   // Enhanced administrative sync hook (only when not provided externally)
   const internalSync = useAdministrativeSync({
@@ -114,19 +128,6 @@ export const AdministrativeSelect = ({
   // Always use internal sync methods (external props are for status display only)
   const { enhancedGeocoding, processGeocoding, applyToForm, clearSync } =
     internalSync;
-
-  // Fetch dependent data when parent selection changes
-  React.useEffect(() => {
-    if (selectedProvinceCode) {
-      refetchRegencies(selectedProvinceCode);
-    }
-  }, [selectedProvinceCode, refetchRegencies]);
-
-  React.useEffect(() => {
-    if (selectedRegencyCode) {
-      refetchDistricts(selectedRegencyCode);
-    }
-  }, [selectedRegencyCode, refetchDistricts]);
 
   // Helper function to truncate long text
   const truncateText = (text: string, maxLength: number = 20) => {
@@ -292,6 +293,13 @@ export const AdministrativeSelect = ({
     router.replace(`?${params.toString()}`, { scroll: false });
     onClearGeocodingError?.();
 
+    // Invalidate dependent queries when province changes
+    if (provinceCode !== "all") {
+      invalidateRegencies(provinceCode);
+    } else {
+      invalidateRegencies();
+    }
+
     // Clear sync status when user manually changes selection
     clearSync();
   };
@@ -332,6 +340,13 @@ export const AdministrativeSelect = ({
     // Update URL
     router.replace(`?${params.toString()}`, { scroll: false });
     onClearGeocodingError?.();
+
+    // Invalidate dependent queries when regency changes
+    if (regencyCode !== "all") {
+      invalidateDistricts(regencyCode);
+    } else {
+      invalidateDistricts();
+    }
 
     // Clear sync status when user manually changes selection
     clearSync();

@@ -10,6 +10,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { useAdministrative } from "./use-administrative";
+import type { Province, Regency, District } from "../../services/administrative";
 import {
   processGeocodingResponse,
   getAdministrativeSyncStatus,

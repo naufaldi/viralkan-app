@@ -1,10 +1,10 @@
-import { useState, useEffect, useCallback } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   administrativeService,
   Province,
   Regency,
   District,
-} from "../../services/api-client";
+} from "../../services/administrative";
 
 interface AdministrativeData {
   provinces: Province[];
@@ -33,151 +33,189 @@ interface UseAdministrativeReturn {
   ) => void;
 }
 
-export function useAdministrative(): UseAdministrativeReturn {
-  const [data, setData] = useState<AdministrativeData>({
-    provinces: [],
-    regencies: [],
-    districts: [],
-  });
+interface UseAdministrativeOptions {
+  provinceCode?: string | null;
+  regencyCode?: string | null;
+}
 
-  const [loading, setLoading] = useState({
-    provinces: false,
-    regencies: false,
-    districts: false,
-  });
+// Query keys
+const ADMINISTRATIVE_KEYS = {
+  provinces: ["administrative", "provinces"] as const,
+  regencies: (provinceCode: string) =>
+    ["administrative", "regencies", provinceCode] as const,
+  districts: (regencyCode: string) =>
+    ["administrative", "districts", regencyCode] as const,
+};
 
-  const [error, setError] = useState({
-    provinces: null as string | null,
-    regencies: null as string | null,
-    districts: null as string | null,
-  });
+// Hook for invalidating administrative queries
+export function useInvalidateAdministrative() {
+  const queryClient = useQueryClient();
 
-  // Fetch provinces
-  const fetchProvinces = useCallback(async () => {
-    setLoading((prev) => ({ ...prev, provinces: true }));
-    setError((prev) => ({ ...prev, provinces: null }));
-
-    try {
-      const response = await administrativeService.getProvinces();
-      setData((prev) => ({ ...prev, provinces: response.data }));
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Gagal memuat data provinsi";
-      setError((prev) => ({ ...prev, provinces: errorMessage }));
-      console.error("Error fetching provinces:", err);
-    } finally {
-      setLoading((prev) => ({ ...prev, provinces: false }));
-    }
-  }, []);
-
-  // Fetch regencies by province
-  const fetchRegencies = useCallback(async (provinceCode: string) => {
-    if (!provinceCode) {
-      setData((prev) => ({ ...prev, regencies: [] }));
-      return;
-    }
-
-    setLoading((prev) => ({ ...prev, regencies: true }));
-    setError((prev) => ({ ...prev, regencies: null }));
-
-    try {
-      const response = await administrativeService.getRegencies(provinceCode);
-      setData((prev) => ({ ...prev, regencies: response.data }));
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Gagal memuat data kabupaten/kota";
-      setError((prev) => ({ ...prev, regencies: errorMessage }));
-      console.error("Error fetching regencies:", err);
-    } finally {
-      setLoading((prev) => ({ ...prev, regencies: false }));
-    }
-  }, []);
-
-  // Fetch districts by regency
-  const fetchDistricts = useCallback(async (regencyCode: string) => {
-    if (!regencyCode) {
-      setData((prev) => ({ ...prev, districts: [] }));
-      return;
-    }
-
-    setLoading((prev) => ({ ...prev, districts: true }));
-    setError((prev) => ({ ...prev, districts: null }));
-
-    try {
-      const response = await administrativeService.getDistricts(regencyCode);
-      setData((prev) => ({ ...prev, districts: response.data }));
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Gagal memuat data kecamatan";
-      setError((prev) => ({ ...prev, districts: errorMessage }));
-      console.error("Error fetching districts:", err);
-    } finally {
-      setLoading((prev) => ({ ...prev, districts: false }));
-    }
-  }, []);
-
-  // Add dynamic option (for search results)
-  const addDynamicOption = useCallback(
-    (
-      type: "province" | "regency" | "district",
-      option: Province | Regency | District,
-    ) => {
-      setData((prev) => {
-        const newData = { ...prev };
-
-        if (type === "province") {
-          const province = option as Province;
-          // Check if option already exists
-          const existingIndex = newData.provinces.findIndex(
-            (p) => p.code === province.code,
-          );
-          if (existingIndex === -1) {
-            newData.provinces = [...newData.provinces, province];
-          }
-        } else if (type === "regency") {
-          const regency = option as Regency;
-          const existingIndex = newData.regencies.findIndex(
-            (r) => r.code === regency.code,
-          );
-          if (existingIndex === -1) {
-            newData.regencies = [...newData.regencies, regency];
-          }
-        } else if (type === "district") {
-          const district = option as District;
-          const existingIndex = newData.districts.findIndex(
-            (d) => d.code === district.code,
-          );
-          if (existingIndex === -1) {
-            newData.districts = [...newData.districts, district];
-          }
-        }
-
-        return newData;
+  const invalidateRegencies = (provinceCode?: string) => {
+    if (provinceCode) {
+      queryClient.invalidateQueries({
+        queryKey: ["administrative", "regencies", provinceCode],
       });
-    },
-    [],
-  );
+    } else {
+      // Invalidate all regency queries
+      queryClient.invalidateQueries({
+        queryKey: ["administrative", "regencies"],
+      });
+    }
+    // Also invalidate all districts when province changes
+    queryClient.invalidateQueries({
+      queryKey: ["administrative", "districts"],
+    });
+  };
 
-  // Refetch functions - memoized to prevent infinite re-renders
-  const refetchProvinces = useCallback(() => fetchProvinces(), []);
-  const refetchRegencies = useCallback(
-    (provinceCode: string) => fetchRegencies(provinceCode),
-    [],
-  );
-  const refetchDistricts = useCallback(
-    (regencyCode: string) => fetchDistricts(regencyCode),
-    [],
-  );
+  const invalidateDistricts = (regencyCode?: string) => {
+    if (regencyCode) {
+      queryClient.invalidateQueries({
+        queryKey: ["administrative", "districts", regencyCode],
+      });
+    } else {
+      // Invalidate all district queries
+      queryClient.invalidateQueries({
+        queryKey: ["administrative", "districts"],
+      });
+    }
+  };
 
-  // Load provinces on mount
-  useEffect(() => {
-    fetchProvinces();
-  }, []);
+  const invalidateAll = () => {
+    queryClient.invalidateQueries({
+      queryKey: ["administrative"],
+    });
+  };
 
   return {
-    data,
-    loading,
-    error,
+    invalidateRegencies,
+    invalidateDistricts,
+    invalidateAll,
+  };
+}
+
+export function useAdministrative(
+  options?: UseAdministrativeOptions,
+): UseAdministrativeReturn {
+  const queryClient = useQueryClient();
+  const { provinceCode = null, regencyCode = null } = options || {};
+
+  // Fetch provinces - always enabled
+  const provincesQuery = useQuery({
+    queryKey: ADMINISTRATIVE_KEYS.provinces,
+    queryFn: () => administrativeService.getProvinces(),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+  });
+
+  // Fetch regencies - enabled only when provinceCode exists
+  const regenciesQuery = useQuery({
+    queryKey: ADMINISTRATIVE_KEYS.regencies(provinceCode || ""),
+    queryFn: () => administrativeService.getRegencies(provinceCode!),
+    enabled: !!provinceCode,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+  });
+
+  // Fetch districts - enabled only when regencyCode exists
+  const districtsQuery = useQuery({
+    queryKey: ADMINISTRATIVE_KEYS.districts(regencyCode || ""),
+    queryFn: () => administrativeService.getDistricts(regencyCode!),
+    enabled: !!regencyCode,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+  });
+
+  // Refetch functions
+  const refetchProvinces = () => {
+    provincesQuery.refetch();
+  };
+
+  const refetchRegencies = (provinceCode: string) => {
+    if (provinceCode) {
+      queryClient.invalidateQueries({
+        queryKey: ["administrative", "regencies", provinceCode],
+      });
+    }
+  };
+
+  const refetchDistricts = (regencyCode: string) => {
+    if (regencyCode) {
+      queryClient.invalidateQueries({
+        queryKey: ["administrative", "districts", regencyCode],
+      });
+    }
+  };
+
+  // Add dynamic option to cache
+  const addDynamicOption = (
+    type: "province" | "regency" | "district",
+    option: Province | Regency | District,
+  ) => {
+    if (type === "province") {
+      const province = option as Province;
+      queryClient.setQueryData<Province[]>(
+        ADMINISTRATIVE_KEYS.provinces,
+        (oldData) => {
+          if (!oldData) return [province];
+          const exists = oldData.some((p) => p.code === province.code);
+          if (exists) return oldData;
+          return [...oldData, province];
+        },
+      );
+    } else if (type === "regency") {
+      const regency = option as Regency;
+      queryClient.setQueryData<Regency[]>(
+        ADMINISTRATIVE_KEYS.regencies(regency.province_code),
+        (oldData) => {
+          if (!oldData) return [regency];
+          const exists = oldData.some((r) => r.code === regency.code);
+          if (exists) return oldData;
+          return [...oldData, regency];
+        },
+      );
+    } else if (type === "district") {
+      const district = option as District;
+      queryClient.setQueryData<District[]>(
+        ADMINISTRATIVE_KEYS.districts(district.regency_code),
+        (oldData) => {
+          if (!oldData) return [district];
+          const exists = oldData.some((d) => d.code === district.code);
+          if (exists) return oldData;
+          return [...oldData, district];
+        },
+      );
+    }
+  };
+
+  return {
+    data: {
+      provinces: provincesQuery.data || [],
+      regencies: regenciesQuery.data || [],
+      districts: districtsQuery.data || [],
+    },
+    loading: {
+      provinces: provincesQuery.isLoading,
+      regencies: regenciesQuery.isLoading,
+      districts: districtsQuery.isLoading,
+    },
+    error: {
+      provinces: provincesQuery.error
+        ? provincesQuery.error instanceof Error
+          ? provincesQuery.error.message
+          : "Gagal memuat data provinsi"
+        : null,
+      regencies: regenciesQuery.error
+        ? regenciesQuery.error instanceof Error
+          ? regenciesQuery.error.message
+          : "Gagal memuat data kabupaten/kota"
+        : null,
+      districts: districtsQuery.error
+        ? districtsQuery.error instanceof Error
+          ? districtsQuery.error.message
+          : "Gagal memuat data kecamatan"
+        : null,
+    },
     refetchProvinces,
     refetchRegencies,
     refetchDistricts,

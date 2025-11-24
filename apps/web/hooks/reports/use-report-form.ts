@@ -1,7 +1,11 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CreateReportSchema, CreateReportInput, ReportResponse } from "../../lib/types/api";
+import {
+  CreateReportSchema,
+  CreateReportInput,
+  ReportResponse,
+} from "../../lib/types/api";
 import { useReportImage } from "./use-report-image";
 import { useReportLocation } from "./use-report-location";
 import { useReportSubmit } from "./use-report-submit";
@@ -12,7 +16,11 @@ interface UseReportFormProps {
   isEditing?: boolean;
 }
 
-export const useReportForm = ({ onSuccess, initialData, isEditing = false }: UseReportFormProps) => {
+export const useReportForm = ({
+  onSuccess,
+  initialData,
+  isEditing = false,
+}: UseReportFormProps) => {
   const [formError, setFormError] = useState<string | undefined>(undefined);
 
   const form = useForm<CreateReportInput>({
@@ -29,9 +37,9 @@ export const useReportForm = ({ onSuccess, initialData, isEditing = false }: Use
           district: initialData.district,
           city: initialData.city,
           province: initialData.province,
-          province_code: "",
-          regency_code: "",
-          district_code: "",
+          province_code: initialData.province_code || "",
+          regency_code: initialData.regency_code || "",
+          district_code: initialData.district_code || "",
         }
       : {
           street_name: "",
@@ -49,6 +57,26 @@ export const useReportForm = ({ onSuccess, initialData, isEditing = false }: Use
         },
   });
 
+  // Reset form when initialData changes (for edit mode)
+  useEffect(() => {
+    if (initialData) {
+      form.reset({
+        street_name: initialData.street_name,
+        category: initialData.category,
+        location_text: initialData.location_text,
+        image_url: initialData.image_url,
+        lat: initialData.lat,
+        lon: initialData.lon,
+        district: initialData.district,
+        city: initialData.city,
+        province: initialData.province,
+        province_code: initialData.province_code || "",
+        regency_code: initialData.regency_code || "",
+        district_code: initialData.district_code || "",
+      });
+    }
+  }, [initialData, form]);
+
   const watchedValues = form.watch();
   useEffect(() => {
     if (formError) {
@@ -58,9 +86,10 @@ export const useReportForm = ({ onSuccess, initialData, isEditing = false }: Use
 
   const locationState = useReportLocation({ form });
 
-  const imageState = useReportImage({ 
-    form, 
-    applyAdministrativeSearchResults: locationState.applyAdministrativeSearchResults 
+  const imageState = useReportImage({
+    form,
+    applyAdministrativeSearchResults:
+      locationState.applyAdministrativeSearchResults,
   });
 
   const submitState = useReportSubmit({
@@ -103,7 +132,8 @@ export const useReportForm = ({ onSuccess, initialData, isEditing = false }: Use
     hasExifWarning: imageState.hasExifWarning,
     hasExifData: imageState.hasExifData,
     handleImageSelect: imageState.handleImageSelect,
-    handleImageRemove: () => imageState.handleImageRemove(locationState.clearSync),
+    handleImageRemove: () =>
+      imageState.handleImageRemove(locationState.clearSync),
     handleImageUploadError: imageState.handleImageUploadError,
     handleImageUploadSuccess: imageState.handleImageUploadSuccess,
     isGettingLocation: locationState.isGettingLocation,
@@ -117,11 +147,12 @@ export const useReportForm = ({ onSuccess, initialData, isEditing = false }: Use
     canAutoSelect: locationState.canAutoSelect,
     isProcessingAdminSync: locationState.isProcessingAdminSync,
     getCurrentLocation: locationState.getCurrentLocation,
-    handleGetAddressFromCoordinates: locationState.handleGetAddressFromCoordinates,
-    handleGetCoordinatesFromAddress: locationState.handleGetCoordinatesFromAddress,
+    handleGetAddressFromCoordinates:
+      locationState.handleGetAddressFromCoordinates,
+    handleGetCoordinatesFromAddress:
+      locationState.handleGetCoordinatesFromAddress,
     clearGeocodingError: locationState.clearGeocodingError,
     submitError: submitState.submitError,
     onSubmit: submitState.onSubmit,
   };
 };
-

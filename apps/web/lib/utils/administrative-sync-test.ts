@@ -12,7 +12,7 @@ import {
   forwardGeocode,
   reverseGeocodeWithNominatimData,
 } from "../services/geocoding";
-import { administrativeService } from "../../services/api-client";
+import { administrativeService } from "../../services/administrative";
 import { processNominatimAddressWithAPI } from "./enhanced-geocoding-handler";
 import type {
   CurrentGeocodingResponse,

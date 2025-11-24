@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, use, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthContext } from "@/contexts/AuthContext";
 import CreateReportForm from "@/components/reports/create-report-form";
@@ -9,12 +9,25 @@ import { Loader2 } from "lucide-react";
 import { Button } from "@repo/ui/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 
-export default function EditReportPage({ params }: { params: { id: string } }) {
+export default function EditReportPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = use(params);
   const router = useRouter();
   const { backendUser, apiCall, isLoading: isAuthLoading } = useAuthContext();
   const [report, setReport] = useState<ReportResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const apiCallRef = useRef(apiCall);
+  const routerRef = useRef(router);
+
+  useEffect(() => {
+    apiCallRef.current = apiCall;
+    routerRef.current = router;
+  }, [apiCall, router]);
 
   useEffect(() => {
     const fetchReport = async () => {
@@ -22,7 +35,7 @@ export default function EditReportPage({ params }: { params: { id: string } }) {
 
       try {
         setIsLoading(true);
-        const response = await apiCall(`/api/reports/${params.id}`);
+        const response = await apiCallRef.current(`/api/reports/${id}`);
         
         if (!response.ok) {
           if (response.status === 404) {
@@ -46,12 +59,12 @@ export default function EditReportPage({ params }: { params: { id: string } }) {
 
     if (!isAuthLoading) {
       if (!backendUser) {
-        router.push("/login");
+        routerRef.current.push("/login");
       } else {
         fetchReport();
       }
     }
-  }, [params.id, backendUser, isAuthLoading, apiCall, router]);
+  }, [id, backendUser, isAuthLoading]);
 
   if (isAuthLoading || isLoading) {
     return (
