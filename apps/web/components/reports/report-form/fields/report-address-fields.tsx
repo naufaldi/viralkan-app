@@ -1,4 +1,3 @@
-import { UseFormReturn } from "react-hook-form";
 import {
   FormControl,
   FormDescription,
@@ -8,39 +7,28 @@ import {
   FormMessage,
 } from "@repo/ui/components/ui/form";
 import { Input } from "@repo/ui/components/ui/input";
-import { CreateReportInput } from "../../../../lib/types/api";
-import { AdministrativeSelect } from "../../administrative-select";
+
 import { Loader2, MapPin } from "lucide-react";
+import {
+  useReportFormContext,
+  useLocationContext,
+  useReportFormActionsContext,
+} from "../report-form-context";
+import { AdministrativeSelect } from "../../administrative-select";
 
-interface ReportAddressFieldsProps {
-  form: UseFormReturn<CreateReportInput>;
-  disabled?: boolean;
-  isFormActivated?: boolean;
-  isGeocodingFromCoords?: boolean;
-  lastGeocodingSource?: "coordinates" | "address" | null;
-  onClearGeocodingError?: () => void;
-  syncStatus?: any;
-  hasValidMatch?: boolean;
-  confidenceLevel?: "high" | "medium" | "low" | "none";
-  canAutoSelect?: boolean;
-  isProcessingAdminSync?: boolean;
-  mode?: "auto" | "manual";
-}
-
-export const ReportAddressFields = ({
-  form,
-  disabled,
-  isFormActivated = false,
-  isGeocodingFromCoords = false,
-  lastGeocodingSource = null,
-  onClearGeocodingError,
-  syncStatus,
-  hasValidMatch = false,
-  confidenceLevel = "none",
-  canAutoSelect = false,
-  isProcessingAdminSync = false,
-  mode = "auto",
-}: ReportAddressFieldsProps) => {
+export const ReportAddressFields = () => {
+  const { form, isLoading, isFormActivated, mode } = useReportFormContext();
+  const {
+    isGeocodingFromCoords,
+    lastGeocodingSource,
+    syncStatus,
+    hasValidMatch,
+    confidenceLevel,
+    canAutoSelect,
+    isProcessingAdminSync,
+  } = useLocationContext();
+  const { clearGeocodingError } = useReportFormActionsContext();
+  const disabled = isLoading;
   return (
     <>
       {/* Street Name */}
@@ -62,7 +50,9 @@ export const ReportAddressFields = ({
               <Input
                 placeholder="Contoh: Jl. Sudirman"
                 disabled={
-                  disabled || (mode === "auto" && isGeocodingFromCoords) || !isFormActivated
+                  disabled ||
+                  (mode === "auto" && isGeocodingFromCoords) ||
+                  !isFormActivated
                 }
                 size="lg"
                 className={`border-neutral-300 transition-all duration-200 focus:border-neutral-600 focus:ring-neutral-600/20 ${
@@ -75,7 +65,7 @@ export const ReportAddressFields = ({
                 {...field}
                 onChange={(e) => {
                   field.onChange(e);
-                  onClearGeocodingError?.();
+                  clearGeocodingError();
                 }}
               />
             </FormControl>
@@ -95,10 +85,9 @@ export const ReportAddressFields = ({
         isFormActivated={isFormActivated}
         isGeocodingFromCoords={isGeocodingFromCoords}
         lastGeocodingSource={lastGeocodingSource}
-        onClearGeocodingError={onClearGeocodingError}
+        onClearGeocodingError={clearGeocodingError}
         enableAutoSync={true}
         showSyncStatus={true}
-        // Administrative sync status props
         syncStatus={syncStatus}
         hasValidMatch={hasValidMatch}
         confidenceLevel={confidenceLevel}

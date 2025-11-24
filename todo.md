@@ -1,95 +1,109 @@
-Debugging deployment issues (API + Web)
+Perfect! Now let me provide you with a comprehensive refactoring plan for the ReportLocationFields component. Based on my analysis, I've identified several opportunities to make the code more reusable, follow KISS and DRY principles, and reduce prop drilling.
 
-Findings
+## 📋 **Refactoring Plan: ReportLocationFields Component**
 
-- API container crash: Hono OpenAPI route registration fails at runtime with
-  TypeError: undefined is not an object (evaluating 'route.path.replaceAll').
-  This originates from @hono/zod-openapi’s .openapi() method while mounting a
-  route, which expects route.path to be a string. Our route definitions all
-  specify path explicitly. This points to a runtime/library interaction issue
-  (not a missing path in our source): either a bundling quirk with Bun build
-  (the generated dist/index.js is large and appears minified/optimized) or a
-  version mismatch/bug inside @hono/zod-openapi when used with Bun in Alpine.
+### **Current Issues Identified:**
 
-- Web app error on /laporan: Next.js reports a generic Server Components render
-  failure in production. The page does server-side fetching from the API. When
-  the API is down (as above), the fetch can throw during the server render. The
-  page catches errors and renders an error UI, but the non-standard typing of
-  searchParams as Promise<> could contribute to inconsistent behavior across
-  environments. I adjusted that to Next’s standard object shape.
+1. **Prop Drilling**: The component receives 13 props, making it tightly coupled
+2. **Code Duplication**: Latitude and longitude inputs have nearly identical code
+3. **Complex Conditional Logic**: Multiple nested conditions for different modes and states
+4. **Large Component**: 276 lines handling multiple responsibilities
+5. **Hard to Test**: Monolithic structure makes unit testing difficult
 
-What I changed
+### **Proposed Solution Architecture:**
 
-- apps/web/app/laporan/page.tsx
-  - Fixed props: use object for searchParams (not Promise) and remove await.
-    This aligns with Next App Router conventions and avoids subtle runtime
-    mismatches in Server Components.
-- Dependencies and container
-  - Bumped hono and zod-openapi to latest compatible versions and rebuilt locally:
-    - hono: ^4.9.6
-    - @hono/zod-openapi: ^1.1.0
-    - @hono/zod-validator: ^0.7.2
-  - Switched API Docker base image from Alpine to Debian:
-    - apps/api/Dockerfile: oven/bun:1.2.4-alpine → oven/bun:1.2.4
-    - Use apt-get to install wget/ca-certificates
+```mermaid
+graph TD
+    A[ReportFormFields] --> B[LocationFieldsProvider]
+    B --> C[LocationFieldsContainer]
+    C --> D[LocationStatusIndicator]
+    C --> E[LocationDescriptionField]
+    C --> F[CoordinateInputs]
+    C --> G[LocationActions]
+    F --> H[CoordinateInput]
+    F --> I[CoordinateInput]
+    G --> J[LocationButton]
+    G --> K[GetCoordinatesButton]
+    G --> L[GetAddressButton]
+```
 
-- Defensive change
-  - Removed `middleware` from `createRoute({...})` and passed them directly to
-    `router.openapi(route, ...middleware, handler)` for all authenticated admin,
-    reports, upload, and auth routes. This reduces reliance on library internals
-    to read/merge `route.middleware`.
+### **Detailed Refactoring Steps:**
 
-Root cause hypotheses (API)
+#### **1. Create Shared Types & Interfaces**
 
-- Library/runtime mismatch: @hono/zod-openapi@1.0.2 + hono@4.6.x with Bun
-  running in oven/bun:1.2.4-alpine can produce route objects where path becomes
-  undefined inside the bundled output (seen at dist/index.js stack). This is
-  consistent with a bundling/minification edge-case or an upstream bug in the
-  library’s OpenAPI wrapper when consumed via Bun build.
+- Consolidate all location-related props into a single interface
+- Create enums for modes and geocoding states
+- Define proper TypeScript types for all location operations
 
-- Not a missing path in source: I reviewed all createRoute() calls; every route
-  includes a literal string path. All .openapi() usages pass the correct route
-  object. No conditional route creation or dynamic path construction is present.
+#### **2. Extract Location Status Indicator**
 
-How to fix (API)
+- Create `LocationStatusIndicator` component
+- Handle EXIF data status display
+- Make reusable across different contexts
 
-- Preferred: Upgrade the OpenAPI wrapper and hono together, then rebuild.
-  - Bump: "@hono/zod-openapi" to a newer 1.x and ensure "hono" is compatible.
-  - Rebuild the container. This often resolves the internal route registration
-    bug that manifests as route.path being undefined.
+#### **3. Create Custom Hook for Location Logic**
 
-- Defensive change (optional but robust): Do not place middleware inside the
-  createRoute({ ... }) object. Instead, pass them to .openapi(route, ...mws, handler).
-  This avoids the library having to merge or read route.middleware and reduces
-  chances of shape conflicts during bundling.
+- `useLocationFields` hook to manage state and calculations
+- Centralize form watching logic
+- Handle coordinate validation and formatting
 
-- Environment/bundling stability:
-  - Switch base image from oven/bun:1.2.4-alpine to oven/bun:1.2.4 (Debian) to
-    rule out Alpine/JSC differences.
-  - Ensure build includes sourcemaps (already in Dockerfile) and consider
-    explicitly disabling minification if it is being applied by default.
+#### **4. Refactor Coordinate Inputs (DRY Principle)**
 
-- Add startup assertions (temporary instrumentation) to pinpoint any offending
-  route if the issue persists:
-  - Wrap router.openapi with a small guard that logs route and route.path before
-    delegation, throwing a clear error if missing. This will reveal which route
-    triggers the undefined path in production logs without obfuscation.
+- Create reusable `CoordinateInput` component
+- Eliminate code duplication between lat/lon fields
+- Handle loading states and validation consistently
 
-How to fix (Web)
+#### **5. Create Location Actions Component**
 
-- Ensure NEXT_PUBLIC_API_URL points to a reachable API host from the web
-  container and that CORS on the API allows the web origin (already includes
-  https://viral.faldi.xyz). With the API stable, the /laporan page should render
-  and fall back to the in-page error state if network errors occur.
+- Group all location-related buttons
+- Handle progressive disclosure logic
+- Simplify conditional rendering
 
-- The searchParams typing fix is in place. If errors continue, add logging in
-  getPublicReportsWithStats to capture server-side fetch failures, and verify
-  the page renders the ReportsErrorState (which it should on exceptions).
+#### **6. Implement Context Pattern**
 
-Next steps I recommend
+- Create `LocationFieldsContext` to reduce prop drilling
+- Provide location state and actions through context
+- Maintain backward compatibility
 
-- Try a quick image change (Debian) and rebuild to see if the API crash
-  disappears without code changes.
-- If not, bump @hono/zod-openapi and hono together and rebuild.
-- If still failing, I can add the openapi guard wrapper to log the exact route
-  at fault and proceed to the defensive middleware change.
+#### **7. Update ReportFormFields Interface**
+
+- Reduce props from 13 to 3-4 essential ones
+- Use context for location-specific data
+- Simplify component usage
+
+### **Benefits of This Approach:**
+
+✅ **KISS Principle**: Each component has a single, clear responsibility  
+✅ **DRY Principle**: Eliminate code duplication in coordinate inputs  
+✅ **Reusability**: Components can be used in different contexts  
+✅ **Testability**: Smaller components are easier to unit test  
+✅ **Maintainability**: Clear separation of concerns  
+✅ **Type Safety**: Proper TypeScript interfaces throughout
+
+### **File Structure After Refactoring:**
+
+```
+apps/web/components/reports/report-form/
+├── fields/
+│   ├── report-location-fields.tsx (simplified container)
+│   ├── location-status-indicator.tsx
+│   ├── location-description-field.tsx
+│   ├── coordinate-input.tsx
+│   └── location-actions.tsx
+├── hooks/
+│   └── use-location-fields.ts
+├── context/
+│   └── location-fields-context.tsx
+└── types/
+    └── location-fields.ts
+```
+
+### **Backward Compatibility:**
+
+The refactoring will maintain the same external API while internally restructuring the components. This means no breaking changes for existing usage.
+
+---
+
+**Are you pleased with this plan?**
+
+Would you like me to make any changes to the approach, or shall I proceed with the implementation? I can also adjust the balance between using context vs. compound components if you have a preference.

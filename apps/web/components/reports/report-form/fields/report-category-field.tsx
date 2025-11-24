@@ -1,4 +1,3 @@
-import { UseFormReturn } from "react-hook-form";
 import {
   FormControl,
   FormDescription,
@@ -14,19 +13,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@repo/ui/components/ui/select";
-import { CreateReportInput, REPORT_CATEGORIES } from "../../../../lib/types/api";
+import { useReportFormContext, useImageContext } from "../report-form-context";
+import { REPORT_CATEGORIES } from "@/lib/types/api";
 
-interface ReportCategoryFieldProps {
-  form: UseFormReturn<CreateReportInput>;
-  disabled?: boolean;
-  isFormActivated?: boolean;
-}
-
-export const ReportCategoryField = ({
-  form,
-  disabled,
-  isFormActivated = false,
-}: ReportCategoryFieldProps) => {
+export const ReportCategoryField = () => {
+  const { form, isLoading, isFormActivated } = useReportFormContext();
+  const { isUploadingImage } = useImageContext();
+  const disabled = isLoading || isUploadingImage;
   return (
     <FormField
       control={form.control}
@@ -88,8 +81,8 @@ export const ReportCategoryField = ({
             </SelectContent>
           </Select>
           <FormDescription className="text-sm text-neutral-600">
-            Pilih jenis kerusakan jalan yang paling sesuai dengan kondisi
-            yang Anda temukan.
+            Pilih jenis kerusakan jalan yang paling sesuai dengan kondisi yang
+            Anda temukan.
           </FormDescription>
           <FormMessage />
         </FormItem>

@@ -1,4 +1,3 @@
-import { UseFormReturn } from "react-hook-form";
 import {
   FormControl,
   FormDescription,
@@ -9,45 +8,34 @@ import {
 } from "@repo/ui/components/ui/form";
 import { Input } from "@repo/ui/components/ui/input";
 import { Textarea } from "@repo/ui/components/ui/textarea";
-import { CreateReportInput } from "../../../../lib/types/api";
 import { GetCoordinatesButton } from "../get-coordinates-button";
 import { GetAddressButton } from "../get-address-button";
 import { LocationButton } from "../location-button";
 import { Loader2, MapPin } from "lucide-react";
+import {
+  useReportFormContext,
+  useImageContext,
+  useLocationContext,
+  useReportFormActionsContext,
+} from "../report-form-context";
 
-interface ReportLocationFieldsProps {
-  form: UseFormReturn<CreateReportInput>;
-  disabled?: boolean;
-  isFormActivated?: boolean;
-  isGeocodingFromCoords?: boolean;
-  isGeocodingFromAddress?: boolean;
-  lastGeocodingSource?: "coordinates" | "address" | null;
-  geocodingError?: string | null;
-  onGetAddress?: () => void;
-  onGetCoordinates?: () => void;
-  onClearGeocodingError?: () => void;
-  hasExifData?: boolean;
-  onGetLocation?: () => void;
-  isGettingLocation?: boolean;
-  mode?: "auto" | "manual";
-}
-
-export const ReportLocationFields = ({
-  form,
-  disabled,
-  isFormActivated = false,
-  isGeocodingFromCoords = false,
-  isGeocodingFromAddress = false,
-  lastGeocodingSource = null,
-  geocodingError = null,
-  onGetAddress,
-  onGetCoordinates,
-  onClearGeocodingError,
-  hasExifData = false,
-  onGetLocation,
-  isGettingLocation = false,
-  mode = "auto",
-}: ReportLocationFieldsProps) => {
+export const ReportLocationFields = () => {
+  const { form, isLoading, isFormActivated, mode } = useReportFormContext();
+  const { hasExifData } = useImageContext();
+  const {
+    isGeocodingFromCoords,
+    isGeocodingFromAddress,
+    lastGeocodingSource,
+    geocodingError,
+    isGettingLocation,
+  } = useLocationContext();
+  const {
+    handleGetAddressFromCoordinates,
+    handleGetCoordinatesFromAddress,
+    clearGeocodingError,
+    getCurrentLocation,
+  } = useReportFormActionsContext();
+  const disabled = isLoading;
   return (
     <>
       {/* Location Status Indicator - UX Enhancement - Only show when form is activated */}
@@ -78,34 +66,42 @@ export const ReportLocationFields = ({
       )}
 
       {/* Smart Fallback: Current Location Button - Only show when form is activated and EXIF unavailable */}
-      {isFormActivated && !hasExifData && onGetLocation && mode === "auto" && (
-        <LocationButton
-          onGetLocation={onGetLocation}
-          isLoading={isGettingLocation}
-          disabled={disabled}
-          isFormActivated={isFormActivated}
-        />
-      )}
+      {isFormActivated &&
+        !hasExifData &&
+        getCurrentLocation &&
+        mode === "auto" && (
+          <LocationButton
+            onGetLocation={getCurrentLocation}
+            isLoading={isGettingLocation}
+            disabled={disabled}
+            isFormActivated={isFormActivated}
+          />
+        )}
 
       {/* Progressive Disclosure: Manual Location Buttons - Only show when form is activated and EXIF unavailable */}
-      {isFormActivated && onGetCoordinates && !hasExifData && mode === "manual" && (
-        <div className="flex flex-col items-center space-y-3 pt-4">
-          <div className="max-w-md text-center">
-            <p className="mb-2 text-sm text-neutral-600">
-              🗺️ <strong>Dapatkan koordinat dari alamat</strong>
-            </p>
-            <p className="text-xs text-neutral-500">
-              Isi nama jalan dan kabupaten/kota, lalu klik tombol di bawah
-            </p>
+      {isFormActivated &&
+        handleGetCoordinatesFromAddress &&
+        !hasExifData &&
+        mode === "manual" && (
+          <div className="flex flex-col items-center space-y-3 pt-4">
+            <div className="max-w-md text-center">
+              <p className="mb-2 text-sm text-neutral-600">
+                🗺️ <strong>Dapatkan koordinat dari alamat</strong>
+              </p>
+              <p className="text-xs text-neutral-500">
+                Isi nama jalan dan kabupaten/kota, lalu klik tombol di bawah
+              </p>
+            </div>
+            <GetCoordinatesButton
+              onClick={handleGetCoordinatesFromAddress}
+              isLoading={isGeocodingFromAddress}
+              disabled={disabled}
+              isValidAddress={
+                !!(form.watch("street_name") && form.watch("city"))
+              }
+            />
           </div>
-          <GetCoordinatesButton
-            onClick={onGetCoordinates}
-            isLoading={isGeocodingFromAddress}
-            disabled={disabled}
-            isValidAddress={!!(form.watch("street_name") && form.watch("city"))}
-          />
-        </div>
-      )}
+        )}
 
       {/* Geocoding Error Display */}
       {geocodingError && (
@@ -174,7 +170,10 @@ export const ReportLocationFields = ({
                     step="any"
                     placeholder="Contoh: -7.260000"
                     disabled={
-                      disabled || (mode === "manual" && isGeocodingFromAddress) || !isFormActivated || mode === "manual"
+                      disabled ||
+                      (mode === "manual" && isGeocodingFromAddress) ||
+                      !isFormActivated ||
+                      mode === "manual"
                     }
                     size="lg"
                     className={`border-neutral-300 bg-white focus:border-neutral-600 focus:ring-neutral-600/20 ${
@@ -186,7 +185,7 @@ export const ReportLocationFields = ({
                     onChange={(e) => {
                       const value = e.target.value;
                       field.onChange(value === "" ? 0 : parseFloat(value));
-                      onClearGeocodingError?.();
+                      clearGeocodingError();
                     }}
                     value={field.value === 0 ? "" : field.value}
                   />
@@ -218,7 +217,10 @@ export const ReportLocationFields = ({
                     step="any"
                     placeholder="Contoh: 112.780000"
                     disabled={
-                      disabled || (mode === "manual" && isGeocodingFromAddress) || !isFormActivated || mode === "manual"
+                      disabled ||
+                      (mode === "manual" && isGeocodingFromAddress) ||
+                      !isFormActivated ||
+                      mode === "manual"
                     }
                     size="lg"
                     className={`border-neutral-300 bg-white focus:border-neutral-600 focus:ring-neutral-600/20 ${
@@ -230,7 +232,7 @@ export const ReportLocationFields = ({
                     onChange={(e) => {
                       const value = e.target.value;
                       field.onChange(value === "" ? 0 : parseFloat(value));
-                      onClearGeocodingError?.();
+                      clearGeocodingError();
                     }}
                     value={field.value === 0 ? "" : field.value}
                   />
@@ -245,31 +247,34 @@ export const ReportLocationFields = ({
         </div>
 
         {/* Progressive Disclosure: Manual Address Button - Only show when form is activated and EXIF unavailable */}
-        {isFormActivated && onGetAddress && !hasExifData && mode === "auto" && (
-          <div className="flex flex-col items-center space-y-3 pt-4">
-            <div className="max-w-md text-center">
-              <p className="mb-2 text-sm text-neutral-600">
-                📍 <strong>Dapatkan alamat dari koordinat</strong>
-              </p>
-              <p className="text-xs text-neutral-500">
-                Isi latitude dan longitude, lalu klik tombol di bawah
-              </p>
+        {isFormActivated &&
+          handleGetAddressFromCoordinates &&
+          !hasExifData &&
+          mode === "auto" && (
+            <div className="flex flex-col items-center space-y-3 pt-4">
+              <div className="max-w-md text-center">
+                <p className="mb-2 text-sm text-neutral-600">
+                  📍 <strong>Dapatkan alamat dari koordinat</strong>
+                </p>
+                <p className="text-xs text-neutral-500">
+                  Isi latitude dan longitude, lalu klik tombol di bawah
+                </p>
+              </div>
+              <GetAddressButton
+                onClick={handleGetAddressFromCoordinates}
+                isLoading={isGeocodingFromCoords}
+                disabled={disabled}
+                isValidCoordinates={
+                  !!(
+                    form.watch("lat") &&
+                    form.watch("lon") &&
+                    form.watch("lat") !== 0 &&
+                    form.watch("lon") !== 0
+                  )
+                }
+              />
             </div>
-            <GetAddressButton
-              onClick={onGetAddress}
-              isLoading={isGeocodingFromCoords}
-              disabled={disabled}
-              isValidCoordinates={
-                !!(
-                  form.watch("lat") &&
-                  form.watch("lon") &&
-                  form.watch("lat") !== 0 &&
-                  form.watch("lon") !== 0
-                )
-              }
-            />
-          </div>
-        )}
+          )}
       </div>
     </>
   );

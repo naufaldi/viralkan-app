@@ -1,61 +1,11 @@
-import { UseFormReturn } from "react-hook-form";
-import { CreateReportInput } from "../../../lib/types/api";
 import { MapPin } from "lucide-react";
 import { ReportCategoryField } from "./fields/report-category-field";
 import { ReportAddressFields } from "./fields/report-address-fields";
 import { ReportLocationFields } from "./fields/report-location-fields";
+import { useReportFormContext } from "./report-form-context";
 
-interface ReportFormFieldsProps {
-  form: UseFormReturn<CreateReportInput>;
-  disabled?: boolean;
-  isEditing?: boolean;
-  isFormActivated?: boolean;
-  selectedImage?: File | null;
-  // Geocoding props
-  isGeocodingFromCoords?: boolean;
-  isGeocodingFromAddress?: boolean;
-  lastGeocodingSource?: "coordinates" | "address" | null;
-  geocodingError?: string | null;
-  onGetAddress?: () => void;
-  onGetCoordinates?: () => void;
-  onClearGeocodingError?: () => void;
-  // Progressive disclosure props
-  hasExifData?: boolean;
-  // Location props
-  onGetLocation?: () => void;
-  isGettingLocation?: boolean;
-  // Administrative sync props
-  syncStatus?: any; // TODO: Import proper type
-  hasValidMatch?: boolean;
-  confidenceLevel?: "high" | "medium" | "low" | "none";
-  canAutoSelect?: boolean;
-  isProcessingAdminSync?: boolean;
-  mode?: "auto" | "manual";
-}
-
-export const ReportFormFields = ({
-  form,
-  disabled,
-  isFormActivated = false,
-  // selectedImage = null, // Remove unused parameter
-  isGeocodingFromCoords = false,
-  isGeocodingFromAddress = false,
-  lastGeocodingSource = null,
-  geocodingError = null,
-  onGetAddress,
-  onGetCoordinates,
-  onClearGeocodingError,
-  hasExifData = false,
-  onGetLocation,
-  isGettingLocation = false,
-  // Administrative sync props
-  syncStatus,
-  hasValidMatch = false,
-  confidenceLevel = "none",
-  canAutoSelect = false,
-  isProcessingAdminSync = false,
-  mode = "auto",
-}: ReportFormFieldsProps) => {
+export const ReportFormFields = () => {
+  const { isFormActivated } = useReportFormContext();
   return (
     <>
       {/* Progressive Activation Notice */}
@@ -85,48 +35,16 @@ export const ReportFormFields = ({
         }`}
       >
         {/* Category Selection */}
-        <ReportCategoryField 
-          form={form} 
-          disabled={disabled} 
-          isFormActivated={isFormActivated} 
-        />
+        <ReportCategoryField />
 
         {/* Street Name & Address */}
         <div className="space-y-6">
-          <ReportAddressFields
-            form={form}
-            disabled={disabled}
-            isFormActivated={isFormActivated}
-            isGeocodingFromCoords={isGeocodingFromCoords}
-            lastGeocodingSource={lastGeocodingSource}
-            onClearGeocodingError={onClearGeocodingError}
-            syncStatus={syncStatus}
-            hasValidMatch={hasValidMatch}
-            confidenceLevel={confidenceLevel}
-            canAutoSelect={canAutoSelect}
-            isProcessingAdminSync={isProcessingAdminSync}
-            mode={mode}
-          />
+          <ReportAddressFields />
         </div>
       </div>
 
       {/* Location Fields */}
-      <ReportLocationFields
-        form={form}
-        disabled={disabled}
-        isFormActivated={isFormActivated}
-        isGeocodingFromCoords={isGeocodingFromCoords}
-        isGeocodingFromAddress={isGeocodingFromAddress}
-        lastGeocodingSource={lastGeocodingSource}
-        geocodingError={geocodingError}
-        onGetAddress={onGetAddress}
-        onGetCoordinates={onGetCoordinates}
-        onClearGeocodingError={onClearGeocodingError}
-        hasExifData={hasExifData}
-        onGetLocation={onGetLocation}
-        isGettingLocation={isGettingLocation}
-        mode={mode}
-      />
+      <ReportLocationFields />
     </>
   );
 };
