@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { ReportResponse } from "../../../lib/types/api";
-import { useReportForm } from "./use-report-form";
+import { useReportForm } from "../../../hooks/reports/use-report-form";
 import {
   ReportFormContext,
   ImageContext,

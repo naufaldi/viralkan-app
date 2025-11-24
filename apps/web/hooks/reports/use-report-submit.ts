@@ -2,13 +2,13 @@ import { useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { CreateReportInput, ReportResponse } from "../../../lib/types/api";
-import { useCreateReport } from "../../../hooks/use-create-report";
-import { useUpdateReport } from "../../../hooks/use-update-report";
-import { useInvalidateDashboard } from "../../../hooks/dashboard";
-import { useAuth } from "../../../hooks/useAuth";
-import { uploadImage } from "../../../services/upload";
-import { cleanFormData } from "../../../utils/report-form-utils";
+import { CreateReportInput, ReportResponse } from "../../lib/types/api";
+import { useCreateReport } from "../use-create-report";
+import { useUpdateReport } from "../use-update-report";
+import { useInvalidateDashboard } from "../dashboard";
+import { useAuth } from "../useAuth";
+import { uploadImage } from "../../services/upload";
+import { cleanFormData } from "../../utils/report-form-utils";
 
 interface UseReportSubmitProps {
   form: UseFormReturn<CreateReportInput>;
@@ -46,7 +46,6 @@ export const useReportSubmit = ({
     onSuccess: (reportId) => {
       invalidateAll();
       onSuccess?.(reportId);
-      // Redirect to dashboard after successful report creation
       router.push(`/dashboard?success=true&reportId=${reportId}`);
     },
   });
@@ -98,7 +97,6 @@ export const useReportSubmit = ({
 
       let imageUrl = data.image_url;
 
-      // Only upload if a new image is selected
       if (selectedImage) {
         const uploadResult = await uploadImage(selectedImage, token);
 
@@ -154,3 +152,4 @@ export const useReportSubmit = ({
     submitError: createError || updateError,
   };
 };
+

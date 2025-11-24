@@ -6,6 +6,26 @@ We're building production-quality code together. Your role is to create maintain
 
 When you seem stuck or overly complex, I'll redirect you - my guidance helps you stay on track.
 
+## 📚 Technical Rules Reference
+
+This document provides general guidance, workflow, and project context. For detailed technical rules:
+
+- **Backend Development**: See `.cursor/rules/backend.mdc` for comprehensive backend rules including:
+  - 4-layer Clean Architecture patterns
+  - Type organization (General Types vs Route-Specific Types)
+  - Database patterns (postgres.js usage, query patterns, transactions)
+  - Naming conventions, import organization, error handling
+  - Route implementation patterns, security requirements, testing requirements
+
+- **Frontend Development**: See `.cursor/rules/frontend-rule.mdc` for comprehensive frontend rules including:
+  - Component architecture and organization
+  - Styling guidelines (Tailwind CSS v4, shadcn/ui)
+  - Performance and state management patterns
+  - Testing strategy, TypeScript best practices
+  - Asset handling, development workflow
+
+**Always check these rule files before implementing backend or frontend features** to ensure compliance with detailed technical standards.
+
 ## 🚨 AUTOMATED CHECKS ARE MANDATORY
 
 **ALL lint/test issues are BLOCKING - EVERYTHING must be ✅ GREEN!**  
@@ -122,6 +142,12 @@ Your code must be 100% clean. No exceptions.
 - **Zod validation**: All API inputs must be validated with Zod schemas
 - **ESLint compliance**: Follow project ESLint rules strictly
 
+### Code Style Principles:
+
+- **Code Comments**: Only add comments for function/component documentation, not for obvious code
+- **Event Handlers**: Use "handle" prefix for event handlers (e.g., `handleClick`, `handleKeyDown`, `handleSubmit`)
+- **Const vs Function**: Prefer const arrow functions over function declarations (e.g., `const getUserById = () => {}` instead of `function getUserById() {}`)
+
 ## Project Overview
 
 **Viralkan** is a road damage reporting platform for Bekasi, Indonesia, built as a monorepo using Turborepo. It centralizes pothole and road damage reports that are currently scattered across WhatsApp and social media, making it easier for local government to prioritize repairs.
@@ -225,6 +251,8 @@ Key directories:
 - `src/shell/`: Service layer orchestrating business operations
 - `src/types/`: TypeScript type definitions
 
+> **For detailed architecture rules**: See `.cursor/rules/backend.mdc` for comprehensive 4-layer architecture guidelines, layer responsibilities (DO/DON'T lists), type organization rules, naming conventions, database patterns, route implementation patterns, and code quality standards.
+
 ### Database Schema
 
 **Users Table**: Firebase UID, email, name, avatar_url, provider
@@ -304,6 +332,13 @@ docker run --name postgres-viralkan \
 
 ## Development Guidelines
 
+**Before implementing any backend or frontend feature, always check the corresponding rule file:**
+
+- Backend features → Review `.cursor/rules/backend.mdc`
+- Frontend features → Review `.cursor/rules/frontend-rule.mdc`
+
+These rule files contain detailed technical standards that must be followed. This document (AGENTS.md) provides general workflow and project context, while the rule files provide specific implementation guidance.
+
 ### API Development
 
 - All endpoints use Zod validation schemas
@@ -311,12 +346,16 @@ docker run --name postgres-viralkan \
 - Database queries use prepared statements for security
 - Error responses follow consistent structure with proper HTTP codes
 
+> **For detailed backend patterns**: See `.cursor/rules/backend.mdc` for comprehensive backend development patterns including database query examples, route implementation with Hono, import organization, error handling with custom error classes, security requirements, testing requirements, documentation standards, and development checklist.
+
 ### Frontend Development
 
 - Components are built with the shared UI library (`@repo/ui`)
 - Tailwind CSS v4 for styling
 - React Hook Form for form handling
 - Next.js 15 with Turbopack for fast development
+
+> **For detailed frontend patterns**: See `.cursor/rules/frontend-rule.mdc` for comprehensive frontend development guidelines including component architecture (Shared UI vs Feature-Specific), styling guidelines (Tailwind CSS v4, shadcn/ui), performance and state management patterns, testing strategy, TypeScript best practices, asset handling, development workflow, and deployment considerations.
 
 ### Testing
 
@@ -377,6 +416,8 @@ Would you like me to [specific improvement]?"
 4. Add database operations in `src/data/`
 5. Update OpenAPI documentation
 
+> **For detailed API endpoint patterns**: See `.cursor/rules/backend.mdc` for comprehensive guidance on 4-layer architecture implementation, route structure with Hono, type organization, database patterns, error handling, and development checklist.
+
 ### Database Migrations
 
 - Migrations are in `apps/api/src/db/migrations/`
@@ -389,6 +430,11 @@ Would you like me to [specific improvement]?"
 - Follow existing patterns with Radix UI primitives
 - Export from `packages/ui/src/index.ts`
 - Use TypeScript for all components
+- Install shadcn/ui components using: `bunx shadcn@latest add <component-name>`
+- Check component availability in shadcn/ui before creating custom implementations
+- Always wrap shadcn components in `packages/ui` before using in `apps/web`
+
+> **For detailed component patterns**: See `.cursor/rules/frontend-rule.mdc` for comprehensive guidance on component architecture (Shared UI vs Feature-Specific), shadcn/ui integration, styling guidelines, component organization, and export requirements.
 
 ### Frontend Code Organization
 

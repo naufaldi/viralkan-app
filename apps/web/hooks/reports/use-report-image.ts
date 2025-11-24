@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { UseFormReturn } from "react-hook-form";
-import { CreateReportInput } from "../../../lib/types/api";
-import { extractGPSFromImage, getExifErrorMessage } from "../../../lib/utils/exif-extraction";
-import { reverseGeocodeWithNominatimData } from "../../../lib/services/geocoding";
-import { processNominatimAddressWithAPI } from "../../../lib/utils/enhanced-geocoding-handler";
+import { CreateReportInput } from "../../lib/types/api";
+import { extractGPSFromImage, getExifErrorMessage } from "../../lib/utils/exif-extraction";
+import { reverseGeocodeWithNominatimData } from "../../lib/services/geocoding";
+import { processNominatimAddressWithAPI } from "../../lib/utils/enhanced-geocoding-handler";
 import { toast } from "sonner";
 
 interface UseReportImageProps {
@@ -29,7 +29,6 @@ export const useReportImage = ({ form, applyAdministrativeSearchResults }: UseRe
     setExifError(undefined);
     setHasExifWarning(false);
 
-    // Extract EXIF GPS data from the original file (before compression) if available
     const fileForExif = originalFile || file;
     console.log("EXIF extraction started:", {
       compressedFile: file.name,
@@ -44,12 +43,10 @@ export const useReportImage = ({ form, applyAdministrativeSearchResults }: UseRe
       const exifResult = await extractGPSFromImage(fileForExif);
 
       if (exifResult.success && exifResult.gpsData) {
-        // Auto-fill coordinates from EXIF data
         form.setValue("lat", exifResult.gpsData.lat, { shouldValidate: true });
         form.setValue("lon", exifResult.gpsData.lon, { shouldValidate: true });
         setHasExifData(true);
 
-        // Perform enhanced reverse geocoding with API-based administrative matching
         try {
           const geocodingResult = await reverseGeocodeWithNominatimData(
             exifResult.gpsData.lat,
@@ -57,22 +54,18 @@ export const useReportImage = ({ form, applyAdministrativeSearchResults }: UseRe
           );
 
           if (geocodingResult.success && geocodingResult.data) {
-            // Process with new API-based progressive population
             const enhancedResult = await processNominatimAddressWithAPI(
               geocodingResult.data,
             );
 
-            // Apply the enhanced result to the form with proper data loading
             await applyAdministrativeSearchResults(enhancedResult);
 
-            // Set basic address fields
             if (geocodingResult.data.street_name) {
               form.setValue("street_name", geocodingResult.data.street_name, {
                 shouldValidate: true,
               });
             }
 
-            // Show success message based on overall confidence
             if (enhancedResult.overallConfidence >= 0.9) {
               toast.success("Lokasi dan alamat berhasil diekstrak dengan AI", {
                 description:
@@ -100,7 +93,6 @@ export const useReportImage = ({ form, applyAdministrativeSearchResults }: UseRe
               });
             }
           } else {
-            // Only coordinates extracted, show partial success
             toast.success("Koordinat berhasil diekstrak dari foto", {
               description: `Lat: ${exifResult.gpsData.lat.toFixed(6)}, Lon: ${exifResult.gpsData.lon.toFixed(6)}. Silakan isi alamat secara manual.`,
               duration: 4000,
@@ -108,33 +100,27 @@ export const useReportImage = ({ form, applyAdministrativeSearchResults }: UseRe
           }
         } catch (geocodingError) {
           console.error("Geocoding error:", geocodingError);
-          // Show coordinates only on geocoding failure
           toast.success("Koordinat berhasil diekstrak dari foto", {
             description: `Lat: ${exifResult.gpsData.lat.toFixed(6)}, Lon: ${exifResult.gpsData.lon.toFixed(6)}. Silakan isi alamat secara manual.`,
             duration: 4000,
           });
         }
       } else {
-        // Show warning for missing GPS data
         const errorMessage = getExifErrorMessage(exifResult);
         setExifError(errorMessage);
         setHasExifWarning(true);
         setHasExifData(false);
 
-        // Don't show toast error immediately, let user see the warning in the form
         console.log("EXIF extraction failed:", errorMessage);
       }
     } catch (error) {
       console.warn("EXIF extraction error:", error);
 
-      // Set a user-friendly warning message instead of breaking
       setExifError(
         "Gambar tidak memiliki data lokasi GPS. Silakan gunakan tombol lokasi atau isi koordinat secara manual.",
       );
       setHasExifWarning(true);
       setHasExifData(false);
-
-      // Don't throw or break the flow - this is expected for many images
     } finally {
       setIsExtractingExif(false);
     }
@@ -146,7 +132,6 @@ export const useReportImage = ({ form, applyAdministrativeSearchResults }: UseRe
     form.setValue("image_url", "");
     setUploadError(undefined);
     setHasExifData(false);
-    // Clear administrative sync state when image is removed
     clearSync();
   };
 
@@ -175,3 +160,4 @@ export const useReportImage = ({ form, applyAdministrativeSearchResults }: UseRe
     handleImageUploadSuccess,
   };
 };
+
