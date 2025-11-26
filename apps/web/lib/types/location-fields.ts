@@ -1,7 +1,6 @@
-
 /**
  * Location Fields Types & Interfaces
- * 
+ *
  * Consolidated types for location-related components to reduce prop drilling
  * and improve maintainability following DRY principles.
  */
@@ -74,7 +73,7 @@ export interface LocationState {
  */
 export interface AdministrativeSyncState {
   /** Current sync status object */
-  syncStatus: any; // TODO: Import proper type from administrative-sync-analysis
+  syncStatus: unknown; // TODO: Import proper type from administrative-sync-analysis
   /** Whether valid administrative match was found */
   hasValidMatch: boolean;
   /** Confidence level of the administrative match */
@@ -137,7 +136,9 @@ export interface LocationFieldsHandlers {
  * Complete location fields props interface
  * Replaces the 13 individual props in ReportLocationFields component
  */
-export interface LocationFieldsProps extends LocationFieldsConfig, LocationFieldsHandlers {
+export interface LocationFieldsProps
+  extends LocationFieldsConfig,
+    LocationFieldsHandlers {
   // All props are now consolidated into the above interfaces
 }
 
@@ -161,8 +162,7 @@ export interface ReportLocationFieldsProps {
   onGetCoordinates?: () => void;
   onClearGeocodingError?: () => void;
   hasExifData?: boolean;
-  onGetLocation?: ()
-  void;
+  onGetLocation?: () => void;
   isGettingLocation?: boolean;
   mode?: "auto" | "manual";
 }
@@ -191,7 +191,7 @@ export interface ReportFormFieldsProps {
   onGetLocation?: () => void;
   isGettingLocation?: boolean;
   // Administrative sync props
-  syncStatus?: any;
+  syncStatus?: unknown;
   hasValidMatch?: boolean;
   confidenceLevel?: "high" | "medium" | "low" | "none";
   canAutoSelect?: boolean;
@@ -208,9 +208,15 @@ export interface ReportFormFieldsProps {
  */
 export type LegacyToLocationFieldsProps = Omit<
   ReportLocationFieldsProps,
-  "mode" | "disabled" | "isFormActivated" | "isGeocodingFromCoords" | 
-  "isGeocodingFromAddress" | "lastGeocodingSource" | "geocodingError" | 
-  "hasExifData" | "isGettingLocation"
+  | "mode"
+  | "disabled"
+  | "isFormActivated"
+  | "isGeocodingFromCoords"
+  | "isGeocodingFromAddress"
+  | "lastGeocodingSource"
+  | "geocodingError"
+  | "hasExifData"
+  | "isGettingLocation"
 > & {
   mode: LocationMode;
   formState: FormActivationState;
@@ -222,19 +228,30 @@ export type LegacyToLocationFieldsProps = Omit<
 /**
  * Type guard to check if props are using new interface
  */
-export function isLocationFieldsProps(props: any): props is LocationFieldsProps {
-  return props.formState && props.geocodingState && props.locationState && props.administrativeSyncState;
+export function isLocationFieldsProps(
+  props: unknown,
+): props is LocationFieldsProps {
+  return (
+    typeof props === "object" &&
+    props !== null &&
+    "formState" in props &&
+    "geocodingState" in props &&
+    "locationState" in props &&
+    "administrativeSyncState" in props
+  );
 }
 
 /**
  * Utility function to convert legacy props to new interface
  */
-export function convertLegacyProps(legacy: ReportLocationFieldsProps): LocationFieldsProps {
+export function convertLegacyProps(
+  legacy: ReportLocationFieldsProps,
+): LocationFieldsProps {
   return {
     // Core form and mode
     form: legacy.form,
-    mode: legacy.mode as LocationMode || LocationMode.AUTO,
-    
+    mode: (legacy.mode as LocationMode) || LocationMode.AUTO,
+
     // Consolidated state interfaces
     formState: {
       isFormActivated: legacy.isFormActivated || false,
@@ -243,7 +260,8 @@ export function convertLegacyProps(legacy: ReportLocationFieldsProps): LocationF
     geocodingState: {
       isGeocodingFromCoords: legacy.isGeocodingFromCoords || false,
       isGeocodingFromAddress: legacy.isGeocodingFromAddress || false,
-      lastGeocodingSource: legacy.lastGeocodingSource as GeocodingSource || null,
+      lastGeocodingSource:
+        (legacy.lastGeocodingSource as GeocodingSource) || null,
       geocodingError: legacy.geocodingError || null,
     },
     locationState: {
@@ -257,7 +275,7 @@ export function convertLegacyProps(legacy: ReportLocationFieldsProps): LocationF
       canAutoSelect: false,
       isProcessingAdminSync: false,
     },
-    
+
     // Event handlers
     onClearGeocodingError: legacy.onClearGeocodingError || (() => {}),
     onGetAddress: legacy.onGetAddress || (() => {}),
@@ -275,22 +293,7 @@ export default {
   LocationMode,
   GeocodingSource,
   ConfidenceLevel,
-  
-  // Core interfaces
-  GeocodingState,
-  LocationState,
-  AdministrativeSyncState,
-  FormActivationState,
-  
-  // Consolidated interfaces
-  LocationFieldsConfig,
-  LocationFieldsHandlers,
-  LocationFieldsProps,
-  
-  // Legacy interfaces
-  ReportLocationFieldsProps,
-  ReportFormFieldsProps,
-  
+
   // Utilities
   isLocationFieldsProps,
   convertLegacyProps,

@@ -29,7 +29,8 @@ export function AdministrativeFilters({
 }: AdministrativeFiltersProps) {
   const { data, loading } = useAdministrative({
     provinceCode: provinsi && provinsi !== "all" ? provinsi : undefined,
-    regencyCode: kabupaten_kota && kabupaten_kota !== "all" ? kabupaten_kota : undefined,
+    regencyCode:
+      kabupaten_kota && kabupaten_kota !== "all" ? kabupaten_kota : undefined,
   });
 
   // Filter options based on selected values

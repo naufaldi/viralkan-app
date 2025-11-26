@@ -152,4 +152,3 @@ export const useReportSubmit = ({
     submitError: createError || updateError,
   };
 };
-

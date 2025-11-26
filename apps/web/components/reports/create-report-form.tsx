@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Card, CardContent } from "@repo/ui/components/ui/card";
 import { Form } from "@repo/ui/components/ui/form";
 import {
@@ -11,12 +10,6 @@ import {
   ExifWarning,
 } from "./report-form";
 import { ReportForm } from "./report-form/report-form";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@repo/ui/components/ui/tabs";
 import { ReportResponse } from "@/lib/types/api";
 import {
   useReportFormContext,
@@ -33,15 +26,11 @@ interface CreateReportFormProps {
 interface CreateReportFormContentProps {
   isEditing?: boolean;
   initialImageUrl?: string;
-  mode: "auto" | "manual";
-  onModeChange: (mode: "auto" | "manual") => void;
 }
 
 function CreateReportFormContent({
   isEditing = false,
   initialImageUrl,
-  mode,
-  onModeChange,
 }: CreateReportFormContentProps) {
   const { form, formError, isLoading, isFormActivated, submitError } =
     useReportFormContext();
@@ -68,7 +57,7 @@ function CreateReportFormContent({
   };
 
   return (
-    <Card className="hover:translate-0 overflow-hidden rounded-xl border-neutral-200 shadow-lg">
+    <Card className="overflow-hidden rounded-xl border-neutral-200 shadow-lg hover:translate-0">
       <ReportFormHeader
         title={isEditing ? "Edit Laporan" : "Buat Laporan Baru"}
       />
@@ -83,57 +72,29 @@ function CreateReportFormContent({
             })}
             className="space-y-6"
           >
-            <Tabs
-              value={mode}
-              onValueChange={(value) =>
-                onModeChange(value as "auto" | "manual")
-              }
-              className="w-full"
-            >
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="auto">Foto & Lokasi Otomatis</TabsTrigger>
-                <TabsTrigger value="manual">Foto & Alamat Manual</TabsTrigger>
-              </TabsList>
-
-              <div className="mt-6">
-                <ReportImageUpload
-                  selectedImage={selectedImage}
-                  onImageSelect={handleImageSelect}
-                  onImageRemove={handleImageRemove}
-                  onUploadError={handleImageUploadError}
-                  onUploadSuccess={handleImageUploadSuccess}
-                  isUploading={isUploadingImage || isExtractingExif}
-                  error={uploadError}
-                  disabled={isLoading}
-                  onFormActivation={handleFormActivation}
-                  initialImageUrl={initialImageUrl}
-                />
-
-                {/* EXIF Warning - Shows when GPS metadata is missing (Only in Auto mode) */}
-                <div className={mode === "auto" ? "block" : "hidden"}>
-                  <ExifWarning isVisible={hasExifWarning} />
-                </div>
-
-                <TabsContent value="auto" className="mt-4">
-                  <div className="rounded-md bg-blue-50 p-4 text-sm text-blue-700">
-                    <p>
-                      Mode ini akan mencoba mengambil lokasi dari GPS foto atau
-                      lokasi perangkat Anda secara otomatis.
-                    </p>
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="manual" className="mt-4">
-                  <div className="rounded-md bg-amber-50 p-4 text-sm text-amber-700">
-                    <p>
-                      Mode ini memungkinkan Anda mengisi alamat secara manual.
-                      Koordinat akan dicari berdasarkan alamat yang Anda
-                      masukkan.
-                    </p>
-                  </div>
-                </TabsContent>
-              </div>
-            </Tabs>
+            <div className="space-y-3">
+              <p className="text-sm font-semibold text-neutral-900">
+                Langkah 1 · Unggah foto jalan rusak
+              </p>
+              <p className="text-sm text-neutral-600">
+                Kami akan mencoba membaca GPS dari foto atau perangkat Anda.
+                Jika tidak tersedia, lengkapi alamat dan gunakan bantuan lokasi
+                di bawah.
+              </p>
+              <ReportImageUpload
+                selectedImage={selectedImage}
+                onImageSelect={handleImageSelect}
+                onImageRemove={handleImageRemove}
+                onUploadError={handleImageUploadError}
+                onUploadSuccess={handleImageUploadSuccess}
+                isUploading={isUploadingImage || isExtractingExif}
+                error={uploadError}
+                disabled={isLoading}
+                onFormActivation={handleFormActivation}
+                initialImageUrl={initialImageUrl}
+              />
+              <ExifWarning isVisible={hasExifWarning} />
+            </div>
 
             <ReportForm.Fields />
 
@@ -167,20 +128,15 @@ export default function CreateReportForm({
   initialData,
   isEditing = false,
 }: CreateReportFormProps) {
-  const [activeTab, setActiveTab] = useState<"auto" | "manual">("auto");
-
   return (
     <ReportForm
       onSuccess={onSuccess}
       initialData={initialData}
       isEditing={isEditing}
-      mode={activeTab}
     >
       <CreateReportFormContent
         isEditing={isEditing}
         initialImageUrl={initialData?.image_url}
-        mode={activeTab}
-        onModeChange={(mode) => setActiveTab(mode)}
       />
     </ReportForm>
   );

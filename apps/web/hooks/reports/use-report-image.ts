@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { CreateReportInput } from "../../lib/types/api";
-import { extractGPSFromImage, getExifErrorMessage } from "../../lib/utils/exif-extraction";
+import {
+  extractGPSFromImage,
+  getExifErrorMessage,
+} from "../../lib/utils/exif-extraction";
 import { reverseGeocodeWithNominatimData } from "../../lib/services/geocoding";
 import { processNominatimAddressWithAPI } from "../../lib/utils/enhanced-geocoding-handler";
 import { toast } from "sonner";
@@ -11,7 +14,10 @@ interface UseReportImageProps {
   applyAdministrativeSearchResults: (result: any) => Promise<void>;
 }
 
-export const useReportImage = ({ form, applyAdministrativeSearchResults }: UseReportImageProps) => {
+export const useReportImage = ({
+  form,
+  applyAdministrativeSearchResults,
+}: UseReportImageProps) => {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [uploadError, setUploadError] = useState<string | undefined>(undefined);
   const [imageUploadFailed, setImageUploadFailed] = useState(false);
@@ -160,4 +166,3 @@ export const useReportImage = ({ form, applyAdministrativeSearchResults }: UseRe
     handleImageUploadSuccess,
   };
 };
-

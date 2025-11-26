@@ -61,7 +61,9 @@ export default function ImageUpload({
   onFormActivation,
   initialImageUrl,
 }: ImageUploadProps) {
-  const [preview, setPreview] = useState<string | null>(initialImageUrl || null);
+  const [preview, setPreview] = useState<string | null>(
+    initialImageUrl || null,
+  );
   const [dragOver, setDragOver] = useState(false);
   const [uploadError, setUploadError] = useState<string | undefined>(undefined);
   const [retryCount, setRetryCount] = useState(0);
@@ -519,14 +521,14 @@ export default function ImageUpload({
                         className="line-clamp-1 text-sm font-semibold text-neutral-800"
                         title={selectedImage?.name || "Foto Laporan"}
                       >
-                        {selectedImage 
-                          ? (selectedImage.name.length > 25
-                              ? `${selectedImage.name.substring(0, 22)}...${selectedImage.name.split(".").pop()}`
-                              : selectedImage.name)
+                        {selectedImage
+                          ? selectedImage.name.length > 25
+                            ? `${selectedImage.name.substring(0, 22)}...${selectedImage.name.split(".").pop()}`
+                            : selectedImage.name
                           : "Foto Laporan"}
                       </p>
                       <p className="text-xs font-medium text-green-700">
-                        {selectedImage 
+                        {selectedImage
                           ? `${(selectedImage.size / 1024 / 1024).toFixed(1)} MB • Foto siap digunakan`
                           : "Foto tersimpan"}
                       </p>
@@ -582,7 +584,7 @@ export default function ImageUpload({
                         {selectedImage?.name || "Foto Laporan"}
                       </p>
                       <p className="text-xs font-medium text-green-700">
-                        {selectedImage 
+                        {selectedImage
                           ? `${(selectedImage.size / 1024 / 1024).toFixed(1)} MB • Foto siap digunakan`
                           : "Foto tersimpan"}
                       </p>

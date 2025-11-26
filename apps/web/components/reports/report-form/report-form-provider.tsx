@@ -23,7 +23,6 @@ export function ReportFormProvider({
   onSuccess,
   initialData,
   isEditing = false,
-  mode = "auto",
 }: ReportFormProviderProps) {
   const [isFormActivated, setIsFormActivated] = useState(isEditing);
 
@@ -41,6 +40,7 @@ export function ReportFormProvider({
   }, [formState.selectedImage, isFormActivated, isEditing]);
 
   // Core form context value (6 properties)
+  const mode = formState.hasExifData ? "auto" : "manual";
   const formContextValue = useMemo(
     () => ({
       form: formState.form,

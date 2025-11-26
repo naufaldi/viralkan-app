@@ -12,7 +12,6 @@ interface ReportFormProps {
   onSuccess?: (reportId: string) => void;
   initialData?: ReportResponse;
   isEditing?: boolean;
-  mode?: "auto" | "manual";
 }
 
 /**
@@ -44,4 +43,3 @@ ReportForm.LocationFields = ReportLocationFields;
 ReportForm.CategoryField = ReportCategoryField;
 
 export { ReportForm };
-

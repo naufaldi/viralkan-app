@@ -1,0 +1,10 @@
+# Tasks – Backend Improve Create Report Flow (Auto Location)
+
+- status: completed | id: improve-create-report-backend-plan | description: Create ExecPlan and align scope with RFC and backend rules.
+- status: completed | id: improve-create-report-backend-schema-validation | description: Update report schemas/types/validation rules to support geocoding-aware payloads and metadata. (Progress: added geocoding schemas/types/metadata fields, adjusted validation to handle nullable coords, resolved type errors.)
+- status: in_progress | id: improve-create-report-backend-geocoding-service | description: Build Nominatim-backed geocoding client with rate limiting and parsing to administrative fields. (Progress: client scaffolded, rate-limited, retry on 429; consider externalizing configs/tests.)
+- status: in_progress | id: improve-create-report-backend-create-update-flow | description: Orchestrate reverse/forward geocoding inside report create/update shell/core and persist metadata. (Progress: create/update now call geocoding and merge metadata; need response contract/tests.)
+- status: in_progress | id: improve-create-report-backend-geocoding-endpoints | description: Add geocoding helper endpoints for reverse/forward lookups and update responses to expose geocoding status. (Progress: endpoints added with handlers; need tests/docs.)
+- status: in_progress | id: improve-create-report-backend-admin-remediation | description: Provide admin-only endpoint to correct lat/lon and address metadata regardless of ownership. (Progress: route + handler wired; needs tests and logging.)
+- status: pending | id: improve-create-report-backend-testing-docs | description: Add tests for geocoding flows and admin corrections; update developer docs/env vars.
+- status: completed | id: improve-create-report-frontend-single-flow | description: Remove auto/manual tabs from create report form; single flow adapts based on photo EXIF vs manual address entry.

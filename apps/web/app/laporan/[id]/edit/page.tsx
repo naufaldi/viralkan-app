@@ -36,13 +36,15 @@ export default function EditReportPage({
       try {
         setIsLoading(true);
         const response = await apiCallRef.current(`/api/reports/${id}`);
-        
+
         if (!response.ok) {
           if (response.status === 404) {
             throw new Error("Laporan tidak ditemukan");
           }
           if (response.status === 403) {
-            throw new Error("Anda tidak memiliki akses untuk mengedit laporan ini");
+            throw new Error(
+              "Anda tidak memiliki akses untuk mengedit laporan ini",
+            );
           }
           throw new Error("Gagal memuat laporan");
         }
@@ -78,10 +80,12 @@ export default function EditReportPage({
     return (
       <div className="container mx-auto max-w-2xl px-4 py-8">
         <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-center">
-          <h2 className="mb-2 text-lg font-semibold text-red-800">Gagal Memuat Laporan</h2>
+          <h2 className="mb-2 text-lg font-semibold text-red-800">
+            Gagal Memuat Laporan
+          </h2>
           <p className="text-red-600">{error}</p>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             className="mt-4"
             onClick={() => router.back()}
           >
@@ -96,8 +100,8 @@ export default function EditReportPage({
   return (
     <div className="container mx-auto max-w-3xl px-4 py-8">
       <div className="mb-6">
-        <Button 
-          variant="ghost" 
+        <Button
+          variant="ghost"
           className="pl-0 hover:bg-transparent hover:text-neutral-900"
           onClick={() => router.back()}
         >
@@ -107,10 +111,12 @@ export default function EditReportPage({
       </div>
 
       {report && (
-        <CreateReportForm 
-          initialData={report} 
-          isEditing={true} 
-          onSuccess={(id: string) => router.push(`/laporan/${id}?success=updated`)}
+        <CreateReportForm
+          initialData={report}
+          isEditing={true}
+          onSuccess={(id: string) =>
+            router.push(`/laporan/${id}?success=updated`)
+          }
         />
       )}
     </div>

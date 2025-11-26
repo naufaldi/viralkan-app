@@ -5,10 +5,15 @@ import type {
   ReportQuery,
   ReportParams,
   PaginatedReports,
+  GeocodingMetadata,
+  GeocodingResult,
+  ReverseGeocodeRequest,
+  ForwardGeocodeRequest,
 } from "./types";
 import type { AppResult } from "@/types";
 import * as data from "./data";
 import * as core from "./core";
+import { reverseGeocode, forwardGeocode } from "./geocoding";
 
 // Shell layer: Business logic orchestration (coordinates between core and data layers)
 
@@ -81,8 +86,54 @@ export const createNewReport = async (
       return validation;
     }
 
+    let geocodingResult: GeocodingResult | undefined;
+    let metadata: GeocodingMetadata = {
+      geocoding_source: "manual",
+      geocoded_at: null,
+    };
+
+    const hasCoords =
+      validation.data.lat !== undefined &&
+      validation.data.lat !== null &&
+      validation.data.lon !== undefined &&
+      validation.data.lon !== null;
+
+    if (hasCoords) {
+      const reverseResult = await reverseGeocode({
+        lat: validation.data.lat as number,
+        lon: validation.data.lon as number,
+      });
+
+      if (reverseResult.success) {
+        geocodingResult = reverseResult.data;
+      }
+    } else {
+      const forwardResult = await forwardGeocode({
+        street_name: validation.data.street_name,
+        district: validation.data.district,
+        city: validation.data.city,
+        province: validation.data.province,
+        province_code: validation.data.province_code ?? undefined,
+        regency_code: validation.data.regency_code ?? undefined,
+        district_code: validation.data.district_code ?? undefined,
+      });
+
+      if (forwardResult.success) {
+        geocodingResult = forwardResult.data;
+      }
+    }
+
+    if (geocodingResult) {
+      const merged = core.mergeGeocodingIntoReport(
+        validation.data,
+        geocodingResult,
+      );
+      metadata = merged.metadata;
+      validation.data = merged.report;
+    }
+
     // Create report in data layer
-    const result = await data.createReport(userId, validation.data);
+    const result = await data.createReport(userId, validation.data, metadata);
     if (!result.success) {
       return result;
     }
@@ -117,7 +168,8 @@ export const updateExistingReport = async (
     }
 
     // Sanitize update data if string fields are being updated
-    const sanitizedUpdateData: Partial<CreateReportInput> = {};
+    const sanitizedUpdateData: Partial<CreateReportInput & GeocodingMetadata> =
+      {};
     if (updateData.street_name !== undefined) {
       sanitizedUpdateData.street_name = updateData.street_name.trim();
     }
@@ -130,11 +182,99 @@ export const updateExistingReport = async (
     if (updateData.category !== undefined) {
       sanitizedUpdateData.category = updateData.category;
     }
-    if (updateData.lat !== undefined) {
-      sanitizedUpdateData.lat = updateData.lat;
+    const targetLat = updateData.lat ?? existingReportResult.data.lat;
+    const targetLon = updateData.lon ?? existingReportResult.data.lon;
+
+    const hasCoords =
+      targetLat !== undefined &&
+      targetLat !== null &&
+      targetLon !== undefined &&
+      targetLon !== null;
+
+    const addressChanged =
+      updateData.street_name !== undefined ||
+      updateData.district !== undefined ||
+      updateData.city !== undefined ||
+      updateData.province !== undefined ||
+      updateData.province_code !== undefined ||
+      updateData.regency_code !== undefined ||
+      updateData.district_code !== undefined;
+
+    let geocodingResult: GeocodingResult | undefined;
+    if (hasCoords) {
+      const reverseResult = await reverseGeocode({
+        lat: targetLat as number,
+        lon: targetLon as number,
+      });
+
+      if (reverseResult.success) {
+        geocodingResult = reverseResult.data;
+      }
+    } else if (addressChanged) {
+      const forwardResult = await forwardGeocode({
+        street_name:
+          sanitizedUpdateData.street_name ??
+          existingReportResult.data.street_name,
+        district:
+          sanitizedUpdateData.district ?? existingReportResult.data.district,
+        city: sanitizedUpdateData.city ?? existingReportResult.data.city,
+        province:
+          sanitizedUpdateData.province ?? existingReportResult.data.province,
+        province_code:
+          sanitizedUpdateData.province_code ??
+          existingReportResult.data.province_code ??
+          undefined,
+        regency_code:
+          sanitizedUpdateData.regency_code ??
+          existingReportResult.data.regency_code ??
+          undefined,
+        district_code:
+          sanitizedUpdateData.district_code ??
+          existingReportResult.data.district_code ??
+          undefined,
+      });
+
+      if (forwardResult.success) {
+        geocodingResult = forwardResult.data;
+      }
     }
-    if (updateData.lon !== undefined) {
-      sanitizedUpdateData.lon = updateData.lon;
+
+    if (geocodingResult) {
+      sanitizedUpdateData.lat = sanitizedUpdateData.lat ?? geocodingResult.lat;
+      sanitizedUpdateData.lon = sanitizedUpdateData.lon ?? geocodingResult.lon;
+      sanitizedUpdateData.street_name =
+        sanitizedUpdateData.street_name ??
+        geocodingResult.street_name ??
+        existingReportResult.data.street_name;
+      sanitizedUpdateData.district =
+        sanitizedUpdateData.district ??
+        geocodingResult.district ??
+        existingReportResult.data.district;
+      sanitizedUpdateData.city =
+        sanitizedUpdateData.city ??
+        geocodingResult.city ??
+        existingReportResult.data.city;
+      sanitizedUpdateData.province =
+        sanitizedUpdateData.province ??
+        geocodingResult.province ??
+        existingReportResult.data.province;
+      sanitizedUpdateData.province_code =
+        sanitizedUpdateData.province_code ??
+        geocodingResult.province_code ??
+        existingReportResult.data.province_code ??
+        undefined;
+      sanitizedUpdateData.regency_code =
+        sanitizedUpdateData.regency_code ??
+        geocodingResult.regency_code ??
+        existingReportResult.data.regency_code ??
+        undefined;
+      sanitizedUpdateData.district_code =
+        sanitizedUpdateData.district_code ??
+        geocodingResult.district_code ??
+        existingReportResult.data.district_code ??
+        undefined;
+      sanitizedUpdateData.geocoding_source = geocodingResult.geocoding_source;
+      sanitizedUpdateData.geocoded_at = geocodingResult.geocoded_at;
     }
 
     // Update report in data layer
@@ -296,5 +436,119 @@ export const validateReportOwnership = async (
   } catch (error) {
     console.error("Error in validateReportOwnership shell:", error);
     return createError("Failed to validate report ownership", 500);
+  }
+};
+
+export const reverseGeocodeLocation = async (
+  payload: ReverseGeocodeRequest,
+): Promise<AppResult<GeocodingResult>> => {
+  return reverseGeocode(payload);
+};
+
+export const forwardGeocodeLocation = async (
+  payload: ForwardGeocodeRequest,
+): Promise<AppResult<GeocodingResult>> => {
+  return forwardGeocode(payload);
+};
+
+export const adminUpdateReportLocation = async (
+  reportId: string,
+  updateData: Partial<CreateReportInput & GeocodingMetadata>,
+): Promise<AppResult<boolean>> => {
+  try {
+    const latProvided = updateData.lat !== undefined && updateData.lat !== null;
+    const lonProvided = updateData.lon !== undefined && updateData.lon !== null;
+
+    if ((latProvided && !lonProvided) || (lonProvided && !latProvided)) {
+      return createError(
+        "Both latitude and longitude must be provided together",
+        400,
+      );
+    }
+
+    if (
+      latProvided &&
+      updateData.lat !== null &&
+      ((updateData.lat as number) < -11 || (updateData.lat as number) > 6)
+    ) {
+      return createError(
+        "Latitude must be within Indonesia bounds (-11 to 6)",
+        400,
+      );
+    }
+
+    if (
+      lonProvided &&
+      updateData.lon !== null &&
+      ((updateData.lon as number) < 95 || (updateData.lon as number) > 141)
+    ) {
+      return createError(
+        "Longitude must be within Indonesia bounds (95 to 141)",
+        400,
+      );
+    }
+
+    const sanitized: Partial<CreateReportInput & GeocodingMetadata> = {
+      ...updateData,
+    };
+
+    if (updateData.street_name !== undefined) {
+      sanitized.street_name = updateData.street_name.trim();
+    }
+
+    if (updateData.location_text !== undefined) {
+      sanitized.location_text = updateData.location_text.trim();
+    }
+
+    if (updateData.city !== undefined) {
+      sanitized.city = updateData.city.trim();
+    }
+
+    if (updateData.district !== undefined) {
+      sanitized.district = updateData.district.trim();
+    }
+
+    if (updateData.province !== undefined) {
+      sanitized.province = updateData.province.trim();
+    }
+
+    // Attempt geocoding if coordinates supplied
+    if (
+      latProvided &&
+      lonProvided &&
+      updateData.lat !== null &&
+      updateData.lon !== null
+    ) {
+      const lat = updateData.lat as number;
+      const lon = updateData.lon as number;
+
+      const reverseResult = await reverseGeocode({
+        lat,
+        lon,
+      });
+
+      if (reverseResult.success) {
+        sanitized.geocoding_source = reverseResult.data.geocoding_source;
+        sanitized.geocoded_at = reverseResult.data.geocoded_at;
+        sanitized.street_name =
+          sanitized.street_name ?? reverseResult.data.street_name;
+        sanitized.district = sanitized.district ?? reverseResult.data.district;
+        sanitized.city = sanitized.city ?? reverseResult.data.city;
+        sanitized.province = sanitized.province ?? reverseResult.data.province;
+      }
+    }
+
+    const updateResult = await data.adminUpdateReportLocation(
+      reportId,
+      sanitized,
+    );
+    if (!updateResult.success) {
+      return updateResult;
+    }
+
+    return createSuccess(true);
+  } catch (error) {
+    console.error("Error in adminUpdateReportLocation shell:", error);
+    return createError("Failed to update report location as admin", 500);
   }
 };

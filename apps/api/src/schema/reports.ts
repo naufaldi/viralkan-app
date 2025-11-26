@@ -29,11 +29,11 @@ export const CreateReportSchema = z.object({
       example: "Depan Mall Tunjungan Plaza, sebelah kiri arah Surabaya",
       description: "Detailed description of the damage location",
     }),
-  lat: z.number().min(-90).max(90).optional().openapi({
+  lat: z.number().min(-90).max(90).nullable().optional().openapi({
     example: -7.257472,
     description: "Latitude coordinate of the damage location",
   }),
-  lon: z.number().min(-180).max(180).optional().openapi({
+  lon: z.number().min(-180).max(180).nullable().optional().openapi({
     example: 112.752088,
     description: "Longitude coordinate of the damage location",
   }),
@@ -92,6 +92,87 @@ export const CreateReportSchema = z.object({
     .openapi({
       example: "327301",
       description: "District code from Indonesian administrative system",
+    }),
+});
+
+export const ReverseGeocodeRequestSchema = z.object({
+  lat: z
+    .number()
+    .min(-90, "Latitude must be greater than or equal to -90")
+    .max(90, "Latitude must be less than or equal to 90")
+    .openapi({
+      example: -6.2,
+      description: "Latitude coordinate for reverse geocoding",
+    }),
+  lon: z
+    .number()
+    .min(-180, "Longitude must be greater than or equal to -180")
+    .max(180, "Longitude must be less than or equal to 180")
+    .openapi({
+      example: 106.816666,
+      description: "Longitude coordinate for reverse geocoding",
+    }),
+});
+
+export const ForwardGeocodeRequestSchema = z.object({
+  street_name: z
+    .string()
+    .min(1, "Street name is required")
+    .max(255, "Street name too long")
+    .openapi({
+      example: "Jl. Jenderal Sudirman",
+      description: "Street name used for forward geocoding",
+    }),
+  district: z
+    .string()
+    .min(1, "District is required")
+    .max(100, "District name too long")
+    .openapi({
+      example: "Tanah Abang",
+      description: "District (kecamatan) used for forward geocoding",
+    }),
+  city: z
+    .string()
+    .min(1, "City is required")
+    .max(100, "City name too long")
+    .openapi({
+      example: "Jakarta Pusat",
+      description: "City/regency (kota/kabupaten) used for forward geocoding",
+    }),
+  province: z
+    .string()
+    .min(1, "Province is required")
+    .max(100, "Province name too long")
+    .openapi({
+      example: "DKI Jakarta",
+      description: "Province (provinsi) used for forward geocoding",
+    }),
+  province_code: z
+    .string()
+    .length(2, "Province code must be 2 characters")
+    .regex(/^\d{2}$/, "Province code must be 2 digits")
+    .optional()
+    .openapi({
+      example: "31",
+      description: "Province code used for forward geocoding",
+    }),
+  regency_code: z
+    .string()
+    .length(4, "Regency code must be 4 characters")
+    .regex(/^\d{4}$/, "Regency code must be 4 digits")
+    .optional()
+    .openapi({
+      example: "3174",
+      description: "Regency/city code used for forward geocoding",
+    }),
+  district_code: z
+    .string()
+    .length(6, "District code must be 6 characters")
+    .regex(/^\d{6}$/, "District code must be 6 digits")
+    .optional()
+    .openapi({
+      example: "317404",
+      description: "District code used for forward geocoding",
     }),
 });
 
@@ -248,6 +329,16 @@ export const ReportResponseSchema = z.object({
     .string()
     .datetime()
     .openapi({ example: "2024-01-15T10:30:00Z" }),
+  geocoding_source: z.enum(["exif", "nominatim", "manual"]).nullable().openapi({
+    example: "nominatim",
+    description:
+      "Source of geocoding data (exif/nominatim/manual), nullable when unknown",
+  }),
+  geocoded_at: z.string().datetime().nullable().openapi({
+    example: "2025-01-01T00:00:00.000Z",
+    description:
+      "Timestamp when geocoding was successfully performed; null if not geocoded",
+  }),
 });
 
 export const ReportWithUserResponseSchema = ReportResponseSchema.extend({

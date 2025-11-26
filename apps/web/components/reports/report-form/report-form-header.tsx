@@ -13,9 +13,7 @@ export const ReportFormHeader = ({ title }: ReportFormHeaderProps) => {
           <FileText className="h-5 w-5 text-neutral-700" />
         </div>
         <div>
-          <div className="text-xl font-bold text-neutral-900">
-            {title}
-          </div>
+          <div className="text-xl font-bold text-neutral-900">{title}</div>
           <div className="mt-1 text-sm font-normal text-neutral-600">
             Bantu komunitas menghindari jalan rusak dan tingkatkan kesadaran
             publik

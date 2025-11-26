@@ -3,6 +3,8 @@ import type {
   CreateReportInput,
   ReportWithUser,
   PaginatedReports,
+  GeocodingMetadata,
+  GeocodingResult,
 } from "./types";
 import type { AppResult } from "@/types";
 
@@ -12,10 +14,12 @@ export const validateReportData = (
   data: CreateReportInput,
 ): AppResult<CreateReportInput> => {
   // Business rule: Coordinates must be both provided or both omitted
-  if (
-    (data.lat !== undefined && data.lon === undefined) ||
-    (data.lat === undefined && data.lon !== undefined)
-  ) {
+  const latValue = data.lat ?? null;
+  const lonValue = data.lon ?? null;
+  const hasLat = latValue !== null;
+  const hasLon = lonValue !== null;
+
+  if ((hasLat && !hasLon) || (hasLon && !hasLat)) {
     return createError(
       "Both latitude and longitude must be provided together",
       400,
@@ -23,14 +27,14 @@ export const validateReportData = (
   }
 
   // Business rule: Validate coordinate ranges for Indonesia
-  if (data.lat !== undefined && data.lon !== undefined) {
-    if (data.lat < -11 || data.lat > 6) {
+  if (hasLat && hasLon && latValue !== null && lonValue !== null) {
+    if (latValue < -11 || latValue > 6) {
       return createError(
         "Latitude must be within Indonesia bounds (-11 to 6)",
         400,
       );
     }
-    if (data.lon < 95 || data.lon > 141) {
+    if (lonValue < 95 || lonValue > 141) {
       return createError(
         "Longitude must be within Indonesia bounds (95 to 141)",
         400,
@@ -65,6 +69,54 @@ export const sanitizeReportData = (
     location_text: data.location_text.trim(),
     image_url: data.image_url.trim(),
   };
+};
+
+const defaultGeocodingMetadata = (): GeocodingMetadata => ({
+  geocoding_source: null,
+  geocoded_at: null,
+});
+
+const isMeaningful = (value?: string | null): value is string =>
+  typeof value === "string" && value.trim().length > 0;
+
+export const mergeGeocodingIntoReport = (
+  data: CreateReportInput,
+  geocodingResult?: GeocodingResult,
+): { report: CreateReportInput; metadata: GeocodingMetadata } => {
+  if (!geocodingResult) {
+    return { report: data, metadata: defaultGeocodingMetadata() };
+  }
+
+  const merged: CreateReportInput = {
+    ...data,
+    street_name: isMeaningful(data.street_name)
+      ? data.street_name
+      : (geocodingResult.street_name ?? data.street_name),
+    district: isMeaningful(data.district)
+      ? data.district
+      : (geocodingResult.district ?? data.district),
+    city: isMeaningful(data.city)
+      ? data.city
+      : (geocodingResult.city ?? data.city),
+    province: isMeaningful(data.province)
+      ? data.province
+      : (geocodingResult.province ?? data.province),
+    province_code:
+      data.province_code ?? geocodingResult.province_code ?? undefined,
+    regency_code:
+      data.regency_code ?? geocodingResult.regency_code ?? undefined,
+    district_code:
+      data.district_code ?? geocodingResult.district_code ?? undefined,
+    lat: data.lat ?? geocodingResult.lat ?? null,
+    lon: data.lon ?? geocodingResult.lon ?? null,
+  };
+
+  const metadata: GeocodingMetadata = {
+    geocoding_source: geocodingResult.geocoding_source,
+    geocoded_at: geocodingResult.geocoded_at,
+  };
+
+  return { report: merged, metadata };
 };
 
 export const calculateReportPriority = (
@@ -198,11 +250,17 @@ export const validateReportUpdate = (
   }
 
   // Business rule: Validate update data if provided
-  if (updateData.lat !== undefined || updateData.lon !== undefined) {
-    const lat = updateData.lat ?? currentReport.lat;
-    const lon = updateData.lon ?? currentReport.lon;
+  const hasLatUpdate = updateData.lat !== undefined;
+  const hasLonUpdate = updateData.lon !== undefined;
 
-    if ((lat !== null && lon === null) || (lat === null && lon !== null)) {
+  if (hasLatUpdate || hasLonUpdate) {
+    const lat = hasLatUpdate ? updateData.lat : currentReport.lat;
+    const lon = hasLonUpdate ? updateData.lon : currentReport.lon;
+
+    const latProvided = lat !== undefined && lat !== null;
+    const lonProvided = lon !== undefined && lon !== null;
+
+    if ((latProvided && !lonProvided) || (lonProvided && !latProvided)) {
       return createError(
         "Both latitude and longitude must be provided together",
         400,
@@ -211,7 +269,12 @@ export const validateReportUpdate = (
   }
 
   // Validate coordinates if provided
-  if (updateData.lat !== undefined && updateData.lon !== undefined) {
+  if (
+    updateData.lat !== undefined &&
+    updateData.lon !== undefined &&
+    updateData.lat !== null &&
+    updateData.lon !== null
+  ) {
     if (updateData.lat < -11 || updateData.lat > 6) {
       return createError(
         "Latitude must be within Indonesia bounds (-11 to 6)",

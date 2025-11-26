@@ -7,7 +7,10 @@ import { useAdministrative } from "./use-administrative";
 import { administrativeService } from "../../services/administrative";
 import { reverseGeocodeWithNominatimData } from "../../lib/services/geocoding";
 import { processNominatimAddressWithAPI } from "../../lib/utils/enhanced-geocoding-handler";
-import { getLocationErrorMessage, geolocationOptions } from "../../utils/report-form-utils";
+import {
+  getLocationErrorMessage,
+  geolocationOptions,
+} from "../../utils/report-form-utils";
 import { toast } from "sonner";
 
 interface UseReportLocationProps {
@@ -16,7 +19,7 @@ interface UseReportLocationProps {
 
 export const useReportLocation = ({ form }: UseReportLocationProps) => {
   const [isGettingLocation, setIsGettingLocation] = useState(false);
-  
+
   const { addDynamicOption } = useAdministrative();
 
   const {
@@ -404,4 +407,3 @@ export const useReportLocation = ({ form }: UseReportLocationProps) => {
     applyAdministrativeSearchResults,
   };
 };
-
