@@ -5,8 +5,14 @@ import { useGeocoding } from "../use-geocoding";
 import { useAdministrativeSync } from "./use-administrative-sync";
 import { useAdministrative } from "./use-administrative";
 import { administrativeService } from "../../services/administrative";
-import { reverseGeocodeWithNominatimData } from "../../lib/services/geocoding";
-import { processNominatimAddressWithAPI } from "../../lib/utils/enhanced-geocoding-handler";
+import {
+  reverseGeocodeWithNominatimData,
+  type LocationData,
+} from "../../lib/services/geocoding";
+import {
+  processNominatimAddressWithAPI,
+  type EnhancedGeocodingResponse,
+} from "../../lib/utils/enhanced-geocoding-handler";
 import {
   getLocationErrorMessage,
   geolocationOptions,
@@ -60,13 +66,9 @@ export const useReportLocation = ({ form }: UseReportLocationProps) => {
     enableValidation: true,
   });
 
-  const applyAdministrativeSearchResults = async (enhancedResult: {
-    administrative: {
-      province: { code: string | null; name: string | null };
-      regency: { code: string | null; name: string | null };
-      district: { code: string | null; name: string | null };
-    };
-  }) => {
+  const applyAdministrativeSearchResults = async (
+    enhancedResult: EnhancedGeocodingResponse,
+  ) => {
     try {
       if (
         enhancedResult.administrative.province.code &&
@@ -151,6 +153,33 @@ export const useReportLocation = ({ form }: UseReportLocationProps) => {
     }
   };
 
+  const applyGeocodingAdministrativeFallbacks = (
+    geocodingData: LocationData,
+    enhancedResult?: EnhancedGeocodingResponse,
+  ) => {
+    const provinceName =
+      enhancedResult?.administrative.province.name ||
+      geocodingData.province ||
+      "";
+    const regencyName =
+      enhancedResult?.administrative.regency.name || geocodingData.city || "";
+    const districtName =
+      enhancedResult?.administrative.district.name ||
+      geocodingData.district ||
+      "";
+
+    const provinceCode = enhancedResult?.administrative.province.code || "";
+    const regencyCode = enhancedResult?.administrative.regency.code || "";
+    const districtCode = enhancedResult?.administrative.district.code || "";
+
+    form.setValue("province", provinceName, { shouldValidate: true });
+    form.setValue("province_code", provinceCode, { shouldValidate: true });
+    form.setValue("city", regencyName, { shouldValidate: true });
+    form.setValue("regency_code", regencyCode, { shouldValidate: true });
+    form.setValue("district", districtName, { shouldValidate: true });
+    form.setValue("district_code", districtCode, { shouldValidate: true });
+  };
+
   const getCurrentLocation = async () => {
     setIsGettingLocation(true);
 
@@ -198,6 +227,10 @@ export const useReportLocation = ({ form }: UseReportLocationProps) => {
             );
 
             await applyAdministrativeSearchResults(enhancedResult);
+            applyGeocodingAdministrativeFallbacks(
+              geocodingResult.data,
+              enhancedResult,
+            );
 
             if (geocodingResult.data.street_name) {
               form.setValue("street_name", geocodingResult.data.street_name, {
@@ -289,6 +322,10 @@ export const useReportLocation = ({ form }: UseReportLocationProps) => {
           geocodingResult.data,
         );
 
+        applyGeocodingAdministrativeFallbacks(
+          geocodingResult.data,
+          enhancedResult,
+        );
         if (enhancedResult.administrative.province.code) {
           form.setValue(
             "province_code",

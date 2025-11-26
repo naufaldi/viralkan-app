@@ -131,6 +131,7 @@ export const useReportForm = ({
     exifError: imageState.exifError,
     hasExifWarning: imageState.hasExifWarning,
     hasExifData: imageState.hasExifData,
+    geocodingFromExifSucceeded: imageState.geocodingFromExifSucceeded,
     handleImageSelect: imageState.handleImageSelect,
     handleImageRemove: () =>
       imageState.handleImageRemove(locationState.clearSync),

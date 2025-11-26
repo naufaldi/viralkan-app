@@ -60,7 +60,7 @@ export function ReportFormProvider({
     ],
   );
 
-  // Image context value (7 properties)
+  // Image context value (8 properties)
   const imageContextValue = useMemo(
     () => ({
       selectedImage: formState.selectedImage,
@@ -70,6 +70,7 @@ export function ReportFormProvider({
       isExtractingExif: formState.isExtractingExif,
       hasExifWarning: formState.hasExifWarning,
       hasExifData: formState.hasExifData,
+      geocodingFromExifSucceeded: formState.geocodingFromExifSucceeded,
     }),
     [
       formState.selectedImage,
@@ -79,6 +80,7 @@ export function ReportFormProvider({
       formState.isExtractingExif,
       formState.hasExifWarning,
       formState.hasExifData,
+      formState.geocodingFromExifSucceeded,
     ],
   );
 

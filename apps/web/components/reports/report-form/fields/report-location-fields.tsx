@@ -18,7 +18,7 @@ import {
 
 export const ReportLocationFields = () => {
   const { form, isLoading, isFormActivated } = useReportFormContext();
-  const { hasExifData } = useImageContext();
+  const { hasExifData, geocodingFromExifSucceeded } = useImageContext();
   const { isGeocodingFromCoords, geocodingError, isGettingLocation } =
     useLocationContext();
   const {
@@ -28,34 +28,33 @@ export const ReportLocationFields = () => {
   } = useReportFormActionsContext();
   const disabled = isLoading;
 
+  // Determine if location buttons should be shown
+  // Show buttons if:
+  // - No EXIF data (manual required)
+  // - OR EXIF exists but geocoding failed (auto fallback)
+  // Hide buttons if:
+  // - EXIF exists AND geocoding succeeded (auto success)
+  const shouldShowLocationButtons =
+    !hasExifData || (hasExifData && !geocodingFromExifSucceeded);
+
+  // Show warning banner if EXIF exists but geocoding failed
+  const showGeocodingFallbackWarning =
+    hasExifData && !geocodingFromExifSucceeded && isFormActivated;
+
   return (
     <>
-      {isFormActivated && (
-        <div className="flex justify-center">
-          <div
-            className={`inline-flex items-center rounded-lg px-3 py-2 text-sm font-medium ${
-              hasExifData
-                ? "border border-green-200 bg-green-50 text-green-700"
-                : "border border-blue-200 bg-blue-50 text-blue-700"
-            }`}
-          >
-            {hasExifData ? (
-              <>
-                ✅{" "}
-                <span className="ml-2">
-                  Lokasi berhasil diekstrak dari foto
-                </span>
-              </>
-            ) : (
-              <>
-                📍 <span className="ml-2">Gunakan bantuan lokasi di bawah</span>
-              </>
-            )}
-          </div>
+      {showGeocodingFallbackWarning && (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
+          <p className="text-sm font-semibold text-amber-800">
+            ⚠️ Kami tidak bisa menemukan alamat yang pasti dari lokasi foto
+          </p>
+          <p className="mt-1 text-sm text-amber-700">
+            Mohon lengkapi alamat di bawah ini atau gunakan bantuan lokasi.
+          </p>
         </div>
       )}
 
-      {isFormActivated && (
+      {isFormActivated && shouldShowLocationButtons && (
         <div className="mt-4 space-y-3 rounded-lg border border-neutral-200 bg-neutral-50 p-4">
           <p className="text-sm font-semibold text-neutral-900">
             Bantuan Lokasi

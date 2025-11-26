@@ -35,7 +35,7 @@ export function useReportFormContext(): ReportFormContextType {
 /**
  * ImageContext - Image and EXIF state
  * Used by: Components that display/use image state
- * Properties: 7 (selectedImage, uploadError, imageUploadFailed, isUploadingImage, isExtractingExif, hasExifWarning, hasExifData)
+ * Properties: 8 (selectedImage, uploadError, imageUploadFailed, isUploadingImage, isExtractingExif, hasExifWarning, hasExifData, geocodingFromExifSucceeded)
  */
 interface ImageContextType {
   selectedImage: File | null;
@@ -45,6 +45,7 @@ interface ImageContextType {
   isExtractingExif: boolean;
   hasExifWarning: boolean;
   hasExifData: boolean;
+  geocodingFromExifSucceeded: boolean;
 }
 
 const ImageContext = createContext<ImageContextType | undefined>(undefined);

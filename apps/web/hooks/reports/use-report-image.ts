@@ -25,6 +25,8 @@ export const useReportImage = ({
   const [exifError, setExifError] = useState<string | undefined>(undefined);
   const [hasExifWarning, setHasExifWarning] = useState(false);
   const [hasExifData, setHasExifData] = useState(false);
+  const [geocodingFromExifSucceeded, setGeocodingFromExifSucceeded] =
+    useState(false);
 
   const handleImageSelect = async (file: File, originalFile?: File) => {
     setSelectedImage(file);
@@ -34,6 +36,7 @@ export const useReportImage = ({
     setUploadError(undefined);
     setExifError(undefined);
     setHasExifWarning(false);
+    setGeocodingFromExifSucceeded(false);
 
     const fileForExif = originalFile || file;
     console.log("EXIF extraction started:", {
@@ -72,6 +75,14 @@ export const useReportImage = ({
               });
             }
 
+            // Track geocoding success - address was auto-filled
+            // Consider it successful if we have at least some address data
+            const hasAddressData =
+              enhancedResult.administrative.province.name ||
+              geocodingResult.data.city ||
+              geocodingResult.data.district;
+            setGeocodingFromExifSucceeded(!!hasAddressData);
+
             if (enhancedResult.overallConfidence >= 0.9) {
               toast.success("Lokasi dan alamat berhasil diekstrak dengan AI", {
                 description:
@@ -99,13 +110,17 @@ export const useReportImage = ({
               });
             }
           } else {
+            // Geocoding failed - coordinates extracted but no address
+            setGeocodingFromExifSucceeded(false);
             toast.success("Koordinat berhasil diekstrak dari foto", {
               description: `Lat: ${exifResult.gpsData.lat.toFixed(6)}, Lon: ${exifResult.gpsData.lon.toFixed(6)}. Silakan isi alamat secara manual.`,
               duration: 4000,
             });
           }
         } catch (geocodingError) {
+          // Geocoding error - coordinates extracted but geocoding failed
           console.error("Geocoding error:", geocodingError);
+          setGeocodingFromExifSucceeded(false);
           toast.success("Koordinat berhasil diekstrak dari foto", {
             description: `Lat: ${exifResult.gpsData.lat.toFixed(6)}, Lon: ${exifResult.gpsData.lon.toFixed(6)}. Silakan isi alamat secara manual.`,
             duration: 4000,
@@ -138,6 +153,7 @@ export const useReportImage = ({
     form.setValue("image_url", "");
     setUploadError(undefined);
     setHasExifData(false);
+    setGeocodingFromExifSucceeded(false);
     clearSync();
   };
 
@@ -160,6 +176,7 @@ export const useReportImage = ({
     exifError,
     hasExifWarning,
     hasExifData,
+    geocodingFromExifSucceeded,
     handleImageSelect,
     handleImageRemove,
     handleImageUploadError,

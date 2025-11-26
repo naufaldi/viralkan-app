@@ -8,7 +8,6 @@ import {
   CheckCircle,
   AlertTriangle,
   Settings,
-  RefreshCw,
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -32,6 +31,7 @@ import { AdministrativeSyncStatus } from "./administrative-sync-status";
 import { CreateReportInput } from "../../lib/types/api";
 import { Province, Regency, District } from "../../services/administrative";
 import { cn } from "@repo/ui/lib/utils";
+import type { AdministrativeSyncStatus as AdministrativeSyncStatusType } from "../../lib/utils/enhanced-geocoding-handler";
 
 interface AdministrativeSelectProps {
   form: UseFormReturn<CreateReportInput>;
@@ -47,7 +47,7 @@ interface AdministrativeSelectProps {
   enableAutoSync?: boolean;
   showSyncStatus?: boolean;
   // Administrative sync status props (passed from parent)
-  syncStatus?: any; // TODO: Import proper type
+  syncStatus?: AdministrativeSyncStatusType | null;
   hasValidMatch?: boolean;
   confidenceLevel?: "high" | "medium" | "low" | "none";
   canAutoSelect?: boolean;
@@ -79,6 +79,9 @@ export const AdministrativeSelect = ({
   const selectedProvinceCode = form.watch("province_code");
   const selectedRegencyCode = form.watch("regency_code");
   const selectedDistrictCode = form.watch("district_code");
+  const selectedProvinceName = form.watch("province");
+  const selectedRegencyName = form.watch("city");
+  const selectedDistrictName = form.watch("district");
 
   // Get "all" states from URL params (only if form doesn't have values)
   // When editing, form values take precedence over URL params
@@ -98,8 +101,6 @@ export const AdministrativeSelect = ({
     data,
     loading,
     error,
-    refetchRegencies,
-    refetchDistricts,
     addDynamicOption,
   } = useAdministrative({
     provinceCode: selectedProvinceCode || undefined,
@@ -247,6 +248,57 @@ export const AdministrativeSelect = ({
 
     return options;
   }, [data.districts, enableAllOptions]);
+
+  // Ensure auto-filled administrative values appear in combobox options
+  React.useEffect(() => {
+    if (
+      selectedProvinceCode &&
+      selectedProvinceName &&
+      !provinceOptions.some((option) => option.value === selectedProvinceCode)
+    ) {
+      addDynamicOption("province", {
+        code: selectedProvinceCode,
+        name: selectedProvinceName,
+      });
+    }
+
+    if (
+      selectedRegencyCode &&
+      selectedRegencyName &&
+      selectedProvinceCode &&
+      !regencyOptions.some((option) => option.value === selectedRegencyCode)
+    ) {
+      addDynamicOption("regency", {
+        code: selectedRegencyCode,
+        name: selectedRegencyName,
+        province_code: selectedProvinceCode,
+      });
+    }
+
+    if (
+      selectedDistrictCode &&
+      selectedDistrictName &&
+      selectedRegencyCode &&
+      !districtOptions.some((option) => option.value === selectedDistrictCode)
+    ) {
+      addDynamicOption("district", {
+        code: selectedDistrictCode,
+        name: selectedDistrictName,
+        regency_code: selectedRegencyCode,
+      });
+    }
+  }, [
+    addDynamicOption,
+    districtOptions,
+    provinceOptions,
+    regencyOptions,
+    selectedDistrictCode,
+    selectedDistrictName,
+    selectedProvinceCode,
+    selectedProvinceName,
+    selectedRegencyCode,
+    selectedRegencyName,
+  ]);
 
   // Handle province selection - reset dependent fields
   const handleProvinceChange = (provinceCode: string) => {
@@ -499,7 +551,7 @@ export const AdministrativeSelect = ({
           <FormField
             control={form.control}
             name="province"
-            render={({ field }) => (
+            render={() => (
               <FormItem className="space-y-3">
                 <FormLabel className="flex items-center gap-2 text-base font-semibold text-neutral-900">
                   Provinsi *
@@ -562,7 +614,7 @@ export const AdministrativeSelect = ({
           <FormField
             control={form.control}
             name="city"
-            render={({ field }) => (
+            render={() => (
               <FormItem className="space-y-3">
                 <FormLabel className="flex items-center gap-2 text-base font-semibold text-neutral-900">
                   Kabupaten/Kota *
@@ -632,7 +684,7 @@ export const AdministrativeSelect = ({
           <FormField
             control={form.control}
             name="district"
-            render={({ field }) => (
+            render={() => (
               <FormItem className="space-y-3">
                 <FormLabel className="flex items-center gap-2 text-base font-semibold text-neutral-900">
                   Kecamatan *

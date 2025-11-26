@@ -1,0 +1,3 @@
+- location-sync-research (in_progress): Trace current-location geocoding to administrative select flow; identify where province/city/district values or codes are lost or not rendered.
+- location-sync-fix (pending): Implement fixes to set/admin-sync codes+names and ensure combobox options display selected values after geolocation.
+- location-sync-validate (pending): Run lint/tests as appropriate and manual current-location flow to confirm selects auto-fill and remain editable.

@@ -41,6 +41,7 @@ function CreateReportFormContent({
     isUploadingImage,
     isExtractingExif,
     hasExifWarning,
+    hasExifData,
   } = useImageContext();
   const {
     handleImageSelect,
@@ -74,12 +75,7 @@ function CreateReportFormContent({
           >
             <div className="space-y-3">
               <p className="text-sm font-semibold text-neutral-900">
-                Langkah 1 · Unggah foto jalan rusak
-              </p>
-              <p className="text-sm text-neutral-600">
-                Kami akan mencoba membaca GPS dari foto atau perangkat Anda.
-                Jika tidak tersedia, lengkapi alamat dan gunakan bantuan lokasi
-                di bawah.
+                Unggah Foto
               </p>
               <ReportImageUpload
                 selectedImage={selectedImage}
@@ -93,7 +89,11 @@ function CreateReportFormContent({
                 onFormActivation={handleFormActivation}
                 initialImageUrl={initialImageUrl}
               />
-              <ExifWarning isVisible={hasExifWarning} />
+              <ExifWarning
+                isVisible={hasExifWarning || hasExifData || isExtractingExif}
+                hasGpsData={hasExifData}
+                isExtracting={isExtractingExif}
+              />
             </div>
 
             <ReportForm.Fields />
