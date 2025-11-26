@@ -20,7 +20,6 @@ import {
   LayoutDashboard,
   FileText,
   Users,
-  Settings,
   ChevronUp,
   LogOut,
 } from "lucide-react";
@@ -28,7 +27,7 @@ import { useAuthContext } from "../../contexts/AuthContext";
 
 export const AdminNavigation = () => {
   const pathname = usePathname();
-  const { isAuthenticated, isLoading, backendUser, signOut } = useAuthContext();
+  const { isAuthenticated, backendUser, signOut } = useAuthContext();
 
   const handleLogout = async () => {
     try {

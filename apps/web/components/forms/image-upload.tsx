@@ -205,9 +205,11 @@ export default function ImageUpload({
         try {
           setIsCompressing(true);
           processedFile = await convertHeicToJpeg(file);
-        } catch (error: any) {
+        } catch (error: unknown) {
           const errorMsg =
-            error.message ||
+            error instanceof Error && error.message
+              ? error.message
+              :
             "Gagal mengkonversi file HEIC. Silakan gunakan format JPEG, PNG, atau WebP.";
           setUploadError(errorMsg);
           onUploadError?.(errorMsg);

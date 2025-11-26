@@ -1,5 +1,5 @@
 import { FileText } from "lucide-react";
-import { Card, CardHeader, CardTitle } from "@repo/ui/components/ui/card";
+import { CardHeader, CardTitle } from "@repo/ui/components/ui/card";
 
 interface ReportFormHeaderProps {
   title: string;

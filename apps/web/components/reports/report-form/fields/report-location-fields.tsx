@@ -23,10 +23,16 @@ export const ReportLocationFields = () => {
     useLocationContext();
   const {
     handleGetAddressFromCoordinates,
-    clearGeocodingError,
     getCurrentLocation,
   } = useReportFormActionsContext();
   const disabled = isLoading;
+  const lat = form.watch("lat");
+  const lon = form.watch("lon");
+  const hasValidCoordinates =
+    typeof lat === "number" &&
+    typeof lon === "number" &&
+    Number.isFinite(lat) &&
+    Number.isFinite(lon);
 
   // Determine if location buttons should be shown
   // Show buttons if:
@@ -76,14 +82,7 @@ export const ReportLocationFields = () => {
                 onClick={handleGetAddressFromCoordinates}
                 isLoading={isGeocodingFromCoords}
                 disabled={disabled}
-                isValidCoordinates={
-                  !!(
-                    form.watch("lat") &&
-                    form.watch("lon") &&
-                    form.watch("lat") !== 0 &&
-                    form.watch("lon") !== 0
-                  )
-                }
+                isValidCoordinates={hasValidCoordinates}
               />
             )}
           </div>

@@ -14,6 +14,8 @@ Enable users to submit road damage reports without touching lat/lon by letting t
 - [x] (2025-11-26 01:49Z) Fixed TypeScript errors after geocoding integration; check-types now passes.
 - [x] (2025-11-26 02:05Z) Added rate-limited Nominatim client, exposed reverse/forward geocode endpoints, and admin location update handler; check-types passing.
 - [x] (2025-11-26 02:20Z) Simplified create report frontend flow to single track (no tabs) that adapts based on photo EXIF vs manual address.
+- [ ] (2025-11-26 08:55Z) Frontend geocoding bug triage: CreateReportSchema on web still requires lat/lon (defaults 0) so address-only submissions send 0,0 and skip backend forward geocoding; need to allow null/undefined coords and pre-submit forward geocode via backend endpoint to honor RFC.
+- [ ] (2025-11-26 09:10Z) Implemented nullable coords + backend forward-geocode pre-submit on web; bun run format + bun test green; bun run lint currently fails on pre-existing web warnings (unused imports/any/no-unescaped-entities) unrelated to this change—needs cleanup decision.
 - [ ] (pending) Finalize API contract updates for create/update and new geocoding endpoints.
 - [ ] (pending) Validate plan with stakeholders before implementation.
 
@@ -21,12 +23,15 @@ Enable users to submit road damage reports without touching lat/lon by letting t
 
 - Observation: No backend geocoding exists yet; only database migration fields reference geocoding metadata. Evidence: rg search shows only migration 006 adds geocoded_at/geocoding_source; reports data layer writes whatever address/coords are provided.
 - Observation: Report updates currently require ownership; no admin override path exists for correcting locations. Evidence: apps/api/src/routes/reports/data.ts updateReport checks user_id, and core validation assumes same ownership rule.
+- Observation: Frontend CreateReportSchema still treats lat/lon as required numbers with default 0, so manual address + photo submissions post lat/lon=0 and bypass backend forward geocoding. Evidence: apps/web/lib/types/api.ts uses z.number() without nullable/optional and use-report-form defaults lat/lon to 0.
+- Observation: bun run lint fails in apps/web due to numerous pre-existing warnings (unused imports/icons, unescaped quotes in pages, no-html-link-for-pages, unexpected any). Evidence: turbo run lint output on 2025-11-26 shows failures before touching those files.
 
 ## Decision Log
 
 - Decision: Align backend geocoding with existing Nominatim usage from frontend docs to stay consistent with docs/gis/rfc-geojson.md. Rationale: Shared provider simplifies parsing logic and rate limit policy. Date/Author: 2025-11-24 Codex.
 - Decision: Plan includes an admin-only location correction path so lat/lon can be fixed post-submission when geocoding fails. Rationale: New RFC clause 4.5 requires admin remediation. Date/Author: 2025-11-24 Codex.
 - Decision: Use requireAdmin middleware for remediation endpoints; no new role needed. Rationale: Matches current admin guard and user confirmation. Date/Author: 2025-11-24 Codex.
+- Decision: Frontend must stop sending sentinel coords (0,0) when none are available; allow nullable coords and, when missing, call backend forward geocoding before submission to honor RFC auto-location flow. Rationale: Prevents reverse-geocoding garbage and lets backend enrich address-only payloads. Date/Author: 2025-11-26 Codex.
 
 ## Outcomes & Retrospective
 
@@ -46,6 +51,7 @@ Describe edits in prose with file paths so a novice can follow without other con
 4. API layer adjustments (apps/api/src/routes/reports/api.ts): expose geocoding helper endpoints for the frontend (e.g., POST /api/reports/geocode/reverse and /geocode/forward) with Zod schemas; update create/update responses to surface geocoding status and parsed address so the UI can show auto-fill results; ensure error codes distinguish validation vs geocoding failure vs permission issues. Keep authentication rules: create requires auth; geocoding endpoints may require auth to manage quota.
 5. Admin remediation path: add admin-specific route (apps/api/src/routes/admin/api.ts or reports/admin) guarded by requireAdmin to edit location/metadata regardless of ownership; ensure data layer update handles lat/lon/address updates and records geocoding_source as manual-admin along with verifier fields; update validation to allow null->value transitions for coordinates.
 6. Testing and observability: add unit tests for core validation/merging logic and shell orchestration (success, reverse geocode fail, forward geocode fail, admin override). Add integration tests for new endpoints with mocked Nominatim responses. Update logging to structured messages without console.log. Document environment variables for geocoding base URL and rate limits.
+7. Frontend alignment: update apps/web CreateReportSchema/defaults to accept nullable coords, drop 0 defaults, and pre-submit forward geocode via backend when coords are missing so address+photo flows still produce lat/lon while keeping submission resilient if geocoding fails.
 
 ## Concrete Steps
 

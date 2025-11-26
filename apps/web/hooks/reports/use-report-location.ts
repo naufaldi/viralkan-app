@@ -69,6 +69,10 @@ export const useReportLocation = ({ form }: UseReportLocationProps) => {
   const applyAdministrativeSearchResults = async (
     enhancedResult: EnhancedGeocodingResponse,
   ) => {
+    if (process.env.NODE_ENV !== "production") {
+      console.debug("[ReportForm] Enhanced geocoding result", enhancedResult);
+    }
+
     try {
       if (
         enhancedResult.administrative.province.code &&
@@ -106,6 +110,7 @@ export const useReportLocation = ({ form }: UseReportLocationProps) => {
         addDynamicOption("regency", {
           code: enhancedResult.administrative.regency.code,
           name: enhancedResult.administrative.regency.name,
+          province_code: enhancedResult.administrative.province.code || "",
         });
 
         form.setValue(
@@ -135,6 +140,7 @@ export const useReportLocation = ({ form }: UseReportLocationProps) => {
         addDynamicOption("district", {
           code: enhancedResult.administrative.district.code,
           name: enhancedResult.administrative.district.name,
+          regency_code: enhancedResult.administrative.regency.code || "",
         });
 
         form.setValue(
@@ -178,6 +184,29 @@ export const useReportLocation = ({ form }: UseReportLocationProps) => {
     form.setValue("regency_code", regencyCode, { shouldValidate: true });
     form.setValue("district", districtName, { shouldValidate: true });
     form.setValue("district_code", districtCode, { shouldValidate: true });
+
+    if (provinceCode && provinceName) {
+      addDynamicOption("province", {
+        code: provinceCode,
+        name: provinceName,
+      });
+    }
+
+    if (regencyCode && regencyName && provinceCode) {
+      addDynamicOption("regency", {
+        code: regencyCode,
+        name: regencyName,
+        province_code: provinceCode,
+      });
+    }
+
+    if (districtCode && districtName && regencyCode) {
+      addDynamicOption("district", {
+        code: districtCode,
+        name: districtName,
+        regency_code: regencyCode,
+      });
+    }
   };
 
   const getCurrentLocation = async () => {
@@ -315,7 +344,10 @@ export const useReportLocation = ({ form }: UseReportLocationProps) => {
     });
 
     try {
-      const geocodingResult = await reverseGeocodeWithNominatimData(lat, lon);
+      const geocodingResult = await reverseGeocodeWithNominatimData(
+        lat as number,
+        lon as number,
+      );
 
       if (geocodingResult.success && geocodingResult.data) {
         const enhancedResult = await processNominatimAddressWithAPI(

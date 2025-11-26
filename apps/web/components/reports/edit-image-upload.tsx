@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { Alert, AlertDescription } from "@repo/ui/components/ui/alert";
 import { FormLabel } from "@repo/ui/components/ui/form";
+import Image from "next/image";
 // Dynamic imports for browser-only libraries
 // import imageCompression from "browser-image-compression";
 // import heic2any from "heic2any";
@@ -173,10 +174,11 @@ export default function EditImageUpload({
         try {
           setIsCompressing(true);
           processedFile = await convertHeicToJpeg(file);
-        } catch (error: any) {
+        } catch (error: unknown) {
           const errorMsg =
-            error.message ||
-            "Gagal mengkonversi file HEIC. Silakan gunakan format JPEG, PNG, atau WebP.";
+            error instanceof Error && error.message
+              ? error.message
+              : "Gagal mengkonversi file HEIC. Silakan gunakan format JPEG, PNG, atau WebP.";
           setUploadError(errorMsg);
           onUploadError?.(errorMsg);
           setIsCompressing(false);
@@ -210,10 +212,13 @@ export default function EditImageUpload({
 
         onImageSelect(compressedFile);
         onUploadSuccess?.();
-      } catch (error) {
+      } catch (error: unknown) {
         const errorMsg = "Gagal memproses gambar. Coba lagi.";
         setUploadError(errorMsg);
         onUploadError?.(errorMsg);
+        if (process.env.NODE_ENV !== "production") {
+          console.warn("[EditImageUpload] Failed to process image", error);
+        }
       } finally {
         setIsCompressing(false);
       }
@@ -347,11 +352,15 @@ export default function EditImageUpload({
             <div className="relative">
               {(preview || existingImageUrl) && (
                 <div className="relative">
-                  <img
-                    src={preview || existingImageUrl || ""}
-                    alt="Foto jalan rusak"
-                    className="h-72 w-full object-cover"
-                  />
+                  <div className="relative h-72 w-full">
+                    <Image
+                      src={preview || existingImageUrl || ""}
+                      alt="Foto jalan rusak"
+                      fill
+                      sizes="100vw"
+                      className="object-cover"
+                    />
+                  </div>
 
                   {(isUploading || isCompressing) && (
                     <div className="absolute inset-0 flex items-center justify-center bg-white/80 backdrop-blur-sm">

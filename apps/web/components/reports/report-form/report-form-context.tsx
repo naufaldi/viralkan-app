@@ -3,6 +3,7 @@
 import { createContext, useContext } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { CreateReportInput } from "../../../lib/types/api";
+import type { AdministrativeSyncStatus } from "../../../lib/utils/enhanced-geocoding-handler";
 
 /**
  * ReportFormContext - Core form state + Submit error
@@ -72,7 +73,7 @@ interface LocationContextType {
   // Location state
   isGettingLocation: boolean;
   // Administrative sync state
-  syncStatus: any;
+  syncStatus: AdministrativeSyncStatus | null;
   hasValidMatch: boolean;
   confidenceLevel: "high" | "medium" | "low" | "none";
   canAutoSelect: boolean;

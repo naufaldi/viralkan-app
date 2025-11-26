@@ -21,11 +21,15 @@ export const CreateReportSchema = z.object({
   lat: z
     .number()
     .min(-90, "Latitude must be between -90 and 90")
-    .max(90, "Latitude must be between -90 and 90"),
+    .max(90, "Latitude must be between -90 and 90")
+    .nullable()
+    .optional(),
   lon: z
     .number()
     .min(-180, "Longitude must be between -180 and 180")
-    .max(180, "Longitude must be between -180 and 180"),
+    .max(180, "Longitude must be between -180 and 180")
+    .nullable()
+    .optional(),
   // Administrative boundaries (required - will be auto-filled by geocoding or manual input)
   district: z
     .string()

@@ -22,12 +22,8 @@ interface AdminReport {
   status: "pending" | "verified" | "rejected";
 }
 
-interface AdminReportsTableWrapperProps {
-  // Remove data and isLoading props since we're using real data
-}
-
-export function AdminReportsTableWrapper({}: AdminReportsTableWrapperProps) {
-  const [filters, setFilters] = useState({
+export function AdminReportsTableWrapper() {
+  const [filters] = useState({
     page: 1,
     limit: 20,
     status: "",

@@ -49,6 +49,8 @@ interface NominatimResponse {
   lat: string;
   lon: string;
   address: {
+    "ISO3166-2-lvl3"?: string;
+    "ISO3166-2-lvl4"?: string;
     road?: string;
     suburb?: string;
     village?: string;
@@ -202,6 +204,53 @@ async function makeNominatimRequest(
 function parseNominatimAddress(
   address: NominatimResponse["address"],
 ): Partial<LocationData> {
+  const ISO_PROVINCE_MAP: Record<string, string> = {
+    "ID-AC": "Aceh",
+    "ID-BA": "Bali",
+    "ID-BB": "Bangka Belitung",
+    "ID-BT": "Banten",
+    "ID-BE": "Bengkulu",
+    "ID-GO": "Gorontalo",
+    "ID-JA": "Jambi",
+    "ID-JB": "Jawa Barat",
+    "ID-JT": "Jawa Tengah",
+    "ID-JI": "Jawa Timur",
+    "ID-JK": "DKI Jakarta",
+    "ID-KB": "Kalimantan Barat",
+    "ID-KS": "Kalimantan Selatan",
+    "ID-KT": "Kalimantan Tengah",
+    "ID-KI": "Kalimantan Timur",
+    "ID-KU": "Kalimantan Utara",
+    "ID-KR": "Kepulauan Riau",
+    "ID-LA": "Lampung",
+    "ID-MA": "Maluku",
+    "ID-MU": "Maluku Utara",
+    "ID-NB": "Nusa Tenggara Barat",
+    "ID-NT": "Nusa Tenggara Timur",
+    "ID-PA": "Papua",
+    "ID-PB": "Papua Barat",
+    "ID-PE": "Papua Pegunungan",
+    "ID-PS": "Papua Selatan",
+    "ID-PU": "Papua Tengah",
+    "ID-PY": "Papua Barat Daya",
+    "ID-RI": "Riau",
+    "ID-SR": "Sulawesi Barat",
+    "ID-SN": "Sulawesi Selatan",
+    "ID-ST": "Sulawesi Tengah",
+    "ID-SG": "Sulawesi Tenggara",
+    "ID-SA": "Sulawesi Utara",
+    "ID-SB": "Sumatera Barat",
+    "ID-SS": "Sumatera Selatan",
+    "ID-SU": "Sumatera Utara",
+    "ID-YO": "DI Yogyakarta",
+  };
+
+  const resolveProvinceFromISO = (code?: string): string | undefined | null => {
+    if (!code) return null;
+    const normalized = code.toUpperCase();
+    return ISO_PROVINCE_MAP[normalized] || null;
+  };
+
   // Map Nominatim address components to administrative structure
   const result: Partial<LocationData> = {
     country: address.country || "Indonesia",
@@ -235,6 +284,13 @@ function parseNominatimAddress(
   // Province (province/state)
   if (address.state) {
     result.province = address.state;
+  } else {
+    const isoProvince =
+      resolveProvinceFromISO(address["ISO3166-2-lvl4"]) ||
+      resolveProvinceFromISO(address["ISO3166-2-lvl3"]);
+    if (isoProvince) {
+      result.province = isoProvince;
+    }
   }
 
   return result;

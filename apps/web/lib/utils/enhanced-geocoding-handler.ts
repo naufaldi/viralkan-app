@@ -7,18 +7,13 @@
  * Following Viralkan Design System 2.0 & Frontend Development Guidelines
  */
 
-import {
-  batchFuzzyMatch,
-  FuzzyMatchResult,
-  AdministrativeOption,
-} from "./fuzzy-matching";
+import { batchFuzzyMatch, AdministrativeOption } from "./fuzzy-matching";
 import type { CurrentGeocodingResponse } from "../types/administrative-sync-analysis";
 import {
   administrativeService,
-  type Province,
-  type Regency,
-  type District,
 } from "../../services/administrative";
+import type { UseFormReturn } from "react-hook-form";
+import type { CreateReportInput } from "../types/api";
 
 /**
  * Enhanced geocoding response with administrative mapping
@@ -242,7 +237,7 @@ export function getAdministrativeSyncStatus(
  */
 export function applyEnhancedGeocodingToForm(
   enhancedResponse: EnhancedGeocodingResponse,
-  form: any, // UseFormReturn<CreateReportInput>
+  form: UseFormReturn<CreateReportInput>,
   syncStatus: AdministrativeSyncStatus,
 ): {
   applied: boolean;

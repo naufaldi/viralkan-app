@@ -97,12 +97,7 @@ export const AdministrativeSelect = ({
     useInvalidateAdministrative();
 
   // Fetch data using our custom hook with TanStack Query
-  const {
-    data,
-    loading,
-    error,
-    addDynamicOption,
-  } = useAdministrative({
+  const { data, loading, error, addDynamicOption } = useAdministrative({
     provinceCode: selectedProvinceCode || undefined,
     regencyCode: selectedRegencyCode || undefined,
   });

@@ -6,7 +6,7 @@ import Header from "components/layout/header";
 
 export default async function CreateReportPage() {
   // Server-side authentication check
-  const _user = await requireAuth();
+  await requireAuth();
 
   return (
     <>

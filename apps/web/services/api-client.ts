@@ -11,6 +11,30 @@ import {
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
+export interface GeocodingResponse {
+  street_name: string | null;
+  district: string | null;
+  city: string | null;
+  province: string | null;
+  province_code: string | null;
+  regency_code: string | null;
+  district_code: string | null;
+  lat: number | null;
+  lon: number | null;
+  geocoding_source: "exif" | "nominatim" | "manual";
+  geocoded_at: string;
+}
+
+export interface ForwardGeocodePayload {
+  street_name: string;
+  district: string;
+  city: string;
+  province: string;
+  province_code?: string;
+  regency_code?: string;
+  district_code?: string;
+}
+
 // Base API request function with consistent error handling
 export async function apiRequest<T>(
   endpoint: string,
@@ -166,6 +190,21 @@ export const reportsService = {
   // Get individual report by ID
   getReportById: async (id: string): Promise<ReportWithUser> => {
     return apiRequest<ReportWithUser>(`/api/reports/${id}`);
+  },
+
+  // Forward geocode address (authenticated; uses backend Nominatim proxy)
+  forwardGeocode: async (
+    payload: ForwardGeocodePayload,
+    token: string,
+  ): Promise<GeocodingResponse> => {
+    return authenticatedApiRequest<GeocodingResponse>(
+      "/api/reports/geocode/forward",
+      token,
+      {
+        method: "POST",
+        body: JSON.stringify(payload),
+      },
+    );
   },
 
   // Create new report (authenticated)

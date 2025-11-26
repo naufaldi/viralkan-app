@@ -9,8 +9,8 @@ Users clicking “Gunakan Lokasi Saat Ini” should see province, city/regency, 
 ## Progress
 
 - [x] (2025-11-26 00:00Z) Created plan skeleton and captured purpose.
-- [ ] (2025-11-26 00:00Z) Deep-dive current flow (geocoding, admin sync, combobox options) to pinpoint why fields stay empty after using current location.
-- [ ] (2025-11-26 00:00Z) Implement fixes and refresh UI so selects reflect geocoded values; re-validate lint/tests relevant scope.
+- [x] (2025-11-26 12:30Z) Reviewed form contexts, location fields/buttons, administrative select flow, and use-report-location geocoding/admin sync.
+- [x] (2025-11-26 13:15Z) Implemented ISO province fallback in geocoding parser to surface province name (e.g., ID-JK -> DKI Jakarta); added parent-code injection for dynamic options in location hook.
 - [ ] (2025-11-26 00:00Z) Validate manually (current-location flow) and document outcomes.
 
 ## Surprises & Discoveries
@@ -19,7 +19,9 @@ Users clicking “Gunakan Lokasi Saat Ini” should see province, city/regency, 
 
 ## Decision Log
 
-- None yet.
+- Decision: Administrative dynamic options must include parent codes to populate combobox queries keyed by province/regency codes; added debug logging (non-prod) and fallback option injection when geocoding sets values.
+  Rationale: Without province_code/regency_code the options were cached under an undefined key, so selects never saw the geocoded values.
+  Date/Author: 2025-11-26 / Codex
 
 ## Outcomes & Retrospective
 
@@ -28,6 +30,7 @@ Users clicking “Gunakan Lokasi Saat Ini” should see province, city/regency, 
 ## Context and Orientation
 
 Relevant files for the report form:
+
 - `apps/web/components/reports/create-report-form.tsx` wires the form.
 - `apps/web/components/reports/report-form/report-form-provider.tsx` and `report-form-context.tsx` expose form, image, location, and actions contexts.
 - `apps/web/hooks/reports/use-report-form.ts` bundles image, location, submit hooks.
@@ -36,6 +39,7 @@ Relevant files for the report form:
 - UI selects live in `apps/web/components/reports/administrative-select.tsx`, which uses `useAdministrative` (data fetcher) and `useAdministrativeSync` (fuzzy mapping) and is consumed via `ReportAddressFields`.
 
 Known symptoms:
+
 - Toast after “Gunakan Lokasi Saat Ini” shows a district/city string (e.g., Tanah Abang, Jakarta Pusat), but province/city/district selects remain empty/disabled.
 - Previous change added dynamic option insertion, but behavior still missing, suggesting values may not be set, codes don’t match available options, or select activation gating prevents display.
 
@@ -52,11 +56,12 @@ Milestone 4: Validation: run scoped lint on touched files, run `bun run lint --f
 ## Concrete Steps
 
 All commands run from repo root unless stated.
-1) Read flow files: `apps/web/hooks/reports/use-report-location.ts`, `apps/web/components/reports/administrative-select.tsx`, `apps/web/lib/utils/enhanced-geocoding-handler.ts`, `apps/web/hooks/reports/use-report-form.ts`, `apps/web/components/reports/report-form/fields/report-address-fields.tsx`.
-2) Instrument/inspect state changes (via code review; no logging in production) to locate missing updates.
-3) Apply code fixes per findings (hooks/UI as needed).
-4) Run lint for touched area: `cd apps/web && bunx next lint --max-warnings 0 --file components/reports/administrative-select.tsx` and consider `bun run lint --filter=web`.
-5) Manual check: start web (`bun run dev` at root or `turbo dev --filter=web`), go to create report, click “Gunakan Lokasi Saat Ini”, observe province/city/district pre-filled.
+
+1. Read flow files: `apps/web/hooks/reports/use-report-location.ts`, `apps/web/components/reports/administrative-select.tsx`, `apps/web/lib/utils/enhanced-geocoding-handler.ts`, `apps/web/hooks/reports/use-report-form.ts`, `apps/web/components/reports/report-form/fields/report-address-fields.tsx`.
+2. Instrument/inspect state changes (via code review; no logging in production) to locate missing updates.
+3. Apply code fixes per findings (hooks/UI as needed).
+4. Run lint for touched area: `cd apps/web && bunx next lint --max-warnings 0 --file components/reports/administrative-select.tsx` and consider `bun run lint --filter=web`.
+5. Manual check: start web (`bun run dev` at root or `turbo dev --filter=web`), go to create report, click “Gunakan Lokasi Saat Ini”, observe province/city/district pre-filled.
 
 ## Validation and Acceptance
 
@@ -77,4 +82,5 @@ Repeated geolocation attempts should update the same fields safely. If a geocodi
 - `useAdministrative` provides province/regency/district options keyed by codes; ensure only one instance is used in the select component to avoid duplicate calls.
 
 ---
+
 Revision note: Initial creation of plan (2025-11-26) to investigate/fix administrative auto-fill after current-location use.

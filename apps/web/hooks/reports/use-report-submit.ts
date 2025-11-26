@@ -8,6 +8,11 @@ import { useUpdateReport } from "../use-update-report";
 import { useInvalidateDashboard } from "../dashboard";
 import { useAuth } from "../useAuth";
 import { uploadImage } from "../../services/upload";
+import {
+  ForwardGeocodePayload,
+  GeocodingResponse,
+  reportsService,
+} from "../../services/api-client";
 import { cleanFormData } from "../../utils/report-form-utils";
 
 interface UseReportSubmitProps {
@@ -35,6 +40,45 @@ export const useReportSubmit = ({
   const { getToken, isAuthenticated } = useAuth();
   const { invalidateAll } = useInvalidateDashboard();
   const router = useRouter();
+
+  const hasValidCoordinates = (
+    lat?: number | null,
+    lon?: number | null,
+  ): boolean => {
+    return (
+      typeof lat === "number" &&
+      Number.isFinite(lat) &&
+      typeof lon === "number" &&
+      Number.isFinite(lon)
+    );
+  };
+
+  const mergeForwardGeocoding = (
+    payload: CreateReportInput,
+    geocoding: GeocodingResponse,
+  ): CreateReportInput => {
+    const geocodedLat =
+      typeof geocoding.lat === "number" && Number.isFinite(geocoding.lat)
+        ? geocoding.lat
+        : null;
+    const geocodedLon =
+      typeof geocoding.lon === "number" && Number.isFinite(geocoding.lon)
+        ? geocoding.lon
+        : null;
+
+    return {
+      ...payload,
+      lat: geocodedLat ?? payload.lat ?? null,
+      lon: geocodedLon ?? payload.lon ?? null,
+      street_name: payload.street_name || geocoding.street_name || "",
+      district: payload.district || geocoding.district || "",
+      city: payload.city || geocoding.city || "",
+      province: payload.province || geocoding.province || "",
+      province_code: payload.province_code || geocoding.province_code || "",
+      regency_code: payload.regency_code || geocoding.regency_code || "",
+      district_code: payload.district_code || geocoding.district_code || "",
+    };
+  };
 
   const {
     submitReport,
@@ -107,16 +151,43 @@ export const useReportSubmit = ({
         imageUrl = uploadResult.data.imageUrl;
       }
 
-      const cleanedData = cleanFormData({
+      let payload = cleanFormData({
         ...data,
         image_url: imageUrl,
       });
+
+      if (!hasValidCoordinates(payload.lat, payload.lon)) {
+        const forwardPayload: ForwardGeocodePayload = {
+          street_name: payload.street_name,
+          district: payload.district,
+          city: payload.city,
+          province: payload.province,
+          province_code: payload.province_code || undefined,
+          regency_code: payload.regency_code || undefined,
+          district_code: payload.district_code || undefined,
+        };
+
+        try {
+          const geocodingResult = await reportsService.forwardGeocode(
+            forwardPayload,
+            token,
+          );
+          payload = mergeForwardGeocoding(payload, geocodingResult);
+        } catch (geocodeError) {
+          if (process.env.NODE_ENV !== "production") {
+            console.warn(
+              "[ReportSubmit] Forward geocoding failed; proceeding without coords",
+              geocodeError,
+            );
+          }
+        }
+      }
 
       if (isEditing && initialData) {
         toast.success("Memperbarui laporan...", {
           description: "Mohon tunggu sebentar",
         });
-        await updateReport(initialData.id, cleanedData);
+        await updateReport(initialData.id, payload);
         toast.success("Laporan berhasil diperbarui!", {
           description: "Perubahan Anda telah disimpan",
           duration: 5000,
@@ -125,7 +196,7 @@ export const useReportSubmit = ({
         toast.success("Foto berhasil diunggah", {
           description: "Sedang membuat laporan...",
         });
-        await submitReport(cleanedData, selectedImage || undefined);
+        await submitReport(payload, selectedImage || undefined);
         toast.success("Laporan berhasil dibuat!", {
           description: "Terima kasih telah melaporkan kerusakan jalan",
           duration: 5000,

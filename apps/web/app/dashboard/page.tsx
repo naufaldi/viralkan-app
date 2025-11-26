@@ -23,16 +23,30 @@ import {
 import Link from "next/link";
 import Header from "../../components/layout/header";
 import { ReportsTable } from "../../components/dashboard/reports-table";
-import { requireAuth, getUserStats } from "../../lib/auth-server";
+import {
+  requireAuth,
+  getUserStats,
+  type UserStatsResponse,
+} from "../../lib/auth-server";
 import { getUserReportsAction } from "../../lib/auth-actions";
+
+type DashboardReport = {
+  id: string;
+  title: string;
+  category: string;
+  status: string;
+  created_at: string;
+  image_url?: string;
+  street_name?: string;
+};
 
 export default async function DashboardPage() {
   // Server-side authentication check
   const user = await requireAuth();
 
   // Server-side data fetching
-  let userReports: any[] = [];
-  let stats: any = null;
+  let userReports: DashboardReport[] = [];
+  let stats: UserStatsResponse | null = null;
 
   try {
     // Fetch user reports with limit for dashboard
@@ -40,7 +54,7 @@ export default async function DashboardPage() {
     const reportsData = await getUserReportsAction(searchParams);
 
     // Transform API data to match ReportsTable expected format
-    userReports = (reportsData?.items || []).map((report: any) => ({
+    userReports = (reportsData?.items || []).map((report) => ({
       ...report,
       title: report.street_name, // Use street_name as title
       status: report.status || "pending", // Use actual status from API

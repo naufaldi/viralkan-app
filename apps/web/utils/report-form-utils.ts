@@ -1,10 +1,16 @@
 import { CreateReportInput } from "../lib/types/api";
 
 export const cleanFormData = (data: CreateReportInput): CreateReportInput => {
+  const normalizeCoordinate = (value: unknown): number | null => {
+    if (typeof value !== "number") return null;
+    if (!Number.isFinite(value)) return null;
+    return value;
+  };
+
   return {
     ...data,
-    lat: data.lat ?? null,
-    lon: data.lon ?? null,
+    lat: normalizeCoordinate(data.lat),
+    lon: normalizeCoordinate(data.lon),
   };
 };
 
