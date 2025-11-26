@@ -15,7 +15,8 @@ Enable users to submit road damage reports without touching lat/lon by letting t
 - [x] (2025-11-26 02:05Z) Added rate-limited Nominatim client, exposed reverse/forward geocode endpoints, and admin location update handler; check-types passing.
 - [x] (2025-11-26 02:20Z) Simplified create report frontend flow to single track (no tabs) that adapts based on photo EXIF vs manual address.
 - [ ] (2025-11-26 08:55Z) Frontend geocoding bug triage: CreateReportSchema on web still requires lat/lon (defaults 0) so address-only submissions send 0,0 and skip backend forward geocoding; need to allow null/undefined coords and pre-submit forward geocode via backend endpoint to honor RFC.
-- [ ] (2025-11-26 09:10Z) Implemented nullable coords + backend forward-geocode pre-submit on web; bun run format + bun test green; bun run lint currently fails on pre-existing web warnings (unused imports/any/no-unescaped-entities) unrelated to this change—needs cleanup decision.
+- [x] (2025-11-26 09:10Z) Implemented nullable coords + backend forward-geocode pre-submit on web; bun run format + bun test green; bun run lint web section clean; remaining lint warnings are pre-existing in apps/api.
+- [ ] (2025-11-26 10:25Z) New requirement: if forward geocode fails, attempt device geolocation automatically; if both fail, warn (do not block) while keeping coordinate inputs hidden, but encourage location permission for mapping. Implement MVP cues without new fields.
 - [ ] (pending) Finalize API contract updates for create/update and new geocoding endpoints.
 - [ ] (pending) Validate plan with stakeholders before implementation.
 
@@ -32,6 +33,7 @@ Enable users to submit road damage reports without touching lat/lon by letting t
 - Decision: Plan includes an admin-only location correction path so lat/lon can be fixed post-submission when geocoding fails. Rationale: New RFC clause 4.5 requires admin remediation. Date/Author: 2025-11-24 Codex.
 - Decision: Use requireAdmin middleware for remediation endpoints; no new role needed. Rationale: Matches current admin guard and user confirmation. Date/Author: 2025-11-24 Codex.
 - Decision: Frontend must stop sending sentinel coords (0,0) when none are available; allow nullable coords and, when missing, call backend forward geocoding before submission to honor RFC auto-location flow. Rationale: Prevents reverse-geocoding garbage and lets backend enrich address-only payloads. Date/Author: 2025-11-26 Codex.
+- Decision: For mapping readiness, require coords at submit time: if forward geocode fails, automatically attempt device geolocation; only block if both fail, keeping lat/lon fields hidden from the UI. Rationale: Ensures coordinates for future map features without exposing technical inputs. Date/Author: 2025-11-26 Codex.
 
 ## Outcomes & Retrospective
 
@@ -52,6 +54,7 @@ Describe edits in prose with file paths so a novice can follow without other con
 5. Admin remediation path: add admin-specific route (apps/api/src/routes/admin/api.ts or reports/admin) guarded by requireAdmin to edit location/metadata regardless of ownership; ensure data layer update handles lat/lon/address updates and records geocoding_source as manual-admin along with verifier fields; update validation to allow null->value transitions for coordinates.
 6. Testing and observability: add unit tests for core validation/merging logic and shell orchestration (success, reverse geocode fail, forward geocode fail, admin override). Add integration tests for new endpoints with mocked Nominatim responses. Update logging to structured messages without console.log. Document environment variables for geocoding base URL and rate limits.
 7. Frontend alignment: update apps/web CreateReportSchema/defaults to accept nullable coords, drop 0 defaults, and pre-submit forward geocode via backend when coords are missing so address+photo flows still produce lat/lon while keeping submission resilient if geocoding fails.
+8. Frontend enforcement for mapping: in apps/web (use-report-submit.ts + report-location-fields.tsx), when no coords after forward geocode, auto-attempt device geolocation; if still missing, block submission with inline error/toast. Keep lat/lon fields hidden; reuse existing location helpers where possible.
 
 ## Concrete Steps
 

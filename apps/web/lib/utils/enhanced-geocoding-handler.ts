@@ -9,9 +9,7 @@
 
 import { batchFuzzyMatch, AdministrativeOption } from "./fuzzy-matching";
 import type { CurrentGeocodingResponse } from "../types/administrative-sync-analysis";
-import {
-  administrativeService,
-} from "../../services/administrative";
+import { administrativeService } from "../../services/administrative";
 import type { UseFormReturn } from "react-hook-form";
 import type { CreateReportInput } from "../types/api";
 

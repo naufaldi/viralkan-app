@@ -21,10 +21,8 @@ export const ReportLocationFields = () => {
   const { hasExifData, geocodingFromExifSucceeded } = useImageContext();
   const { isGeocodingFromCoords, geocodingError, isGettingLocation } =
     useLocationContext();
-  const {
-    handleGetAddressFromCoordinates,
-    getCurrentLocation,
-  } = useReportFormActionsContext();
+  const { handleGetAddressFromCoordinates, getCurrentLocation } =
+    useReportFormActionsContext();
   const disabled = isLoading;
   const lat = form.watch("lat");
   const lon = form.watch("lon");

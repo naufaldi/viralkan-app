@@ -16,7 +16,6 @@ interface AdminUser {
 }
 
 export function AdminUsersTableWrapper() {
-
   // Data fetching - temporarily use admin stats for user count
   const { data: statsData, isLoading, error } = useAdminStatsQuery();
 

@@ -548,7 +548,8 @@ export default function Panduan() {
                             <ul className="mt-1 ml-4 space-y-1">
                               <li>• Pastikan GPS/lokasi aktif di ponsel</li>
                               <li>
-                                • Gunakan tombol &quot;Dapatkan Lokasi Saya&quot;
+                                • Gunakan tombol &quot;Dapatkan Lokasi
+                                Saya&quot;
                               </li>
                               <li>• Isi koordinat secara manual</li>
                             </ul>

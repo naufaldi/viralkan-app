@@ -1,9 +1,4 @@
-import {
-  Camera,
-  MapPin,
-  CheckCircle2,
-  XCircle,
-} from "lucide-react";
+import { Camera, MapPin, CheckCircle2, XCircle } from "lucide-react";
 import { Card, CardContent } from "@repo/ui/components/ui/card";
 
 interface ExifWarningProps {
@@ -97,8 +92,8 @@ export const ExifWarning = ({
                   <strong className="font-medium">
                     Gunakan tombol lokasi:
                   </strong>{" "}
-                  Klik &quot;Gunakan Lokasi Saat Ini&quot; untuk mengisi koordinat
-                  otomatis
+                  Klik &quot;Gunakan Lokasi Saat Ini&quot; untuk mengisi
+                  koordinat otomatis
                 </span>
               </div>
 

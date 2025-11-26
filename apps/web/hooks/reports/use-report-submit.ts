@@ -13,7 +13,10 @@ import {
   GeocodingResponse,
   reportsService,
 } from "../../services/api-client";
-import { cleanFormData } from "../../utils/report-form-utils";
+import {
+  cleanFormData,
+  geolocationOptions,
+} from "../../utils/report-form-utils";
 
 interface UseReportSubmitProps {
   form: UseFormReturn<CreateReportInput>;
@@ -78,6 +81,28 @@ export const useReportSubmit = ({
       regency_code: payload.regency_code || geocoding.regency_code || "",
       district_code: payload.district_code || geocoding.district_code || "",
     };
+  };
+
+  const tryGetDeviceLocation = async (): Promise<{
+    lat: number;
+    lon: number;
+  } | null> => {
+    if (typeof window === "undefined" || !navigator.geolocation) {
+      return null;
+    }
+
+    return new Promise((resolve) => {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          resolve({
+            lat: position.coords.latitude,
+            lon: position.coords.longitude,
+          });
+        },
+        () => resolve(null),
+        geolocationOptions,
+      );
+    });
   };
 
   const {
@@ -178,6 +203,25 @@ export const useReportSubmit = ({
             console.warn(
               "[ReportSubmit] Forward geocoding failed; proceeding without coords",
               geocodeError,
+            );
+          }
+        }
+
+        if (!hasValidCoordinates(payload.lat, payload.lon)) {
+          const deviceCoords = await tryGetDeviceLocation();
+          if (deviceCoords) {
+            payload = {
+              ...payload,
+              lat: deviceCoords.lat,
+              lon: deviceCoords.lon,
+            };
+          } else {
+            toast.warning(
+              "Koordinat belum diperoleh. Laporan tetap dikirim tanpa titik peta.",
+              {
+                description:
+                  "Aktifkan lokasi perangkat atau pastikan alamat lebih spesifik untuk membantu pemetaan.",
+              },
             );
           }
         }
