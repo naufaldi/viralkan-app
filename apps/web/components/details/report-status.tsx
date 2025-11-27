@@ -1,7 +1,4 @@
 "use client";
-
-import { Badge } from "@repo/ui/components/ui/badge";
-import { Separator } from "@repo/ui/components/ui/separator";
 import { CheckCircle, Clock, XCircle } from "lucide-react";
 
 interface ReportStatusProps {

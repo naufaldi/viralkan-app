@@ -1,7 +1,7 @@
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { cors } from "hono/cors";
 
-import { firebaseAuthMiddleware } from "../../middleware/auth";
+import { firebaseAuthMiddleware, requireAdmin } from "../auth";
 import {
   CreateReportSchema,
   ReportQuerySchema,
@@ -12,6 +12,8 @@ import {
   PaginatedReportsResponseSchema,
   PaginatedMyReportsResponseSchema,
   ReportsErrorResponseSchema,
+  ReverseGeocodeRequestSchema,
+  ForwardGeocodeRequestSchema,
 } from "@/schema/reports";
 import * as shell from "./shell";
 
@@ -119,6 +121,165 @@ const getReportsRoute = createRoute({
   },
 });
 
+const geocodingResponseSchema = z.object({
+  street_name: z.string().nullable(),
+  district: z.string().nullable(),
+  city: z.string().nullable(),
+  province: z.string().nullable(),
+  province_code: z.string().nullable(),
+  regency_code: z.string().nullable(),
+  district_code: z.string().nullable(),
+  lat: z.number().nullable(),
+  lon: z.number().nullable(),
+  geocoding_source: z.enum(["exif", "nominatim", "manual"]),
+  geocoded_at: z.string().datetime(),
+});
+
+const reverseGeocodeRoute = createRoute({
+  method: "post",
+  path: "/geocode/reverse",
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: ReverseGeocodeRequestSchema,
+        },
+      },
+    },
+  },
+  summary: "Reverse geocode coordinates",
+  description:
+    "Convert coordinates into structured address fields using Nominatim",
+  tags: ["Reports"],
+  security: [{ bearerAuth: [] }],
+  middleware: [firebaseAuthMiddleware],
+  responses: {
+    200: {
+      description: "Reverse geocoding successful",
+      content: { "application/json": { schema: geocodingResponseSchema } },
+    },
+    400: {
+      description: "Invalid coordinates",
+      content: { "application/json": { schema: ReportsErrorResponseSchema } },
+    },
+    404: {
+      description: "No geocoding result found",
+      content: { "application/json": { schema: ReportsErrorResponseSchema } },
+    },
+    502: {
+      description: "Upstream geocoding failed",
+      content: { "application/json": { schema: ReportsErrorResponseSchema } },
+    },
+    500: {
+      description: "Internal server error",
+      content: { "application/json": { schema: ReportsErrorResponseSchema } },
+    },
+  },
+});
+
+const forwardGeocodeRoute = createRoute({
+  method: "post",
+  path: "/geocode/forward",
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: ForwardGeocodeRequestSchema,
+        },
+      },
+    },
+  },
+  summary: "Forward geocode address",
+  description:
+    "Convert human-readable address into coordinates using Nominatim",
+  tags: ["Reports"],
+  security: [{ bearerAuth: [] }],
+  middleware: [firebaseAuthMiddleware],
+  responses: {
+    200: {
+      description: "Forward geocoding successful",
+      content: { "application/json": { schema: geocodingResponseSchema } },
+    },
+    400: {
+      description: "Invalid address",
+      content: { "application/json": { schema: ReportsErrorResponseSchema } },
+    },
+    404: {
+      description: "No geocoding result found",
+      content: { "application/json": { schema: ReportsErrorResponseSchema } },
+    },
+    502: {
+      description: "Upstream geocoding failed",
+      content: { "application/json": { schema: ReportsErrorResponseSchema } },
+    },
+    500: {
+      description: "Internal server error",
+      content: { "application/json": { schema: ReportsErrorResponseSchema } },
+    },
+  },
+});
+
+const adminUpdateLocationSchema = CreateReportSchema.pick({
+  street_name: true,
+  location_text: true,
+  district: true,
+  city: true,
+  province: true,
+  province_code: true,
+  regency_code: true,
+  district_code: true,
+  lat: true,
+  lon: true,
+}).partial();
+
+const adminUpdateLocationRoute = createRoute({
+  method: "put",
+  path: "/{id}/admin/location",
+  request: {
+    params: ReportParamsSchema,
+    body: {
+      content: {
+        "application/json": {
+          schema: adminUpdateLocationSchema,
+        },
+      },
+    },
+  },
+  summary: "Admin update report location",
+  description:
+    "Admin-only endpoint to correct coordinates and address metadata",
+  tags: ["Reports"],
+  security: [{ bearerAuth: [] }],
+  middleware: [firebaseAuthMiddleware, requireAdmin],
+  responses: {
+    200: {
+      description: "Location updated successfully",
+      content: {
+        "application/json": { schema: z.object({ success: z.boolean() }) },
+      },
+    },
+    400: {
+      description: "Invalid data",
+      content: { "application/json": { schema: ReportsErrorResponseSchema } },
+    },
+    401: {
+      description: "User not authenticated",
+      content: { "application/json": { schema: ReportsErrorResponseSchema } },
+    },
+    403: {
+      description: "Not authorized",
+      content: { "application/json": { schema: ReportsErrorResponseSchema } },
+    },
+    404: {
+      description: "Report not found",
+      content: { "application/json": { schema: ReportsErrorResponseSchema } },
+    },
+    500: {
+      description: "Internal server error",
+      content: { "application/json": { schema: ReportsErrorResponseSchema } },
+    },
+  },
+});
 const getEnrichedReportsRoute = createRoute({
   method: "get",
   path: "/enriched",
@@ -388,6 +549,32 @@ const validateOwnershipRoute = createRoute({
 
 // --- Route Handlers ---
 
+const toGeocodingResponse = (data: {
+  street_name?: string;
+  district?: string;
+  city?: string;
+  province?: string;
+  province_code?: string;
+  regency_code?: string;
+  district_code?: string;
+  lat?: number;
+  lon?: number;
+  geocoding_source: "exif" | "nominatim" | "manual";
+  geocoded_at: Date;
+}) => ({
+  street_name: data.street_name ?? null,
+  district: data.district ?? null,
+  city: data.city ?? null,
+  province: data.province ?? null,
+  province_code: data.province_code ?? null,
+  regency_code: data.regency_code ?? null,
+  district_code: data.district_code ?? null,
+  lat: data.lat ?? null,
+  lon: data.lon ?? null,
+  geocoding_source: data.geocoding_source,
+  geocoded_at: data.geocoded_at.toISOString(),
+});
+
 reportsRouter.openapi(testAuthRoute, async (c) => {
   try {
     const userId = getUserIdFromContext(c);
@@ -457,6 +644,74 @@ reportsRouter.openapi(getReportsRoute, async (c) => {
         error: {
           code: "INTERNAL_ERROR",
           message: "Failed to fetch reports",
+          timestamp: new Date().toISOString(),
+        },
+      },
+      500,
+    );
+  }
+});
+
+reportsRouter.openapi(reverseGeocodeRoute, async (c) => {
+  try {
+    const payload = c.req.valid("json");
+    const result = await shell.reverseGeocodeLocation(payload);
+
+    if (result.success) {
+      return c.json(toGeocodingResponse(result.data), 200);
+    }
+
+    return c.json(
+      {
+        error: {
+          code: "GEOCODING_ERROR",
+          message: result.error,
+          timestamp: new Date().toISOString(),
+        },
+      },
+      (result.statusCode as 400 | 404 | 500 | 502 | undefined) ?? 500,
+    );
+  } catch (error) {
+    console.error("Error in reverseGeocodeRoute:", error);
+    return c.json(
+      {
+        error: {
+          code: "INTERNAL_ERROR",
+          message: "Failed to reverse geocode location",
+          timestamp: new Date().toISOString(),
+        },
+      },
+      500,
+    );
+  }
+});
+
+reportsRouter.openapi(forwardGeocodeRoute, async (c) => {
+  try {
+    const payload = c.req.valid("json");
+    const result = await shell.forwardGeocodeLocation(payload);
+
+    if (result.success) {
+      return c.json(toGeocodingResponse(result.data), 200);
+    }
+
+    return c.json(
+      {
+        error: {
+          code: result.statusCode === 404 ? "NOT_FOUND" : "GEOCODING_ERROR",
+          message: result.error,
+          timestamp: new Date().toISOString(),
+        },
+      },
+      (result.statusCode as 400 | 404 | 500 | 502 | undefined) ?? 500,
+    );
+  } catch (error) {
+    console.error("Error in forwardGeocodeRoute:", error);
+    return c.json(
+      {
+        error: {
+          code: "INTERNAL_ERROR",
+          message: "Failed to forward geocode address",
           timestamp: new Date().toISOString(),
         },
       },
@@ -690,6 +945,64 @@ reportsRouter.openapi(updateReportRoute, async (c) => {
         error: {
           code: "INTERNAL_ERROR",
           message: "Failed to update report",
+          timestamp: new Date().toISOString(),
+        },
+      },
+      500,
+    );
+  }
+});
+
+reportsRouter.openapi(adminUpdateLocationRoute, async (c) => {
+  try {
+    const userId = getUserIdFromContext(c);
+
+    if (!userId) {
+      return c.json(
+        {
+          error: {
+            code: "UNAUTHORIZED",
+            message: "User not authenticated",
+            timestamp: new Date().toISOString(),
+          },
+        },
+        401,
+      );
+    }
+
+    const paramData = c.req.valid("param");
+    const updateData = c.req.valid("json");
+    const result = await shell.adminUpdateReportLocation(
+      paramData.id,
+      updateData,
+    );
+
+    if (result.success) {
+      return c.json({ success: true }, 200);
+    }
+
+    return c.json(
+      {
+        error: {
+          code:
+            result.statusCode === 403
+              ? "FORBIDDEN"
+              : result.statusCode === 404
+                ? "NOT_FOUND"
+                : "UPDATE_ERROR",
+          message: result.error,
+          timestamp: new Date().toISOString(),
+        },
+      },
+      (result.statusCode as 400 | 401 | 403 | 404 | 500 | undefined) ?? 500,
+    );
+  } catch (error) {
+    console.error("Error in adminUpdateLocationRoute:", error);
+    return c.json(
+      {
+        error: {
+          code: "INTERNAL_ERROR",
+          message: "Failed to update report location",
           timestamp: new Date().toISOString(),
         },
       },

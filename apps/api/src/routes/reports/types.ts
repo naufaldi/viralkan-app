@@ -1,7 +1,9 @@
 import {
   CreateReportSchema,
+  ForwardGeocodeRequestSchema,
   ReportParamsSchema,
   ReportQuerySchema,
+  ReverseGeocodeRequestSchema,
 } from "@/schema/reports";
 import { z } from "zod";
 
@@ -9,6 +11,29 @@ import { z } from "zod";
 export type CreateReportInput = z.infer<typeof CreateReportSchema>;
 export type ReportQuery = z.infer<typeof ReportQuerySchema>;
 export type ReportParams = z.infer<typeof ReportParamsSchema>;
+export type ReverseGeocodeRequest = z.infer<typeof ReverseGeocodeRequestSchema>;
+export type ForwardGeocodeRequest = z.infer<typeof ForwardGeocodeRequestSchema>;
+
+export type GeocodingSource = "exif" | "nominatim" | "manual";
+
+export interface GeocodingMetadata {
+  geocoding_source: GeocodingSource | null;
+  geocoded_at: Date | null;
+}
+
+export interface GeocodingResult {
+  street_name?: string;
+  district?: string;
+  city?: string;
+  province?: string;
+  province_code?: string;
+  regency_code?: string;
+  district_code?: string;
+  lat?: number;
+  lon?: number;
+  geocoding_source: GeocodingSource;
+  geocoded_at: Date;
+}
 
 // Database Entity Types (specific to reports)
 export interface Report {
@@ -27,6 +52,8 @@ export interface Report {
   province_code: string | null;
   regency_code: string | null;
   district_code: string | null;
+  geocoding_source: GeocodingSource | null;
+  geocoded_at: Date | null;
   status: "pending" | "verified" | "rejected" | "deleted";
   verified_at: Date | null;
   verified_by: string | null;

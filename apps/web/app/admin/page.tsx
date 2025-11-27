@@ -6,19 +6,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@repo/ui/components/ui/card";
-import { Badge } from "@repo/ui/components/ui/badge";
 import {
   ClipboardList,
   CheckCircle,
   XCircle,
   Clock,
   BarChart3,
-  Users,
   AlertTriangle,
   Eye,
   UserCheck,
   TrendingUp,
-  Activity,
 } from "lucide-react";
 import Link from "next/link";
 import { requireAuth } from "@/lib/auth-server";

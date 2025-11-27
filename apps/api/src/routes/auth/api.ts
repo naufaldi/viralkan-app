@@ -18,6 +18,18 @@ type Env = {
 
 export const authRouter = new OpenAPIHono<Env>();
 
+type AuthErrorStatus = 401 | 404 | 500;
+
+const authErrorResponse = (c: any, status: AuthErrorStatus, message: string) =>
+  c.json(
+    {
+      error: message,
+      statusCode: status,
+      timestamp: new Date().toISOString(),
+    },
+    status,
+  );
+
 // --- Route Definitions ---
 
 const healthRoute = createRoute({
@@ -165,14 +177,7 @@ authRouter.openapi(healthRoute, async (c) => {
     );
   } catch (error) {
     console.error("Health check error:", error);
-    return c.json(
-      {
-        error: "Health check failed",
-        statusCode: 500,
-        timestamp: new Date().toISOString(),
-      },
-      500,
-    );
+    return authErrorResponse(c, 500, "Health check failed");
   }
 });
 
@@ -181,27 +186,17 @@ authRouter.openapi(verifyRoute, async (c) => {
     const authHeader = c.req.header("Authorization");
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return c.json(
-        {
-          error: "Missing or invalid Authorization header",
-          statusCode: 401,
-          timestamp: new Date().toISOString(),
-        },
+      return authErrorResponse(
+        c,
         401,
+        "Missing or invalid Authorization header",
       );
     }
 
     const idToken = authHeader.substring(7); // Remove 'Bearer ' prefix
 
     if (!idToken) {
-      return c.json(
-        {
-          error: "ID token is required",
-          statusCode: 401,
-          timestamp: new Date().toISOString(),
-        },
-        401,
-      );
+      return authErrorResponse(c, 401, "ID token is required");
     }
 
     // Use shell layer for business logic orchestration
@@ -210,25 +205,12 @@ authRouter.openapi(verifyRoute, async (c) => {
     if (result.success) {
       return c.json(result.data, 200);
     } else {
-      return c.json(
-        {
-          error: result.error,
-          statusCode: result.statusCode,
-          timestamp: new Date().toISOString(),
-        },
-        result.statusCode as number,
-      );
+      const status = (result.statusCode ?? 500) as AuthErrorStatus;
+      return authErrorResponse(c, status, result.error);
     }
   } catch (error) {
     console.error("Token verification endpoint error:", error);
-    return c.json(
-      {
-        error: "Authentication failed",
-        statusCode: 500,
-        timestamp: new Date().toISOString(),
-      },
-      500,
-    );
+    return authErrorResponse(c, 500, "Authentication failed");
   }
 });
 
@@ -237,14 +219,7 @@ authRouter.openapi(getMeRoute, async (c) => {
     const userId = c.get("user_id");
 
     if (!userId) {
-      return c.json(
-        {
-          error: "Authentication required",
-          statusCode: 401,
-          timestamp: new Date().toISOString(),
-        },
-        401,
-      );
+      return authErrorResponse(c, 401, "Authentication required");
     }
 
     // Use shell layer for business logic
@@ -253,25 +228,12 @@ authRouter.openapi(getMeRoute, async (c) => {
     if (result.success) {
       return c.json(result.data, 200);
     } else {
-      return c.json(
-        {
-          error: result.error,
-          statusCode: result.statusCode,
-          timestamp: new Date().toISOString(),
-        },
-        result.statusCode as number,
-      );
+      const status = (result.statusCode ?? 500) as AuthErrorStatus;
+      return authErrorResponse(c, status, result.error);
     }
   } catch (error) {
     console.error("Get user profile endpoint error:", error);
-    return c.json(
-      {
-        error: "Failed to get user profile",
-        statusCode: 500,
-        timestamp: new Date().toISOString(),
-      },
-      500,
-    );
+    return authErrorResponse(c, 500, "Failed to get user profile");
   }
 });
 
@@ -280,14 +242,7 @@ authRouter.openapi(getUserStatsRoute, async (c) => {
     const userId = c.get("user_id");
 
     if (!userId) {
-      return c.json(
-        {
-          error: "Authentication required",
-          statusCode: 401,
-          timestamp: new Date().toISOString(),
-        },
-        401,
-      );
+      return authErrorResponse(c, 401, "Authentication required");
     }
 
     // Use shell layer for business logic
@@ -296,25 +251,12 @@ authRouter.openapi(getUserStatsRoute, async (c) => {
     if (result.success) {
       return c.json(result.data, 200);
     } else {
-      return c.json(
-        {
-          error: result.error,
-          statusCode: result.statusCode,
-          timestamp: new Date().toISOString(),
-        },
-        result.statusCode as number,
-      );
+      const status = (result.statusCode ?? 500) as AuthErrorStatus;
+      return authErrorResponse(c, status, result.error);
     }
   } catch (error) {
     console.error("Get user stats endpoint error:", error);
-    return c.json(
-      {
-        error: "Failed to get user statistics",
-        statusCode: 500,
-        timestamp: new Date().toISOString(),
-      },
-      500,
-    );
+    return authErrorResponse(c, 500, "Failed to get user statistics");
   }
 });
 
@@ -323,14 +265,7 @@ authRouter.openapi(logoutRoute, async (c) => {
     const userId = c.get("user_id");
 
     if (!userId) {
-      return c.json(
-        {
-          error: "Authentication required",
-          statusCode: 401,
-          timestamp: new Date().toISOString(),
-        },
-        401,
-      );
+      return authErrorResponse(c, 401, "Authentication required");
     }
 
     // Use shell layer for business logic
@@ -339,24 +274,11 @@ authRouter.openapi(logoutRoute, async (c) => {
     if (result.success) {
       return c.json(result.data, 200);
     } else {
-      return c.json(
-        {
-          error: result.error,
-          statusCode: result.statusCode,
-          timestamp: new Date().toISOString(),
-        },
-        result.statusCode as number,
-      );
+      const status = (result.statusCode ?? 500) as AuthErrorStatus;
+      return authErrorResponse(c, status, result.error);
     }
   } catch (error) {
     console.error("Logout endpoint error:", error);
-    return c.json(
-      {
-        error: "Failed to process logout",
-        statusCode: 500,
-        timestamp: new Date().toISOString(),
-      },
-      500,
-    );
+    return authErrorResponse(c, 500, "Failed to process logout");
   }
 });

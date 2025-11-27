@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { MapPin } from "lucide-react";
 
 const Footer = () => {
@@ -38,12 +39,12 @@ const Footer = () => {
                 </a>
               </li>
               <li>
-                <a
+                <Link
                   href="/privasi"
                   className="transition-colors hover:text-white"
                 >
                   Kebijakan Privasi
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -52,25 +53,28 @@ const Footer = () => {
             <h3 className="mb-4 font-semibold text-white">Laporan</h3>
             <ul className="space-y-2">
               <li>
-                <a
+                <Link
                   href="/laporan"
                   className="transition-colors hover:text-white"
                 >
                   Lihat Laporan
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="/login" className="transition-colors hover:text-white">
+                <Link
+                  href="/login"
+                  className="transition-colors hover:text-white"
+                >
                   Buat Laporan
-                </a>
+                </Link>
               </li>
               <li>
-                <a
+                <Link
                   href="/dashboard"
                   className="transition-colors hover:text-white"
                 >
                   Dashboard
-                </a>
+                </Link>
               </li>
             </ul>
           </div>

@@ -12,6 +12,7 @@ interface ReportImageUploadProps {
   error?: string;
   disabled?: boolean;
   onFormActivation?: () => void;
+  initialImageUrl?: string;
 }
 
 export const ReportImageUpload = ({
@@ -24,6 +25,7 @@ export const ReportImageUpload = ({
   error,
   disabled,
   onFormActivation,
+  initialImageUrl,
 }: ReportImageUploadProps) => {
   return (
     <div className="space-y-3">
@@ -47,6 +49,7 @@ export const ReportImageUpload = ({
         disabled={disabled}
         enableCameraMode={true}
         onFormActivation={onFormActivation}
+        initialImageUrl={initialImageUrl}
       />
       <p className="text-sm text-neutral-600">
         Unggah foto yang jelas untuk membantu komunitas mengidentifikasi lokasi

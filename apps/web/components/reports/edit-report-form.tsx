@@ -30,7 +30,7 @@ export default function EditReportForm({
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | undefined>(undefined);
-  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const isUploadingImage = false;
   const [imageUploadFailed, setImageUploadFailed] = useState(false);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
 

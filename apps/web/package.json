@@ -26,6 +26,7 @@
     "next": "^15.3.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-grab": "^0.0.49",
     "react-hook-form": "^7.60.0",
     "react-leaflet": "^5.0.0",
     "uuidv7": "^1.0.2"

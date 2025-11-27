@@ -7,6 +7,7 @@ import type {
   CreateReportInput,
   ReportQuery,
   PaginatedReports,
+  GeocodingMetadata,
 } from "./types";
 import type { AppResult } from "@/types";
 import { uuidv7 } from "uuidv7";
@@ -87,6 +88,8 @@ export const findReportsWithPagination = async (
         r.province_code,
         r.regency_code,
         r.district_code,
+        r.geocoding_source,
+        r.geocoded_at,
         r.status,
         r.verified_at,
         r.verified_by,
@@ -160,6 +163,8 @@ export const findReportById = async (
         r.province_code,
         r.regency_code,
         r.district_code,
+        r.geocoding_source,
+        r.geocoded_at,
         r.status,
         r.verified_at,
         r.verified_by,
@@ -189,6 +194,7 @@ export const findReportById = async (
 export const createReport = async (
   userId: string, // Changed from number to string (UUID v7)
   reportData: CreateReportInput,
+  geocodingMetadata: GeocodingMetadata,
 ): Promise<AppResult<{ id: string }>> => {
   // Changed return type to string
   try {
@@ -209,9 +215,11 @@ export const createReport = async (
         province_code,
         regency_code,
         district_code,
+        geocoding_source,
+        geocoded_at,
         status
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
       RETURNING id
     `;
 
@@ -230,6 +238,8 @@ export const createReport = async (
       reportData.province_code || null,
       reportData.regency_code || null,
       reportData.district_code || null,
+      geocodingMetadata.geocoding_source,
+      geocodingMetadata.geocoded_at,
       "pending", // Default status for new reports
     ];
 
@@ -249,7 +259,7 @@ export const createReport = async (
 export const updateReport = async (
   id: string, // Changed from number to string (UUID v7)
   userId: string, // Changed from number to string (UUID v7)
-  reportData: Partial<CreateReportInput>,
+  reportData: Partial<CreateReportInput & GeocodingMetadata>,
 ): Promise<AppResult<boolean>> => {
   try {
     // First check if report exists and belongs to user
@@ -336,6 +346,18 @@ export const updateReport = async (
       paramIndex++;
     }
 
+    if (reportData.geocoding_source !== undefined) {
+      updateFields.push(`geocoding_source = $${paramIndex}`);
+      params.push(reportData.geocoding_source);
+      paramIndex++;
+    }
+
+    if (reportData.geocoded_at !== undefined) {
+      updateFields.push(`geocoded_at = $${paramIndex}`);
+      params.push(reportData.geocoded_at);
+      paramIndex++;
+    }
+
     if (reportData.district_code !== undefined) {
       updateFields.push(`district_code = $${paramIndex}`);
       params.push(reportData.district_code);
@@ -396,4 +418,95 @@ export const findReportsByUserId = async (
   };
 
   return findReportsWithPagination(extendedQuery);
+};
+
+export const adminUpdateReportLocation = async (
+  id: string,
+  locationData: Partial<CreateReportInput> & Partial<GeocodingMetadata>,
+): Promise<AppResult<boolean>> => {
+  try {
+    const updateFields: string[] = [];
+    const params: Array<string | number | null | Date> = [];
+    let paramIndex = 1;
+
+    const addField = <T extends string | number | null | Date>(
+      column: string,
+      value: T,
+    ) => {
+      updateFields.push(`${column} = $${paramIndex}`);
+      params.push(value);
+      paramIndex++;
+    };
+
+    if (locationData.street_name !== undefined) {
+      addField("street_name", locationData.street_name);
+    }
+
+    if (locationData.location_text !== undefined) {
+      addField("location_text", locationData.location_text);
+    }
+
+    if (locationData.district !== undefined) {
+      addField("district", locationData.district);
+    }
+
+    if (locationData.city !== undefined) {
+      addField("city", locationData.city);
+    }
+
+    if (locationData.province !== undefined) {
+      addField("province", locationData.province);
+    }
+
+    if (locationData.province_code !== undefined) {
+      addField("province_code", locationData.province_code);
+    }
+
+    if (locationData.regency_code !== undefined) {
+      addField("regency_code", locationData.regency_code);
+    }
+
+    if (locationData.district_code !== undefined) {
+      addField("district_code", locationData.district_code);
+    }
+
+    if (locationData.lat !== undefined) {
+      addField("lat", locationData.lat);
+    }
+
+    if (locationData.lon !== undefined) {
+      addField("lon", locationData.lon);
+    }
+
+    if (locationData.geocoding_source !== undefined) {
+      addField("geocoding_source", locationData.geocoding_source);
+    }
+
+    if (locationData.geocoded_at !== undefined) {
+      addField("geocoded_at", locationData.geocoded_at);
+    }
+
+    if (updateFields.length === 0) {
+      return createError("No fields to update", 400);
+    }
+
+    const updateQuery = `
+      UPDATE reports
+      SET ${updateFields.join(", ")}
+      WHERE id = $${paramIndex}
+    `;
+
+    params.push(id);
+
+    const result = await sql.unsafe(updateQuery, params);
+
+    if ((result as any).rowCount === 0) {
+      return createError("Report not found", 404);
+    }
+
+    return createSuccess(true);
+  } catch (error) {
+    console.error("Database error in adminUpdateReportLocation:", error);
+    return createError("Failed to update report location", 500);
+  }
 };

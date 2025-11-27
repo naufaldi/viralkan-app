@@ -12,7 +12,7 @@ import {
   forwardGeocode,
   reverseGeocodeWithNominatimData,
 } from "../services/geocoding";
-import { administrativeService } from "../../services/api-client";
+import { administrativeService } from "../../services/administrative";
 import { processNominatimAddressWithAPI } from "./enhanced-geocoding-handler";
 import type {
   CurrentGeocodingResponse,
@@ -409,8 +409,8 @@ export async function runAllAdministrativeSyncTests(): Promise<{
   );
 
   const commonIssues = Object.entries(issueCounts)
-    .filter(([_, count]) => count > 1)
-    .sort(([_, a], [__, b]) => b - a)
+    .filter(([, count]) => count > 1)
+    .sort(([, a], [, b]) => b - a)
     .map(([issue, count]) => `${issue} (${count} occurrences)`);
 
   // Generate recommendations based on findings

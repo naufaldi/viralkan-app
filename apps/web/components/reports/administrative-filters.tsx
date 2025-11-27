@@ -7,7 +7,6 @@ import {
 } from "@repo/ui/components/ui/select";
 import { Building, Loader2 } from "lucide-react";
 import { useAdministrative } from "../../hooks/reports/use-administrative";
-import { useEffect } from "react";
 
 interface AdministrativeFiltersProps {
   provinsi?: string;
@@ -28,21 +27,11 @@ export function AdministrativeFilters({
   onKecamatanChange,
   className = "",
 }: AdministrativeFiltersProps) {
-  const { data, loading, refetchRegencies, refetchDistricts } =
-    useAdministrative();
-
-  // Fetch dependent data when parent selection changes
-  useEffect(() => {
-    if (provinsi && provinsi !== "all") {
-      refetchRegencies(provinsi);
-    }
-  }, [provinsi, refetchRegencies]);
-
-  useEffect(() => {
-    if (kabupaten_kota && kabupaten_kota !== "all") {
-      refetchDistricts(kabupaten_kota);
-    }
-  }, [kabupaten_kota, refetchDistricts]);
+  const { data, loading } = useAdministrative({
+    provinceCode: provinsi && provinsi !== "all" ? provinsi : undefined,
+    regencyCode:
+      kabupaten_kota && kabupaten_kota !== "all" ? kabupaten_kota : undefined,
+  });
 
   // Filter options based on selected values
   const filteredRegencies = data.regencies.filter(

@@ -38,15 +38,16 @@ export function useGeocoding(options: UseGeocodingOptions = {}) {
 
   // Validate coordinates
   const isValidCoordinates = useCallback(
-    (lat: number, lon: number): boolean => {
-      return (
-        !isNaN(lat) &&
-        !isNaN(lon) &&
-        lat >= -90 &&
-        lat <= 90 &&
-        lon >= -180 &&
-        lon <= 180
-      );
+    (lat?: number | null, lon?: number | null): boolean => {
+      if (typeof lat !== "number" || typeof lon !== "number") {
+        return false;
+      }
+
+      if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+        return false;
+      }
+
+      return lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180;
     },
     [],
   );
@@ -201,7 +202,7 @@ export function useGeocoding(options: UseGeocodingOptions = {}) {
 
   // Manual coordinates geocoding (removed auto-trigger for better UX)
   const geocodeFromCoordinatesManual = useCallback(
-    async (lat: number, lon: number) => {
+    async (lat?: number | null, lon?: number | null) => {
       if (!isValidCoordinates(lat, lon)) {
         toast.error("Koordinat tidak valid", {
           description: "Silakan masukkan koordinat yang valid",
@@ -210,7 +211,7 @@ export function useGeocoding(options: UseGeocodingOptions = {}) {
         return;
       }
 
-      await geocodeFromCoordinates(lat, lon);
+      await geocodeFromCoordinates(lat as number, lon as number);
     },
     [isValidCoordinates, geocodeFromCoordinates],
   );

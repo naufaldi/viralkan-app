@@ -1,3 +1,4 @@
+import Link from "next/link";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import { Card } from "@repo/ui";
@@ -9,11 +10,9 @@ import {
   Edit3,
   Send,
   Users,
-  Share2,
   CheckCircle,
   AlertCircle,
   Smartphone,
-  Globe,
   Eye,
   Settings,
   ArrowRight,
@@ -202,10 +201,10 @@ export default function Panduan() {
                                   Peringatan EXIF
                                 </h4>
                                 <p className="text-sm text-yellow-800">
-                                  Jika muncul peringatan "GPS metadata tidak
-                                  ditemukan", Anda perlu mengisi lokasi secara
-                                  manual atau menggunakan tombol "Dapatkan
-                                  Lokasi Saya".
+                                  Jika muncul peringatan &quot;GPS metadata
+                                  tidak ditemukan&quot;, Anda perlu mengisi
+                                  lokasi secara manual atau menggunakan tombol
+                                  &quot;Dapatkan Lokasi Saya&quot;.
                                 </p>
                               </div>
                             </div>
@@ -316,8 +315,8 @@ export default function Panduan() {
                         </div>
                         <div className="space-y-4">
                           <p className="leading-relaxed text-neutral-600">
-                            Setelah semua field terisi, tekan tombol "Kirim
-                            Laporan" untuk mempublikasikan laporan Anda ke
+                            Setelah semua field terisi, tekan tombol &quot;Kirim
+                            Laporan&quot; untuk mempublikasikan laporan Anda ke
                             platform komunitas.
                           </p>
 
@@ -548,7 +547,10 @@ export default function Panduan() {
                             <strong>Solusi:</strong>
                             <ul className="mt-1 ml-4 space-y-1">
                               <li>• Pastikan GPS/lokasi aktif di ponsel</li>
-                              <li>• Gunakan tombol "Dapatkan Lokasi Saya"</li>
+                              <li>
+                                • Gunakan tombol &quot;Dapatkan Lokasi
+                                Saya&quot;
+                              </li>
                               <li>• Isi koordinat secara manual</li>
                             </ul>
                           </div>
@@ -618,20 +620,20 @@ export default function Panduan() {
                   infrastruktur yang lebih baik.
                 </p>
                 <div className="flex flex-col justify-center gap-4 sm:flex-row">
-                  <a
+                  <Link
                     href="/login"
                     className="inline-flex items-center gap-2 rounded-lg bg-neutral-900 px-6 py-3 text-white transition-colors hover:bg-neutral-800"
                   >
                     Mulai Lapor Sekarang
                     <ArrowRight className="h-4 w-4" />
-                  </a>
-                  <a
+                  </Link>
+                  <Link
                     href="/laporan"
                     className="inline-flex items-center gap-2 rounded-lg border border-neutral-300 px-6 py-3 text-neutral-700 transition-colors hover:bg-neutral-50"
                   >
                     <Eye className="h-4 w-4" />
                     Lihat Laporan Lain
-                  </a>
+                  </Link>
                 </div>
                 <p className="mt-4 text-sm text-neutral-500">
                   Platform komunitas untuk kemajuan infrastruktur Indonesia

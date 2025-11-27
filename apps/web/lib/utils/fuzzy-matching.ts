@@ -218,7 +218,7 @@ function findSynonym(searchTerm: string): string[] {
   }
 
   // Partial match
-  for (const [key, synonyms] of Object.entries(ADMINISTRATIVE_SYNONYMS)) {
+  for (const synonyms of Object.values(ADMINISTRATIVE_SYNONYMS)) {
     if (synonyms.includes(normalized)) {
       return synonyms;
     }
@@ -264,7 +264,6 @@ export interface AdministrativeOption {
 export function fuzzyMatchAdministrative(
   searchTerm: string | null,
   options: AdministrativeOption[],
-  type: "province" | "regency" | "district" = "regency",
 ): FuzzyMatchResult {
   if (!searchTerm || !searchTerm.trim()) {
     return {
@@ -385,19 +384,16 @@ export function batchFuzzyMatch(
   const provinceMatch = fuzzyMatchAdministrative(
     geocodingData.province ?? null,
     administrativeData.provinces,
-    "province",
   );
 
   const regencyMatch = fuzzyMatchAdministrative(
     geocodingData.city ?? null,
     administrativeData.regencies,
-    "regency",
   );
 
   const districtMatch = fuzzyMatchAdministrative(
     geocodingData.district ?? null,
     administrativeData.districts,
-    "district",
   );
 
   // Calculate overall confidence

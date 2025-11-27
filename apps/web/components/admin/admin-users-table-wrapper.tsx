@@ -1,6 +1,4 @@
 "use client";
-
-import { useState } from "react";
 import { AdminUsersTable } from "./admin-users-table";
 import { useAdminStatsQuery } from "../../hooks/admin";
 import { toast } from "sonner";
@@ -17,17 +15,7 @@ interface AdminUser {
   avatarUrl?: string;
 }
 
-interface AdminUsersTableWrapperProps {
-  // Remove data and isLoading props since we're using real data
-}
-
-export function AdminUsersTableWrapper({}: AdminUsersTableWrapperProps) {
-  const [filters, setFilters] = useState({
-    page: 1,
-    limit: 20,
-    search: "",
-  });
-
+export function AdminUsersTableWrapper() {
   // Data fetching - temporarily use admin stats for user count
   const { data: statsData, isLoading, error } = useAdminStatsQuery();
 

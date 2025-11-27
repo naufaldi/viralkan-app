@@ -8,7 +8,6 @@ import {
   CheckCircle,
   AlertTriangle,
   Settings,
-  RefreshCw,
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -23,12 +22,16 @@ import { Button } from "@repo/ui/components/ui/button";
 import { Badge } from "@repo/ui/components/ui/badge";
 import { Card, CardContent } from "@repo/ui/components/ui/card";
 import { ComboboxField, ComboboxOption } from "../ui/combobox-field";
-import { useAdministrative } from "../../hooks/reports/use-administrative";
+import {
+  useAdministrative,
+  useInvalidateAdministrative,
+} from "../../hooks/reports/use-administrative";
 import { useAdministrativeSync } from "../../hooks/reports/use-administrative-sync";
 import { AdministrativeSyncStatus } from "./administrative-sync-status";
 import { CreateReportInput } from "../../lib/types/api";
-import { Province, Regency, District } from "../../services/api-client";
+import { Province, Regency, District } from "../../services/administrative";
 import { cn } from "@repo/ui/lib/utils";
+import type { AdministrativeSyncStatus as AdministrativeSyncStatusType } from "../../lib/utils/enhanced-geocoding-handler";
 
 interface AdministrativeSelectProps {
   form: UseFormReturn<CreateReportInput>;
@@ -44,7 +47,7 @@ interface AdministrativeSelectProps {
   enableAutoSync?: boolean;
   showSyncStatus?: boolean;
   // Administrative sync status props (passed from parent)
-  syncStatus?: any; // TODO: Import proper type
+  syncStatus?: AdministrativeSyncStatusType | null;
   hasValidMatch?: boolean;
   confidenceLevel?: "high" | "medium" | "low" | "none";
   canAutoSelect?: boolean;
@@ -76,21 +79,28 @@ export const AdministrativeSelect = ({
   const selectedProvinceCode = form.watch("province_code");
   const selectedRegencyCode = form.watch("regency_code");
   const selectedDistrictCode = form.watch("district_code");
+  const selectedProvinceName = form.watch("province");
+  const selectedRegencyName = form.watch("city");
+  const selectedDistrictName = form.watch("district");
 
-  // Get "all" states from URL params (default to "all" when no parameter exists)
-  const selectedAllProvince = !searchParams.get("provinsi");
-  const selectedAllRegency = !searchParams.get("kabupaten_kota");
-  const selectedAllDistrict = !searchParams.get("kecamatan");
+  // Get "all" states from URL params (only if form doesn't have values)
+  // When editing, form values take precedence over URL params
+  const selectedAllProvince =
+    !selectedProvinceCode && !searchParams.get("provinsi");
+  const selectedAllRegency =
+    !selectedRegencyCode && !searchParams.get("kabupaten_kota");
+  const selectedAllDistrict =
+    !selectedDistrictCode && !searchParams.get("kecamatan");
 
-  // Fetch data using our custom hook
-  const {
-    data,
-    loading,
-    error,
-    refetchRegencies,
-    refetchDistricts,
-    addDynamicOption,
-  } = useAdministrative();
+  // Invalidation helpers for cascading invalidation
+  const { invalidateRegencies, invalidateDistricts } =
+    useInvalidateAdministrative();
+
+  // Fetch data using our custom hook with TanStack Query
+  const { data, loading, error, addDynamicOption } = useAdministrative({
+    provinceCode: selectedProvinceCode || undefined,
+    regencyCode: selectedRegencyCode || undefined,
+  });
 
   // Enhanced administrative sync hook (only when not provided externally)
   const internalSync = useAdministrativeSync({
@@ -114,19 +124,6 @@ export const AdministrativeSelect = ({
   // Always use internal sync methods (external props are for status display only)
   const { enhancedGeocoding, processGeocoding, applyToForm, clearSync } =
     internalSync;
-
-  // Fetch dependent data when parent selection changes
-  React.useEffect(() => {
-    if (selectedProvinceCode) {
-      refetchRegencies(selectedProvinceCode);
-    }
-  }, [selectedProvinceCode, refetchRegencies]);
-
-  React.useEffect(() => {
-    if (selectedRegencyCode) {
-      refetchDistricts(selectedRegencyCode);
-    }
-  }, [selectedRegencyCode, refetchDistricts]);
 
   // Helper function to truncate long text
   const truncateText = (text: string, maxLength: number = 20) => {
@@ -247,6 +244,57 @@ export const AdministrativeSelect = ({
     return options;
   }, [data.districts, enableAllOptions]);
 
+  // Ensure auto-filled administrative values appear in combobox options
+  React.useEffect(() => {
+    if (
+      selectedProvinceCode &&
+      selectedProvinceName &&
+      !provinceOptions.some((option) => option.value === selectedProvinceCode)
+    ) {
+      addDynamicOption("province", {
+        code: selectedProvinceCode,
+        name: selectedProvinceName,
+      });
+    }
+
+    if (
+      selectedRegencyCode &&
+      selectedRegencyName &&
+      selectedProvinceCode &&
+      !regencyOptions.some((option) => option.value === selectedRegencyCode)
+    ) {
+      addDynamicOption("regency", {
+        code: selectedRegencyCode,
+        name: selectedRegencyName,
+        province_code: selectedProvinceCode,
+      });
+    }
+
+    if (
+      selectedDistrictCode &&
+      selectedDistrictName &&
+      selectedRegencyCode &&
+      !districtOptions.some((option) => option.value === selectedDistrictCode)
+    ) {
+      addDynamicOption("district", {
+        code: selectedDistrictCode,
+        name: selectedDistrictName,
+        regency_code: selectedRegencyCode,
+      });
+    }
+  }, [
+    addDynamicOption,
+    districtOptions,
+    provinceOptions,
+    regencyOptions,
+    selectedDistrictCode,
+    selectedDistrictName,
+    selectedProvinceCode,
+    selectedProvinceName,
+    selectedRegencyCode,
+    selectedRegencyName,
+  ]);
+
   // Handle province selection - reset dependent fields
   const handleProvinceChange = (provinceCode: string) => {
     const params = new URLSearchParams(searchParams);
@@ -292,6 +340,13 @@ export const AdministrativeSelect = ({
     router.replace(`?${params.toString()}`, { scroll: false });
     onClearGeocodingError?.();
 
+    // Invalidate dependent queries when province changes
+    if (provinceCode !== "all") {
+      invalidateRegencies(provinceCode);
+    } else {
+      invalidateRegencies();
+    }
+
     // Clear sync status when user manually changes selection
     clearSync();
   };
@@ -332,6 +387,13 @@ export const AdministrativeSelect = ({
     // Update URL
     router.replace(`?${params.toString()}`, { scroll: false });
     onClearGeocodingError?.();
+
+    // Invalidate dependent queries when regency changes
+    if (regencyCode !== "all") {
+      invalidateDistricts(regencyCode);
+    } else {
+      invalidateDistricts();
+    }
 
     // Clear sync status when user manually changes selection
     clearSync();
@@ -484,7 +546,7 @@ export const AdministrativeSelect = ({
           <FormField
             control={form.control}
             name="province"
-            render={({ field }) => (
+            render={() => (
               <FormItem className="space-y-3">
                 <FormLabel className="flex items-center gap-2 text-base font-semibold text-neutral-900">
                   Provinsi *
@@ -547,7 +609,7 @@ export const AdministrativeSelect = ({
           <FormField
             control={form.control}
             name="city"
-            render={({ field }) => (
+            render={() => (
               <FormItem className="space-y-3">
                 <FormLabel className="flex items-center gap-2 text-base font-semibold text-neutral-900">
                   Kabupaten/Kota *
@@ -617,7 +679,7 @@ export const AdministrativeSelect = ({
           <FormField
             control={form.control}
             name="district"
-            render={({ field }) => (
+            render={() => (
               <FormItem className="space-y-3">
                 <FormLabel className="flex items-center gap-2 text-base font-semibold text-neutral-900">
                   Kecamatan *
