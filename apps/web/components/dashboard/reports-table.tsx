@@ -44,7 +44,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 interface Report {
-  id: number;
+  id: string;
   title: string;
   category: string;
   status: string;

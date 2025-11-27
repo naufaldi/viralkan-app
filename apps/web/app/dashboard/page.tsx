@@ -29,6 +29,7 @@ import {
   type UserStatsResponse,
 } from "../../lib/auth-server";
 import { getUserReportsAction } from "../../lib/auth-actions";
+import type { ReportWithUser } from "../../lib/types/api";
 
 type DashboardReport = {
   id: string;
@@ -54,7 +55,7 @@ export default async function DashboardPage() {
     const reportsData = await getUserReportsAction(searchParams);
 
     // Transform API data to match ReportsTable expected format
-    userReports = (reportsData?.items || []).map((report) => ({
+    userReports = (reportsData?.items || []).map((report: ReportWithUser) => ({
       ...report,
       title: report.street_name, // Use street_name as title
       status: report.status || "pending", // Use actual status from API

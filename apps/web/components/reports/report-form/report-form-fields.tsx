@@ -3,9 +3,21 @@ import { ReportStreetNameField } from "./fields/report-street-name-field";
 import { ReportAddressFields } from "./fields/report-address-fields";
 import { ReportLocationFields } from "./fields/report-location-fields";
 import { useReportFormContext } from "./report-form-context";
+import type { UseFormReturn } from "react-hook-form";
+import type { CreateReportInput } from "../../../lib/types/api";
 
-export const ReportFormFields = () => {
-  const { isFormActivated } = useReportFormContext();
+interface ReportFormFieldsProps {
+  form?: UseFormReturn<CreateReportInput>;
+  disabled?: boolean;
+}
+
+export const ReportFormFields = ({
+  form,
+  disabled = false,
+}: ReportFormFieldsProps) => {
+  const context = useReportFormContext();
+  const isFormActivated = form ? !disabled : context.isFormActivated;
+
   return (
     <div className="space-y-6">
       {/* Row 1: Category and Street Name */}
@@ -14,8 +26,8 @@ export const ReportFormFields = () => {
           !isFormActivated ? "pointer-events-none opacity-40" : "opacity-100"
         }`}
       >
-        <ReportCategoryField />
-        <ReportStreetNameField />
+        <ReportCategoryField form={form} />
+        <ReportStreetNameField form={form} />
       </div>
 
       {/* Row 2: Administrative Fields (Province, City, District) */}
@@ -24,11 +36,11 @@ export const ReportFormFields = () => {
           !isFormActivated ? "pointer-events-none opacity-40" : "opacity-100"
         }`}
       >
-        <ReportAddressFields />
+        <ReportAddressFields form={form} />
       </div>
 
       {/* Row 3: Location Description and Coordinates */}
-      <ReportLocationFields />
+      <ReportLocationFields form={form} />
     </div>
   );
 };

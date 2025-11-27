@@ -246,20 +246,20 @@ export async function runAdministrativeSyncTest(
     // Step 2: Get administrative data
     try {
       const provincesResponse = await administrativeService.getProvinces();
-      result.administrativeData.provinces = provincesResponse.data;
+      result.administrativeData.provinces = provincesResponse;
 
       // For now, we'll use a sample of regencies and districts
       // In a full implementation, we'd fetch based on the geocoding response
       const sampleRegenciesResponse =
         await administrativeService.getRegencies("32"); // Jawa Barat
-      result.administrativeData.regencies = sampleRegenciesResponse.data;
+      result.administrativeData.regencies = sampleRegenciesResponse;
 
-      if (sampleRegenciesResponse.data.length > 0) {
+      if (sampleRegenciesResponse.length > 0) {
         const sampleDistrictsResponse =
           await administrativeService.getDistricts(
-            sampleRegenciesResponse.data[0]?.code || "",
+            sampleRegenciesResponse[0]?.code || "",
           );
-        result.administrativeData.districts = sampleDistrictsResponse.data;
+        result.administrativeData.districts = sampleDistrictsResponse;
       }
     } catch (error) {
       result.issues.push(

@@ -15,9 +15,19 @@ import {
 } from "@repo/ui/components/ui/select";
 import { useReportFormContext, useImageContext } from "../report-form-context";
 import { REPORT_CATEGORIES } from "@/lib/types/api";
+import type { UseFormReturn } from "react-hook-form";
+import type { CreateReportInput } from "@/lib/types/api";
 
-export const ReportCategoryField = () => {
-  const { form, isLoading, isFormActivated } = useReportFormContext();
+interface ReportCategoryFieldProps {
+  form?: UseFormReturn<CreateReportInput>;
+}
+
+export const ReportCategoryField = ({
+  form: formProp,
+}: ReportCategoryFieldProps) => {
+  const context = useReportFormContext();
+  const form = formProp || context.form;
+  const { isLoading, isFormActivated } = context;
   const { isUploadingImage } = useImageContext();
   const disabled = isLoading || isUploadingImage;
   return (
