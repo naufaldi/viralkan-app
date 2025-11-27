@@ -25,21 +25,33 @@ function ReportForm({ children, ...providerProps }: ReportFormProps) {
 /**
  * ReportForm.Fields - Main form fields container
  */
-ReportForm.Fields = ReportFormFields;
+const ReportFormFieldsComponent = (
+  props: React.ComponentProps<typeof ReportFormFields>,
+) => <ReportFormFields {...props} />;
+ReportForm.Fields = ReportFormFieldsComponent;
 
 /**
  * ReportForm.AddressFields - Address and administrative fields
  */
-ReportForm.AddressFields = ReportAddressFields;
+const ReportAddressFieldsComponent = (
+  props: React.ComponentProps<typeof ReportAddressFields>,
+) => <ReportAddressFields {...props} />;
+ReportForm.AddressFields = ReportAddressFieldsComponent;
 
 /**
  * ReportForm.LocationFields - Location coordinates and description fields
  */
-ReportForm.LocationFields = ReportLocationFields;
+const ReportLocationFieldsComponent = (
+  props: React.ComponentProps<typeof ReportLocationFields>,
+) => <ReportLocationFields {...props} />;
+ReportForm.LocationFields = ReportLocationFieldsComponent;
 
 /**
  * ReportForm.CategoryField - Category selection field
  */
-ReportForm.CategoryField = ReportCategoryField;
+const ReportCategoryFieldComponent = (
+  props: React.ComponentProps<typeof ReportCategoryField>,
+) => <ReportCategoryField {...props} />;
+ReportForm.CategoryField = ReportCategoryFieldComponent;
 
 export { ReportForm };
