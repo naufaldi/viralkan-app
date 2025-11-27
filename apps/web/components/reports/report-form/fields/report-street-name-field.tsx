@@ -13,9 +13,19 @@ import {
   useLocationContext,
   useReportFormActionsContext,
 } from "../report-form-context";
+import type { UseFormReturn } from "react-hook-form";
+import type { CreateReportInput } from "@/lib/types/api";
 
-export const ReportStreetNameField = () => {
-  const { form, isLoading, isFormActivated } = useReportFormContext();
+interface ReportStreetNameFieldProps {
+  form?: UseFormReturn<CreateReportInput>;
+}
+
+export const ReportStreetNameField = ({
+  form: formProp,
+}: ReportStreetNameFieldProps) => {
+  const context = useReportFormContext();
+  const form = formProp || context.form;
+  const { isLoading, isFormActivated } = context;
   const { isGeocodingFromCoords, lastGeocodingSource } = useLocationContext();
   const { clearGeocodingError } = useReportFormActionsContext();
   const disabled = isLoading;
