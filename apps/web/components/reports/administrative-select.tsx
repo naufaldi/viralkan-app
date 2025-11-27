@@ -125,12 +125,6 @@ export const AdministrativeSelect = ({
   const { enhancedGeocoding, processGeocoding, applyToForm, clearSync } =
     internalSync;
 
-  // Helper function to truncate long text
-  const truncateText = (text: string, maxLength: number = 20) => {
-    if (!text) return text;
-    return text.length > maxLength ? `${text.slice(0, maxLength)}...` : text;
-  };
-
   // Get confidence level styling
   const getConfidenceStyling = (level: "high" | "medium" | "low" | "none") => {
     switch (level) {
@@ -183,7 +177,7 @@ export const AdministrativeSelect = ({
       options.push(
         ...data.provinces.map((province: Province) => ({
           value: province.code,
-          label: truncateText(province.name),
+          label: province.name,
           searchValue: province.name.toLowerCase(),
         })),
       );
@@ -209,7 +203,7 @@ export const AdministrativeSelect = ({
       options.push(
         ...data.regencies.map((regency: Regency) => ({
           value: regency.code,
-          label: truncateText(regency.name),
+          label: regency.name,
           searchValue: regency.name.toLowerCase(),
         })),
       );
@@ -235,7 +229,7 @@ export const AdministrativeSelect = ({
       options.push(
         ...data.districts.map((district: District) => ({
           value: district.code,
-          label: truncateText(district.name),
+          label: district.name,
           searchValue: district.name.toLowerCase(),
         })),
       );
@@ -542,7 +536,7 @@ export const AdministrativeSelect = ({
         }`}
       >
         {/* Province Selection */}
-        <div className="max-w-full">
+        <div className="w-full">
           <FormField
             control={form.control}
             name="province"
@@ -584,10 +578,7 @@ export const AdministrativeSelect = ({
                     loading={loading.provinces}
                     size="lg"
                     error={!!form.formState.errors.province}
-                    className={cn(
-                      enhancedGeocodingClasses,
-                      "max-w-full truncate",
-                    )}
+                    className={cn(enhancedGeocodingClasses, "w-full")}
                   />
                 </FormControl>
                 <FormDescription className="text-sm text-neutral-600">
@@ -605,7 +596,7 @@ export const AdministrativeSelect = ({
         </div>
 
         {/* Regency Selection */}
-        <div className="max-w-full">
+        <div className="w-full">
           <FormField
             control={form.control}
             name="city"
@@ -654,10 +645,7 @@ export const AdministrativeSelect = ({
                     loading={loading.regencies}
                     size="lg"
                     error={!!form.formState.errors.city}
-                    className={cn(
-                      enhancedGeocodingClasses,
-                      "max-w-full truncate",
-                    )}
+                    className={cn(enhancedGeocodingClasses, "w-full")}
                   />
                 </FormControl>
                 <FormDescription className="text-sm text-neutral-600">
@@ -675,7 +663,7 @@ export const AdministrativeSelect = ({
         </div>
 
         {/* District Selection */}
-        <div className="max-w-full">
+        <div className="w-full">
           <FormField
             control={form.control}
             name="district"
@@ -726,10 +714,7 @@ export const AdministrativeSelect = ({
                     loading={loading.districts}
                     size="lg"
                     error={!!form.formState.errors.district}
-                    className={cn(
-                      enhancedGeocodingClasses,
-                      "max-w-full truncate",
-                    )}
+                    className={cn(enhancedGeocodingClasses, "w-full")}
                   />
                 </FormControl>
                 <FormDescription className="text-sm text-neutral-600">

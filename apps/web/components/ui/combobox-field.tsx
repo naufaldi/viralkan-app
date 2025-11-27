@@ -105,10 +105,7 @@ export const ComboboxField = React.forwardRef<
             <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent
-          className="w-[--radix-popover-trigger-width] p-0"
-          align="start"
-        >
+        <PopoverContent className="w-full p-0 sm:min-w-[388px]" align="start">
           <Command>
             <CommandInput placeholder={searchPlaceholder} />
             <CommandList>
@@ -119,7 +116,7 @@ export const ComboboxField = React.forwardRef<
                     key={option.value}
                     value={option.searchValue || option.label}
                     onSelect={() => handleSelect(option.value)}
-                    className="cursor-pointer"
+                    className="w-full cursor-pointer sm:min-w-[300px]"
                   >
                     <Check
                       className={cn(
@@ -127,7 +124,7 @@ export const ComboboxField = React.forwardRef<
                         value === option.value ? "opacity-100" : "opacity-0",
                       )}
                     />
-                    <span className="truncate">{option.label}</span>
+                    <span className="whitespace-normal">{option.label}</span>
                   </CommandItem>
                 ))}
               </CommandGroup>

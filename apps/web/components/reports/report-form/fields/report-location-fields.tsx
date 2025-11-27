@@ -58,32 +58,20 @@ export const ReportLocationFields = () => {
         </div>
       )}
 
-      {isFormActivated && shouldShowLocationButtons && (
+      {isFormActivated && shouldShowLocationButtons && getCurrentLocation && (
         <div className="mt-4 space-y-3 rounded-lg border border-neutral-200 bg-neutral-50 p-4">
           <p className="text-sm font-semibold text-neutral-900">
             Bantuan Lokasi
           </p>
           <p className="text-sm text-neutral-600">
-            Coba lokasi otomatis atau cari berdasarkan alamat.
+            Gunakan lokasi perangkat Anda untuk mengisi alamat secara otomatis.
           </p>
-          <div className="flex flex-col gap-3 md:flex-row">
-            {getCurrentLocation && (
-              <LocationButton
-                onGetLocation={getCurrentLocation}
-                isLoading={isGettingLocation}
-                disabled={disabled}
-                isFormActivated={isFormActivated}
-              />
-            )}
-            {handleGetAddressFromCoordinates && (
-              <GetAddressButton
-                onClick={handleGetAddressFromCoordinates}
-                isLoading={isGeocodingFromCoords}
-                disabled={disabled}
-                isValidCoordinates={hasValidCoordinates}
-              />
-            )}
-          </div>
+          <LocationButton
+            onGetLocation={getCurrentLocation}
+            isLoading={isGettingLocation}
+            disabled={disabled}
+            isFormActivated={isFormActivated}
+          />
         </div>
       )}
 
@@ -124,6 +112,28 @@ export const ReportLocationFields = () => {
           )}
         />
       </div>
+
+      {/* Conditional GetAddressButton - Only show when user has coordinates but address is empty */}
+      {isFormActivated &&
+        hasValidCoordinates &&
+        !form.watch("location_text") &&
+        handleGetAddressFromCoordinates && (
+          <div className="mt-4 space-y-3 rounded-lg border border-neutral-200 bg-neutral-50 p-4">
+            <p className="text-sm font-semibold text-neutral-900">
+              Cari Alamat dari Koordinat
+            </p>
+            <p className="text-sm text-neutral-600">
+              Jika Anda memiliki koordinat tetapi alamat belum diisi, gunakan
+              tombol di bawah untuk mencari alamat.
+            </p>
+            <GetAddressButton
+              onClick={handleGetAddressFromCoordinates}
+              isLoading={isGeocodingFromCoords}
+              disabled={disabled}
+              isValidCoordinates={hasValidCoordinates}
+            />
+          </div>
+        )}
     </>
   );
 };

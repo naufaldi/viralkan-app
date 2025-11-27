@@ -80,7 +80,7 @@ export default async function CreateReportPage() {
           </div>
 
           {/* Form Section */}
-          <div className="mx-auto max-w-4xl">
+          <div className="mx-auto max-w-screen-xl">
             <CreateReportForm />
           </div>
         </div>
