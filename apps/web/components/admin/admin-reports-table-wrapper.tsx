@@ -20,6 +20,8 @@ interface AdminReport {
   submittedAt: string;
   imageUrl?: string;
   status: "pending" | "verified" | "rejected";
+  lat: number | null;
+  lon: number | null;
 }
 
 export function AdminReportsTableWrapper() {
@@ -60,6 +62,8 @@ export function AdminReportsTableWrapper() {
       submittedAt: item.created_at,
       imageUrl: item.image_url,
       status: item.status as "pending" | "verified" | "rejected",
+      lat: item.lat,
+      lon: item.lon,
     })) || [];
 
   // Client-side handlers for table actions

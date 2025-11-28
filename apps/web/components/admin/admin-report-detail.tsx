@@ -327,6 +327,22 @@ export function AdminReportDetail({ reportId }: AdminReportDetailProps) {
               </div>
             </div>
 
+            {report.lat === null || report.lon === null ? (
+              <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+                <AlertCircle className="mt-0.5 h-4 w-4" />
+                <div>
+                  <p className="font-semibold">
+                    Koordinat lokasi belum tersedia
+                  </p>
+                  <p className="text-xs text-amber-900">
+                    Anda dapat melengkapi koordinat secara manual atau
+                    menggunakan pencarian berdasarkan alamat pada tahap
+                    berikutnya.
+                  </p>
+                </div>
+              </div>
+            ) : null}
+
             <Separator className="bg-neutral-200" />
 
             <div className="grid gap-6 md:grid-cols-2">

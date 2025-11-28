@@ -71,6 +71,8 @@ interface AdminReport {
   submittedAt: string;
   imageUrl?: string;
   status: "pending" | "verified" | "rejected";
+  lat: number | null;
+  lon: number | null;
 }
 
 interface AdminReportsTableProps {
@@ -339,24 +341,34 @@ export function AdminReportsTable({
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       ),
-      cell: ({ row }) => (
-        <div className="max-w-[200px] md:max-w-[300px]">
-          <div className="truncate font-medium text-neutral-900">
-            {row.getValue("streetName")}
+      cell: ({ row }) => {
+        const hasMissingCoordinates =
+          row.original.lat === null || row.original.lon === null;
+
+        return (
+          <div className="max-w-[200px] md:max-w-[300px]">
+            <div className="truncate font-medium text-neutral-900">
+              {row.getValue("streetName")}
+            </div>
+            <div className="truncate text-sm text-neutral-500">
+              {row.original.locationText}
+            </div>
+            <div className="mt-1 flex items-center text-xs text-neutral-400">
+              <User className="mr-1 h-3 w-3" />
+              {row.original.userName}
+            </div>
+            {hasMissingCoordinates && (
+              <div className="mt-1 inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] font-medium tracking-wide text-amber-800 uppercase">
+                BUTUH KOORDINAT
+              </div>
+            )}
+            {/* Show category on mobile when column is hidden */}
+            <div className="mt-2 md:hidden">
+              {getCategoryBadge(row.original.category)}
+            </div>
           </div>
-          <div className="truncate text-sm text-neutral-500">
-            {row.original.locationText}
-          </div>
-          <div className="mt-1 flex items-center text-xs text-neutral-400">
-            <User className="mr-1 h-3 w-3" />
-            {row.original.userName}
-          </div>
-          {/* Show category on mobile when column is hidden */}
-          <div className="mt-2 md:hidden">
-            {getCategoryBadge(row.original.category)}
-          </div>
-        </div>
-      ),
+        );
+      },
     },
     {
       accessorKey: "category",
