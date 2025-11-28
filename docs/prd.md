@@ -38,7 +38,7 @@ Guiding principles
 | **Upload Form**      | ① Select JPEG/PNG ≤10 MB ② Choose category (Berlubang • Retak • Lainnya) ③ Street name ④ Free‑text location | Server returns 201; redirect to confirmation page                                    |
 | **Public List**      | Anyone (no login) sees table of all reports with thumbnail, category, street, created_at                    | Table loads <1 s on 3G; clicking row opens detail page                               |
 | **Storage & DB**     | Images in R2; metadata in Postgres (`reports` table)                                                        | Schema includes user_id FK, category, street, location_text, lat, lon (nullable)     |
-| **Abuse Protection** | reCAPTCHA v3 on upload, 10 reports/user/day limit                                                           | Abuse metrics visible in Grafana                                                     |
+| **Abuse Protection** | Rate limiting: 10 reports/user/day limit                                                                    | Abuse metrics visible in Grafana                                                     |
 
 ---
 
@@ -260,7 +260,6 @@ Guiding principles
   **Step 3: Review & Submit**
   - Preview of uploaded image
   - Summary of entered details
-  - reCAPTCHA verification
   - Submit button with loading state
 
 - Cancel button (with confirmation dialog)
@@ -269,21 +268,7 @@ Guiding principles
   **Data Requirements:**
 - API: `POST /api/reports` with multipart form data
 - Response: `{id: string, message: string}`
-  **Navigation:** → `/reports/create/success` or back to `/dashboard`
-
-#### **Page: Report Success (`/reports/create/success`)**
-
-**Purpose:** Confirmation page after successful report creation
-**Components:**
-
-- Success icon and message
-- "Laporan berhasil dibuat" heading
-- Summary of created report
-- Action buttons:
-  - "Lihat Laporan" → `/reports/[id]`
-  - "Buat Laporan Lain" → `/reports/create`
-  - "Kembali ke Dashboard" → `/dashboard`
-    **Navigation:** Multiple options as listed above
+  **Navigation:** → `/laporan` (list page) or back to `/dashboard`
 
 ---
 
@@ -338,7 +323,6 @@ Guiding principles
 | `/dashboard`              | User dashboard       | Yes           | `GET /api/me/*`        | Stats, recent reports  |
 | `/dashboard/reports`      | User reports list    | Yes           | `GET /api/me/reports`  | Personal data table    |
 | `/reports/create`         | Create report form   | Yes           | `POST /api/reports`    | Multi-step form        |
-| `/reports/create/success` | Success confirmation | Yes           | None                   | Success message        |
 
 ---
 
@@ -375,9 +359,9 @@ Guiding principles
 ### **Flow B: Authenticated User Creating Report**
 
 ```
-[Dashboard] → [Create Report] → [Upload Image] → [Fill Details] → [Review] → [Success] → [View Report]
+[Dashboard] → [Create Report] → [Upload Image] → [Fill Details] → [Review] → [Submit]
      ↑              ↓                                                          ↓
-[My Reports]    [Cancel/Back]                                           [Create Another]
+[My Reports]    [Cancel/Back]                                           [View Report]
 ```
 
 ### **Flow C: Error Handling**
@@ -438,7 +422,7 @@ Same steps as V1; address columns now show precise location when EXIF data exist
 | 0    | Kick‑off      | RFC sign‑off, repo/infrastructure bootstrap          |
 | 1    | V1 Core Build | Auth, DB migrations, upload endpoint, R2 integration |
 | 2    | V1 UI Build   | Dashboard, list page, form validation; internal beta |
-| 3    | V1 Hardening  | reCAPTCHA, rate limits, CI tests; public launch      |
+| 3    | V1 Hardening  | Rate limits, CI tests; public launch                 |
 | 4    | V2 Build      | EXIF parser, reverse‑geocoder service, form autofill |
 | 5    | V2 Launch     | Metrics: GPS autofill success‑rate                   |
 | 6    | V3 Build      | Map page, clustering, PostGIS index                  |

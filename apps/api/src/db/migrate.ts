@@ -118,6 +118,18 @@ const runMigrations = async () => {
 
     console.log("✅ English administrative columns ensured");
 
+    // Step 6.5: Add geocoding metadata columns (missing from previous migration)
+    console.log("📋 Adding geocoding metadata columns...");
+
+    await sql`ALTER TABLE reports ADD COLUMN IF NOT EXISTS geocoded_at TIMESTAMPTZ`;
+    await sql`ALTER TABLE reports ADD COLUMN IF NOT EXISTS geocoding_source TEXT CHECK (geocoding_source IN ('exif', 'nominatim', 'manual'))`;
+
+    // Create indexes for geocoding metadata
+    await sql`CREATE INDEX IF NOT EXISTS reports_geocoding_source_idx ON reports(geocoding_source)`;
+    await sql`CREATE INDEX IF NOT EXISTS reports_geocoded_at_idx ON reports(geocoded_at DESC)`;
+
+    console.log("✅ Geocoding metadata columns added");
+
     // Step 7: Create administrative tables
     console.log("📋 Creating administrative tables...");
 

@@ -14,7 +14,7 @@
 
 ## 1 · Scope
 
-- **IN** — Google OAuth, image upload to Cloudflare R2, public list page, Postgres schema with GIS columns, multi-step form, pagination, reCAPTCHA, PWA capabilities.
+- **IN** — Google OAuth, image upload to Cloudflare R2, public list page, Postgres schema with GIS columns, multi-step form, pagination, PWA capabilities.
 - **OUT** — EXIF parsing, map view, admin dashboard (future V2+).
 
 ---
@@ -30,7 +30,7 @@
 | Storage       | **Cloudflare R2**                 | Cheap S3 clone near Jakarta            |
 | DB            | **PostgreSQL 15 + PostGIS**       | Spatial ready                          |
 | Reverse Proxy | **Traefik v3**                    | Auto‑TLS, Docker labels, single binary |
-| Security      | **reCAPTCHA v3**                  | Abuse protection                       |
+| Security      | **Rate Limiting**                 | Abuse protection via request throttling |
 | PWA           | **Vite PWA Plugin**               | Offline support                        |
 
 ---
@@ -101,7 +101,6 @@ _`bunx turbo run dev`_ spins up API (port 3000) & Web (5173) with watch mode.
 | `/dashboard`              | User dashboard       | Yes           | `GET /api/me/*`        | Stats, ReportCard     |
 | `/dashboard/reports`      | User reports list    | Yes           | `GET /api/me/reports`  | DataTable             |
 | `/reports/create`         | Create report form   | Yes           | `POST /api/reports`    | ImageUpload, Form     |
-| `/reports/create/success` | Success confirmation | Yes           | None                   | SuccessMessage        |
 | `/404`                    | Not found            | No            | None                   | ErrorPage             |
 | `/500`                    | Server error         | No            | None                   | ErrorPage             |
 | `/offline`                | Offline state        | No            | None                   | OfflinePage           |
@@ -117,7 +116,7 @@ _`bunx turbo run dev`_ spins up API (port 3000) & Web (5173) with watch mode.
 **Flow B: Authenticated User Creating Report**
 
 ```
-[Dashboard] → [Create Report] → [Upload Image] → [Fill Details] → [Review] → [Success]
+[Dashboard] → [Create Report] → [Upload Image] → [Fill Details] → [Review] → [Submit]
 ```
 
 **Flow C: Error Handling**
@@ -734,7 +733,6 @@ R2_ACCESS_KEY=your_r2_access_key
 R2_SECRET_KEY=your_r2_secret_key
 R2_BUCKET=viralkan-images
 R2_ENDPOINT=https://your-account.r2.cloudflarestorage.com
-RECAPTCHA_SECRET_KEY=your_recaptcha_secret
 
 # Web (.env)
 NEXT_PUBLIC_FIREBASE_API_KEY=your_firebase_api_key
@@ -744,7 +742,6 @@ NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_bucket.appspot.com
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
 NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
 VITE_API_URL=http://localhost:3000
-VITE_RECAPTCHA_SITE_KEY=your_recaptcha_site_key
 ```
 
 ---
@@ -892,10 +889,10 @@ export default defineConfig({
 | 11        | User dashboard with stats             | 1.5     | 6, 7         |
 | 12        | Report detail pages                   | 1       | 5, 7         |
 | 13        | Error handling + PWA setup            | 1       | 5            |
-| 14        | reCAPTCHA integration                 | 1       | 9            |
-| 15        | Rate limiting middleware              | 1       | 6, 7         |
+| 14        | Rate limiting middleware              | 1       | 6, 7         |
 | 16        | Docker builds + compose.yml           | 1       | 1            |
-| 17        | GitHub Actions CI/CD                  | 1       | 16           |
+| 17        | GitHub Actions CI/CD (Deployment)     | 1       | 16           |
+| 17a       | GitHub Actions CI/CD (Pull Requests)  | 1       | 3, 16        |
 | 18        | QA testing + bug fixes                | 2       | All          |
 | **Total** | **20 days**                           | **20**  |              |
 
@@ -945,7 +942,7 @@ test("complete report creation flow", async ({ page }) => {
   await page.fill('[data-testid="street"]', "Jl. Test");
   await page.fill('[data-testid="location"]', "Test location");
   await page.click('[data-testid="submit"]');
-  await expect(page.locator('[data-testid="success-message"]')).toBeVisible();
+  await expect(page.locator('h1')).toContainText('Laporan Kerusakan Jalan');
 });
 ```
 
