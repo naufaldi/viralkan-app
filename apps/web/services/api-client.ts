@@ -11,6 +11,37 @@ import {
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
+export interface AdminReportUser {
+  id: string;
+  name: string;
+  email: string;
+}
+
+export interface AdminReportItem {
+  id: string;
+  user_id: string;
+  image_url: string;
+  category: string;
+  street_name: string;
+  location_text: string;
+  lat: number | null;
+  lon: number | null;
+  status: "pending" | "verified" | "rejected" | "deleted";
+  verified_at: string | null;
+  verified_by: string | null;
+  rejection_reason: string | null;
+  deleted_at: string | null;
+  created_at: string;
+  user?: AdminReportUser;
+}
+
+export interface AdminReportsResponse {
+  items: AdminReportItem[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
 export interface GeocodingResponse {
   street_name: string | null;
   district: string | null;
@@ -149,32 +180,7 @@ export const reportsService = {
       category?: string;
       search?: string;
     },
-  ): Promise<{
-    items: Array<{
-      id: string;
-      user_id: string;
-      image_url: string;
-      category: string;
-      street_name: string;
-      location_text: string;
-      lat: number | null;
-      lon: number | null;
-      status: "pending" | "verified" | "rejected" | "deleted";
-      verified_at: string | null;
-      verified_by: string | null;
-      rejection_reason: string | null;
-      deleted_at: string | null;
-      created_at: string;
-      user?: {
-        id: string;
-        name: string;
-        email: string;
-      };
-    }>;
-    total: number;
-    page: number;
-    limit: number;
-  }> => {
+  ): Promise<AdminReportsResponse> => {
     const searchParams = new URLSearchParams();
 
     if (params?.page) searchParams.append("page", params.page.toString());
@@ -184,7 +190,18 @@ export const reportsService = {
     if (params?.search) searchParams.append("search", params.search);
 
     const endpoint = `/api/admin/reports${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
-    return authenticatedApiRequest(endpoint, token);
+    return authenticatedApiRequest<AdminReportsResponse>(endpoint, token);
+  },
+
+  // Get individual admin report by ID
+  getAdminReportDetail: async (
+    token: string,
+    id: string,
+  ): Promise<AdminReportItem> => {
+    return authenticatedApiRequest<AdminReportItem>(
+      `/api/admin/reports/${id}`,
+      token,
+    );
   },
 
   // Get individual report by ID
@@ -327,6 +344,7 @@ export const {
   deleteReport,
   validateOwnership,
   getReportsStats,
+  getAdminReportDetail,
 } = reportsService;
 
 // Add interfaces from lib/api-client.ts for backward compatibility

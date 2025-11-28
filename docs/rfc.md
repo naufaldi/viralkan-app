@@ -187,6 +187,10 @@ GET /api/reports?page=1&limit=10&category=berlubang
 
 GET /api/reports/:id
   -> 200 OK {report: Report} | 404 Not Found
+
+POST /api/reports/:id/view
+  -> 200 OK {viewCount: number, shareCount: number} | 404
+  Notes: increments unique view (per user or IP) with 15m debounce
 ```
 
 ### 5.3 Reports (User-specific)
@@ -666,50 +670,95 @@ Viralkan adopts a **true monochrome design system** (95% grayscale) with minimal
 ## 9 · Database Schema (GIS-Ready)
 
 ```sql
+-- Core schema (kept in sync with apps/api/src/db/schema.sql)
 CREATE EXTENSION IF NOT EXISTS postgis;
 
 CREATE TABLE users (
-  id BIGSERIAL PRIMARY KEY,
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   firebase_uid TEXT UNIQUE NOT NULL,
   email TEXT UNIQUE NOT NULL,
   name TEXT NOT NULL,
   avatar_url TEXT,
   provider TEXT NOT NULL DEFAULT 'google',
+  role TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'admin')),
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
 CREATE TABLE reports (
-  id BIGSERIAL PRIMARY KEY,
-  user_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
   image_url TEXT NOT NULL,
-  image_key TEXT NOT NULL,  -- R2 object key
   category TEXT NOT NULL CHECK (category IN ('berlubang','retak','lainnya')),
   street_name TEXT NOT NULL,
   location_text TEXT NOT NULL,
   lat DOUBLE PRECISION,
   lon DOUBLE PRECISION,
-  status TEXT DEFAULT 'pending' CHECK (status IN ('pending','in_progress','resolved')),
-  created_at TIMESTAMPTZ DEFAULT now(),
-  updated_at TIMESTAMPTZ DEFAULT now()
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'verified', 'rejected', 'deleted')),
+  verified_at TIMESTAMPTZ,
+  verified_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  rejection_reason TEXT,
+  deleted_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT now()
 );
 
--- Performance indexes
+-- V1 indexes
 CREATE INDEX reports_created_at_idx ON reports(created_at DESC);
 CREATE INDEX reports_user_idx ON reports(user_id);
-CREATE INDEX reports_category_idx ON reports(category);
 CREATE INDEX reports_status_idx ON reports(status);
+CREATE INDEX reports_verified_by_idx ON reports(verified_by);
+CREATE INDEX users_firebase_uid_idx ON users(firebase_uid);
+CREATE INDEX users_email_idx ON users(email);
+CREATE INDEX users_provider_idx ON users(provider);
+CREATE INDEX users_role_idx ON users(role);
 
--- Spatial index for V3 (safe to add now)
-CREATE INDEX reports_geo_idx ON reports USING GIST (geography(ST_MakePoint(lon,lat)));
-
--- Rate limiting table
-CREATE TABLE rate_limits (
-  user_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
-  action TEXT NOT NULL,
-  count INTEGER DEFAULT 1,
-  window_start TIMESTAMPTZ DEFAULT now(),
-  PRIMARY KEY (user_id, action)
+-- Admin audit log
+CREATE TABLE admin_actions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  admin_user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  action_type TEXT NOT NULL,
+  target_type TEXT NOT NULL,
+  target_id UUID NOT NULL,
+  details JSONB,
+  created_at TIMESTAMPTZ DEFAULT now()
 );
+
+CREATE INDEX admin_actions_admin_user_idx ON admin_actions(admin_user_id);
+CREATE INDEX admin_actions_action_type_idx ON admin_actions(action_type);
+CREATE INDEX admin_actions_target_idx ON admin_actions(target_type, target_id);
+CREATE INDEX admin_actions_created_at_idx ON admin_actions(created_at DESC);
+
+-- Spatial index for future GIS queries (V3 ready)
+CREATE INDEX reports_geo_idx ON reports USING GIST (geography(ST_MakePoint(lon,lat)))
+WHERE lat IS NOT NULL AND lon IS NOT NULL;
+```
+
+### 9.1 Engagement & Views Extension (Future Migration)
+
+To support viral metrics while keeping the base schema stable, a separate migration can extend `reports` and add a `views` table:
+
+```sql
+-- Aggregate counters on reports
+ALTER TABLE reports
+  ADD COLUMN IF NOT EXISTS share_count INTEGER NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS view_count INTEGER NOT NULL DEFAULT 0;
+
+-- Optional per-event view tracking
+CREATE TABLE IF NOT EXISTS views (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  report_id UUID NOT NULL REFERENCES reports(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  viewed_at TIMESTAMPTZ DEFAULT now(),
+  ip_address INET,
+  user_agent TEXT
+);
+
+CREATE INDEX IF NOT EXISTS views_report_id_idx ON views(report_id);
+CREATE INDEX IF NOT EXISTS views_viewed_at_idx ON views(viewed_at DESC);
+
+-- Engagement-friendly sorting for verified reports
+CREATE INDEX IF NOT EXISTS reports_status_view_count_idx
+  ON reports(status, view_count DESC)
+  WHERE status = 'verified';
 ```
 
 ---
@@ -869,6 +918,36 @@ export default defineConfig({
   ],
 });
 ```
+
+### 12.4 SEO & Social Previews
+
+```typescript
+// Next.js 15 metadata (per route)
+export const generateMetadata = async ({ params }) => {
+  const report = await getReport(params.id);
+  const title = `Laporan Jalan Rusak · ${report.street_name}`;
+  const description = `${report.category} · Dilaporkan oleh warga Bekasi`; // keep < 150 chars
+  const image = report.image_url;
+
+  return {
+    title,
+    description,
+    alternates: { canonical: `https://viralkan.app/reports/${report.id}` },
+    openGraph: {
+      title,
+      description,
+      images: [{ url: image, width: 1200, height: 630 }],
+      type: "article",
+    },
+    twitter: { card: "summary_large_image", title, description, images: [image] },
+  };
+};
+```
+
+- Server-render OG/Twitter tags for every report detail page; fallback to branded image if upload missing.
+- Precompute `sitemap.xml` + `robots.txt`; include verified reports for crawlability.
+- Add JSON-LD `Article` schema (headline, image, datePublished, author name from reporter) for each report.
+- Ensure share buttons pass UTM params (`utm_source`, `utm_medium`, `utm_campaign=share_report`) to feed analytics.
 
 ---
 
@@ -1072,7 +1151,7 @@ POST /api/admin/reports/:id/restore
 
 # Get Report Detail (Admin View)
 GET /api/admin/reports/:id
-  -> 200 OK {report: ReportWithUser} | 403 | 404
+  -> 200 OK {report: ReportWithUser & {shareCount: number, viewCount: number}} | 403 | 404
 ```
 
 **Admin Activity Logging:**

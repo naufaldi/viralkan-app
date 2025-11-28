@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { sharingApi } from "@/services/api-client";
+import { useQuery } from "@tanstack/react-query";
+import { sharingService } from "@/services/sharing";
 
 interface UseReportSharingOptions {
   reportId: string;
@@ -7,7 +7,6 @@ interface UseReportSharingOptions {
 }
 
 interface UseReportSharingReturn {
-  // State
   shareDetails: {
     shareCount: number;
     platformBreakdown: Record<string, number>;
@@ -23,8 +22,6 @@ interface UseReportSharingReturn {
   } | null;
   isLoading: boolean;
   error: string | null;
-
-  // Actions
   refetch: () => void;
 }
 
@@ -32,49 +29,31 @@ export function useReportSharing({
   reportId,
   enabled = true,
 }: UseReportSharingOptions): UseReportSharingReturn {
-  const [shareDetails, setShareDetails] =
-    useState<UseReportSharingReturn["shareDetails"]>(null);
-  const [validation, setValidation] =
-    useState<UseReportSharingReturn["validation"]>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchData = async () => {
-    if (!enabled || !reportId) return;
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      // Fetch share details and validation in parallel
-      const [detailsResult, validationResult] = await Promise.all([
-        sharingApi.getReportShareDetails(reportId),
-        sharingApi.validateReportForSharing(reportId),
-      ]);
-
-      setShareDetails(detailsResult);
-      setValidation(validationResult);
-    } catch (err) {
-      console.error("Error fetching report sharing data:", err);
-      setError("Gagal memuat data pembagian laporan");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, [reportId, enabled]);
-
-  const refetch = () => {
-    fetchData();
-  };
+  const query = useQuery({
+    queryKey: ["report-sharing", reportId],
+    queryFn: () => sharingService.getReportSharingData(reportId),
+    enabled: enabled && !!reportId,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    retry: (failureCount, error) => {
+      if (error instanceof Error && error.message.includes("HTTP 4")) {
+        return false;
+      }
+      return failureCount < 2;
+    },
+  });
 
   return {
-    shareDetails,
-    validation,
-    isLoading,
-    error,
-    refetch,
+    shareDetails: query.data?.shareDetails ?? null,
+    validation: query.data?.validation ?? null,
+    isLoading: query.isLoading,
+    error: query.error
+      ? query.error instanceof Error
+        ? query.error.message
+        : "Gagal memuat data pembagian laporan"
+      : null,
+    refetch: () => {
+      query.refetch();
+    },
   };
 }

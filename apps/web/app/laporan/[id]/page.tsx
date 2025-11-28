@@ -23,7 +23,6 @@ import {
 import { getReportByIdAction } from "@/lib/report-actions";
 import { getAuthUser } from "@/lib/auth-server";
 import Header from "@/components/layout/header";
-import { ReportDetailClient } from "@/components/details/report-detail-client";
 
 interface ReportDetailPageProps {
   params: Promise<{
@@ -244,9 +243,6 @@ export default async function ReportDetailPage({
             </div>
           </div>
         </div>
-
-        {/* Client-side sharing components */}
-        <ReportDetailClient report={report} />
       </>
     );
   } catch (error) {
