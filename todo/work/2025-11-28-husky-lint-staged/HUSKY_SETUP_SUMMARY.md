@@ -13,12 +13,12 @@ Successfully implemented **Alternative 2: Fast Commit + Pre-Push Build** for the
 - **No Build**: Keeps commits fast
 - **Auto-Fix**: ESLint fixes issues automatically
 
-### 2. **Pre-Push Hook** (Thorough - 40-80 seconds)
+### 2. **Pre-Push Hook** (Thorough - 60-120 seconds)
 
 - **File**: `.husky/pre-push`
-- **Runs**: Full build verification using `turbo run build --affected`
+- **Runs**: Full build verification for ALL packages using `turbo run build`
 - **Blocks Push**: If build fails
-- **Fast**: Only builds packages that changed
+- **Complete**: Builds everything to ensure no integration issues
 
 ### 3. **Lint-Staged Configuration**
 
@@ -52,7 +52,7 @@ git commit -m "feat: add new feature"
 
 ```bash
 git push
-# ✅ Runs build verification for affected packages
+# ✅ Runs build verification for ALL packages
 # ❌ Blocks push if build fails
 ```
 
@@ -61,7 +61,7 @@ git push
 | Operation          | Before            | After    | Improvement               |
 | ------------------ | ----------------- | -------- | ------------------------- |
 | **Commit**         | ~40-80s           | ~3-5s    | **85% faster!** 🚀        |
-| **Push**           | N/A               | ~40-80s  | New - but ensures quality |
+| **Push**           | N/A               | ~60-120s | New - but ensures quality |
 | **Daily Dev Time** | 13-26 min waiting | ~1-2 min | **Saves hours per week!** |
 
 ## Test Results ✅

@@ -1,11 +1,12 @@
 import { AdminReportDetail } from "@/components/admin/admin-report-detail";
 
 interface AdminReportDetailPageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
-export default function AdminReportDetailPage({
+export default async function AdminReportDetailPage({
   params,
 }: AdminReportDetailPageProps) {
-  return <AdminReportDetail reportId={params.id} />;
+  const { id } = await params;
+  return <AdminReportDetail reportId={id} />;
 }

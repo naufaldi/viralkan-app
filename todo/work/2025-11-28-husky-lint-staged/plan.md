@@ -51,9 +51,10 @@ Implement **two-stage automated git hooks** using Husky + lint-staged:
   **Rationale:** Project already uses ES modules (`"type": "module"` in package.json), consistent with existing tooling
   **Date/Author:** 2025-11-28
 
-- **Decision:** Use `turbo run lint --affected` for linting
-  **Rationale:** Turborepo's `--affected` flag ensures only changed packages are processed, making pre-commit fast
+- **Decision:** Build ALL packages in pre-push (not just affected)
+  **Rationale:** Ensures complete verification for all branches including main, catches integration issues
   **Date/Author:** 2025-11-28
+  **Update:** Changed from --affected to full build after realizing 0 packages were affected on main branch pushes
 
 - **Decision:** Use `eslint --fix` for auto-fixable issues
   **Rationale:** Standard ESLint behavior, fixes formatting and fixable lint violations automatically
