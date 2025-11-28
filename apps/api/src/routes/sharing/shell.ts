@@ -214,13 +214,13 @@ export const getReportShareDetails = async (
   }>
 > => {
   try {
-    // Check if report exists
-    const reportExists = await data.checkReportExists(reportId);
+    // Check if report exists (regardless of status or deletion)
+    const reportExists = await data.checkReportExistsForViewing(reportId);
     if (!reportExists) {
       return createError("Report not found", 404);
     }
 
-    // Get share count
+    // Get share count (preserved even after deletion)
     const shareCount = await data.getShareCountForReport(reportId);
 
     // Get platform breakdown

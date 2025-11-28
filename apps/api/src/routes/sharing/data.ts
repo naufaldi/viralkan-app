@@ -379,6 +379,23 @@ export const checkReportExists = async (reportId: string): Promise<boolean> => {
   }
 };
 
+export const checkReportExistsForViewing = async (
+  reportId: string,
+): Promise<boolean> => {
+  try {
+    const result = await sql`
+      SELECT 1
+      FROM reports
+      WHERE id = ${reportId}
+    `;
+
+    return result.length > 0;
+  } catch (error) {
+    console.error("Error checking report existence for viewing:", error);
+    return false;
+  }
+};
+
 export const getShareEventsByDateRange = async (
   startDate: Date,
   endDate: Date,
@@ -491,8 +508,6 @@ export const getShareCountForReport = async (
       SELECT share_count
       FROM reports
       WHERE id = ${reportId}
-        AND status = 'verified'
-        AND deleted_at IS NULL
     `;
 
     return result.length > 0 ? result[0].share_count || 0 : 0;
