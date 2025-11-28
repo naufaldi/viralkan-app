@@ -23,26 +23,26 @@ export async function getAdminStats(
 ): Promise<AdminStatsResponse> {
   // Get total counts by status
   const statusCounts = await sql`
-    SELECT 
+    SELECT
       status,
       COUNT(*) as count
-    FROM reports 
+    FROM reports
     WHERE deleted_at IS NULL
     GROUP BY status
   `;
 
   // Calculate average verification time
   const avgVerificationTime = await sql`
-    SELECT 
+    SELECT
       AVG(EXTRACT(EPOCH FROM (verified_at - created_at)) / 3600) as avg_hours
-    FROM reports 
-    WHERE status = 'verified' 
+    FROM reports
+    WHERE status = 'verified'
     AND verified_at IS NOT NULL
   `;
 
   // Get user statistics
   const userStats = await sql`
-    SELECT 
+    SELECT
       COUNT(*) as total_users,
       COUNT(CASE WHEN role = 'admin' THEN 1 END) as admin_users
     FROM users
@@ -50,7 +50,7 @@ export async function getAdminStats(
 
   // Get recent admin activity
   const recentActivity = await sql`
-    SELECT 
+    SELECT
       aa.action_type as action,
       aa.created_at as timestamp,
       u.name as admin_user
@@ -154,7 +154,7 @@ export async function getAdminReports(
 
   // Get reports with user information
   const reportsQuery = `
-    SELECT 
+    SELECT
       r.*,
       u.id as user_id,
       u.name as user_name,
@@ -202,6 +202,54 @@ export async function getAdminReports(
 }
 
 /**
+ * Get a single admin report by ID
+ */
+export async function getAdminReportById(
+  id: string,
+): Promise<AdminReportsResponse["items"][number] | null> {
+  const query = `
+    SELECT
+      r.*,
+      u.id as user_id,
+      u.name as user_name,
+      u.email as user_email
+    FROM reports r
+    LEFT JOIN users u ON r.user_id = u.id
+    WHERE r.id = $1
+    LIMIT 1
+  `;
+
+  const rows = await sql.unsafe(query, [id]);
+  const report = rows[0];
+
+  if (!report) return null;
+
+  return {
+    id: report.id,
+    user_id: report.user_id,
+    image_url: report.image_url,
+    category: report.category,
+    street_name: report.street_name,
+    location_text: report.location_text,
+    lat: report.lat,
+    lon: report.lon,
+    status: report.status,
+    verified_at: report.verified_at?.toISOString() || null,
+    verified_by: report.verified_by,
+    rejection_reason: report.rejection_reason,
+    deleted_at: report.deleted_at?.toISOString() || null,
+    created_at: report.created_at.toISOString(),
+    user: report.user_id
+      ? {
+          id: report.user_id,
+          name: report.user_name,
+          email: report.user_email,
+        }
+      : undefined,
+  };
+}
+
+/**
  * Log admin action for audit trail
  */
 export async function logAdminAction(
@@ -209,10 +257,10 @@ export async function logAdminAction(
 ): Promise<void> {
   await sql`
     INSERT INTO admin_actions (
-      admin_user_id, 
-      action_type, 
-      target_type, 
-      target_id, 
+      admin_user_id,
+      action_type,
+      target_type,
+      target_id,
       details
     ) VALUES (
       ${action.admin_user_id},
@@ -233,8 +281,8 @@ export async function verifyReport(
 ): Promise<ReportWithUser> {
   // Update report status
   const result = await sql`
-    UPDATE reports 
-    SET 
+    UPDATE reports
+    SET
       status = 'verified',
       verified_at = NOW(),
       verified_by = ${adminUserId},
@@ -271,8 +319,8 @@ export async function rejectReport(
 ): Promise<ReportWithUser> {
   // Update report status
   const result = await sql`
-    UPDATE reports 
-    SET 
+    UPDATE reports
+    SET
       status = 'rejected',
       verified_at = NULL,
       verified_by = NULL,
@@ -310,7 +358,7 @@ export async function toggleReportStatus(
   // Get current report
   const currentReport = await sql`
     SELECT status, rejection_reason
-    FROM reports 
+    FROM reports
     WHERE id = ${reportId}
   `;
 
@@ -324,8 +372,8 @@ export async function toggleReportStatus(
   let updateQuery;
   if (newStatus === "verified") {
     updateQuery = sql`
-      UPDATE reports 
-      SET 
+      UPDATE reports
+      SET
         status = 'verified',
         verified_at = NOW(),
         verified_by = ${adminUserId},
@@ -335,8 +383,8 @@ export async function toggleReportStatus(
     `;
   } else if (newStatus === "rejected") {
     updateQuery = sql`
-      UPDATE reports 
-      SET 
+      UPDATE reports
+      SET
         status = 'rejected',
         verified_at = NULL,
         verified_by = NULL,
@@ -346,8 +394,8 @@ export async function toggleReportStatus(
     `;
   } else {
     updateQuery = sql`
-      UPDATE reports 
-      SET 
+      UPDATE reports
+      SET
         status = 'pending',
         verified_at = NULL,
         verified_by = NULL,
@@ -389,8 +437,8 @@ export async function softDeleteReport(
 ): Promise<ReportWithUser> {
   // Update report status
   const result = await sql`
-    UPDATE reports 
-    SET 
+    UPDATE reports
+    SET
       status = 'deleted',
       deleted_at = NOW()
     WHERE id = ${reportId}
@@ -424,8 +472,8 @@ export async function restoreReport(
 ): Promise<ReportWithUser> {
   // Update report status
   const result = await sql`
-    UPDATE reports 
-    SET 
+    UPDATE reports
+    SET
       status = 'pending',
       deleted_at = NULL
     WHERE id = ${reportId}

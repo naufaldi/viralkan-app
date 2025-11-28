@@ -1146,11 +1146,20 @@ adminRouter.openapi(getReportDetailRoute, async (c) => {
   try {
     const paramData = c.req.valid("param");
 
-    // Get single report with user information
-    const result = await adminShell.getAdminReports({
-      page: 1,
-      limit: 1,
-    });
+    const result = await adminShell.getAdminReportById(paramData.id);
+
+    if (!result.success && result.statusCode === 404) {
+      return c.json(
+        {
+          error: {
+            code: "NOT_FOUND",
+            message: result.error || "Report not found",
+            timestamp: new Date().toISOString(),
+          },
+        },
+        404,
+      );
+    }
 
     if (!result.success) {
       return c.json(
@@ -1161,26 +1170,11 @@ adminRouter.openapi(getReportDetailRoute, async (c) => {
             timestamp: new Date().toISOString(),
           },
         },
-        500,
+        result.statusCode || 500,
       );
     }
 
-    const report = result.data?.items.find((r) => r.id === paramData.id);
-
-    if (!report) {
-      return c.json(
-        {
-          error: {
-            code: "NOT_FOUND",
-            message: "Report not found",
-            timestamp: new Date().toISOString(),
-          },
-        },
-        404,
-      );
-    }
-
-    return c.json(report, 200);
+    return c.json(result.data, 200);
   } catch (error) {
     console.error("Error getting report detail:", error);
     return c.json(
