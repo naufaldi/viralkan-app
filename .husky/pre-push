@@ -1,0 +1,23 @@
+# Pre-push hook: Build verification for affected packages (40-80 seconds)
+# This ensures every push has working code
+#
+# We run in the repository root where turbo.json is located
+
+echo "🔍 Running pre-push build verification for affected packages..."
+
+# Get the list of affected packages and run build verification
+# Using --affected flag to only build packages that changed
+bun run turbo run build --affected
+
+# Capture the exit code
+BUILD_EXIT_CODE=$?
+
+if [ $BUILD_EXIT_CODE -eq 0 ]; then
+  echo "✅ Build verification passed for affected packages!"
+else
+  echo "❌ Build verification failed!"
+  echo "Please fix the build errors before pushing."
+  echo ""
+  echo "Tip: Run 'bun run build' locally to see detailed errors"
+  exit $BUILD_EXIT_CODE
+fi

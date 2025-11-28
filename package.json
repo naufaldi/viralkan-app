@@ -8,11 +8,14 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types",
     "db:migrate": "cd apps/api && bun run db:migrate",
-    "db:reset": "cd apps/api && bun run db:reset"
+    "db:reset": "cd apps/api && bun run db:reset",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@types/minimatch": "^6.0.0",
     "@types/node": "^22.10.2",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
     "prettier": "^3.6.0",
     "turbo": "^2.5.4",
     "typescript": "5.8.2"

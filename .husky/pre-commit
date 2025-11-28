@@ -1,0 +1,3 @@
+# Fast commit: lint + format staged files only (3-5 seconds)
+# Build verification happens on push (see .husky/pre-push)
+bunx lint-staged --config .lintstagedrc.mjs
