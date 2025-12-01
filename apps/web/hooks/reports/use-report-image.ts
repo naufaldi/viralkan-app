@@ -12,6 +12,7 @@ import { toast } from "sonner";
 interface UseReportImageProps {
   form: UseFormReturn<CreateReportInput>;
   applyAdministrativeSearchResults: (result: any) => Promise<void>;
+  isEditing?: boolean;
 }
 
 export const useReportImage = ({
@@ -147,10 +148,18 @@ export const useReportImage = ({
     }
   };
 
-  const handleImageRemove = (clearSync: () => void) => {
+  const handleImageRemove = (
+    clearSync: () => void,
+    isEditing: boolean = false,
+  ) => {
     setSelectedImage(null);
     setImageUploadFailed(false);
-    form.setValue("image_url", "");
+
+    // In edit mode, clear the image_url from form to require new image
+    if (isEditing) {
+      form.setValue("image_url", "");
+    }
+
     setUploadError(undefined);
     setHasExifData(false);
     setGeocodingFromExifSucceeded(false);

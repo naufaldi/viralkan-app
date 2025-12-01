@@ -115,13 +115,11 @@ export function ReportFormProvider({
     ],
   );
 
-  // Actions context value (stable references - 9 properties)
+  // Actions context value (stable references - 7 properties)
   const actionsContextValue = useMemo(
     () => ({
       handleImageSelect: formState.handleImageSelect,
       handleImageRemove: formState.handleImageRemove,
-      handleImageUploadError: formState.handleImageUploadError,
-      handleImageUploadSuccess: formState.handleImageUploadSuccess,
       getCurrentLocation: formState.getCurrentLocation,
       handleGetAddressFromCoordinates:
         formState.handleGetAddressFromCoordinates,
@@ -133,8 +131,6 @@ export function ReportFormProvider({
     [
       formState.handleImageSelect,
       formState.handleImageRemove,
-      formState.handleImageUploadError,
-      formState.handleImageUploadSuccess,
       formState.getCurrentLocation,
       formState.handleGetAddressFromCoordinates,
       formState.handleGetCoordinatesFromAddress,

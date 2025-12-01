@@ -136,7 +136,7 @@ export const useReportSubmit = ({
     setFormError(undefined);
     setUploadError(undefined);
 
-    if (!selectedImage && !isEditing) {
+    if (!selectedImage && !initialData?.image_url) {
       setFormError("Silakan pilih foto jalan rusak terlebih dahulu");
       return;
     }

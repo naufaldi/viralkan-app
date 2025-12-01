@@ -56,16 +56,6 @@ export default function EditReportForm({
     setUploadError(undefined);
   };
 
-  const handleImageUploadError = (error: string) => {
-    setUploadError(error);
-    setImageUploadFailed(true);
-  };
-
-  const handleImageUploadSuccess = () => {
-    setUploadError(undefined);
-    setImageUploadFailed(false);
-  };
-
   const getCurrentLocation = () => {
     setIsGettingLocation(true);
 
@@ -146,8 +136,6 @@ export default function EditReportForm({
               selectedImage={selectedImage}
               onImageSelect={handleImageSelect}
               onImageRemove={handleImageRemove}
-              onUploadError={handleImageUploadError}
-              onUploadSuccess={handleImageUploadSuccess}
               isUploading={isUploadingImage}
               error={uploadError}
               disabled={isLoading}

@@ -5,6 +5,7 @@ Based on RFC v1.0, PRD v0.3, and current codebase analysis.
 ## 📊 **Summary**
 
 **Total Missing Features: 17+**
+
 - **Critical (MVP V1)**: 5 features
 - **V2 Smart Metadata**: 0 features (All implemented ✓)
 - **V3 Map Visual**: 5 features
@@ -18,16 +19,18 @@ Based on RFC v1.0, PRD v0.3, and current codebase analysis.
 ---
 
 ### 2. **PWA Configuration & Service Worker**
+
 **RFC Section:** 12.3 PWA Configuration
 **Priority:** HIGH
 **Description:** Offline support and PWA capabilities
 **Requirements:**
+
 - Vite PWA plugin configuration
 - Workbox runtime caching for API responses
 - Service worker registration
 - Manifest file
 - Offline page (/offline)
-**Files to Create:**
+  **Files to Create:**
 - `apps/web/vite.config.ts` (update if using Vite, or Next config for PWA)
 - `apps/web/public/manifest.json`
 - `apps/web/app/offline/page.tsx`
@@ -36,43 +39,49 @@ Based on RFC v1.0, PRD v0.3, and current codebase analysis.
 ---
 
 ### 3. **404 Not Found Page**
+
 **PRD Section:** Epic 5 - User Story 5.1
 **Priority:** HIGH
 **Description:** Handle invalid routes gracefully
 **Requirements:**
+
 - Custom 404 page with navigation
 - Search functionality
 - Links back to main sections
-**Files to Create:**
+  **Files to Create:**
 - `apps/web/app/not-found.tsx` (Next.js 13+ app router)
 - Update `next.config.js` to handle 404s
 
 ---
 
 ### 4. **500 Server Error Page**
+
 **PRD Section:** Epic 5 - User Story 5.1
 **Priority:** HIGH
 **Description:** Handle server errors gracefully
 **Requirements:**
+
 - Custom 500 error page
 - Retry button
 - Contact information
-**Files to Create:**
+  **Files to Create:**
 - `apps/web/app/error.tsx`
 - Error boundary component
 
 ---
 
 ### 5. **User Statistics API Integration**
+
 **PRD Section:** User Story 3.1 - View My Reports Dashboard
 **Priority:** MEDIUM
 **Description:** Dashboard statistics not displaying
 **Current State:** Dashboard page exists, statistics not loading
 **Requirements:**
+
 - Implement GET /api/me/stats endpoint (if missing)
 - Fix dashboard stats display
 - Show: total reports, this month, by category
-**Files to Create/Update:**
+  **Files to Create/Update:**
 - Backend: `apps/api/src/routes/auth/api.ts` (add /me/stats)
 - Frontend: `apps/web/components/dashboard/status-card.tsx`
 - Frontend: `apps/web/hooks/dashboard/use-dashboard-stats.ts`
@@ -80,61 +89,68 @@ Based on RFC v1.0, PRD v0.3, and current codebase analysis.
 ---
 
 ### 6. **Rate Limiting Middleware**
+
 **RFC Section:** 12.1 Rate Limiting
 **Priority:** HIGH
 **Description:** Prevent abuse with request limits
 **Requirements:**
+
 - Implement rate limiting for:
   - REPORT_CREATION: 10 requests / 24h per user
   - IMAGE_UPLOAD: 20 requests / 1h per user
   - API_REQUESTS: 1000 requests / 1h per user
 - Database table for rate limiting
-**Files to Create:**
+  **Files to Create:**
 - `apps/api/src/middleware/rate-limit.ts`
 - Database migration for rate_limits table
 
 ---
 
-
 ### 18. **Admin User Management**
+
 **RFC Section:** 17.2 Admin API Endpoints
 **Current State:** Admin endpoints exist
 **Priority:** HIGH
 **Description:** Verify admin can verify/reject reports
 **Requirements:**
+
 - Test all admin report actions
 - Verify audit logging
 - Ensure proper permissions
-**Files to Test:**
+  **Files to Test:**
 - `apps/api/src/routes/admin/api.ts`
 - `apps/web/components/admin/admin-reports-table.tsx`
 
 ---
 
 ### 19. **Admin Activity Logs**
+
 **RFC Section:** 17 Admin System
 **Current State:** Admin users page exists
 **Priority:** MEDIUM
 **Description:** Admin can view and manage users
 **Requirements:**
+
 - List all users
 - View user report counts
 - Deactivate/activate users if needed
-**Files to Enhance:**
+  **Files to Enhance:**
 - `apps/web/app/admin/users/page.tsx`
 - `apps/web/components/admin/admin-users-table.tsx`
 
 ---
 
 ### 20. **Admin Statistics Dashboard**
+
 **RFC Section:** 17.2 Admin Activity Logging
 **Priority:** LOW
 **Description:** Track all admin actions for audit
 **Requirements:**
+
 - Log all admin report actions
 - Display activity timeline
 - Export logs
-**Files to Create:**
+  **Files to Create:**
 - `apps/web/app/admin/activity/page.tsx`
 - `apps/web/components/admin/admin-activity.tsx`
 - Backend logging for admin actions
@@ -142,16 +158,18 @@ Based on RFC v1.0, PRD v0.3, and current codebase analysis.
 ---
 
 ### 21. **Admin Report Bulk Actions**
+
 **RFC Section:** 17.3 Admin Dashboard
 **Current State:** Basic admin dashboard exists
 **Priority:** MEDIUM
 **Description:** Comprehensive admin statistics
 **Requirements:**
+
 - Total reports by status
 - Verification rate and processing time
 - Geographic distribution
 - User activity metrics
-**Files to Enhance:**
+  **Files to Enhance:**
 - `apps/web/app/admin/page.tsx`
 - `apps/web/components/admin/admin-stats.tsx`
 
@@ -160,14 +178,16 @@ Based on RFC v1.0, PRD v0.3, and current codebase analysis.
 ## 🎯 **Infrastructure & DevOps**
 
 ### 22. **Monitoring & Observability**
+
 **RFC Section:** 17 Admin System
 **Priority:** LOW
 **Description:** Perform actions on multiple reports at once
 **Requirements:**
+
 - Bulk verify/reject reports
 - Bulk delete (soft delete)
 - Export selected reports
-**Files to Create:**
+  **Files to Create:**
 - `apps/web/components/admin/bulk-actions-toolbar.tsx`
 - Bulk action API endpoints
 
@@ -176,15 +196,17 @@ Based on RFC v1.0, PRD v0.3, and current codebase analysis.
 ## 🎯 **V3 - Map Visualization Features**
 
 ### 13. **Leaflet Map Integration**
+
 **RFC Section:** 3.3 User Flows (V3)
 **Current State:** leaflet installed but not used
 **Priority:** MEDIUM
 **Description:** Display reports on interactive map
 **Requirements:**
+
 - Map view for public reports
 - Marker clustering for performance
 - Filter map by category/location
-**Files to Create:**
+  **Files to Create:**
 - `apps/web/components/maps/reports-map.tsx`
 - `apps/web/app/peta/page.tsx` (map view page)
 - `apps/web/app/laporan/peta/page.tsx` (alternative route)
@@ -192,54 +214,62 @@ Based on RFC v1.0, PRD v0.3, and current codebase analysis.
 ---
 
 ### 14. **Map Marker Clustering**
+
 **RFC Section:** 3.3 User Flows (V3)
 **Priority:** MEDIUM
 **Description:** Cluster markers by zoom level
 **Requirements:**
+
 - Implement supercluster or leaflet marker cluster
 - Zoom to cluster on click
 - Show count of reports in cluster
-**Files to Create:**
+  **Files to Create:**
 - `apps/web/components/maps/marker-cluster.tsx`
 
 ---
 
 ### 15. **Map Filter Integration**
+
 **RFC Section:** 3.3 User Flows (V3)
 **Priority:** LOW
 **Description:** Filter reports on map by various criteria
 **Requirements:**
+
 - Filter by category (berlubang/retak/lainnya)
 - Filter by date range
 - Filter by admin boundaries
 - Real-time map updates
-**Files to Create:**
+  **Files to Create:**
 - `apps/web/components/maps/map-filters.tsx`
 
 ---
 
 ### 16. **Personal Reports Map View**
+
 **RFC Section:** 3.3 User Flows (V3)
 **Priority:** LOW
 **Description:** User dashboard with personal reports on map
 **Requirements:**
+
 - Tab/option to view personal reports on map
 - Highlight user's own reports
 - Quick actions from map
-**Files to Update:**
+  **Files to Update:**
 - `apps/web/app/dashboard/page.tsx`
 
 ---
 
 ### 17. **Map Share & Link**
+
 **RFC Section:** 3.3 User Flows (V3)
 **Priority:** LOW
 **Description:** Share map views with specific filters/zoom
 **Requirements:**
+
 - Generate shareable URLs with map state
 - Deep link to specific map locations
 - Social media preview for map links
-**Files to Create:**
+  **Files to Create:**
 - `apps/web/lib/utils/map-share.ts`
 
 ---
@@ -247,30 +277,34 @@ Based on RFC v1.0, PRD v0.3, and current codebase analysis.
 ## 🎯 **V4 - Admin & Moderation Features**
 
 ### 18. **Admin Reports Verification**
+
 **RFC Section:** 17.2 Admin API Endpoints
 **Current State:** Admin endpoints exist
 **Priority:** HIGH
 **Description:** Verify admin can verify/reject reports
 **Requirements:**
+
 - Test all admin report actions
 - Verify audit logging
 - Ensure proper permissions
-**Files to Test:**
+  **Files to Test:**
 - `apps/api/src/routes/admin/api.ts`
 - `apps/web/components/admin/admin-reports-table.tsx`
 
 ---
 
 ### 19. **Database Migrations Setup**
+
 **RFC Section:** 10 Local Dev Setup
 **Current State:** Migration tool unclear
 **Priority:** HIGH
 **Description:** Proper database migration system
 **Requirements:**
+
 - Choose migration tool (Sqitch, Prisma, Drizzle)
 - Migrate development to production
 - Seed data for testing
-**Files to Create:**
+  **Files to Create:**
 - `apps/api/migrations/` directory
 - Migration scripts
 - Database initialization scripts
@@ -278,18 +312,20 @@ Based on RFC v1.0, PRD v0.3, and current codebase analysis.
 ---
 
 ### 20. **GitHub Actions CI/CD for Pull Requests**
+
 **RFC Section:** 13 Milestone Checklist - Item 17a
 **Current State:** Deployment workflow exists (build-and-push.yml), but PR testing missing
 **Priority:** HIGH
 **Description:** Automated build and test for each Pull Request
 **Requirements:**
+
 - Build API and Web on every PR
 - Run TypeScript type checking
 - Run linting (ESLint)
 - Build Docker images to verify builds
 - Optional: Run basic smoke tests
 - Block merge if any step fails
-**Files to Create:**
+  **Files to Create:**
 - `.github/workflows/ci.yml` (triggered on pull_request events)
 - Test scripts in package.json
 - Basic smoke test scripts
@@ -297,29 +333,33 @@ Based on RFC v1.0, PRD v0.3, and current codebase analysis.
 ---
 
 ### 21. **Security Headers & CORS**
+
 **RFC Section:** 6.5 Security Considerations
 **Priority:** HIGH
 **Description:** Proper security headers and CORS configuration
 **Requirements:**
+
 - CORS configuration for frontend origin
 - Security headers (CSP, HSTS, etc.)
 - Rate limiting headers
 - API security middleware
-**Files to Create/Update:**
+  **Files to Create/Update:**
 - `apps/api/src/middleware/security.ts`
 - `apps/api/src/middleware/cors.ts`
 
 ---
 
 ### 22. **Monitoring & Observability**
+
 **RFC Section:** 15 Monitoring & Observability
 **Priority:** LOW
 **Description:** Metrics collection and health checks
 **Requirements:**
+
 - Custom metrics (reportCreations, uploadDuration, authFailures)
 - Health check endpoints (/health)
 - Grafana integration (optional)
-**Files to Create:**
+  **Files to Create:**
 - `apps/api/src/middleware/metrics.ts`
 - Health check handlers
 - Database query performance monitoring
@@ -327,15 +367,17 @@ Based on RFC v1.0, PRD v0.3, and current codebase analysis.
 ---
 
 ### 23. **Performance Optimization**
+
 **RFC Section:** 6.7 Performance Considerations
 **Priority:** MEDIUM
 **Description:** Optimize application performance
 **Requirements:**
+
 - Image optimization and CDN
 - API response caching
 - Database query optimization
 - Bundle size optimization
-**Files to Create/Update:**
+  **Files to Create/Update:**
 - Image optimization middleware
 - Redis caching layer (optional)
 - Database index optimization
@@ -345,18 +387,21 @@ Based on RFC v1.0, PRD v0.3, and current codebase analysis.
 ## 📝 **Implementation Priority Order**
 
 ### Phase 1 (Week 1-2): Critical V1 Fixes
+
 1. Rate Limiting Middleware
 2. PWA Configuration
 3. 404/500 Error Pages
 4. Security Headers & CORS
 
 ### Phase 2 (Week 3-4): User Experience
+
 5. Dashboard Statistics
 6. Database Migrations
 7. GitHub Actions CI/CD for Pull Requests
 8. Security Headers & CORS
 
 ### Phase 3 (Month 2): V3 Map Visual
+
 9. Leaflet Map Integration
 10. Marker Clustering
 11. Map Filters
@@ -364,6 +409,7 @@ Based on RFC v1.0, PRD v0.3, and current codebase analysis.
 13. Map Sharing
 
 ### Phase 4 (Month 3): V4 Admin & Monitoring
+
 14. Admin Verification Features
 15. Admin User Management
 16. Admin Statistics
@@ -372,6 +418,7 @@ Based on RFC v1.0, PRD v0.3, and current codebase analysis.
 19. Monitoring & Observability
 
 ### Phase 5 (Month 4): V5 Mobile & Enhancement
+
 20. Database Migrations Setup
 21. GitHub Actions CI/CD
 22. Performance Optimization
@@ -383,11 +430,13 @@ Based on RFC v1.0, PRD v0.3, and current codebase analysis.
 ## 🏷️ **GitHub Issue Labels**
 
 **Priority Labels:**
+
 - `priority/high` - Critical for V1
 - `priority/medium` - Important but not blocking
 - `priority/low` - Nice to have
 
 **Feature Labels:**
+
 - `feature/auth` - Authentication related
 - `feature/reports` - Report CRUD operations
 - `feature/maps` - Map visualization
@@ -396,6 +445,7 @@ Based on RFC v1.0, PRD v0.3, and current codebase analysis.
 - `feature/geocoding` - GPS/address features
 
 **Type Labels:**
+
 - `bug` - Bug fixes
 - `enhancement` - Feature improvements
 - `task` - Maintenance tasks
@@ -417,17 +467,21 @@ Based on RFC v1.0, PRD v0.3, and current codebase analysis.
 
 ```markdown
 ## Problem
+
 [Describe the issue or missing feature]
 
 ## Solution
+
 [Describe how to fix/implement]
 
 ## Requirements
+
 - [ ] Requirement 1
 - [ ] Requirement 2
 - [ ] Requirement 3
 
 ## Additional Context
+
 - RFC Section: [Section reference]
 - PRD Section: [Section reference]
 - Priority: [High/Medium/Low]
@@ -436,5 +490,105 @@ Based on RFC v1.0, PRD v0.3, and current codebase analysis.
 
 ---
 
-**Last Updated:** 2025-11-28
+---
+
+## 🧹 **TECHNICAL DEBT - Image Upload Component Cleanup**
+
+### **Image Upload Callback Simplification**
+
+**Current State:** Component has 6 callback props, several are redundant
+**Priority:** LOW (Cleanup task)
+**Effort:** S
+**Files to Update:**
+
+- `apps/web/components/forms/image-upload.tsx`
+- `apps/web/components/reports/report-form/report-image-upload.tsx`
+
+#### **Callback Analysis:**
+
+**REQUIRED (Must Keep):**
+
+1. `onImageSelect: (file: File, originalFile?: File) => void`
+   - Core functionality - how parent receives selected files
+   - No alternative - MUST exist
+
+2. `onImageRemove: () => void`
+   - Core functionality - how parent knows image was removed
+   - No alternative - MUST exist
+
+**QUESTIONABLE (Could Remove):** 3. `onUploadError?: (error: string) => void`
+
+- **Redundancy**: Component already has internal `uploadError` state
+- Current flow: Component sets internal state + calls callback
+- Parent error prop merges: `displayError = error || uploadError`
+- **Verdict**: REMOVE - internal state + parent error prop is sufficient
+
+4. `onUploadSuccess?: () => void`
+   - **Redundancy**: Only clears parent's upload error state
+   - Component already manages its own `uploadError` state
+   - Parent's `handleImageUploadSuccess` sets same state
+   - **Verdict**: REMOVE - purely redundant
+
+**UNNECESSARY (Can Be Removed):** 5. `onFormActivation?: () => void`
+
+- Currently empty function in parent
+- Comment says "Form activation is now handled in context"
+- **Verdict**: REMOVE - not used
+
+6. `onInitialImageRemove?: () => void`
+   - Defined in interface but never called
+   - **Verdict**: REMOVE - unused code
+
+#### **Why Remove vs Keep?**
+
+**Arguments FOR Removal:**
+
+- **Performance**: Removes 3+ useCallback memoizations for unused/redundant callbacks
+- **Simplicity**: Cleaner API surface - less to understand
+- **Maintainability**: Fewer props to document, test, and maintain
+- **Type Safety**: Removes optional callbacks that could be undefined
+- **Internal Use Only**: Component is only used within report form context
+- **No External Dependencies**: Not a public library - no external consumers
+
+**Arguments FOR Keeping Backward Compatibility:**
+
+- **Safety**: Won't break if other code depends on callbacks (defensive programming)
+- **No Urgency**: Not causing issues - low priority to change
+- **Over-engineering**: Cleanup might not be worth the effort
+
+#### **Recommendation:**
+
+**YES, REMOVE** the unnecessary callbacks because:
+
+1. **Internal Component**: Only used within the app, not a public library
+2. **Low Risk**: Well-defined usage in report form context
+3. **Current Code Analysis**: `onUploadError`, `onUploadSuccess`, and `onFormActivation` are redundant
+4. **Benefits Outweigh Costs**: Cleaner code + better performance
+5. **Not Breaking**: The component props are already changing (we just added `initialData`)
+
+#### **Implementation:**
+
+```typescript
+// REMOVE from ImageUploadProps:
+- onUploadSuccess?: () => void;  // Redundant
+- onFormActivation?: () => void; // Unused
+- onInitialImageRemove?: () => void; // Unused
+
+// KEEP in ImageUploadProps:
++ onImageSelect: (file: File, originalFile?: File) => void;
++ onImageRemove: () => void;
++ onUploadError?: (error: string) => void;  // Keep for parent error prop merging
+```
+
+#### **Impact Assessment:**
+
+- **Breaking Changes**: YES for any external consumers (but none exist)
+- **Refactoring Effort**: LOW - Simple interface cleanup
+- **Testing Required**: Update `report-image-upload.tsx` to not pass removed props
+- **Performance Gain**: Minimal but measurable (3 fewer useCallback)
+- **Code Quality**: IMPROVED - cleaner, simpler API
+
+---
+
+**Last Updated:** 2025-12-01
 **Based On:** RFC v1.0, PRD v0.3, Current Codebase

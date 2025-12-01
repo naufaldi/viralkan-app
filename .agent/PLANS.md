@@ -102,25 +102,6 @@ The `todos.md` format may be free-form markdown, provided:
 - Each task’s status is explicitly visible alongside or within the task entry.
 - The mapping from ExecPlan sections to task IDs is clear to a novice reader.
 
-### Plan mode (planning-only behavior)
-
-When operating in a planning role for an ExecPlan:
-
-- Only create or update:
-  - `todo/work/.../plan.md` (the ExecPlan), and
-  - `todo/work/.../todos.md` (the task list).
-- Do not modify application code, configuration, or other repository files as part of planning.
-- Ensure that:
-  - Tasks in `todos.md` are derived from the ExecPlan.
-  - Task IDs are stable before any implementation work begins.
-  - Exactly one task is designated as `in_progress` when handing off to implementation.
-
-Before implementation starts, the planner MUST:
-
-- Ask the developer/user concise clarifying questions where requirements, constraints, or success criteria are ambiguous.
-- Confirm scope and direction with the developer/user.
-- Only after that confirmation should any implementation work be performed according to the ExecPlan and `todos.md`.
-
 ## Skeleton of a Good ExecPlan
 
 ```md
@@ -201,3 +182,22 @@ In crates/foo/planner.rs, define:
 If you follow the guidance above, a single, stateless agent -- or a human novice -- can read your ExecPlan from top to bottom and produce a working, observable result. That is the bar: SELF-CONTAINED, SELF-SUFFICIENT, NOVICE-GUIDING, OUTCOME-FOCUSED.
 
 When you revise a plan, you must ensure your changes are comprehensively reflected across all sections, including the living document sections, and you must write a note at the bottom of the plan describing the change and the reason why. ExecPlans must describe not just the what but the why for almost everything.
+
+### Plan mode (planning-only behavior)
+
+When operating in a planning role for an ExecPlan:
+
+- Only create or update:
+  - `todo/work/.../plan.md` (the ExecPlan), and
+  - `todo/work/.../todos.md` (the task list).
+- Do not modify application code, configuration, or other repository files as part of planning.
+- Ensure that:
+  - Tasks in `todos.md` are derived from the ExecPlan.
+  - Task IDs are stable before any implementation work begins.
+  - Exactly one task is designated as `in_progress` when handing off to implementation.
+
+Before implementation starts, the planner MUST:
+
+- Ask the developer/user concise clarifying questions where requirements, constraints, or success criteria are ambiguous.
+- Confirm scope and direction with the developer/user.
+- Only after that confirmation should any implementation work be performed according to the ExecPlan and `todos.md`.

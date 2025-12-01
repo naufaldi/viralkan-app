@@ -9,6 +9,7 @@ interface ReportFormActionsProps {
   selectedImage: File | null;
   disabled?: boolean;
   isEditing?: boolean;
+  initialData?: { image_url?: string };
 }
 
 export const ReportFormActions = ({
@@ -19,6 +20,7 @@ export const ReportFormActions = ({
   selectedImage,
   disabled,
   isEditing = false,
+  initialData,
 }: ReportFormActionsProps) => {
   const getLoadingText = () => {
     if (isUploadingImage) return "Mengunggah Foto...";
@@ -50,7 +52,7 @@ export const ReportFormActions = ({
       return (
         <>
           <Save className="mr-2 h-4 w-4" />
-          Simpan Perubahan
+          Perbarui Laporan
         </>
       );
     }
@@ -68,7 +70,11 @@ export const ReportFormActions = ({
       type="submit"
       size="default"
       className="h-12 w-full rounded-lg bg-neutral-900 text-base font-semibold text-white shadow-sm transition-all duration-150 hover:-translate-y-0.5 hover:bg-neutral-800 hover:shadow-md active:translate-y-0"
-      disabled={disabled || (!selectedImage && !isEditing) || imageUploadFailed}
+      disabled={
+        disabled ||
+        (!selectedImage && !initialData?.image_url) ||
+        imageUploadFailed
+      }
     >
       {renderButtonContent()}
     </Button>
