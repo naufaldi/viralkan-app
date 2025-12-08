@@ -1,11 +1,11 @@
 import { cn } from "@repo/ui/lib/utils";
-import React from "react";
+import { ReactNode } from "react";
 
 const SectionContainer = ({
   children,
   className,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
 }) => {
   return (

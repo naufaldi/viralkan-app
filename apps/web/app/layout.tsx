@@ -6,6 +6,7 @@ import { AuthProvider } from "../contexts/AuthContext";
 import { getAuthUser } from "../lib/auth-server";
 import { Toaster } from "@repo/ui";
 import { Providers } from "../lib/providers";
+import { ReactNode } from "react";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -25,7 +26,7 @@ export const metadata: Metadata = {
 export default async function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: ReactNode;
 }>) {
   // Get initial server-side user state
   const initialUser = await getAuthUser();

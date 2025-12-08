@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, ReactNode } from "react";
 import { Button } from "@repo/ui/components/ui/button";
 import {
   DropdownMenu,
@@ -178,14 +178,14 @@ export function ShareButton({
     return count.toString();
   };
 
-  const renderButton = (children: React.ReactNode, onClick?: () => void) => (
+  const renderButton = (children: ReactNode, onClick?: () => void) => (
     <div className="group relative">
       <Button
         onClick={onClick}
         className={`${SIZE_CLASSES[size]} ${className} rounded-full border border-white/20 bg-white/95 p-0 text-neutral-700 shadow-lg backdrop-blur-md transition-all duration-300 ease-out hover:scale-105 hover:bg-white hover:shadow-xl`}
         disabled={isSharing}
       >
-        {children}
+        <>{children}</>
       </Button>
 
       {/* Share Count Badge */}

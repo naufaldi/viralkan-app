@@ -30,7 +30,10 @@
   ],
   "dependencies": {
     "@hono/zod-openapi": "^1.1.0",
+    "next": "16.0.7",
     "prettier-plugin-tailwindcss": "^0.6.14",
+    "react": "19.2.1",
+    "react-dom": "19.2.1",
     "zod": "^4.0.5"
   }
 }

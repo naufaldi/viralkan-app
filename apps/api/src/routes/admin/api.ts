@@ -1170,7 +1170,7 @@ adminRouter.openapi(getReportDetailRoute, async (c) => {
             timestamp: new Date().toISOString(),
           },
         },
-        result.statusCode || 500,
+        (result.statusCode as any) || 500,
       );
     }
 

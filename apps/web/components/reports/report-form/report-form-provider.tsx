@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, ReactNode } from "react";
 import { ReportResponse } from "../../../lib/types/api";
 import { useReportForm } from "../../../hooks/reports/use-report-form";
 import {
@@ -11,7 +11,7 @@ import {
 } from "./report-form-context";
 
 interface ReportFormProviderProps {
-  children: React.ReactNode;
+  children: ReactNode;
   onSuccess?: (reportId: string) => void;
   initialData?: ReportResponse;
   isEditing?: boolean;
