@@ -6,12 +6,9 @@ interface ReportImageUploadProps {
   selectedImage: File | null;
   onImageSelect: (file: File, originalFile?: File) => void;
   onImageRemove: () => void;
-  onUploadError: (error: string) => void;
-  onUploadSuccess: () => void;
   isUploading: boolean;
   error?: string;
   disabled?: boolean;
-  onFormActivation?: () => void;
   initialImageUrl?: string;
 }
 
@@ -19,12 +16,9 @@ export const ReportImageUpload = ({
   selectedImage,
   onImageSelect,
   onImageRemove,
-  onUploadError,
-  onUploadSuccess,
   isUploading,
   error,
   disabled,
-  onFormActivation,
   initialImageUrl,
 }: ReportImageUploadProps) => {
   return (
@@ -42,13 +36,10 @@ export const ReportImageUpload = ({
         selectedImage={selectedImage}
         onImageSelect={onImageSelect}
         onImageRemove={onImageRemove}
-        onUploadError={onUploadError}
-        onUploadSuccess={onUploadSuccess}
         isUploading={isUploading}
         error={error}
         disabled={disabled}
         enableCameraMode={true}
-        onFormActivation={onFormActivation}
         initialImageUrl={initialImageUrl}
       />
       <p className="text-sm text-neutral-600">

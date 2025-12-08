@@ -31,10 +31,7 @@ interface ImageUploadProps {
   isUploading?: boolean;
   error?: string;
   disabled?: boolean;
-  onUploadError?: (error: string) => void;
-  onUploadSuccess?: () => void;
   enableCameraMode?: boolean;
-  onFormActivation?: () => void;
   initialImageUrl?: string;
 }
 
@@ -55,10 +52,7 @@ export default function ImageUpload({
   isUploading = false,
   error,
   disabled = false,
-  onUploadError,
-  onUploadSuccess,
   enableCameraMode = true,
-  onFormActivation,
   initialImageUrl,
 }: ImageUploadProps) {
   const [preview, setPreview] = useState<string | null>(
@@ -190,7 +184,6 @@ export default function ImageUpload({
       if (file.size > MAX_FILE_SIZE) {
         const errorMsg = `File terlalu besar. Maksimal ${(MAX_FILE_SIZE / 1024 / 1024).toFixed(0)}MB`;
         setUploadError(errorMsg);
-        onUploadError?.(errorMsg);
         return;
       }
 
@@ -211,7 +204,6 @@ export default function ImageUpload({
               ? error.message
               : "Gagal mengkonversi file HEIC. Silakan gunakan format JPEG, PNG, atau WebP.";
           setUploadError(errorMsg);
-          onUploadError?.(errorMsg);
           setIsCompressing(false);
           return;
         }
@@ -225,7 +217,6 @@ export default function ImageUpload({
         const errorMsg =
           "Format file tidak didukung. Gunakan JPEG, PNG, WebP, atau HEIC";
         setUploadError(errorMsg);
-        onUploadError?.(errorMsg);
         setIsCompressing(false);
         return;
       }
@@ -245,27 +236,15 @@ export default function ImageUpload({
 
         // Pass both compressed file for upload and original file for EXIF extraction
         onImageSelect(compressedFile, file);
-        onUploadSuccess?.();
-
-        // Trigger form activation when image is successfully selected
-        onFormActivation?.();
       } catch (error) {
         console.error("File processing error:", error);
         const errorMsg = "Gagal memproses gambar. Silakan coba lagi.";
         setUploadError(errorMsg);
-        onUploadError?.(errorMsg);
       } finally {
         setIsCompressing(false);
       }
     },
-    [
-      onImageSelect,
-      onUploadError,
-      onUploadSuccess,
-      compressImage,
-      onFormActivation,
-      convertHeicToJpeg,
-    ],
+    [onImageSelect, compressImage, convertHeicToJpeg],
   );
 
   const handleRetry = useCallback(() => {

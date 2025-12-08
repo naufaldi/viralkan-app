@@ -1,9 +1,10 @@
 import { redirect } from "next/navigation";
 import { requireAuth } from "../../lib/auth-server";
 import { AdminNavigation } from "../../components/admin/admin-navigation";
+import { ReactNode } from "react";
 
 interface AdminLayoutProps {
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 export default async function AdminLayout({ children }: AdminLayoutProps) {

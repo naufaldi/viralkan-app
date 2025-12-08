@@ -102,9 +102,7 @@ export function useLocationContext(): LocationContextType {
 interface ReportFormActionsContextType {
   // Image handlers
   handleImageSelect: (file: File, originalFile?: File) => Promise<void>;
-  handleImageRemove: () => void;
-  handleImageUploadError: (error: string) => void;
-  handleImageUploadSuccess: () => void;
+  handleImageRemove: (isEditing?: boolean) => void;
   // Location handlers
   getCurrentLocation: () => Promise<void>;
   // Geocoding handlers

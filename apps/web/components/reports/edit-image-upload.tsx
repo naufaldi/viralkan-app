@@ -23,8 +23,6 @@ interface EditImageUploadProps {
   selectedImage: File | null;
   onImageSelect: (file: File) => void;
   onImageRemove: () => void;
-  onUploadError: (error: string) => void;
-  onUploadSuccess: () => void;
   isUploading: boolean;
   error?: string;
   disabled?: boolean;
@@ -45,8 +43,6 @@ export default function EditImageUpload({
   selectedImage,
   onImageSelect,
   onImageRemove,
-  onUploadError,
-  onUploadSuccess,
   isUploading = false,
   error,
   disabled = false,
@@ -159,7 +155,7 @@ export default function EditImageUpload({
       if (file.size > MAX_FILE_SIZE) {
         const errorMsg = `File terlalu besar. Maksimal ${(MAX_FILE_SIZE / 1024 / 1024).toFixed(0)}MB`;
         setUploadError(errorMsg);
-        onUploadError?.(errorMsg);
+
         return;
       }
 
@@ -180,7 +176,7 @@ export default function EditImageUpload({
               ? error.message
               : "Gagal mengkonversi file HEIC. Silakan gunakan format JPEG, PNG, atau WebP.";
           setUploadError(errorMsg);
-          onUploadError?.(errorMsg);
+
           setIsCompressing(false);
           return;
         }
@@ -194,7 +190,7 @@ export default function EditImageUpload({
         const errorMsg =
           "Format file tidak didukung. Gunakan JPEG, PNG, WebP, atau HEIC";
         setUploadError(errorMsg);
-        onUploadError?.(errorMsg);
+
         setIsCompressing(false);
         return;
       }
@@ -211,11 +207,10 @@ export default function EditImageUpload({
         reader.readAsDataURL(compressedFile);
 
         onImageSelect(compressedFile);
-        onUploadSuccess?.();
       } catch (error: unknown) {
         const errorMsg = "Gagal memproses gambar. Coba lagi.";
         setUploadError(errorMsg);
-        onUploadError?.(errorMsg);
+
         if (process.env.NODE_ENV !== "production") {
           console.warn("[EditImageUpload] Failed to process image", error);
         }
@@ -223,13 +218,7 @@ export default function EditImageUpload({
         setIsCompressing(false);
       }
     },
-    [
-      compressImage,
-      onImageSelect,
-      onUploadError,
-      onUploadSuccess,
-      convertHeicToJpeg,
-    ],
+    [compressImage, onImageSelect, convertHeicToJpeg],
   );
 
   const handleDragOver = useCallback((e: React.DragEvent) => {

@@ -6,9 +6,10 @@ import { ReportLocationFields } from "./fields/report-location-fields";
 import { ReportCategoryField } from "./fields/report-category-field";
 import { ReportFormProvider } from "./report-form-provider";
 import type { ReportResponse } from "../../../lib/types/api";
+import { ReactNode } from "react";
 
 interface ReportFormProps {
-  children: React.ReactNode;
+  children: ReactNode;
   onSuccess?: (reportId: string) => void;
   initialData?: ReportResponse;
   isEditing?: boolean;

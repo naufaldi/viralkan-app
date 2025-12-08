@@ -26,11 +26,13 @@ interface CreateReportFormProps {
 interface CreateReportFormContentProps {
   isEditing?: boolean;
   initialImageUrl?: string;
+  initialData?: ReportResponse;
 }
 
 function CreateReportFormContent({
   isEditing = false,
   initialImageUrl,
+  initialData,
 }: CreateReportFormContentProps) {
   const { form, formError, isLoading, isFormActivated, submitError } =
     useReportFormContext();
@@ -43,19 +45,10 @@ function CreateReportFormContent({
     hasExifWarning,
     hasExifData,
   } = useImageContext();
-  const {
-    handleImageSelect,
-    handleImageRemove,
-    handleImageUploadError,
-    handleImageUploadSuccess,
-    onSubmit,
-  } = useReportFormActionsContext();
+  const { handleImageSelect, handleImageRemove, onSubmit } =
+    useReportFormActionsContext();
 
   const displayError = formError || submitError || undefined;
-
-  const handleFormActivation = () => {
-    // Form activation is now handled in context
-  };
 
   return (
     <Card className="overflow-hidden rounded-xl border-neutral-200 shadow-lg hover:translate-0">
@@ -81,12 +74,9 @@ function CreateReportFormContent({
                 selectedImage={selectedImage}
                 onImageSelect={handleImageSelect}
                 onImageRemove={handleImageRemove}
-                onUploadError={handleImageUploadError}
-                onUploadSuccess={handleImageUploadSuccess}
                 isUploading={isUploadingImage || isExtractingExif}
                 error={uploadError}
                 disabled={isLoading}
-                onFormActivation={handleFormActivation}
                 initialImageUrl={initialImageUrl}
               />
               <ExifWarning
@@ -114,6 +104,7 @@ function CreateReportFormContent({
                 selectedImage={selectedImage}
                 disabled={isLoading || !isFormActivated}
                 isEditing={isEditing}
+                initialData={initialData}
               />
             </div>
           </form>
@@ -137,6 +128,7 @@ export default function CreateReportForm({
       <CreateReportFormContent
         isEditing={isEditing}
         initialImageUrl={initialData?.image_url}
+        initialData={initialData}
       />
     </ReportForm>
   );
