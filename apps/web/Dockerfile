@@ -1,4 +1,4 @@
-FROM oven/bun:1.2.4 AS base
+FROM oven/bun:1.2.6 AS base
 
 # Install wget for health checks (Debian-based official Bun image)
 USER root
