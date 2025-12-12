@@ -16,7 +16,7 @@
 
 We need:
 
-1. Clear **flagging in the admin table** when a report has missing coordinates.  
+1. Clear **flagging in the admin table** when a report has missing coordinates.
 2. An **admin workflow to fix coordinates**, either manually or via geocoding based on address.
 
 ---
@@ -126,7 +126,7 @@ Use-case: coordinates are missing but we have a good address string.
 
 ## 5 · UX Guidelines for Missing Coordinates
 
-- Do **not** block report verification solely because coordinates are missing.  
+- Do **not** block report verification solely because coordinates are missing.
   - Admin may still verify based on textual description.
 - Always show:
   - Whether coordinates are present.
@@ -149,4 +149,3 @@ Copy suggestions (Bahasa):
 - [ ] Add visual flag in `/admin/reports` table for `lat/lon` missing.
 - [ ] Surface coordinate status clearly in `/admin/reports/[id]`.
 - [ ] (Next tasks) Wire manual edit + “find from address” flow on the admin detail page using existing geocoding endpoints.
-

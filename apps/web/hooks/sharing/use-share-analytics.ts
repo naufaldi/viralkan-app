@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { sharingApi } from "@/services/api-client";
 
 interface UseShareAnalyticsOptions {
@@ -43,14 +43,23 @@ export function useShareAnalytics({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchAnalytics = async () => {
+  const stableFilters = useMemo(
+    () => ({
+      startDate: filters.startDate,
+      endDate: filters.endDate,
+      platform: filters.platform,
+    }),
+    [filters.startDate, filters.endDate, filters.platform],
+  );
+
+  const fetchAnalytics = useCallback(async () => {
     if (!enabled || !token) return;
 
     setIsLoading(true);
     setError(null);
 
     try {
-      const result = await sharingApi.getShareAnalytics(token, filters);
+      const result = await sharingApi.getShareAnalytics(token, stableFilters);
       setAnalytics(result);
     } catch (err) {
       console.error("Error fetching share analytics:", err);
@@ -58,14 +67,14 @@ export function useShareAnalytics({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [enabled, token, stableFilters]);
 
   useEffect(() => {
-    fetchAnalytics();
-  }, [token, filters.startDate, filters.endDate, filters.platform, enabled]);
+    void fetchAnalytics();
+  }, [fetchAnalytics]);
 
   const refetch = () => {
-    fetchAnalytics();
+    void fetchAnalytics();
   };
 
   return {

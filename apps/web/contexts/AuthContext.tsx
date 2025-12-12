@@ -1,12 +1,13 @@
 "use client";
 
 import React, { createContext, useContext, ReactNode } from "react";
+import type { User as FirebaseUser } from "firebase/auth";
 import { useAuth } from "../hooks/useAuth";
 import type { AuthUser } from "../lib/auth-server";
 
 interface AuthContextType {
   // Firebase state
-  firebaseUser: any | null;
+  firebaseUser: FirebaseUser | null;
   isFirebaseAuthenticated: boolean;
 
   // Backend state

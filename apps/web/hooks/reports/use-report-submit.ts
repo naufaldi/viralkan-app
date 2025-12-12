@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { UseFormReturn } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { CreateReportInput, ReportResponse } from "../../lib/types/api";
@@ -19,7 +18,6 @@ import {
 } from "../../utils/report-form-utils";
 
 interface UseReportSubmitProps {
-  form: UseFormReturn<CreateReportInput>;
   selectedImage: File | null;
   imageUploadFailed: boolean;
   isEditing: boolean;
@@ -30,7 +28,6 @@ interface UseReportSubmitProps {
 }
 
 export const useReportSubmit = ({
-  form,
   selectedImage,
   imageUploadFailed,
   isEditing,
@@ -240,7 +237,7 @@ export const useReportSubmit = ({
         toast.success("Foto berhasil diunggah", {
           description: "Sedang membuat laporan...",
         });
-        await submitReport(payload, selectedImage || undefined);
+        await submitReport(payload);
         toast.success("Laporan berhasil dibuat!", {
           description: "Terima kasih telah melaporkan kerusakan jalan",
           duration: 5000,

@@ -1,9 +1,17 @@
 import { useState } from "react";
-import { sharingApi, type AICaptionResponse } from "@/services/api-client";
+import {
+  sharingApi,
+  type AICaptionResponse,
+  type GenerateAICaptionRequest,
+  type TrackShareRequest,
+} from "@/services/api-client";
 import { toast } from "sonner";
 
 interface UseSharingOptions {
-  onShareSuccess?: (platform: string, newCount: number) => void;
+  onShareSuccess?: (
+    platform: TrackShareRequest["platform"],
+    newCount: number,
+  ) => void;
   onError?: (error: string) => void;
 }
 
@@ -15,16 +23,19 @@ interface UseSharingReturn {
   // Actions
   generateAICaption: (
     reportId: string,
-    platform: string,
-    tone: string,
+    platform: TrackShareRequest["platform"],
+    tone: GenerateAICaptionRequest["tone"],
     usePaidModel?: boolean,
   ) => Promise<AICaptionResponse | null>;
 
-  trackShare: (reportId: string, platform: string) => Promise<number | null>;
+  trackShare: (
+    reportId: string,
+    platform: TrackShareRequest["platform"],
+  ) => Promise<number | null>;
 
   // Utilities
   shareToPlatform: (
-    platform: string,
+    platform: TrackShareRequest["platform"],
     caption: string,
     hashtags: string[],
     reportId: string,
@@ -48,15 +59,15 @@ export function useSharing(options: UseSharingOptions = {}): UseSharingReturn {
 
   const generateAICaption = async (
     reportId: string,
-    platform: string,
-    tone: string,
+    platform: TrackShareRequest["platform"],
+    tone: GenerateAICaptionRequest["tone"],
     usePaidModel?: boolean,
   ) => {
     setIsGenerating(true);
     try {
       const response = await sharingApi.generateAICaption(reportId, {
-        platform: platform as any,
-        tone: tone as any,
+        platform,
+        tone,
         usePaidModel,
       });
 
@@ -75,10 +86,13 @@ export function useSharing(options: UseSharingOptions = {}): UseSharingReturn {
     }
   };
 
-  const trackShare = async (reportId: string, platform: string) => {
+  const trackShare = async (
+    reportId: string,
+    platform: TrackShareRequest["platform"],
+  ) => {
     try {
       const response = await sharingApi.trackShare(reportId, {
-        platform: platform as any,
+        platform,
       });
 
       options.onShareSuccess?.(platform, response.newShareCount);
@@ -93,7 +107,7 @@ export function useSharing(options: UseSharingOptions = {}): UseSharingReturn {
   };
 
   const shareToPlatform = async (
-    platform: string,
+    platform: TrackShareRequest["platform"],
     caption: string,
     hashtags: string[],
     reportId: string,
@@ -131,7 +145,7 @@ export function useSharing(options: UseSharingOptions = {}): UseSharingReturn {
 
       if (shareUrlPlatform) {
         window.open(shareUrlPlatform, "_blank", "width=600,height=400");
-        const platformNames = {
+        const platformNames: Record<TrackShareRequest["platform"], string> = {
           whatsapp: "WhatsApp",
           twitter: "Twitter/X",
           facebook: "Facebook",
@@ -139,7 +153,7 @@ export function useSharing(options: UseSharingOptions = {}): UseSharingReturn {
           telegram: "Telegram",
         };
         toast.success(
-          `Berhasil membagikan caption dan link ke ${platformNames[platform as keyof typeof platformNames]}!`,
+          `Berhasil membagikan caption dan link ke ${platformNames[platform]}!`,
         );
         return true;
       }

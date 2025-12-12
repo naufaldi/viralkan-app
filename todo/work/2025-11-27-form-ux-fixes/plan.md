@@ -19,6 +19,7 @@ After this change: dropdowns will be fluid, filling available space on all viewp
 
 **Issue 2 – Location Button Redundancy:**
 The "Bantuan Lokasi" (Location Assistance) section in `report-location-fields.tsx` presents two buttons with overlapping purposes:
+
 - "Gunakan Lokasi Saat Ini" (Use Current Location) — acquires device geolocation
 - "Dapatkan Alamat" (Get Address) — geocodes existing coordinates
 
@@ -66,7 +67,9 @@ After this change: the UX will follow RFC guidance: "Dapatkan Alamat" only appea
 ## Decision Log
 
 ### Decision 1: Location Workflow Design
+
 **Decision:** Follow RFC guidance—show "Dapatkan Alamat" button only when:
+
 1. User has valid coordinates (from EXIF, device geolocation, or manual entry)
 2. Address field (`location_text`) is empty OR geocoding from EXIF failed
 3. Form is activated
@@ -74,6 +77,7 @@ After this change: the UX will follow RFC guidance: "Dapatkan Alamat" only appea
 **Rationale:** This provides a contextual, progressive disclosure workflow rather than always showing both buttons. Pro: clear intent, reduces cognitive load. Con: button appears/disappears dynamically. User will see it only when it's actionable.
 
 **Alternatives considered:**
+
 - A) Always show both buttons → Confusing (current state)
 - B) Remove "Dapatkan Alamat" entirely → Loses fallback if EXIF geocoding fails
 - C) Separate coordinates section with conditional button → More complex UI, adds extra scrolling
@@ -94,17 +98,20 @@ After this change: the UX will follow RFC guidance: "Dapatkan Alamat" only appea
 ### File Structure
 
 **Core files to modify:**
+
 1. `apps/web/components/reports/administrative-select.tsx` — Dropdown CSS/layout
 2. `apps/web/components/reports/report-form/fields/report-location-fields.tsx` — Location button reorganization
 3. `apps/web/components/reports/report-form/location-button.tsx` — Label simplification (minor)
 
 **Related files (for context, no changes):**
+
 - `apps/web/components/reports/report-form/get-address-button.tsx` — Button component
 - `apps/web/components/reports/report-form/report-form-context.tsx` — State management
 
 ### Current State Analysis
 
 **Dropdown Issue:**
+
 - File: `apps/web/components/reports/administrative-select.tsx` (lines ~340–450)
 - Grid layout: `grid grid-cols-1 gap-6 transition-all duration-300 md:grid-cols-2 lg:grid-cols-3`
 - Each field wrapper: `<div className="max-w-full">` ← Constrains width
@@ -112,6 +119,7 @@ After this change: the UX will follow RFC guidance: "Dapatkan Alamat" only appea
 - **Problem:** Double constraint prevents natural grid expansion
 
 **Location Button Issue:**
+
 - File: `apps/web/components/reports/report-form/fields/report-location-fields.tsx` (lines ~30–60)
 - Current: Two buttons always shown together when `isFormActivated && shouldShowLocationButtons`
 - LocationButton: `getCurrentLocation()` → gets device coords → starts geocoding
@@ -122,6 +130,7 @@ After this change: the UX will follow RFC guidance: "Dapatkan Alamat" only appea
 ### Design Principles (from RFC)
 
 The RFC establishes that location operations should be:
+
 1. Contextual — show actions only when relevant state exists
 2. Progressive — build on prior steps (get coords → optionally get address)
 3. Unified — single loading state, clear outcome
@@ -138,14 +147,11 @@ The RFC establishes that location operations should be:
 
 1. Find Province field wrapper (around line 340):
    - Change: `<div className="max-w-full">` → `<div className="w-full">`
-   
 2. Find Province ComboboxField className (around line 375):
    - Change: `className={cn(enhancedGeocodingClasses, "max-w-full truncate")}` → `className={cn(enhancedGeocodingClasses, "w-full")}`
-   
 3. Repeat for Regency field (around line 425):
    - Wrapper: `max-w-full` → `w-full`
    - ComboboxField: `"max-w-full truncate"` → `"w-full"`
-   
 4. Repeat for District field (around line 510):
    - Wrapper: `max-w-full` → `w-full`
    - ComboboxField: `"max-w-full truncate"` → `"w-full"`
@@ -157,6 +163,7 @@ The RFC establishes that location operations should be:
 **Goal:** Show "Dapatkan Alamat" button only when it's contextually relevant (has coordinates, address is empty).
 
 **Current structure in `report-location-fields.tsx` (lines ~45–60):**
+
 ```tsx
 {isFormActivated && shouldShowLocationButtons && (
   <div className="mt-4 space-y-3 rounded-lg border border-neutral-200 bg-neutral-50 p-4">
@@ -171,6 +178,7 @@ The RFC establishes that location operations should be:
 ```
 
 **New structure:**
+
 - Always show LocationButton in "Bantuan Lokasi" section (primary action: get coordinates)
 - Show GetAddressButton only when ALL conditions met:
   - Coordinates are valid (hasValidCoordinates = true)
@@ -207,21 +215,21 @@ The RFC establishes that location operations should be:
    - Verify options list opens without overlapping
 
 2. **Location Workflow:**
-   
+
    **Scenario A – EXIF geocoding succeeds:**
    - Photo has GPS EXIF data
    - Form auto-extracts EXIF → geocodes → fills address
    - Bantuan Lokasi button should be hidden (EXIF succeeded)
    - GetAddressButton should not appear
    - ✓ Workflow: Automatic, user doesn't need to click anything
-   
+
    **Scenario B – EXIF geocoding fails:**
    - Photo has GPS EXIF data but geocoding returns no address
    - Bantuan Lokasi section shows with LocationButton
    - GetAddressButton not yet visible (no coordinates entered)
    - User clicks LocationButton → device location → geocoding → address filled
    - ✓ Workflow: One clear button, one action
-   
+
    **Scenario C – No EXIF, manual coordinates:**
    - No EXIF data
    - Bantuan Lokasi shows with LocationButton
@@ -229,7 +237,7 @@ The RFC establishes that location operations should be:
    - If somehow address is still empty, GetAddressButton appears below textarea
    - User can click to retry geocoding
    - ✓ Workflow: Clear primary button, optional secondary button
-   
+
    **Scenario D – All manual:**
    - No EXIF, no geolocation permission
    - Bantuan Lokasi button is disabled or not shown
@@ -304,6 +312,7 @@ The RFC establishes that location operations should be:
 ### Dropdown: Before → After
 
 **Before:**
+
 ```tsx
 <div className="grid grid-cols-1 gap-6 transition-all duration-300 md:grid-cols-2 lg:grid-cols-3">
   <div className="max-w-full">
@@ -313,6 +322,7 @@ The RFC establishes that location operations should be:
 ```
 
 **After:**
+
 ```tsx
 <div className="grid grid-cols-1 gap-6 transition-all duration-300 md:grid-cols-2 lg:grid-cols-3">
   <div className="w-full">
@@ -324,6 +334,7 @@ The RFC establishes that location operations should be:
 ### Location Buttons: Before → After
 
 **Before:**
+
 ```tsx
 {isFormActivated && shouldShowLocationButtons && (
   <div className="mt-4 space-y-3 ...">
@@ -338,6 +349,7 @@ The RFC establishes that location operations should be:
 ```
 
 **After:**
+
 ```tsx
 {isFormActivated && shouldShowLocationButtons && (
   <div className="mt-4 space-y-3 ...">
@@ -362,15 +374,18 @@ The RFC establishes that location operations should be:
 ## Interfaces and Dependencies
 
 **Components Modified:**
+
 - `apps/web/components/reports/administrative-select.tsx` — CSS updates to 3 fields
 - `apps/web/components/reports/report-form/fields/report-location-fields.tsx` — Restructure location buttons
 
 **Components Used (no changes):**
+
 - `ComboboxField` — Receives `w-full` className instead of `max-w-full truncate`
 - `LocationButton` — Same props, same behavior
 - `GetAddressButton` — Moved to new section, same props, same behavior
 
 **Hooks & Context (no changes):**
+
 - `useReportFormContext()` — Unchanged
 - `useImageContext()` — Unchanged
 - `useLocationContext()` — Unchanged

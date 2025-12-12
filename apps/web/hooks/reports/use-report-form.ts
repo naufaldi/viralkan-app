@@ -93,7 +93,6 @@ export const useReportForm = ({
   });
 
   const submitState = useReportSubmit({
-    form,
     selectedImage: imageState.selectedImage,
     imageUploadFailed: imageState.imageUploadFailed,
     isEditing,
@@ -102,11 +101,6 @@ export const useReportForm = ({
     setFormError,
     setUploadError: imageState.setUploadError,
   });
-
-  useEffect(() => {
-    if (isEditing && initialData?.image_url && !imageState.selectedImage) {
-    }
-  }, [isEditing, initialData, imageState.selectedImage]);
 
   const isLoading =
     submitState.isSubmitting ||

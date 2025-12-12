@@ -17,7 +17,7 @@ export function useCreateReport(options?: UseCreateReportOptions) {
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const submitReport = async (data: CreateReportInput, imageFile?: File) => {
+  const submitReport = async (data: CreateReportInput) => {
     if (!backendUser) {
       const errorMessage = "Anda harus login terlebih dahulu";
       setError(errorMessage);
@@ -26,6 +26,7 @@ export function useCreateReport(options?: UseCreateReportOptions) {
     }
 
     setIsSubmitting(true);
+    setIsUploading(true);
     setError(null);
 
     try {
@@ -68,6 +69,7 @@ export function useCreateReport(options?: UseCreateReportOptions) {
       throw err instanceof Error ? err : new Error(errorMessage);
     } finally {
       setIsSubmitting(false);
+      setIsUploading(false);
     }
   };
 

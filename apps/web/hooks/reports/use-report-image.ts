@@ -6,12 +6,17 @@ import {
   getExifErrorMessage,
 } from "../../lib/utils/exif-extraction";
 import { reverseGeocodeWithNominatimData } from "../../lib/services/geocoding";
-import { processNominatimAddressWithAPI } from "../../lib/utils/enhanced-geocoding-handler";
+import {
+  processNominatimAddressWithAPI,
+  type EnhancedGeocodingResponse,
+} from "../../lib/utils/enhanced-geocoding-handler";
 import { toast } from "sonner";
 
 interface UseReportImageProps {
   form: UseFormReturn<CreateReportInput>;
-  applyAdministrativeSearchResults: (result: any) => Promise<void>;
+  applyAdministrativeSearchResults: (
+    result: EnhancedGeocodingResponse,
+  ) => Promise<void>;
   isEditing?: boolean;
 }
 
