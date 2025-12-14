@@ -63,7 +63,6 @@ export const useReportLocation = ({ form }: UseReportLocationProps) => {
     form,
     autoApply: true,
     confidenceThreshold: 0.7,
-    enableValidation: true,
   });
 
   const applyAdministrativeSearchResults = async (
