@@ -77,6 +77,7 @@ export function useAuth(initialUser?: AuthUser | null) {
       if (response.ok) {
         const data: AuthVerificationResponse = await response.json();
         setBackendUser(data.user);
+        setIsServerVerified(true);
         console.log("Backend verification successful:", data.message);
         console.log("User data received:", {
           id: data.user.id,
@@ -111,6 +112,11 @@ export function useAuth(initialUser?: AuthUser | null) {
 
   // Auto-verify when Firebase user changes
   useEffect(() => {
+    console.log("useAuth effect triggered", {
+      hasFirebaseUser: !!firebaseUser,
+      firebaseUserId: firebaseUser?.uid,
+    });
+
     if (firebaseUser) {
       // Set cookie immediately when Firebase user is available
       const setCookieAndVerify = async () => {
@@ -135,27 +141,6 @@ export function useAuth(initialUser?: AuthUser | null) {
       setIsServerVerified(false);
     }
   }, [firebaseUser, getIdToken, verifyWithBackend, handleAuthError]);
-
-  // Sync with server-side auth state
-  const refreshAuth = useCallback(async () => {
-    setIsVerifying(true);
-    try {
-      // This would call server-side verification
-      await verifyWithBackend();
-      setIsServerVerified(true);
-    } catch (error) {
-      console.error("Auth refresh failed:", error);
-      setIsServerVerified(false);
-    } finally {
-      setIsVerifying(false);
-    }
-  }, [verifyWithBackend]);
-
-  useEffect(() => {
-    if (!isServerVerified && !isVerifying) {
-      void refreshAuth();
-    }
-  }, [isServerVerified, isVerifying, refreshAuth]);
 
   const apiCall = async (
     url: string,
@@ -245,6 +230,5 @@ export function useAuth(initialUser?: AuthUser | null) {
 
     // Manual verification
     verifyWithBackend,
-    refreshAuth,
   };
 }

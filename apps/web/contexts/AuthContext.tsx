@@ -36,7 +36,6 @@ interface AuthContextType {
 
   // Manual verification
   verifyWithBackend: () => Promise<void>;
-  refreshAuth: () => Promise<void>; // New: refresh server auth state
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);

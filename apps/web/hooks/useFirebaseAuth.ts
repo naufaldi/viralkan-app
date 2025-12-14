@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import {
   signInWithPopup,
@@ -22,9 +22,12 @@ export function useFirebaseAuth() {
     [],
   );
 
-  const signInWithGoogle = () => signInWithPopup(auth, googleProvider);
-  const signOut = () => fbSignOut(auth);
-  const getIdToken = async (): Promise<string | null> => {
+  const signInWithGoogle = useCallback(
+    () => signInWithPopup(auth, googleProvider),
+    [],
+  );
+  const signOut = useCallback(() => fbSignOut(auth), []);
+  const getIdToken = useCallback(async (): Promise<string | null> => {
     if (!user) return null;
     try {
       return await user.getIdToken();
@@ -32,7 +35,7 @@ export function useFirebaseAuth() {
       console.error("Failed to get ID token:", error);
       return null;
     }
-  };
+  }, [user]);
 
   return {
     user,
