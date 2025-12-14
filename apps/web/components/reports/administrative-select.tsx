@@ -107,7 +107,6 @@ export const AdministrativeSelect = ({
     form,
     autoApply: enableAutoSync,
     confidenceThreshold: 0.7,
-    enableValidation: true,
   });
 
   // Use external sync status if provided, otherwise fall back to internal

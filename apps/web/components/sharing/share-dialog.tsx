@@ -59,7 +59,12 @@ export function ShareDialog({
     });
 
   const handleGenerateCaption = async () => {
-    const result = await generateAICaption(reportId, platform, tone, true);
+    const result = await generateAICaption(
+      reportId,
+      platform,
+      tone as any,
+      true,
+    );
 
     if (result) {
       setCaption(result.caption);

@@ -1,10 +1,22 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { reverseGeocode, forwardGeocode } from "../lib/services/geocoding";
 
+interface AddressFillData {
+  street_name: string;
+  district: string;
+  city: string;
+  province: string;
+}
+
+interface CoordinatesFillData {
+  lat: number;
+  lon: number;
+}
+
 interface UseGeocodingOptions {
-  onAddressFilled?: (data: any) => void;
-  onCoordinatesFilled?: (data: any) => void;
+  onAddressFilled?: (data: AddressFillData) => void;
+  onCoordinatesFilled?: (data: CoordinatesFillData) => void;
   autoFillEnabled?: boolean;
 }
 
@@ -28,8 +40,6 @@ export function useGeocoding(options: UseGeocodingOptions = {}) {
     lastGeocodingSource: null,
     geocodingError: null,
   });
-
-  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Clear error when user starts typing
   const clearError = useCallback(() => {
@@ -215,15 +225,6 @@ export function useGeocoding(options: UseGeocodingOptions = {}) {
     },
     [isValidCoordinates, geocodeFromCoordinates],
   );
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (debounceTimeoutRef.current) {
-        clearTimeout(debounceTimeoutRef.current);
-      }
-    };
-  }, []);
 
   return {
     // State

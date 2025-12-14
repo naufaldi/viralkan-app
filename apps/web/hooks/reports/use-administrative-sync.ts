@@ -10,11 +10,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { useAdministrative } from "./use-administrative";
-import type {
-  Province,
-  Regency,
-  District,
-} from "../../services/administrative";
 import {
   processGeocodingResponse,
   getAdministrativeSyncStatus,
@@ -59,7 +54,6 @@ interface UseAdministrativeSyncConfig {
   form: UseFormReturn<CreateReportInput>;
   autoApply?: boolean;
   confidenceThreshold?: number;
-  enableValidation?: boolean;
 }
 
 /**
@@ -69,7 +63,6 @@ export function useAdministrativeSync({
   form,
   autoApply = false,
   confidenceThreshold = 0.7,
-  enableValidation = true,
 }: UseAdministrativeSyncConfig): UseAdministrativeSyncReturn {
   // State
   const [enhancedGeocoding, setEnhancedGeocoding] =
@@ -83,6 +76,36 @@ export function useAdministrativeSync({
   // Get administrative data
   const { data: administrativeData, loading: administrativeLoading } =
     useAdministrative();
+
+  /**
+   * Apply enhanced geocoding to form
+   */
+  const applyToForm = useCallback(async (): Promise<{
+    applied: boolean;
+    appliedFields: string[];
+    skippedFields: string[];
+  }> => {
+    if (!enhancedGeocoding || !syncStatus) {
+      return {
+        applied: false,
+        appliedFields: [],
+        skippedFields: [],
+      };
+    }
+
+    const result = applyEnhancedGeocodingToForm(
+      enhancedGeocoding,
+      form,
+      syncStatus,
+    );
+
+    // Trigger form validation after applying values
+    if (result.applied) {
+      await form.trigger(["province", "city", "district"]);
+    }
+
+    return result;
+  }, [enhancedGeocoding, syncStatus, form]);
 
   /**
    * Process geocoding response and find administrative matches
@@ -128,38 +151,14 @@ export function useAdministrativeSync({
         setIsProcessing(false);
       }
     },
-    [administrativeData, administrativeLoading, autoApply, confidenceThreshold],
+    [
+      administrativeData,
+      administrativeLoading,
+      autoApply,
+      confidenceThreshold,
+      applyToForm,
+    ],
   );
-
-  /**
-   * Apply enhanced geocoding to form
-   */
-  const applyToForm = useCallback(async (): Promise<{
-    applied: boolean;
-    appliedFields: string[];
-    skippedFields: string[];
-  }> => {
-    if (!enhancedGeocoding || !syncStatus) {
-      return {
-        applied: false,
-        appliedFields: [],
-        skippedFields: [],
-      };
-    }
-
-    const result = applyEnhancedGeocodingToForm(
-      enhancedGeocoding,
-      form,
-      syncStatus,
-    );
-
-    // Trigger form validation after applying values
-    if (result.applied) {
-      await form.trigger(["province", "city", "district"]);
-    }
-
-    return result;
-  }, [enhancedGeocoding, syncStatus, form]);
 
   /**
    * Clear sync state
@@ -232,7 +231,6 @@ export function useManualAdministrativeSync(
     form,
     autoApply: false,
     confidenceThreshold: 0.9,
-    enableValidation: true,
   });
 }
 
@@ -246,7 +244,6 @@ export function useAutoAdministrativeSync(
     form,
     autoApply: true,
     confidenceThreshold: 0.7,
-    enableValidation: true,
   });
 }
 

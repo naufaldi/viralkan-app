@@ -1,12 +1,13 @@
 "use client";
 
 import React, { createContext, useContext, ReactNode } from "react";
+import type { User as FirebaseUser } from "firebase/auth";
 import { useAuth } from "../hooks/useAuth";
 import type { AuthUser } from "../lib/auth-server";
 
 interface AuthContextType {
   // Firebase state
-  firebaseUser: any | null;
+  firebaseUser: FirebaseUser | null;
   isFirebaseAuthenticated: boolean;
 
   // Backend state
@@ -35,7 +36,6 @@ interface AuthContextType {
 
   // Manual verification
   verifyWithBackend: () => Promise<void>;
-  refreshAuth: () => Promise<void>; // New: refresh server auth state
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);

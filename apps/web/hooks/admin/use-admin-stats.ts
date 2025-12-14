@@ -19,40 +19,6 @@ interface AdminStats {
   };
 }
 
-// Get API base URL from the same configuration as api-client.ts
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-
-// Helper function for authenticated API requests
-async function authenticatedApiRequest<T>(
-  endpoint: string,
-  token: string,
-  options: RequestInit = {},
-): Promise<T> {
-  const url = `${API_BASE_URL}${endpoint}`;
-
-  const response = await fetch(url, {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-      ...options.headers,
-    },
-    ...options,
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({
-      error: {
-        code: "UNKNOWN_ERROR",
-        message: `HTTP ${response.status}: ${response.statusText}`,
-        timestamp: new Date().toISOString(),
-      },
-    }));
-    throw new Error(errorData.error?.message || `HTTP ${response.status}`);
-  }
-
-  return response.json();
-}
-
 // Custom hook for fetching admin statistics
 export const useAdminStatsQuery = () => {
   const { getToken, isAuthenticated, backendUser } = useAuthContext();
@@ -95,9 +61,9 @@ export const useAdminStatsQuery = () => {
         verificationRate: apiResponse.verificationRate,
         averageResponseTime: `${apiResponse.averageVerificationTime} jam`,
         todayActivity: {
-          verified: 0, // TODO: Calculate from recentActivity
-          rejected: 0, // TODO: Calculate from recentActivity
-          submitted: 0, // TODO: Calculate from recentActivity
+          verified: 0,
+          rejected: 0,
+          submitted: 0,
         },
       } as AdminStats;
     },

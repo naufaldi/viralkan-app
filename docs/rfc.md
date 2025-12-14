@@ -21,17 +21,17 @@
 
 ## 2 · Tech Stack
 
-| Layer         | Choice                            | Why                                    |
-| ------------- | --------------------------------- | -------------------------------------- |
-| Runtime       | **Bun 1.x**                       | Fast TS runtime, single binary         |
-| API           | **Hono**                          | Tiny, edge‑friendly router             |
-| Frontend      | **React 18 + Vite + Tailwind v4** | Familiar, hot‑reload, utility CSS      |
-| Mono‑repo     | **Turborepo**                     | One‑command builds & shared code       |
-| Storage       | **Cloudflare R2**                 | Cheap S3 clone near Jakarta            |
-| DB            | **PostgreSQL 15 + PostGIS**       | Spatial ready                          |
-| Reverse Proxy | **Traefik v3**                    | Auto‑TLS, Docker labels, single binary |
+| Layer         | Choice                            | Why                                     |
+| ------------- | --------------------------------- | --------------------------------------- |
+| Runtime       | **Bun 1.x**                       | Fast TS runtime, single binary          |
+| API           | **Hono**                          | Tiny, edge‑friendly router              |
+| Frontend      | **React 18 + Vite + Tailwind v4** | Familiar, hot‑reload, utility CSS       |
+| Mono‑repo     | **Turborepo**                     | One‑command builds & shared code        |
+| Storage       | **Cloudflare R2**                 | Cheap S3 clone near Jakarta             |
+| DB            | **PostgreSQL 15 + PostGIS**       | Spatial ready                           |
+| Reverse Proxy | **Traefik v3**                    | Auto‑TLS, Docker labels, single binary  |
 | Security      | **Rate Limiting**                 | Abuse protection via request throttling |
-| PWA           | **Vite PWA Plugin**               | Offline support                        |
+| PWA           | **Vite PWA Plugin**               | Offline support                         |
 
 ---
 
@@ -91,19 +91,19 @@ _`bunx turbo run dev`_ spins up API (port 3000) & Web (5173) with watch mode.
 
 ## 4 · Page Architecture & Routes
 
-| Route                     | Purpose              | Auth Required | API Endpoints          | Key Components        |
-| ------------------------- | -------------------- | ------------- | ---------------------- | --------------------- |
-| `/`                       | Landing page         | No            | None                   | Hero, CTA buttons     |
-| `/reports`                | Public reports list  | No            | `GET /api/reports`     | DataTable, pagination |
-| `/reports/[id]`           | Report detail        | No            | `GET /api/reports/:id` | ImageViewer, metadata |
-| `/login`                  | Authentication       | No            | Google OAuth           | LoginForm             |
-| `/auth/callback`          | OAuth callback       | No            | Token exchange         | LoadingSpinner        |
-| `/dashboard`              | User dashboard       | Yes           | `GET /api/me/*`        | Stats, ReportCard     |
-| `/dashboard/reports`      | User reports list    | Yes           | `GET /api/me/reports`  | DataTable             |
-| `/reports/create`         | Create report form   | Yes           | `POST /api/reports`    | ImageUpload, Form     |
-| `/404`                    | Not found            | No            | None                   | ErrorPage             |
-| `/500`                    | Server error         | No            | None                   | ErrorPage             |
-| `/offline`                | Offline state        | No            | None                   | OfflinePage           |
+| Route                | Purpose             | Auth Required | API Endpoints          | Key Components        |
+| -------------------- | ------------------- | ------------- | ---------------------- | --------------------- |
+| `/`                  | Landing page        | No            | None                   | Hero, CTA buttons     |
+| `/reports`           | Public reports list | No            | `GET /api/reports`     | DataTable, pagination |
+| `/reports/[id]`      | Report detail       | No            | `GET /api/reports/:id` | ImageViewer, metadata |
+| `/login`             | Authentication      | No            | Google OAuth           | LoginForm             |
+| `/auth/callback`     | OAuth callback      | No            | Token exchange         | LoadingSpinner        |
+| `/dashboard`         | User dashboard      | Yes           | `GET /api/me/*`        | Stats, ReportCard     |
+| `/dashboard/reports` | User reports list   | Yes           | `GET /api/me/reports`  | DataTable             |
+| `/reports/create`    | Create report form  | Yes           | `POST /api/reports`    | ImageUpload, Form     |
+| `/404`               | Not found           | No            | None                   | ErrorPage             |
+| `/500`               | Server error        | No            | None                   | ErrorPage             |
+| `/offline`           | Offline state       | No            | None                   | OfflinePage           |
 
 ### 4.1 User Flows
 
@@ -939,7 +939,12 @@ export const generateMetadata = async ({ params }) => {
       images: [{ url: image, width: 1200, height: 630 }],
       type: "article",
     },
-    twitter: { card: "summary_large_image", title, description, images: [image] },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [image],
+    },
   };
 };
 ```
@@ -1021,7 +1026,7 @@ test("complete report creation flow", async ({ page }) => {
   await page.fill('[data-testid="street"]', "Jl. Test");
   await page.fill('[data-testid="location"]', "Test location");
   await page.click('[data-testid="submit"]');
-  await expect(page.locator('h1')).toContainText('Laporan Kerusakan Jalan');
+  await expect(page.locator("h1")).toContainText("Laporan Kerusakan Jalan");
 });
 ```
 

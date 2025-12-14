@@ -1,5 +1,10 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQueryClient,
+  type QueryKey,
+} from "@tanstack/react-query";
 import { useAuthContext } from "../../contexts/AuthContext";
+import type { AdminReportsResponse } from "../../services/api-client";
 
 // Types for admin actions
 interface AdminActionResponse {
@@ -13,10 +18,6 @@ interface AdminActionResponse {
     rejection_reason: string | null;
     deleted_at: string | null;
   };
-}
-
-interface RejectReportData {
-  reason: string;
 }
 
 // Get API base URL from the same configuration as api-client.ts
@@ -77,33 +78,42 @@ export const useVerifyReport = () => {
       // Cancel any outgoing refetches
       await queryClient.cancelQueries({ queryKey: ["adminReports"] });
 
-      // Snapshot the previous value
-      const previousReports = queryClient.getQueryData(["adminReports"]);
-
-      // Optimistically update to the new value
-      queryClient.setQueryData(["adminReports"], (old: any) => {
-        if (!old?.items) return old;
-
-        return {
-          ...old,
-          items: old.items.map((report: any) =>
-            report.id === reportId
-              ? {
-                  ...report,
-                  status: "verified",
-                  verified_at: new Date().toISOString(),
-                }
-              : report,
-          ),
-        };
+      const previousReports = queryClient.getQueriesData<AdminReportsResponse>({
+        queryKey: ["adminReports"],
       });
+
+      queryClient.setQueriesData<AdminReportsResponse>(
+        { queryKey: ["adminReports"] },
+        (old) => {
+          if (!old?.items) return old;
+
+          return {
+            ...old,
+            items: old.items.map((report) =>
+              report.id === reportId
+                ? {
+                    ...report,
+                    status: "verified",
+                    verified_at: new Date().toISOString(),
+                  }
+                : report,
+            ),
+          };
+        },
+      );
 
       return { previousReports };
     },
     onError: (err, reportId, context) => {
       // If the mutation fails, use the context returned from onMutate to roll back
       if (context?.previousReports) {
-        queryClient.setQueryData(["adminReports"], context.previousReports);
+        (
+          context.previousReports as Array<
+            [QueryKey, AdminReportsResponse | undefined]
+          >
+        ).forEach(([key, data]) => {
+          queryClient.setQueryData(key, data);
+        });
       }
     },
     onSettled: () => {
@@ -143,30 +153,41 @@ export const useRejectReport = () => {
     onMutate: async ({ reportId }) => {
       await queryClient.cancelQueries({ queryKey: ["adminReports"] });
 
-      const previousReports = queryClient.getQueryData(["adminReports"]);
-
-      queryClient.setQueryData(["adminReports"], (old: any) => {
-        if (!old?.items) return old;
-
-        return {
-          ...old,
-          items: old.items.map((report: any) =>
-            report.id === reportId
-              ? {
-                  ...report,
-                  status: "rejected",
-                  rejection_reason: "Pending...",
-                }
-              : report,
-          ),
-        };
+      const previousReports = queryClient.getQueriesData<AdminReportsResponse>({
+        queryKey: ["adminReports"],
       });
+
+      queryClient.setQueriesData<AdminReportsResponse>(
+        { queryKey: ["adminReports"] },
+        (old) => {
+          if (!old?.items) return old;
+
+          return {
+            ...old,
+            items: old.items.map((report) =>
+              report.id === reportId
+                ? {
+                    ...report,
+                    status: "rejected",
+                    rejection_reason: "Pending...",
+                  }
+                : report,
+            ),
+          };
+        },
+      );
 
       return { previousReports };
     },
     onError: (err, variables, context) => {
       if (context?.previousReports) {
-        queryClient.setQueryData(["adminReports"], context.previousReports);
+        (
+          context.previousReports as Array<
+            [QueryKey, AdminReportsResponse | undefined]
+          >
+        ).forEach(([key, data]) => {
+          queryClient.setQueryData(key, data);
+        });
       }
     },
     onSettled: () => {
@@ -198,30 +219,41 @@ export const useDeleteReport = () => {
     onMutate: async (reportId) => {
       await queryClient.cancelQueries({ queryKey: ["adminReports"] });
 
-      const previousReports = queryClient.getQueryData(["adminReports"]);
-
-      queryClient.setQueryData(["adminReports"], (old: any) => {
-        if (!old?.items) return old;
-
-        return {
-          ...old,
-          items: old.items.map((report: any) =>
-            report.id === reportId
-              ? {
-                  ...report,
-                  status: "deleted",
-                  deleted_at: new Date().toISOString(),
-                }
-              : report,
-          ),
-        };
+      const previousReports = queryClient.getQueriesData<AdminReportsResponse>({
+        queryKey: ["adminReports"],
       });
+
+      queryClient.setQueriesData<AdminReportsResponse>(
+        { queryKey: ["adminReports"] },
+        (old) => {
+          if (!old?.items) return old;
+
+          return {
+            ...old,
+            items: old.items.map((report) =>
+              report.id === reportId
+                ? {
+                    ...report,
+                    status: "deleted",
+                    deleted_at: new Date().toISOString(),
+                  }
+                : report,
+            ),
+          };
+        },
+      );
 
       return { previousReports };
     },
     onError: (err, reportId, context) => {
       if (context?.previousReports) {
-        queryClient.setQueryData(["adminReports"], context.previousReports);
+        (
+          context.previousReports as Array<
+            [QueryKey, AdminReportsResponse | undefined]
+          >
+        ).forEach(([key, data]) => {
+          queryClient.setQueryData(key, data);
+        });
       }
     },
     onSettled: () => {

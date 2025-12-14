@@ -20,6 +20,7 @@ import {
 import { ShareDialog } from "./share-dialog";
 import { useSharing } from "@/hooks/sharing";
 import { useReportSharing } from "@/hooks/sharing";
+import { type TrackShareRequest } from "@/services/api-client";
 
 interface ShareButtonProps {
   reportId: string;
@@ -140,7 +141,7 @@ export function ShareButton({
     };
   }, [showShareCount]);
 
-  const handleQuickShare = async (platform: string) => {
+  const handleQuickShare = async (platform: TrackShareRequest["platform"]) => {
     setIsSharing(true);
 
     try {

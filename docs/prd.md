@@ -313,16 +313,16 @@ Guiding principles
 
 ## **Technical Page Requirements Summary**
 
-| Route                     | Purpose              | Auth Required | API Endpoints          | Key Components         |
-| ------------------------- | -------------------- | ------------- | ---------------------- | ---------------------- |
-| `/`                       | Landing page         | No            | None                   | Hero, CTA buttons      |
-| `/reports`                | Public reports list  | No            | `GET /api/reports`     | Data table, pagination |
-| `/reports/[id]`           | Report detail        | No            | `GET /api/reports/:id` | Image viewer, metadata |
-| `/login`                  | Authentication       | No            | Google OAuth           | Login form             |
-| `/auth/callback`          | OAuth callback       | No            | Token exchange         | Loading state          |
-| `/dashboard`              | User dashboard       | Yes           | `GET /api/me/*`        | Stats, recent reports  |
-| `/dashboard/reports`      | User reports list    | Yes           | `GET /api/me/reports`  | Personal data table    |
-| `/reports/create`         | Create report form   | Yes           | `POST /api/reports`    | Multi-step form        |
+| Route                | Purpose             | Auth Required | API Endpoints          | Key Components         |
+| -------------------- | ------------------- | ------------- | ---------------------- | ---------------------- |
+| `/`                  | Landing page        | No            | None                   | Hero, CTA buttons      |
+| `/reports`           | Public reports list | No            | `GET /api/reports`     | Data table, pagination |
+| `/reports/[id]`      | Report detail       | No            | `GET /api/reports/:id` | Image viewer, metadata |
+| `/login`             | Authentication      | No            | Google OAuth           | Login form             |
+| `/auth/callback`     | OAuth callback      | No            | Token exchange         | Loading state          |
+| `/dashboard`         | User dashboard      | Yes           | `GET /api/me/*`        | Stats, recent reports  |
+| `/dashboard/reports` | User reports list   | Yes           | `GET /api/me/reports`  | Personal data table    |
+| `/reports/create`    | Create report form  | Yes           | `POST /api/reports`    | Multi-step form        |
 
 ---
 
