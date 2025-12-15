@@ -1,5 +1,7 @@
 "use client";
 
+import { useAuthContext } from "../../contexts/AuthContext";
+import { useState } from "react";
 import { Button } from "@repo/ui/components/ui/button";
 import {
   DropdownMenu,
@@ -16,10 +18,10 @@ import {
 } from "@repo/ui/components/ui/avatar";
 import { LogOut, LayoutDashboard, FileText, ChevronUp } from "lucide-react";
 import Link from "next/link";
-import { useAuthContext } from "../../contexts/AuthContext";
 
 const Header = () => {
   const { isAuthenticated, isLoading, backendUser, signOut } = useAuthContext();
+  const [toggleMobileNav, setToggleMobileNav] = useState<boolean>(false);
 
   const handleLogout = async () => {
     try {
@@ -182,9 +184,14 @@ const Header = () => {
             <div className="ml-4">{renderAuthButton()}</div>
           </nav>
 
-          {/* Mobile Menu Button (for future mobile menu) */}
+          {/* Mobile Menu Button */}
           <div className="md:hidden">
-            <Button variant="ghost" size="sm" className="h-10 w-10 p-0">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-10 w-10 p-0"
+              onClick={() => setToggleMobileNav(!toggleMobileNav)}
+            >
               <span className="sr-only">Open menu</span>
               <div className="flex h-5 w-5 flex-col items-center justify-center gap-1">
                 <div className="h-0.5 w-4 rounded bg-neutral-600"></div>
@@ -195,6 +202,52 @@ const Header = () => {
           </div>
         </div>
       </div>
+      {/* Mobile Navigation Section */}
+      <ul
+        className={`flex flex-col rounded-lg bg-white text-center ${toggleMobileNav ? "py-4 opacity-100" : "max-h-0 opacity-0"} transition-height ease duration-300 md:hidden`}
+      >
+        {toggleMobileNav && (
+          <>
+            <li className="pt-4">
+              <Link
+                href="/laporan"
+                onClick={() => setToggleMobileNav(false)}
+                className="border-b-2 border-transparent px-1 py-2 text-sm font-medium text-neutral-600 transition-colors hover:border-neutral-300 hover:text-neutral-900"
+              >
+                Laporan
+              </Link>
+            </li>
+            <li className="pt-4">
+              <Link
+                href="/#how-it-works"
+                onClick={() => setToggleMobileNav(false)}
+                className="border-b-2 border-transparent px-1 py-2 text-sm font-medium text-neutral-600 transition-colors hover:border-neutral-300 hover:text-neutral-900"
+              >
+                Cara Kerja
+              </Link>
+            </li>
+            <li className="pt-4">
+              <Link
+                href="/#community"
+                onClick={() => setToggleMobileNav(false)}
+                className="border-b-2 border-transparent px-1 py-2 text-sm font-medium text-neutral-600 transition-colors hover:border-neutral-300 hover:text-neutral-900"
+              >
+                Komunitas
+              </Link>
+            </li>
+            <li className="pt-4">
+              <Link
+                href="/#about"
+                onClick={() => setToggleMobileNav(false)}
+                className="border-b-2 border-transparent px-1 py-2 text-sm font-medium text-neutral-600 transition-colors hover:border-neutral-300 hover:text-neutral-900"
+              >
+                Tentang
+              </Link>
+            </li>
+            <li className="pt-4">{renderAuthButton()}</li>
+          </>
+        )}
+      </ul>
     </header>
   );
 };
