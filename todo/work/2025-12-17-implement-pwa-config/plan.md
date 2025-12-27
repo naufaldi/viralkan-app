@@ -13,13 +13,14 @@ After implementing this plan, users will be able to install the Viralkan road da
 ## Progress
 
 - [x] (2025-12-17 12:00Z) Research current PWA libraries and best practices for Next.js 16
-- [ ] Install next-pwa package and update package.json
-- [ ] Configure next.config.js with PWA settings and Workbox caching
-- [ ] Create web app manifest using Next.js metadata API
-- [ ] Add PWA app icons to public directory (192x192, 512x512)
-- [ ] Create offline fallback page at app/offline/page.tsx
-- [ ] Create PWA install prompt component with hook
-- [ ] Update root layout to include PWA components and manifest
+- [x] (2025-12-27) Install next-pwa package and update package.json
+- [x] (2025-12-27) Configure next.config.js with PWA settings and Workbox caching
+- [x] (2025-12-27) Create web app manifest using Next.js metadata API
+- [x] (2025-12-27) Create PWA logo (SVG) and update manifest
+- [ ] Generate PNG icons from logo.svg (192x192, 512x512)
+- [x] (2025-12-27) Create offline fallback page at app/offline/page.tsx
+- [x] (2025-12-27) Create PWA install prompt component with hook
+- [x] (2025-12-27) Update root layout to include PWA components and manifest
 - [ ] Test PWA installation, offline functionality, and caching
 - [ ] Run Lighthouse PWA audit and fix any issues
 
@@ -42,6 +43,14 @@ After implementing this plan, users will be able to install the Viralkan road da
 - Decision: Configure Workbox to cache API responses with network-first strategy
   Rationale: Ensures fresh data for road reports while providing offline fallback
   Date/Author: 2025-12-17
+
+- Decision: Use ESM import for `next-pwa` in `next.config.js`
+  Rationale: The project already uses ESM for Next.js configuration
+  Date/Author: 2025-12-27
+
+- Decision: Use `Viewport` export in `layout.tsx` for theme settings
+  Rationale: Next.js 14+ recommended way to handle viewport and theme metadata
+  Date/Author: 2025-12-27
 
 ## Outcomes & Retrospective
 

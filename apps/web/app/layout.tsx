@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import Script from "next/script";
 import "./globals.css";
@@ -7,6 +7,7 @@ import { getAuthUser } from "../lib/auth-server";
 import { Toaster } from "@repo/ui";
 import { Providers } from "../lib/providers";
 import { ReactNode } from "react";
+import { PWAInstallPrompt } from "../components/PWAInstallPrompt";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -21,6 +22,23 @@ export const metadata: Metadata = {
   title: "Viralkan - Jalan Rusak? Jangan Diam, Viralkan!",
   description:
     "Petakan, bagikan, dan hindari jalan rusak di seluruh Indonesia. Jadikan suaramu terdengar lewat kekuatan media sosial.",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Viralkan",
+  },
+  formatDetection: {
+    telephone: false,
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#ffffff",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default async function RootLayout({
@@ -47,6 +65,7 @@ export default async function RootLayout({
         <Providers>
           <AuthProvider initialUser={initialUser}>
             {children}
+            <PWAInstallPrompt />
             <Toaster />
           </AuthProvider>
         </Providers>

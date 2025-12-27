@@ -1,20 +1,53 @@
 "use client";
 
 import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { MapPin, ArrowLeft } from "lucide-react";
 import { Button } from "@repo/ui/components/ui/button";
 import { LoginForm } from "../../components/auth/login-form";
 import { useAuthContext } from "../../contexts/AuthContext";
 
+interface Feature {
+  icon: string;
+  title: string;
+  description: string;
+}
+
+const features: Feature[] = [
+  {
+    icon: "📷",
+    title: "Laporkan Kerusakan Jalan",
+    description: "Ambil foto dan tandai lokasi jalan rusak di sekitar Anda",
+  },
+  {
+    icon: "📱",
+    title: "Bagikan ke Media Sosial",
+    description: "Viralkan laporan Anda langsung ke WhatsApp, Twitter, Threads",
+  },
+  {
+    icon: "👥",
+    title: "Bergabung dengan Komunitas",
+    description:
+      "Terhubung dengan ribuan warga Indonesia yang peduli infrastruktur",
+  },
+  {
+    icon: "📊",
+    title: "Lihat Dashboard Pribadi",
+    description:
+      "Pantau laporan Anda dan lihat dampak kontribusi pada komunitas",
+  },
+];
+
 export default function LoginPage() {
+  const router = useRouter();
   const { isAuthenticated, isLoading } = useAuthContext();
 
   // Redirect if already authenticated
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
-      window.location.href = "/";
+      router.push("/");
     }
-  }, [isAuthenticated, isLoading]);
+  }, [isAuthenticated, isLoading, router]);
 
   if (isLoading) {
     return (
@@ -46,7 +79,7 @@ export default function LoginPage() {
 
             <Button
               variant="ghost"
-              onClick={() => (window.location.href = "/")}
+              onClick={() => router.push("/")}
               className="text-neutral-600 hover:text-neutral-900"
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
@@ -79,32 +112,7 @@ export default function LoginPage() {
               </h2>
 
               <div className="space-y-4">
-                {[
-                  {
-                    icon: "📷",
-                    title: "Laporkan Kerusakan Jalan",
-                    description:
-                      "Ambil foto dan tandai lokasi jalan rusak di sekitar Anda",
-                  },
-                  {
-                    icon: "📱",
-                    title: "Bagikan ke Media Sosial",
-                    description:
-                      "Viralkan laporan Anda langsung ke WhatsApp, Twitter, Threads",
-                  },
-                  {
-                    icon: "👥",
-                    title: "Bergabung dengan Komunitas",
-                    description:
-                      "Terhubung dengan ribuan warga Indonesia yang peduli infrastruktur",
-                  },
-                  {
-                    icon: "📊",
-                    title: "Lihat Dashboard Pribadi",
-                    description:
-                      "Pantau laporan Anda dan lihat dampak kontribusi pada komunitas",
-                  },
-                ].map((feature, index) => (
+                {features.map((feature, index) => (
                   <div key={index} className="flex gap-4">
                     <div className="text-2xl">{feature.icon}</div>
                     <div>

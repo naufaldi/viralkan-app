@@ -21,6 +21,7 @@ NON-NEGOTIABLE REQUIREMENTS:
 - Every ExecPlan must enable a complete novice to implement the feature end-to-end without prior knowledge of this repo.
 - Every ExecPlan must produce a demonstrably working behavior, not merely code changes to "meet a definition".
 - Every ExecPlan must define every term of art in plain language or do not use it.
+- Every ExecPlan must include: User Story, Acceptance Criteria, Edge Cases, and Diagrams (using Mermaid for flowcharts, ERDs, or architecture diagrams).
 
 Purpose and intent come first. Begin by explaining, in a few sentences, why the work matters from a user's perspective: what someone can do after this change that they could not do before, and how to see it working. Then guide the reader through the exact steps to achieve that outcome, including what to edit, what to run, and what they should observe.
 
@@ -50,6 +51,8 @@ Validation is not optional. Include instructions to run tests, to start the syst
 
 Capture evidence. When your steps produce terminal output, short diffs, or logs, include them inside the single fenced block as indented examples. Keep them concise and focused on what proves success. If you need to include a patch, prefer file-scoped diffs or small excerpts that a reader can recreate by following your instructions rather than pasting large blobs.
 
+Use Mermaid diagrams strategically when they add clarity beyond prose. Include flowcharts for processes, ERDs for data relationships, sequence diagrams for interactions. Keep diagrams focused and readable.
+
 ## Milestones
 
 Milestones are narrative, not bureaucracy. If you break the work into milestones, introduce each with a brief paragraph that describes the scope, what will exist at the end of the milestone that did not exist before, the commands to run, and the acceptance you expect to observe. Keep it readable as a story: goal, work, result, proof. Progress and milestones are distinct: milestones tell the story, progress tracks granular work. Both must exist. Never abbreviate a milestone merely for the sake of brevity, do not leave out details that could be crucial to a future implementation.
@@ -60,6 +63,7 @@ Each milestone must be independently verifiable and incrementally implement the 
 
 - ExecPlans are living documents. As you make key design decisions, update the plan to record both the decision and the thinking behind it. Record all decisions in the `Decision Log` section.
 - ExecPlans must contain and maintain a `Progress` section, a `Surprises & Discoveries` section, a `Decision Log`, and an `Outcomes & Retrospective` section. These are not optional.
+- ExecPlans must also include `User Story`, `Acceptance Criteria`, `Edge Cases`, and `Diagrams` sections during planning.
 - When you discover optimizer behavior, performance tradeoffs, unexpected bugs, or inverse/unapply semantics that shaped your approach, capture those observations in the `Surprises & Discoveries` section with short evidence snippets (test output is ideal).
 - If you change course mid-implementation, document why in the `Decision Log` and reflect the implications in `Progress`. Plans are guides for the next contributor as much as checklists for you.
 - At completion of a major task or the full plan, write an `Outcomes & Retrospective` entry summarizing what was achieved, what remains, and lessons learned.
@@ -104,7 +108,7 @@ The `todos.md` format may be free-form markdown, provided:
 
 ## Skeleton of a Good ExecPlan
 
-```md
+````md
 # <Short, action-oriented description>
 
 This ExecPlan is a living document. The sections `Progress`, `Surprises & Discoveries`, `Decision Log`, and `Outcomes & Retrospective` must be kept up to date as work proceeds.
@@ -114,6 +118,43 @@ If PLANS.md file is checked into the repo, reference the path to that file here 
 ## Purpose / Big Picture
 
 Explain in a few sentences what someone gains after this change and how they can see it working. State the user-visible behavior you will enable.
+
+## User Story
+
+Format: "As a [type of user], I want [some goal] so that [some reason]."
+
+## Acceptance Criteria
+
+List specific, measurable conditions that must be met. Each criterion should be testable and unambiguous.
+
+- [ ] Criterion 1: Description
+- [ ] Criterion 2: Another condition
+
+## Edge Cases
+
+Identify boundary conditions, error scenarios, and unusual behaviors with handling approaches.
+
+- **Edge Case**: Description and how to handle it
+- **Error Scenario**: What happens when X fails
+
+## Diagrams
+
+Use Mermaid syntax for flowcharts, ERDs, sequence diagrams, or architecture diagrams as relevant. Use code fences labeled `mermaid`.
+
+```mermaid
+flowchart TD
+    A[Start] --> B{Decision}
+    B -->|Yes| C[Action]
+    B -->|No| D[Alternative]
+```
+````
+
+```mermaid
+erDiagram
+    USER ||--o{ REPORT : creates
+    USER { string id string email }
+    REPORT { string id string userId }
+```
 
 ## Progress
 
@@ -174,9 +215,11 @@ Be prescriptive. Name the libraries, modules, and services to use and why. Speci
 
 In crates/foo/planner.rs, define:
 
+```rs
     pub trait Planner {
         fn plan(&self, observed: &Observed) -> Vec<Action>;
     }
+
 ```
 
 If you follow the guidance above, a single, stateless agent -- or a human novice -- can read your ExecPlan from top to bottom and produce a working, observable result. That is the bar: SELF-CONTAINED, SELF-SUFFICIENT, NOVICE-GUIDING, OUTCOME-FOCUSED.

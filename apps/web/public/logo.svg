@@ -1,0 +1,15 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Rounded container -->
+  <rect width="512" height="512" rx="128" fill="black"/>
+  
+  <!-- Road 'V' perspective -->
+  <path d="M128 160L256 416L384 160" stroke="white" stroke-width="48" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Road dashed line -->
+  <path d="M256 416V320" stroke="white" stroke-width="20" stroke-linecap="round" stroke-dasharray="1 40"/>
+  
+  <!-- 'Viral' Waves / Alert (Red) -->
+  <path d="M256 160V100" stroke="#EF4444" stroke-width="32" stroke-linecap="round"/>
+  <path d="M196 120C176 100 176 60 196 40" stroke="#EF4444" stroke-width="24" stroke-linecap="round"/>
+  <path d="M316 120C336 100 336 60 316 40" stroke="#EF4444" stroke-width="24" stroke-linecap="round"/>
+</svg>

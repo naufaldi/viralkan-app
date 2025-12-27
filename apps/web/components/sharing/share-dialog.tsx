@@ -15,6 +15,7 @@ import { Badge } from "@repo/ui/components/ui/badge";
 import { Loader2, Share2, CheckCircle, X, Brain } from "lucide-react";
 import { toast } from "sonner";
 import { useSharing } from "@/hooks/sharing";
+import { type GenerateAICaptionRequest } from "@/services/api-client";
 import {
   PlatformSelector,
   type Platform,
@@ -62,7 +63,7 @@ export function ShareDialog({
     const result = await generateAICaption(
       reportId,
       platform,
-      tone as any,
+      tone as GenerateAICaptionRequest["tone"],
       true,
     );
 
