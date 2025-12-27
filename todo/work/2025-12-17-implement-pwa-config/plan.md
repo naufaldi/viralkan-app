@@ -52,6 +52,10 @@ After implementing this plan, users will be able to install the Viralkan road da
   Rationale: Next.js 14+ recommended way to handle viewport and theme metadata
   Date/Author: 2025-12-27
 
+- Decision: Add empty `turbopack: {}` to `next.config.js`
+  Rationale: Next.js 16 uses Turbopack by default, which conflicts with `next-pwa`'s webpack injection. Explicitly acknowledging this allows the build to proceed.
+  Date/Author: 2025-12-27
+
 ## Outcomes & Retrospective
 
 _To be filled after implementation completion_

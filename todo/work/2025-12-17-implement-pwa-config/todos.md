@@ -2,11 +2,10 @@
 
 ## Current Task
 
-- [x] pwa-update-layout - Update root layout to include PWA components and manifest
+- [x] pwa-fix-build-error - Resolve Turbopack/next-pwa build conflict
 
 ## Pending Tasks
 
-- [x] pwa-create-logo - Create PWA logo (SVG) and update manifest
 - [ ] pwa-generate-png-icons - Generate PNG icons from logo.svg (192x192, 512x512)
 - [ ] pwa-test-functionality - Test PWA installation, offline functionality, and caching
 - [ ] pwa-lighthouse-audit - Run Lighthouse PWA audit and fix any issues
@@ -20,6 +19,8 @@
 - [x] pwa-create-offline-page - Create offline fallback page at app/offline/page.tsx
 - [x] pwa-install-prompt-component - Create PWA install prompt component with hook
 - [x] pwa-update-layout - Update root layout to include PWA components and manifest
+- [x] pwa-create-logo - Create PWA logo (SVG) and update manifest
+- [x] pwa-fix-build-error - Resolve Turbopack/next-pwa build conflict
 
 ## Task Status Legend
 
