@@ -68,6 +68,9 @@ const nextConfig = {
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",
   },
+  // Ensure webpack is used since next-pwa requires it
+  // and Next.js 16/Turbopack needs explicit acknowledgement of webpack usage
+  turbopack: {},
 };
 
 export default withPWA(nextConfig);
