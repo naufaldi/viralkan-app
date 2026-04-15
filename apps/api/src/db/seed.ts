@@ -69,13 +69,15 @@ const run = async (): Promise<void> => {
     `;
 
     // Fetch back inserted users to get their UUIDs
+    // Admin is placed at index 0 so report distribution (Zipf) skips them correctly
     const insertedUsers = await sql<Array<{ id: string; role: string }>>`
-      SELECT id, role FROM users ORDER BY created_at ASC
+      SELECT id, role FROM users
+      ORDER BY (CASE WHEN role = 'admin' THEN 0 ELSE 1 END), created_at ASC
     `;
 
-    const adminUser = insertedUsers.find((u) => u.role === "admin");
-    if (!adminUser) {
-      throw new Error("Admin user not found after insert");
+    const adminUser = insertedUsers[0];
+    if (!adminUser || adminUser.role !== "admin") {
+      throw new Error("Admin user not found at index 0 after insert");
     }
 
     const userIds = insertedUsers.map((u) => u.id);
