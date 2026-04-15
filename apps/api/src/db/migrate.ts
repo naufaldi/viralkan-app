@@ -1,6 +1,7 @@
 import { sql, testConnection } from "./connection";
 import { readFileSync } from "fs";
 import { join } from "path";
+import { runSqlFileMigrations } from "./migration-runner";
 
 const runMigrations = async () => {
   console.log("🔄 Running database migrations...");
@@ -12,6 +13,10 @@ const runMigrations = async () => {
       console.error("❌ Cannot connect to database");
       process.exit(1);
     }
+
+    // Apply any new SQL file migrations (tracked via schema_migrations table)
+    const migrationsDir = join(import.meta.dir, "migrations");
+    await runSqlFileMigrations(migrationsDir);
 
     // Ensure uploads metadata schema exists before other dependent steps run
     await ensureUploadsInfrastructure();
