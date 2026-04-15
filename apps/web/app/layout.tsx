@@ -6,6 +6,7 @@ import { AuthProvider } from "../contexts/AuthContext";
 import { getAuthUser } from "../lib/auth-server";
 import { Toaster } from "@repo/ui";
 import { Providers } from "../lib/providers";
+import InstallPrompt from "components/pwa/install-prompt";
 import { ReactNode } from "react";
 
 const geistSans = localFont({
@@ -21,6 +22,7 @@ export const metadata: Metadata = {
   title: "Viralkan - Jalan Rusak? Jangan Diam, Viralkan!",
   description:
     "Petakan, bagikan, dan hindari jalan rusak di seluruh Indonesia. Jadikan suaramu terdengar lewat kekuatan media sosial.",
+  manifest: "/manifest.json",
 };
 
 export default async function RootLayout({
@@ -48,6 +50,7 @@ export default async function RootLayout({
           <AuthProvider initialUser={initialUser}>
             {children}
             <Toaster />
+            <InstallPrompt />
           </AuthProvider>
         </Providers>
       </body>
