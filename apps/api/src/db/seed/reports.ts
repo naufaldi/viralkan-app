@@ -122,6 +122,7 @@ export const generateReports = (
 ): SeedReport[] => {
   const reports: SeedReport[] = [];
   let reportIndex = 0;
+  const now = new Date();
 
   // Assign each user a "home" hotspot (deterministic via index)
   const userHotspots = userIds.map(
@@ -170,6 +171,7 @@ export const generateReports = (
         verifiedAt = new Date(
           createdAt.getTime() + hoursOffset * 60 * 60 * 1000,
         );
+        if (verifiedAt > now) verifiedAt = now;
         verifiedBy = adminId;
       }
 
@@ -184,7 +186,6 @@ export const generateReports = (
       // Deleted_at is set after creation_at to maintain logical consistency
       let deletedAt: Date | null = null;
       if (status === "deleted") {
-        const now = new Date();
         const daysOffset = faker.number.int({ min: 2, max: 30 });
         const computed = new Date(
           createdAt.getTime() + daysOffset * 24 * 60 * 60 * 1000,
@@ -213,12 +214,11 @@ export const generateReports = (
   // Assign exactly 20 reports to the current month as a controlled budget.
   // This guarantees the 15–25 spec range without probabilistic accumulation.
   const currentMonthTarget = 20;
-  const now = new Date();
   const startOfCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
   const indices = Array.from({ length: reports.length }, (_, i) => i);
   for (let i = indices.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
+    const j = faker.number.int({ min: 0, max: i });
     [indices[i], indices[j]] = [indices[j] as number, indices[i] as number];
   }
 
@@ -231,6 +231,21 @@ export const generateReports = (
       from: startOfCurrentMonth,
       to: now,
     });
+    // Recalculate dependent timestamps to maintain temporal consistency
+    if (report.status === "verified" && report.verified_at !== null) {
+      const hoursOffset = faker.number.int({ min: 1, max: 7 * 24 });
+      const candidate = new Date(
+        report.created_at.getTime() + hoursOffset * 60 * 60 * 1000,
+      );
+      report.verified_at = candidate > now ? now : candidate;
+    }
+    if (report.status === "deleted" && report.deleted_at !== null) {
+      const daysOffset = faker.number.int({ min: 2, max: 30 });
+      const candidate = new Date(
+        report.created_at.getTime() + daysOffset * 24 * 60 * 60 * 1000,
+      );
+      report.deleted_at = candidate > now ? now : candidate;
+    }
   }
 
   return reports;

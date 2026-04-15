@@ -153,7 +153,9 @@ const run = async (): Promise<void> => {
 
     console.log("");
     console.log("✅ Dev seed completed");
-    console.log(`   Users:   30 (1 admin, 29 regular)`);
+    console.log(
+      `   Users:   ${insertedUsers.length} (1 admin, ${insertedUsers.length - 1} regular)`,
+    );
     console.log(`   Reports: ${total} total`);
     console.log(
       `            - berlubang: ${reportStats.berlubang} (${pct(reportStats.berlubang)}%)`,
