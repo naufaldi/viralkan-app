@@ -62,7 +62,7 @@ export function ShareDialog({
     const result = await generateAICaption(
       reportId,
       platform,
-      tone as any,
+      tone as "formal" | "urgent" | "community" | "informative",
       true,
     );
 
