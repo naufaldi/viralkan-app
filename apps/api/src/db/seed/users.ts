@@ -53,20 +53,25 @@ const indonesianNames = [
 export const generateUsers = (): SeedUser[] => {
   const users: SeedUser[] = [];
 
-  // Admin user (index 0)
+  // Admin user (index 0) — uses indonesianNames[0]
+  const adminName = indonesianNames[0] ?? "Admin Viralkan";
+  const adminEmailSlug = adminName
+    .toLowerCase()
+    .replace(/\s+/g, ".")
+    .replace(/[^a-z.]/g, "");
   users.push({
     firebase_uid: "dev-seed-0",
-    email: "admin@viralkan.dev",
-    name: "Admin Viralkan",
+    email: `${adminEmailSlug}0@viralkan.dev`,
+    name: adminName,
     avatar_url: `https://picsum.photos/seed/admin/200/200`,
     provider: "google",
     role: "admin",
     created_at: faker.date.past({ years: 2 }),
   });
 
-  // 29 regular users (index 1–29)
+  // 29 regular users (index 1–29) — uses indonesianNames[1..29]
   for (let i = 1; i <= 29; i++) {
-    const name = indonesianNames[i - 1] ?? `User ${i}`;
+    const name = indonesianNames[i] ?? `User ${i}`;
     const emailSlug = name
       .toLowerCase()
       .replace(/\s+/g, ".")

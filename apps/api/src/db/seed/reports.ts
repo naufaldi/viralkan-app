@@ -76,23 +76,19 @@ const pickStatus = (): ReportStatus => {
 };
 
 /**
- * Generate a created_at date: 70% in last 90 days, 30% in days 91–365.
- * Also ensures ~15–25 reports are in the current month.
+ * Generate a created_at date: 70% in last 90 days (excluding current month),
+ * 30% in days 91–365. Current-month reports are assigned separately as a
+ * controlled budget after all reports are generated.
  */
-const pickCreatedAt = (forceCurrentMonth: boolean): Date => {
-  if (forceCurrentMonth) {
-    const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    return faker.date.between({ from: startOfMonth, to: now });
-  }
-
+const pickCreatedAt = (): Date => {
   const now = new Date();
+  const startOfCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
   const roll = faker.number.float({ min: 0, max: 1 });
 
   if (roll < 0.7) {
-    // Last 90 days
+    // Last 90 days, but exclude the current calendar month
     const from = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
-    return faker.date.between({ from, to: now });
+    return faker.date.between({ from, to: startOfCurrentMonth });
   } else {
     // Days 91–365
     const from = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
@@ -132,11 +128,6 @@ export const generateReports = (
     (_, i) => bekasiHotspots[i % bekasiHotspots.length],
   );
 
-  // Track how many reports we need in the current month
-  // We'll force ~20 reports (middle of 15–25 range) into current month
-  const currentMonthTarget = 20;
-  let currentMonthCount = 0;
-
   for (let userIndex = 0; userIndex < userIds.length; userIndex++) {
     const userId = userIds[userIndex];
     if (!userId) continue;
@@ -169,14 +160,7 @@ export const generateReports = (
         useHotspot && userHotspot ? userHotspot.district : "Bekasi";
       const locationText = `${streetName}, ${districtName}, Kota Bekasi`;
 
-      // Force some into current month to meet dashboard stats requirement
-      const forceCurrentMonth =
-        currentMonthCount < currentMonthTarget &&
-        faker.number.float({ min: 0, max: 1 }) < 0.08;
-
-      if (forceCurrentMonth) currentMonthCount++;
-
-      const createdAt = pickCreatedAt(forceCurrentMonth);
+      const createdAt = pickCreatedAt();
 
       // Verified fields
       let verifiedAt: Date | null = null;
@@ -197,8 +181,16 @@ export const generateReports = (
             ] ?? "Laporan duplikat")
           : null;
 
-      // Deleted fields
-      const deletedAt = status === "deleted" ? new Date() : null;
+      // Deleted_at is set after creation_at to maintain logical consistency
+      let deletedAt: Date | null = null;
+      if (status === "deleted") {
+        const now = new Date();
+        const daysOffset = faker.number.int({ min: 2, max: 30 });
+        const computed = new Date(
+          createdAt.getTime() + daysOffset * 24 * 60 * 60 * 1000,
+        );
+        deletedAt = computed > now ? now : computed;
+      }
 
       reports.push({
         user_id: userId,
@@ -216,6 +208,29 @@ export const generateReports = (
         created_at: createdAt,
       });
     }
+  }
+
+  // Assign exactly 20 reports to the current month as a controlled budget.
+  // This guarantees the 15–25 spec range without probabilistic accumulation.
+  const currentMonthTarget = 20;
+  const now = new Date();
+  const startOfCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  const indices = Array.from({ length: reports.length }, (_, i) => i);
+  for (let i = indices.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [indices[i], indices[j]] = [indices[j] as number, indices[i] as number];
+  }
+
+  for (let k = 0; k < currentMonthTarget; k++) {
+    const idx = indices[k];
+    if (idx === undefined) break;
+    const report = reports[idx];
+    if (!report) continue;
+    report.created_at = faker.date.between({
+      from: startOfCurrentMonth,
+      to: now,
+    });
   }
 
   return reports;
