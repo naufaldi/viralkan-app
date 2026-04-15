@@ -5,6 +5,10 @@ import { REPORT_CATEGORIES } from "../../constant/reports";
 
 const LEGEND_ENTRIES: ReportCategory[] = ["berlubang", "retak", "lainnya"];
 
+/**
+ * Overlaid legend showing the color coding for each report category.
+ * Positioned in the bottom-left corner of the map.
+ */
 export const MapLegend = () => {
   return (
     <div className="absolute bottom-8 left-2 z-[1000] rounded-lg border border-neutral-200 bg-white/90 px-3 py-2 shadow-md backdrop-blur-sm">

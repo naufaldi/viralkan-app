@@ -40,6 +40,10 @@ const applyFilters = (
   });
 };
 
+/**
+ * Full-page interactive Leaflet map displaying filtered road damage reports.
+ * Composes MapFilters, DensityDotsLayer, and MapLegend into a single view.
+ */
 const ReportsMap = ({ reports }: ReportsMapProps) => {
   const [filters, setFilters] = useState<MapFiltersState>({
     categories: ["berlubang", "retak", "lainnya"],

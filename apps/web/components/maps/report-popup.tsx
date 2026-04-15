@@ -17,6 +17,10 @@ const formatDate = (dateString: string): string => {
   });
 };
 
+/**
+ * Popup card shown when a map marker is clicked.
+ * Rendered to an HTML string via renderToString for use with Leaflet's bindPopup.
+ */
 export const ReportPopup = ({ report }: ReportPopupProps) => {
   const category = REPORT_CATEGORIES[report.category as ReportCategory];
 

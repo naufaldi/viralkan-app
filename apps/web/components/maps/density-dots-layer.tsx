@@ -21,6 +21,10 @@ interface DensityDotsLayerProps {
   reports: MapReport[];
 }
 
+/**
+ * Renders road damage reports as circle markers on the Leaflet map.
+ * Culls markers to the current viewport on each pan or zoom to limit DOM nodes.
+ */
 export const DensityDotsLayer = ({ reports }: DensityDotsLayerProps) => {
   const map = useMap();
   const [bounds, setBounds] = useState<LatLngBounds>(() => map.getBounds());
@@ -30,10 +34,8 @@ export const DensityDotsLayer = ({ reports }: DensityDotsLayerProps) => {
   useEffect(() => {
     const updateBounds = () => setBounds(map.getBounds());
     map.on("moveend", updateBounds);
-    map.on("zoomend", updateBounds);
     return () => {
       map.off("moveend", updateBounds);
-      map.off("zoomend", updateBounds);
     };
   }, [map]);
 

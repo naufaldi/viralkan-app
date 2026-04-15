@@ -2,7 +2,8 @@ import type { LatLngBounds } from "leaflet";
 import type { MapReport } from "./constants";
 
 /**
- * Filters reports to only those within the given Leaflet LatLngBounds.
+ * Filters reports to those within the given Leaflet map bounds.
+ * Used by DensityDotsLayer for viewport culling on pan/zoom.
  */
 export const filterReportsInBounds = (
   reports: MapReport[],

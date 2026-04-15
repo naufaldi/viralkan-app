@@ -16,6 +16,10 @@ interface MapFiltersProps {
 
 const ALL_CATEGORIES: ReportCategory[] = ["berlubang", "retak", "lainnya"];
 
+/**
+ * Category and date-range filter bar rendered above the map.
+ * Calls onChange whenever the user toggles a category or adjusts a date input.
+ */
 export const MapFilters = ({ filters, onChange }: MapFiltersProps) => {
   const handleCategoryToggle = (category: ReportCategory) => {
     const next = filters.categories.includes(category)

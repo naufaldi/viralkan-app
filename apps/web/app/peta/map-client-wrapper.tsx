@@ -13,6 +13,10 @@ interface MapClientWrapperProps {
   reports: MapReport[];
 }
 
+/**
+ * Client-side wrapper that dynamically loads ReportsMap with SSR disabled.
+ * Receives pre-fetched reports from the server component and passes them to the map.
+ */
 export const MapClientWrapper = ({ reports }: MapClientWrapperProps) => {
   return <ReportsMap reports={reports} />;
 };
