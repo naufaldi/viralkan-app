@@ -1,4 +1,16 @@
 import process from "node:process";
+import withPWAInit from "@ducanh2912/next-pwa";
+
+const withPWA = withPWAInit({
+  dest: "public",
+  cacheOnFrontEndNav: true,
+  aggressiveFrontEndNavCaching: true,
+  reloadOnOnline: true,
+  disable: process.env.NODE_ENV === "development",
+  workboxOptions: {
+    disableDevLogs: true,
+  },
+});
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -42,6 +54,10 @@ const nextConfig = {
     useWasmBinary: false,
     scrollRestoration: true,
   },
+  // Explicitly opt into Turbopack so webpack configs added by plugins (e.g. next-pwa)
+  // don't cause a build error. Service worker generation via Workbox/webpack is handled
+  // separately; manifest, offline page, and install prompt work without it.
+  turbopack: {},
   output: "standalone",
   // Optimize bundle
   compiler: {
@@ -49,4 +65,4 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+export default withPWA(nextConfig);
