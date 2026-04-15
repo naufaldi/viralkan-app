@@ -259,19 +259,21 @@ export const getUserStats = async (
   userId: string, // Changed from number to string (UUID v7)
 ): Promise<{
   total_reports: number;
+  reports_this_month: number;
   reports_by_category: { berlubang: number; retak: number; lainnya: number };
   last_report_date: Date | null;
   account_age_days: number;
 }> => {
   const getStats = `
-    SELECT 
+    SELECT
       COUNT(r.id) as total_reports,
+      COUNT(CASE WHEN r.created_at >= date_trunc('month', NOW()) THEN 1 END) as reports_this_month,
       COUNT(CASE WHEN r.category = 'berlubang' THEN 1 END) as berlubang_count,
       COUNT(CASE WHEN r.category = 'retak' THEN 1 END) as retak_count,
       COUNT(CASE WHEN r.category = 'lainnya' THEN 1 END) as lainnya_count,
       MAX(r.created_at) as last_report_date,
       u.created_at as join_date
-    FROM users u 
+    FROM users u
     LEFT JOIN reports r ON r.user_id = u.id
     WHERE u.id = $1
     GROUP BY u.id, u.created_at;
@@ -292,6 +294,7 @@ export const getUserStats = async (
 
   return {
     total_reports: parseInt(row.total_reports) || 0,
+    reports_this_month: parseInt(row.reports_this_month) || 0,
     reports_by_category: {
       berlubang: parseInt(row.berlubang_count) || 0,
       retak: parseInt(row.retak_count) || 0,

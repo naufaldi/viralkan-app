@@ -284,6 +284,7 @@ export const getUserStats = async (
 ): Promise<
   AppResult<{
     total_reports: number;
+    reports_this_month: number;
     reports_by_category: { berlubang: number; retak: number; lainnya: number };
     last_report_date: string | null;
     account_age_days: number;
@@ -338,6 +339,7 @@ export const getUserStats = async (
     // Transform data for response (convert Date to ISO string)
     const responseStats = {
       total_reports: stats.total_reports,
+      reports_this_month: stats.reports_this_month,
       reports_by_category: stats.reports_by_category,
       last_report_date: stats.last_report_date
         ? stats.last_report_date.toISOString()

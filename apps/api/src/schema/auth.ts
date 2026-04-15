@@ -148,6 +148,10 @@ export const UserStatsResponseSchema = z.object({
     example: 15,
     description: "Total number of reports created by user",
   }),
+  reports_this_month: z.number().openapi({
+    example: 3,
+    description: "Number of reports created in the current calendar month",
+  }),
   reports_by_category: z
     .object({
       berlubang: z.number().openapi({ example: 8 }),

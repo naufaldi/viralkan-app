@@ -22,7 +22,9 @@ interface AuthVerificationResponse {
 interface UserStatsResponse {
   total_reports: number;
   reports_this_month: number;
+  reports_by_category: { berlubang: number; retak: number; lainnya: number };
   last_report_date: string | null;
+  account_age_days: number;
 }
 
 export async function getAuthUser(): Promise<AuthUser | null> {

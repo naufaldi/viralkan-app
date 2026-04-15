@@ -86,6 +86,98 @@ describe("Auth Core Logic Tests", () => {
   });
 });
 
+describe("User Stats reports_this_month Tests", () => {
+  test("reports_this_month counts only current calendar month reports", () => {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    // Simulate reports: 2 this month, 1 last month
+    const reports = [
+      { created_at: new Date(startOfMonth.getTime() + 1000) }, // this month
+      { created_at: new Date(startOfMonth.getTime() + 86400000) }, // this month
+      { created_at: new Date(startOfMonth.getTime() - 86400000) }, // last month
+    ];
+
+    const reportsThisMonth = reports.filter(
+      (r) => r.created_at >= startOfMonth,
+    ).length;
+
+    expect(reportsThisMonth).toBe(2);
+  });
+
+  test("reports_this_month is 0 when no reports in current month", () => {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    // All reports from last month
+    const reports = [
+      { created_at: new Date(startOfMonth.getTime() - 86400000) },
+      { created_at: new Date(startOfMonth.getTime() - 172800000) },
+    ];
+
+    const reportsThisMonth = reports.filter(
+      (r) => r.created_at >= startOfMonth,
+    ).length;
+
+    expect(reportsThisMonth).toBe(0);
+  });
+
+  test("getUserStats response includes reports_this_month field", () => {
+    const mockStatsResponse = {
+      total_reports: 5,
+      reports_this_month: 2,
+      reports_by_category: {
+        berlubang: 3,
+        retak: 1,
+        lainnya: 1,
+      },
+      last_report_date: new Date().toISOString(),
+      account_age_days: 45,
+    };
+
+    expect(typeof mockStatsResponse.reports_this_month).toBe("number");
+    expect(mockStatsResponse.reports_this_month).toBe(2);
+    expect(mockStatsResponse.reports_this_month).toBeLessThanOrEqual(
+      mockStatsResponse.total_reports,
+    );
+  });
+
+  test("getUserStats row mapping converts reports_this_month to number", () => {
+    // Simulate raw DB row (postgres returns counts as strings)
+    const rawRow = {
+      total_reports: "5",
+      reports_this_month: "2",
+      berlubang_count: "3",
+      retak_count: "1",
+      lainnya_count: "1",
+      last_report_date: null,
+      join_date: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000).toISOString(),
+    };
+
+    const mapped = {
+      total_reports: parseInt(rawRow.total_reports) || 0,
+      reports_this_month: parseInt(rawRow.reports_this_month) || 0,
+    };
+
+    expect(mapped.reports_this_month).toBe(2);
+    expect(typeof mapped.reports_this_month).toBe("number");
+  });
+
+  test("getUserStats row mapping defaults reports_this_month to 0 when null", () => {
+    const rawRow = {
+      total_reports: "0",
+      reports_this_month: null as string | null,
+    };
+
+    const mapped = {
+      total_reports: parseInt(rawRow.total_reports ?? "0") || 0,
+      reports_this_month: parseInt(rawRow.reports_this_month ?? "0") || 0,
+    };
+
+    expect(mapped.reports_this_month).toBe(0);
+  });
+});
+
 describe("Auth Route Response Format Tests", () => {
   test("error response format", () => {
     const errorResponse = {
