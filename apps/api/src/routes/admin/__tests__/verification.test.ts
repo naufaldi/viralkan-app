@@ -144,14 +144,14 @@ describe("Admin Verification System", () => {
 
   describe("requireAdmin middleware logic", () => {
     test("role check: 'admin' matches 'admin'", () => {
-      const userRole = "admin";
-      const requiredRole = "admin";
+      const userRole: string = "admin";
+      const requiredRole: string = "admin";
       expect(userRole === requiredRole).toBe(true);
     });
 
     test("role check: 'user' does not match 'admin'", () => {
-      const userRole = "user";
-      const requiredRole = "admin";
+      const userRole: string = "user";
+      const requiredRole: string = "admin";
       expect(userRole === requiredRole).toBe(false);
     });
 

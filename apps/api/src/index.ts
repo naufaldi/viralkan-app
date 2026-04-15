@@ -14,6 +14,7 @@ import { adminRouter } from "@/routes/admin/api";
 import { env, validateEnv } from "@/config/env";
 import { testConnection } from "@/db/connection";
 import { initializeFirebase } from "@/config/firebase";
+import { securityHeaders } from "@/middleware/security";
 
 const app = new OpenAPIHono();
 
@@ -28,6 +29,7 @@ testConnection();
 
 // Middleware
 app.use("*", logger());
+app.use("*", securityHeaders);
 app.use(
   "*",
   cors({
