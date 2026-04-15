@@ -54,6 +54,10 @@ const nextConfig = {
     useWasmBinary: false,
     scrollRestoration: true,
   },
+  // Explicitly opt into Turbopack so webpack configs added by plugins (e.g. next-pwa)
+  // don't cause a build error. Service worker generation via Workbox/webpack is handled
+  // separately; manifest, offline page, and install prompt work without it.
+  turbopack: {},
   output: "standalone",
   // Optimize bundle
   compiler: {
