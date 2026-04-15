@@ -1,5 +1,6 @@
 import type { Sql } from "postgres";
 import admin from "firebase-admin";
+import type { z } from "zod";
 import { getFirebaseAuth } from "../../config/firebase";
 import * as core from "./core";
 import * as data from "./data";
@@ -11,6 +12,7 @@ import type {
 } from "./types";
 import { createSuccess, createError } from "@/types";
 import type { AppResult } from "@/types";
+import type { UserStatsResponseSchema } from "@/schema/auth";
 
 /**
  * Verifies Firebase ID token and returns user data
@@ -281,15 +283,7 @@ export const getUserStats = async (
   sql: Sql,
   userId: string, // Changed from number to string (UUID v7)
   requestingUserId: string, // Changed from number to string (UUID v7)
-): Promise<
-  AppResult<{
-    total_reports: number;
-    reports_this_month: number;
-    reports_by_category: { berlubang: number; retak: number; lainnya: number };
-    last_report_date: string | null;
-    account_age_days: number;
-  }>
-> => {
+): Promise<AppResult<z.infer<typeof UserStatsResponseSchema>>> => {
   try {
     // Input validation
     if (!userId || typeof userId !== "string" || userId.trim().length === 0) {
