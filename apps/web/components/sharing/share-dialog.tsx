@@ -23,6 +23,7 @@ import {
   SharingPreview,
   SharingActions,
 } from "./index";
+import type { GenerateAICaptionRequest } from "@/services/api-client";
 
 interface ShareDialogProps {
   isOpen: boolean;
@@ -62,7 +63,7 @@ export function ShareDialog({
     const result = await generateAICaption(
       reportId,
       platform,
-      tone as "formal" | "urgent" | "community" | "informative",
+      tone as GenerateAICaptionRequest["tone"],
       true,
     );
 
