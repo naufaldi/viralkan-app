@@ -13,16 +13,25 @@ import {
   AvatarImage,
 } from "@repo/ui/components/ui/avatar";
 import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@repo/ui/components/ui/tabs";
+import {
   FileText,
   Plus,
   MapPin,
   Calendar,
   TrendingUp,
   Eye,
+  List,
+  Map,
 } from "lucide-react";
 import Link from "next/link";
 import Header from "../../components/layout/header";
 import { ReportsTable } from "../../components/dashboard/reports-table";
+import { DashboardMapWrapper } from "../../components/dashboard/dashboard-map-wrapper";
 import {
   requireAuth,
   getUserStats,
@@ -30,6 +39,10 @@ import {
 } from "../../lib/auth-server";
 import { getUserReportsAction } from "../../lib/auth-actions";
 import type { ReportWithUser } from "../../lib/types/api";
+import type {
+  DashboardMapReport,
+  ReportStatus,
+} from "../../lib/maps/constants";
 
 type DashboardReport = {
   id: string;
@@ -47,22 +60,39 @@ export default async function DashboardPage() {
 
   // Server-side data fetching
   let userReports: DashboardReport[] = [];
+  let mapReports: DashboardMapReport[] = [];
   let stats: UserStatsResponse | null = null;
 
   try {
-    // Fetch user reports with limit for dashboard
-    const searchParams = new URLSearchParams("limit=6");
-    const reportsData = await getUserReportsAction(searchParams);
+    // Fetch all user reports (map needs all, table shows recent 6)
+    const allParams = new URLSearchParams("limit=1000");
+    const allReportsData = await getUserReportsAction(allParams);
+    const allItems: ReportWithUser[] = allReportsData?.items || [];
 
-    // Transform API data to match ReportsTable expected format
-    userReports = (reportsData?.items || []).map((report: ReportWithUser) => ({
+    // Transform for table (recent 6)
+    userReports = allItems.slice(0, 6).map((report) => ({
       ...report,
-      title: report.street_name, // Use street_name as title
-      status: report.status || "pending", // Use actual status from API
+      title: report.street_name,
+      status: report.status || "pending",
     }));
+
+    // Filter for map (only reports with valid coordinates)
+    mapReports = allItems
+      .filter((r) => r.lat !== null && r.lon !== null)
+      .map((r) => ({
+        id: r.id,
+        lat: r.lat,
+        lon: r.lon,
+        category: r.category,
+        street_name: r.street_name,
+        image_url: r.image_url,
+        created_at: r.created_at,
+        status: (r.status || "pending") as ReportStatus,
+      }));
   } catch (error) {
     console.error("Error fetching user reports:", error);
-    userReports = []; // Fallback to empty array
+    userReports = [];
+    mapReports = [];
   }
 
   try {
@@ -70,7 +100,7 @@ export default async function DashboardPage() {
     stats = await getUserStats();
   } catch (error) {
     console.error("Error fetching user stats:", error);
-    stats = null; // Fallback to null
+    stats = null;
   }
 
   return (
@@ -237,13 +267,13 @@ export default async function DashboardPage() {
           </Card>
         </div>
 
-        {/* Recent Reports Section */}
+        {/* Reports Section with Tabs */}
         <Card className="border-0 shadow-lg" id="my-reports">
           <CardHeader className="px-8 py-6">
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="text-2xl font-bold text-neutral-900">
-                  Laporan Terbaru Saya
+                  Laporan Saya
                 </CardTitle>
                 <CardDescription className="mt-2 text-lg text-neutral-600">
                   Kelola dan pantau status laporan yang telah Anda buat
@@ -259,17 +289,36 @@ export default async function DashboardPage() {
             </div>
           </CardHeader>
           <CardContent className="px-8 pb-8">
-            {userReports.length > 0 ? (
-              <ReportsTable data={userReports} />
-            ) : (
-              <div className="py-12 text-center">
-                <FileText className="mx-auto mb-4 h-12 w-12 text-neutral-400" />
-                <p className="mb-4 text-neutral-600">Belum ada laporan</p>
-                <Button asChild>
-                  <Link href="/laporan/buat">Buat Laporan Pertama</Link>
-                </Button>
-              </div>
-            )}
+            <Tabs defaultValue="daftar">
+              <TabsList className="mb-6">
+                <TabsTrigger value="daftar" className="gap-1.5">
+                  <List className="h-4 w-4" />
+                  Daftar
+                </TabsTrigger>
+                <TabsTrigger value="peta" className="gap-1.5">
+                  <Map className="h-4 w-4" />
+                  Peta
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="daftar">
+                {userReports.length > 0 ? (
+                  <ReportsTable data={userReports} />
+                ) : (
+                  <div className="py-12 text-center">
+                    <FileText className="mx-auto mb-4 h-12 w-12 text-neutral-400" />
+                    <p className="mb-4 text-neutral-600">Belum ada laporan</p>
+                    <Button asChild>
+                      <Link href="/laporan/buat">Buat Laporan Pertama</Link>
+                    </Button>
+                  </div>
+                )}
+              </TabsContent>
+
+              <TabsContent value="peta">
+                <DashboardMapWrapper reports={mapReports} />
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
       </main>
