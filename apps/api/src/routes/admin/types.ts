@@ -132,6 +132,43 @@ export const ChangeRoleResponseSchema = z.object({
   }),
 });
 
+// Admin Activities Query Params
+export const AdminActivitiesQuerySchema = z.object({
+  page: z
+    .string()
+    .optional()
+    .transform((val) => parseInt(val || "1")),
+  limit: z
+    .string()
+    .optional()
+    .transform((val) => parseInt(val || "20")),
+  action_type: z.string().optional(),
+  admin_user_id: z.string().optional(),
+  date_from: z.string().optional(),
+  date_to: z.string().optional(),
+});
+
+// Admin Activity Item (with admin name from join)
+export const AdminActivityItemSchema = z.object({
+  id: z.string(),
+  admin_user_id: z.string(),
+  admin_user_name: z.string(),
+  action_type: z.string(),
+  target_type: z.string(),
+  target_id: z.string(),
+  details: z.any().nullable(),
+  created_at: z.string(),
+});
+
+// Paginated Activities Response
+export const PaginatedActivitiesResponseSchema = z.object({
+  items: z.array(AdminActivityItemSchema),
+  total: z.number(),
+  page: z.number(),
+  limit: z.number(),
+  pages: z.number(),
+});
+
 // TypeScript types from Zod schemas
 export type AdminStatsResponse = z.infer<typeof AdminStatsResponseSchema>;
 export type AdminReportsResponse = z.infer<typeof AdminReportsResponseSchema>;
@@ -147,6 +184,10 @@ export type PaginatedUsersResponse = z.infer<
   typeof PaginatedUsersResponseSchema
 >;
 export type ChangeRoleResponse = z.infer<typeof ChangeRoleResponseSchema>;
+export type AdminActivityItem = z.infer<typeof AdminActivityItemSchema>;
+export type PaginatedActivitiesResponse = z.infer<
+  typeof PaginatedActivitiesResponseSchema
+>;
 
 // Database interfaces
 export interface AdminAction {

@@ -11,6 +11,7 @@ import type {
   AdminReportsResponse,
   AdminReportActionRequest,
   AdminReportActionResponse,
+  PaginatedActivitiesResponse,
   ReportWithUser,
   PaginatedUsersResponse,
   ChangeRoleResponse,
@@ -19,6 +20,7 @@ import {
   getAdminUsers as getAdminUsersCore,
   changeUserRole as changeUserRoleCore,
   logAdminAction,
+  getAdminActivities as getAdminActivitiesCore,
 } from "./core";
 
 /**
@@ -240,6 +242,37 @@ export async function getAdminReports(
     };
   }
 }
+
+/**
+ * Get admin activities with pagination and filters
+ */
+export const getAdminActivitiesShell = async (
+  options: {
+    page?: number;
+    limit?: number;
+    action_type?: string;
+    admin_user_id?: string;
+    date_from?: string;
+    date_to?: string;
+  } = {},
+): Promise<{
+  success: boolean;
+  data?: PaginatedActivitiesResponse;
+  error?: string;
+  statusCode?: number;
+}> => {
+  try {
+    const data = await getAdminActivitiesCore(options);
+    return { success: true, data };
+  } catch (error) {
+    console.error("Error getting admin activities:", error);
+    return {
+      success: false,
+      error: "Failed to get admin activities",
+      statusCode: 500,
+    };
+  }
+};
 
 /**
  * Get single admin report detail

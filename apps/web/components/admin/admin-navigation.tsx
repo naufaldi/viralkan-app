@@ -20,6 +20,7 @@ import {
   LayoutDashboard,
   FileText,
   Users,
+  Activity,
   ChevronUp,
   LogOut,
 } from "lucide-react";
@@ -52,6 +53,11 @@ export const AdminNavigation = () => {
       href: "/admin/users",
       label: "Pengguna",
       icon: Users,
+    },
+    {
+      href: "/admin/activity",
+      label: "Aktivitas",
+      icon: Activity,
     },
   ];
 

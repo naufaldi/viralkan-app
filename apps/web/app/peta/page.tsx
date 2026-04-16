@@ -1,6 +1,7 @@
 import Header from "components/layout/header";
 import { MapClientWrapper } from "./map-client-wrapper";
 import type { MapReport } from "../../lib/maps/constants";
+import { parseMapStateFromParams } from "../../lib/maps/url-state";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
@@ -56,14 +57,24 @@ const fetchMapReports = async (): Promise<MapReport[]> => {
   }
 };
 
-export default async function PetaPage() {
+interface PetaPageProps {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}
+
+export default async function PetaPage({ searchParams }: PetaPageProps) {
+  const params = await searchParams;
+  const urlParams = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (typeof value === "string") urlParams.set(key, value);
+  }
+  const initialState = parseMapStateFromParams(urlParams);
   const reports = await fetchMapReports();
 
   return (
     <div className="min-h-screen bg-neutral-50">
       <Header />
       <main>
-        <MapClientWrapper reports={reports} />
+        <MapClientWrapper reports={reports} initialState={initialState} />
       </main>
     </div>
   );
