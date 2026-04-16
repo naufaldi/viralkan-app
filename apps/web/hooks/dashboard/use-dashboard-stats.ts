@@ -4,7 +4,9 @@ import { useAuthContext } from "../../contexts/AuthContext";
 export interface UserStats {
   total_reports: number;
   reports_this_month: number;
+  reports_by_category: { berlubang: number; retak: number; lainnya: number };
   last_report_date: string | null;
+  account_age_days: number;
 }
 
 /**
