@@ -13,6 +13,9 @@ import type {
   ReportWithUser,
   AdminStatsResponse,
   AdminReportsResponse,
+  PaginatedUsersResponse,
+  AdminUser,
+  ChangeRoleResponse,
 } from "./types";
 
 /**
@@ -497,3 +500,116 @@ export async function restoreReport(
 
   return report as ReportWithUser;
 }
+
+/**
+ * Get paginated users for admin management
+ */
+export const getAdminUsers = async (options: {
+  page?: number;
+  limit?: number;
+  search?: string;
+  role?: "user" | "admin";
+}): Promise<PaginatedUsersResponse> => {
+  const { page = 1, limit = 20, search, role } = options;
+  const offset = (page - 1) * limit;
+
+  let whereClause = "WHERE 1=1";
+  const params: unknown[] = [];
+
+  if (search) {
+    whereClause += ` AND (u.name ILIKE $${params.length + 1} OR u.email ILIKE $${params.length + 1})`;
+    params.push(`%${search}%`);
+  }
+
+  if (role) {
+    whereClause += ` AND u.role = $${params.length + 1}`;
+    params.push(role);
+  }
+
+  const countQuery = `
+    SELECT COUNT(*) as total
+    FROM users u
+    ${whereClause}
+  `;
+  const totalResult = await sql.unsafe(countQuery, params as string[]);
+  const total = parseInt(totalResult[0]?.total as string);
+
+  const usersQuery = `
+    SELECT
+      u.id,
+      u.name,
+      u.email,
+      u.avatar_url,
+      u.role,
+      u.created_at,
+      COUNT(r.id)::int as report_count
+    FROM users u
+    LEFT JOIN reports r ON r.user_id = u.id AND r.deleted_at IS NULL
+    ${whereClause}
+    GROUP BY u.id
+    ORDER BY u.created_at DESC
+    LIMIT $${params.length + 1} OFFSET $${params.length + 2}
+  `;
+
+  const rows = await sql.unsafe(usersQuery, [
+    ...params,
+    limit,
+    offset,
+  ] as string[]);
+
+  const items: AdminUser[] = rows.map((row: Record<string, unknown>) => ({
+    id: row.id as string,
+    name: row.name as string,
+    email: row.email as string,
+    avatar_url: (row.avatar_url as string | null) ?? null,
+    role: row.role as "user" | "admin",
+    report_count: (row.report_count as number) ?? 0,
+    created_at: (row.created_at as Date).toISOString(),
+  }));
+
+  return { items, total, page, limit, pages: Math.ceil(total / limit) };
+};
+
+/**
+ * Change a user's role and log the action
+ */
+export const changeUserRole = async (
+  userId: string,
+  newRole: "user" | "admin",
+  adminUserId: string,
+): Promise<ChangeRoleResponse> => {
+  if (userId === adminUserId) {
+    throw new Error("Cannot change your own role");
+  }
+
+  const result = await sql`
+    UPDATE users
+    SET role = ${newRole}
+    WHERE id = ${userId}
+    RETURNING id, name, role
+  `;
+
+  if (result.length === 0) {
+    throw new Error("User not found");
+  }
+
+  const user = result[0];
+
+  await logAdminAction({
+    admin_user_id: adminUserId,
+    action_type: "change_user_role",
+    target_type: "user",
+    target_id: userId,
+    details: { new_role: newRole },
+  });
+
+  return {
+    success: true,
+    message: `Role pengguna berhasil diubah menjadi ${newRole}`,
+    user: {
+      id: user.id as string,
+      name: user.name as string,
+      role: user.role as "user" | "admin",
+    },
+  };
+};
