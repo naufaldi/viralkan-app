@@ -13,6 +13,7 @@ import type {
   ReportWithUser,
   AdminStatsResponse,
   AdminReportsResponse,
+  PaginatedActivitiesResponse,
 } from "./types";
 
 /**
@@ -107,6 +108,104 @@ export async function getAdminStats(
 
   return stats;
 }
+
+/**
+ * Get paginated admin activities with optional filters
+ */
+export const getAdminActivities = async (options: {
+  page?: number;
+  limit?: number;
+  action_type?: string;
+  admin_user_id?: string;
+  date_from?: string;
+  date_to?: string;
+}): Promise<PaginatedActivitiesResponse> => {
+  const {
+    page = 1,
+    limit = 20,
+    action_type,
+    admin_user_id,
+    date_from,
+    date_to,
+  } = options;
+  const offset = (page - 1) * limit;
+
+  // Build WHERE clause dynamically
+  let whereClause = "WHERE 1=1";
+  const params: any[] = [];
+
+  if (action_type) {
+    whereClause += ` AND aa.action_type = $${params.length + 1}`;
+    params.push(action_type);
+  }
+
+  if (admin_user_id) {
+    whereClause += ` AND aa.admin_user_id = $${params.length + 1}`;
+    params.push(admin_user_id);
+  }
+
+  if (date_from) {
+    whereClause += ` AND aa.created_at >= $${params.length + 1}::timestamptz`;
+    params.push(date_from);
+  }
+
+  if (date_to) {
+    whereClause += ` AND aa.created_at <= $${params.length + 1}::timestamptz`;
+    params.push(date_to);
+  }
+
+  // Get total count
+  const countQuery = `
+    SELECT COUNT(*) as total
+    FROM admin_actions aa
+    ${whereClause}
+  `;
+  const totalResult = await sql.unsafe(countQuery, params);
+  const total = parseInt(totalResult[0]?.total as string);
+
+  // Get activities with admin user name
+  const activitiesQuery = `
+    SELECT
+      aa.id,
+      aa.admin_user_id,
+      u.name as admin_user_name,
+      aa.action_type,
+      aa.target_type,
+      aa.target_id,
+      aa.details,
+      aa.created_at
+    FROM admin_actions aa
+    LEFT JOIN users u ON aa.admin_user_id = u.id
+    ${whereClause}
+    ORDER BY aa.created_at DESC
+    LIMIT $${params.length + 1} OFFSET $${params.length + 2}
+  `;
+
+  const activities = await sql.unsafe(activitiesQuery, [
+    ...params,
+    limit,
+    offset,
+  ]);
+
+  const items = activities.map((activity: any) => ({
+    id: activity.id,
+    admin_user_id: activity.admin_user_id,
+    admin_user_name: activity.admin_user_name || "Unknown",
+    action_type: activity.action_type,
+    target_type: activity.target_type,
+    target_id: activity.target_id,
+    details: activity.details,
+    created_at: activity.created_at.toISOString(),
+  }));
+
+  return {
+    items,
+    total,
+    page,
+    limit,
+    pages: Math.ceil(total / limit),
+  };
+};
 
 /**
  * Get reports for admin management

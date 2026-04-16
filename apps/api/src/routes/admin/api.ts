@@ -17,6 +17,8 @@ import {
   AdminReportActionRequestSchema,
   AdminReportActionResponseSchema,
   AdminActionLogSchema,
+  AdminActivitiesQuerySchema,
+  PaginatedActivitiesResponseSchema,
 } from "./types";
 import {
   ShareAnalyticsQuerySchema,
@@ -793,6 +795,70 @@ const healthCheckRoute = createRoute({
   },
 });
 
+const getAdminActivitiesRoute = createRoute({
+  method: "get",
+  path: "/activities",
+  request: {
+    query: AdminActivitiesQuerySchema,
+  },
+  summary: "Get admin activity log",
+  description:
+    "Get paginated admin activity log with optional filters for action type, admin, and date range",
+  tags: ["Admin"],
+  security: [{ bearerAuth: [] }],
+  middleware: [requireAdmin],
+  responses: {
+    200: {
+      description: "Successfully retrieved admin activities",
+      content: {
+        "application/json": { schema: PaginatedActivitiesResponseSchema },
+      },
+    },
+    401: {
+      description: "User not authenticated",
+      content: {
+        "application/json": {
+          schema: z.object({
+            error: z.object({
+              code: z.string(),
+              message: z.string(),
+              timestamp: z.string(),
+            }),
+          }),
+        },
+      },
+    },
+    403: {
+      description: "Admin access required",
+      content: {
+        "application/json": {
+          schema: z.object({
+            error: z.object({
+              code: z.string(),
+              message: z.string(),
+              timestamp: z.string(),
+            }),
+          }),
+        },
+      },
+    },
+    500: {
+      description: "Internal server error",
+      content: {
+        "application/json": {
+          schema: z.object({
+            error: z.object({
+              code: z.string(),
+              message: z.string(),
+              timestamp: z.string(),
+            }),
+          }),
+        },
+      },
+    },
+  },
+});
+
 // --- Route Handlers ---
 
 adminRouter.openapi(getAdminStatsRoute, async (c) => {
@@ -879,6 +945,55 @@ adminRouter.openapi(getAdminReportsRoute, async (c) => {
         error: {
           code: "INTERNAL_ERROR",
           message: "Failed to get admin reports",
+          timestamp: new Date().toISOString(),
+        },
+      },
+      500,
+    );
+  }
+});
+
+adminRouter.openapi(getAdminActivitiesRoute, async (c) => {
+  try {
+    const userId = c.get("user_id");
+
+    if (!userId) {
+      return c.json(
+        {
+          error: {
+            code: "UNAUTHORIZED",
+            message: "Authentication required",
+            timestamp: new Date().toISOString(),
+          },
+        },
+        401,
+      );
+    }
+
+    const queryData = c.req.valid("query");
+    const result = await adminShell.getAdminActivitiesShell(queryData);
+
+    if (result.success) {
+      return c.json(result.data, 200);
+    }
+
+    return c.json(
+      {
+        error: {
+          code: "FETCH_ERROR",
+          message: result.error || "Failed to get admin activities",
+          timestamp: new Date().toISOString(),
+        },
+      },
+      500,
+    );
+  } catch (error) {
+    console.error("Error getting admin activities:", error);
+    return c.json(
+      {
+        error: {
+          code: "INTERNAL_ERROR",
+          message: "Failed to get admin activities",
           timestamp: new Date().toISOString(),
         },
       },
