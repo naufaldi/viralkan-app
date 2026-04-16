@@ -24,6 +24,7 @@ import {
   SharingPreview,
   SharingActions,
 } from "./index";
+import type { GenerateAICaptionRequest } from "@/services/api-client";
 
 interface ShareDialogProps {
   isOpen: boolean;

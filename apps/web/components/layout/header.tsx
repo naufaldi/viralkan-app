@@ -162,6 +162,12 @@ const Header = () => {
               Laporan
             </Link>
             <Link
+              href="/peta"
+              className="border-b-2 border-transparent px-1 py-2 text-sm font-medium text-neutral-600 transition-colors hover:border-neutral-300 hover:text-neutral-900"
+            >
+              Peta
+            </Link>
+            <Link
               href="/#how-it-works"
               className="border-b-2 border-transparent px-1 py-2 text-sm font-medium text-neutral-600 transition-colors hover:border-neutral-300 hover:text-neutral-900"
             >
