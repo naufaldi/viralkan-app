@@ -4,3 +4,4 @@ export { AdminReportsTableWrapper } from "./admin-reports-table-wrapper";
 export { AdminUsersTable } from "./admin-users-table";
 export { AdminUsersTableWrapper } from "./admin-users-table-wrapper";
 export { AdminReportDetail } from "./admin-report-detail";
+export { AdminActivityTable } from "./admin-activity-table";
