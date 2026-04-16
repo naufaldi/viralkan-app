@@ -995,10 +995,8 @@ adminRouter.openapi(getAdminStatsRoute, async (c) => {
 adminRouter.openapi(getAdminReportsRoute, async (c) => {
   try {
     const userId = c.get("user_id");
-    console.log(`[DEBUG] getAdminReportsRoute - userId: ${userId}`);
 
     if (!userId) {
-      console.log(`[DEBUG] getAdminReportsRoute - No userId found in context`);
       return c.json(
         {
           error: {
@@ -1012,15 +1010,7 @@ adminRouter.openapi(getAdminReportsRoute, async (c) => {
     }
 
     const queryData = c.req.valid("query");
-    console.log(`[DEBUG] getAdminReportsRoute - queryData:`, queryData);
-
     const result = await adminShell.getAdminReports(queryData);
-
-    console.log(`[DEBUG] getAdminReportsRoute - result:`, {
-      success: result.success,
-      error: result.success ? "N/A" : result.error,
-      dataLength: result.success ? result.data?.items?.length : "N/A",
-    });
 
     if (result.success) {
       return c.json(result.data, 200);
@@ -1485,12 +1475,7 @@ adminRouter.openapi(changeUserRoleRoute, async (c) => {
       return c.json(result.data, 200);
     }
 
-    const statusCode =
-      result.error === "Cannot change your own role"
-        ? 400
-        : result.statusCode === 404
-          ? 404
-          : 500;
+    const statusCode = (result.statusCode ?? 500) as 400 | 500;
 
     return c.json(
       {
@@ -1500,7 +1485,7 @@ adminRouter.openapi(changeUserRoleRoute, async (c) => {
           timestamp: new Date().toISOString(),
         },
       },
-      statusCode as 400 | 500,
+      statusCode,
     );
   } catch (error) {
     console.error("Error changing user role:", error);

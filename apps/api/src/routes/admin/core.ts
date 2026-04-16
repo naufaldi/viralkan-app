@@ -514,7 +514,7 @@ export const getAdminUsers = async (options: {
   const offset = (page - 1) * limit;
 
   let whereClause = "WHERE 1=1";
-  const params: unknown[] = [];
+  const params: (string | number)[] = [];
 
   if (search) {
     whereClause += ` AND (u.name ILIKE $${params.length + 1} OR u.email ILIKE $${params.length + 1})`;
@@ -531,8 +531,8 @@ export const getAdminUsers = async (options: {
     FROM users u
     ${whereClause}
   `;
-  const totalResult = await sql.unsafe(countQuery, params as string[]);
-  const total = parseInt(totalResult[0]?.total as string);
+  const totalResult = await sql.unsafe(countQuery, params);
+  const total = parseInt(String(totalResult[0]?.total ?? "0"), 10);
 
   const usersQuery = `
     SELECT
@@ -551,11 +551,7 @@ export const getAdminUsers = async (options: {
     LIMIT $${params.length + 1} OFFSET $${params.length + 2}
   `;
 
-  const rows = await sql.unsafe(usersQuery, [
-    ...params,
-    limit,
-    offset,
-  ] as string[]);
+  const rows = await sql.unsafe(usersQuery, [...params, limit, offset]);
 
   const items: AdminUser[] = rows.map((row: Record<string, unknown>) => ({
     id: row.id as string,
@@ -567,7 +563,13 @@ export const getAdminUsers = async (options: {
     created_at: (row.created_at as Date).toISOString(),
   }));
 
-  return { items, total, page, limit, pages: Math.ceil(total / limit) };
+  return {
+    items,
+    total,
+    page,
+    limit,
+    pages: Math.max(1, Math.ceil(total / limit)),
+  };
 };
 
 /**

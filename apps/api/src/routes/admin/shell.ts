@@ -18,6 +18,7 @@ import type {
 import {
   getAdminUsers as getAdminUsersCore,
   changeUserRole as changeUserRoleCore,
+  logAdminAction,
 } from "./core";
 
 /**
@@ -306,33 +307,6 @@ export async function getAdminReportById(id: string): Promise<{
       statusCode: 500,
     };
   }
-}
-
-/**
- * Log admin action for audit trail
- */
-async function logAdminAction(action: {
-  admin_user_id: string;
-  action_type: string;
-  target_type: string;
-  target_id: string;
-  details?: Record<string, any>;
-}): Promise<void> {
-  await sql`
-    INSERT INTO admin_actions (
-      admin_user_id,
-      action_type,
-      target_type,
-      target_id,
-      details
-    ) VALUES (
-      ${action.admin_user_id},
-      ${action.action_type},
-      ${action.target_type},
-      ${action.target_id},
-      ${JSON.stringify(action.details)}
-    )
-  `;
 }
 
 /**

@@ -61,7 +61,7 @@ import {
   useAdminUsersQuery,
   useChangeUserRoleMutation,
   type AdminUser,
-} from "../../hooks/admin/use-admin-users";
+} from "../../hooks/admin";
 
 const getRoleBadge = (role: string) => {
   if (role === "admin") {
