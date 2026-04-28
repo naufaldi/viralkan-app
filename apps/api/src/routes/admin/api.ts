@@ -17,6 +17,10 @@ import {
   AdminReportActionRequestSchema,
   AdminReportActionResponseSchema,
   AdminActionLogSchema,
+  AdminUsersQuerySchema,
+  PaginatedUsersResponseSchema,
+  ChangeRoleSchema,
+  ChangeRoleResponseSchema,
   AdminActivitiesQuerySchema,
   PaginatedActivitiesResponseSchema,
 } from "./types";
@@ -795,6 +799,166 @@ const healthCheckRoute = createRoute({
   },
 });
 
+const getAdminUsersRoute = createRoute({
+  method: "get",
+  path: "/users",
+  request: {
+    query: AdminUsersQuerySchema,
+  },
+  summary: "Get admin users list",
+  description: "Get paginated user list with optional search and role filter",
+  tags: ["Admin"],
+  security: [{ bearerAuth: [] }],
+  middleware: [requireAdmin],
+  responses: {
+    200: {
+      description: "Successfully retrieved users",
+      content: {
+        "application/json": { schema: PaginatedUsersResponseSchema },
+      },
+    },
+    401: {
+      description: "User not authenticated",
+      content: {
+        "application/json": {
+          schema: z.object({
+            error: z.object({
+              code: z.string(),
+              message: z.string(),
+              timestamp: z.string(),
+            }),
+          }),
+        },
+      },
+    },
+    403: {
+      description: "Admin access required",
+      content: {
+        "application/json": {
+          schema: z.object({
+            error: z.object({
+              code: z.string(),
+              message: z.string(),
+              timestamp: z.string(),
+            }),
+          }),
+        },
+      },
+    },
+    500: {
+      description: "Internal server error",
+      content: {
+        "application/json": {
+          schema: z.object({
+            error: z.object({
+              code: z.string(),
+              message: z.string(),
+              timestamp: z.string(),
+            }),
+          }),
+        },
+      },
+    },
+  },
+});
+
+const changeUserRoleRoute = createRoute({
+  method: "patch",
+  path: "/users/{id}/role",
+  request: {
+    params: z.object({ id: z.string() }),
+    body: {
+      content: {
+        "application/json": { schema: ChangeRoleSchema },
+      },
+    },
+  },
+  summary: "Change user role",
+  description:
+    "Promote a user to admin or demote an admin to user. Cannot change own role.",
+  tags: ["Admin"],
+  security: [{ bearerAuth: [] }],
+  middleware: [requireAdmin],
+  responses: {
+    200: {
+      description: "Role changed successfully",
+      content: {
+        "application/json": { schema: ChangeRoleResponseSchema },
+      },
+    },
+    400: {
+      description: "Bad request (e.g. changing own role)",
+      content: {
+        "application/json": {
+          schema: z.object({
+            error: z.object({
+              code: z.string(),
+              message: z.string(),
+              timestamp: z.string(),
+            }),
+          }),
+        },
+      },
+    },
+    401: {
+      description: "User not authenticated",
+      content: {
+        "application/json": {
+          schema: z.object({
+            error: z.object({
+              code: z.string(),
+              message: z.string(),
+              timestamp: z.string(),
+            }),
+          }),
+        },
+      },
+    },
+    403: {
+      description: "Admin access required",
+      content: {
+        "application/json": {
+          schema: z.object({
+            error: z.object({
+              code: z.string(),
+              message: z.string(),
+              timestamp: z.string(),
+            }),
+          }),
+        },
+      },
+    },
+    404: {
+      description: "User not found",
+      content: {
+        "application/json": {
+          schema: z.object({
+            error: z.object({
+              code: z.string(),
+              message: z.string(),
+              timestamp: z.string(),
+            }),
+          }),
+        },
+      },
+    },
+    500: {
+      description: "Internal server error",
+      content: {
+        "application/json": {
+          schema: z.object({
+            error: z.object({
+              code: z.string(),
+              message: z.string(),
+              timestamp: z.string(),
+            }),
+          }),
+        },
+      },
+    },
+  },
+});
+
 const getAdminActivitiesRoute = createRoute({
   method: "get",
   path: "/activities",
@@ -897,10 +1061,8 @@ adminRouter.openapi(getAdminStatsRoute, async (c) => {
 adminRouter.openapi(getAdminReportsRoute, async (c) => {
   try {
     const userId = c.get("user_id");
-    console.log(`[DEBUG] getAdminReportsRoute - userId: ${userId}`);
 
     if (!userId) {
-      console.log(`[DEBUG] getAdminReportsRoute - No userId found in context`);
       return c.json(
         {
           error: {
@@ -914,15 +1076,7 @@ adminRouter.openapi(getAdminReportsRoute, async (c) => {
     }
 
     const queryData = c.req.valid("query");
-    console.log(`[DEBUG] getAdminReportsRoute - queryData:`, queryData);
-
     const result = await adminShell.getAdminReports(queryData);
-
-    console.log(`[DEBUG] getAdminReportsRoute - result:`, {
-      success: result.success,
-      error: result.success ? "N/A" : result.error,
-      dataLength: result.success ? result.data?.items?.length : "N/A",
-    });
 
     if (result.success) {
       return c.json(result.data, 200);
@@ -1349,6 +1503,112 @@ adminRouter.openapi(getShareAnalyticsRoute, async (c) => {
         error: {
           code: "INTERNAL_ERROR",
           message: "Failed to fetch analytics",
+          timestamp: new Date().toISOString(),
+        },
+      },
+      500,
+    );
+  }
+});
+
+adminRouter.openapi(getAdminUsersRoute, async (c) => {
+  try {
+    const userId = c.get("user_id");
+
+    if (!userId) {
+      return c.json(
+        {
+          error: {
+            code: "UNAUTHORIZED",
+            message: "Authentication required",
+            timestamp: new Date().toISOString(),
+          },
+        },
+        401,
+      );
+    }
+
+    const queryData = c.req.valid("query");
+    const result = await adminShell.getAdminUsersShell(queryData);
+
+    if (result.success) {
+      return c.json(result.data, 200);
+    }
+
+    return c.json(
+      {
+        error: {
+          code: "FETCH_ERROR",
+          message: result.error || "Failed to get users",
+          timestamp: new Date().toISOString(),
+        },
+      },
+      500,
+    );
+  } catch (error) {
+    console.error("Error getting admin users:", error);
+    return c.json(
+      {
+        error: {
+          code: "INTERNAL_ERROR",
+          message: "Failed to get users",
+          timestamp: new Date().toISOString(),
+        },
+      },
+      500,
+    );
+  }
+});
+
+adminRouter.openapi(changeUserRoleRoute, async (c) => {
+  try {
+    const adminUserId = c.get("user_id");
+
+    if (!adminUserId) {
+      return c.json(
+        {
+          error: {
+            code: "UNAUTHORIZED",
+            message: "Authentication required",
+            timestamp: new Date().toISOString(),
+          },
+        },
+        401,
+      );
+    }
+
+    const { id: targetUserId } = c.req.valid("param");
+    const { role: newRole } = c.req.valid("json");
+
+    const result = await adminShell.changeUserRoleShell(
+      targetUserId,
+      newRole,
+      adminUserId,
+    );
+
+    if (result.success) {
+      return c.json(result.data, 200);
+    }
+
+    const statusCode = (result.statusCode ?? 500) as 400 | 500;
+
+    return c.json(
+      {
+        error: {
+          code: statusCode === 400 ? "BAD_REQUEST" : "INTERNAL_ERROR",
+          message: result.error || "Failed to change role",
+          timestamp: new Date().toISOString(),
+        },
+      },
+      statusCode,
+    );
+  } catch (error) {
+    console.error("Error changing user role:", error);
+    return c.json(
+      {
+        error: {
+          code: "INTERNAL_ERROR",
+          message: "Failed to change user role",
           timestamp: new Date().toISOString(),
         },
       },

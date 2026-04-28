@@ -6,3 +6,8 @@ export {
 } from "./use-admin-actions";
 export { useAdminReportDetail } from "./use-admin-report-detail";
 export { useAdminStatsQuery } from "./use-admin-stats";
+export {
+  useAdminUsersQuery,
+  useChangeUserRoleMutation,
+  type AdminUser,
+} from "./use-admin-users";

@@ -83,6 +83,55 @@ export const AdminActionLogSchema = z.object({
   created_at: z.string(),
 });
 
+// Admin User Schema
+export const AdminUserSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  email: z.string(),
+  avatar_url: z.string().nullable(),
+  role: z.enum(["user", "admin"]),
+  report_count: z.number(),
+  created_at: z.string(),
+});
+
+// Paginated Users Response
+export const PaginatedUsersResponseSchema = z.object({
+  items: z.array(AdminUserSchema),
+  total: z.number(),
+  page: z.number(),
+  limit: z.number(),
+  pages: z.number(),
+});
+
+// Admin Users Query Params
+export const AdminUsersQuerySchema = z.object({
+  page: z
+    .string()
+    .optional()
+    .transform((val) => parseInt(val || "1")),
+  limit: z
+    .string()
+    .optional()
+    .transform((val) => parseInt(val || "20")),
+  search: z.string().optional(),
+  role: z.enum(["user", "admin"]).optional(),
+});
+
+// Change Role Request/Response
+export const ChangeRoleSchema = z.object({
+  role: z.enum(["user", "admin"]),
+});
+
+export const ChangeRoleResponseSchema = z.object({
+  success: z.boolean(),
+  message: z.string(),
+  user: z.object({
+    id: z.string(),
+    name: z.string(),
+    role: z.enum(["user", "admin"]),
+  }),
+});
+
 // Admin Activities Query Params
 export const AdminActivitiesQuerySchema = z.object({
   page: z
@@ -130,6 +179,11 @@ export type AdminReportActionResponse = z.infer<
   typeof AdminReportActionResponseSchema
 >;
 export type AdminActionLog = z.infer<typeof AdminActionLogSchema>;
+export type AdminUser = z.infer<typeof AdminUserSchema>;
+export type PaginatedUsersResponse = z.infer<
+  typeof PaginatedUsersResponseSchema
+>;
+export type ChangeRoleResponse = z.infer<typeof ChangeRoleResponseSchema>;
 export type AdminActivityItem = z.infer<typeof AdminActivityItemSchema>;
 export type PaginatedActivitiesResponse = z.infer<
   typeof PaginatedActivitiesResponseSchema

@@ -13,8 +13,15 @@ import type {
   AdminReportActionResponse,
   PaginatedActivitiesResponse,
   ReportWithUser,
+  PaginatedUsersResponse,
+  ChangeRoleResponse,
 } from "./types";
-import { getAdminActivities as getAdminActivitiesCore } from "./core";
+import {
+  getAdminUsers as getAdminUsersCore,
+  changeUserRole as changeUserRoleCore,
+  logAdminAction,
+  getAdminActivities as getAdminActivitiesCore,
+} from "./core";
 
 /**
  * Get admin statistics
@@ -333,33 +340,6 @@ export async function getAdminReportById(id: string): Promise<{
       statusCode: 500,
     };
   }
-}
-
-/**
- * Log admin action for audit trail
- */
-async function logAdminAction(action: {
-  admin_user_id: string;
-  action_type: string;
-  target_type: string;
-  target_id: string;
-  details?: Record<string, any>;
-}): Promise<void> {
-  await sql`
-    INSERT INTO admin_actions (
-      admin_user_id,
-      action_type,
-      target_type,
-      target_id,
-      details
-    ) VALUES (
-      ${action.admin_user_id},
-      ${action.action_type},
-      ${action.target_type},
-      ${action.target_id},
-      ${JSON.stringify(action.details)}
-    )
-  `;
 }
 
 /**
@@ -751,3 +731,57 @@ export async function restoreReport(
     };
   }
 }
+
+/**
+ * Get paginated users for admin management
+ */
+export const getAdminUsersShell = async (
+  options: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    role?: "user" | "admin";
+  } = {},
+): Promise<{
+  success: boolean;
+  data?: PaginatedUsersResponse;
+  error?: string;
+  statusCode?: number;
+}> => {
+  try {
+    const data = await getAdminUsersCore(options);
+    return { success: true, data };
+  } catch (error) {
+    console.error("Error getting admin users:", error);
+    return {
+      success: false,
+      error: "Failed to get users",
+      statusCode: 500,
+    };
+  }
+};
+
+/**
+ * Change a user's role
+ */
+export const changeUserRoleShell = async (
+  userId: string,
+  newRole: "user" | "admin",
+  adminUserId: string,
+): Promise<{
+  success: boolean;
+  data?: ChangeRoleResponse;
+  error?: string;
+  statusCode?: number;
+}> => {
+  try {
+    const data = await changeUserRoleCore(userId, newRole, adminUserId);
+    return { success: true, data };
+  } catch (error) {
+    console.error("Error changing user role:", error);
+    const message =
+      error instanceof Error ? error.message : "Failed to change user role";
+    const statusCode = message === "Cannot change your own role" ? 400 : 500;
+    return { success: false, error: message, statusCode };
+  }
+};
