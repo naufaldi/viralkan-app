@@ -116,6 +116,7 @@ jobs:
             }
 
             # Update to latest code
+            git remote set-url origin https://github.com/${{ github.repository }}.git || true
             git pull origin main || true
 
             # Login to GitHub Container Registry
@@ -141,6 +142,12 @@ jobs:
               mv .env.production.tmp .env.production
             else
               echo "Warning: .env.production not found. Please create it manually with all required variables."
+              exit 1
+            fi
+
+            DB_PASSWORD_VALUE="$(grep "^DB_PASSWORD=" .env.production | tail -n 1 | cut -d= -f2-)"
+            if [ -z "$DB_PASSWORD_VALUE" ]; then
+              echo "DB_PASSWORD is missing from .env.production"
               exit 1
             fi
 
@@ -172,7 +179,7 @@ jobs:
             docker run --rm \
               --network viralkan-private \
               --env-file .env.production \
-              -e DATABASE_URL="postgresql://postgres:${DB_PASSWORD}@db:5432/viralkan" \
+              -e DATABASE_URL="postgresql://postgres:${DB_PASSWORD_VALUE}@db:5432/viralkan" \
               ghcr.io/${{ github.repository }}/viralkan-api:${{ needs.commit-hash.outputs.commit_hash }} \
               bun run db:migrate || {
               echo "❌ Migrations failed" >&2
