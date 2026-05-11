@@ -4,8 +4,8 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": " next dev --turbopack --port 5173",
-    "build": " next build",
+    "dev": "next dev --webpack --port 5173",
+    "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint . --max-warnings 0",
     "check-types": "tsc --noEmit"
