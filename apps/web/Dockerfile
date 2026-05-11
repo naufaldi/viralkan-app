@@ -1,9 +1,10 @@
-FROM oven/bun:1.2.6 AS base
+FROM node:22-bookworm-slim AS node
 
-# Install wget for health checks (Debian-based official Bun image)
-USER root
-RUN apt-get update && apt-get install -y --no-install-recommends wget ca-certificates \
-  && rm -rf /var/lib/apt/lists/*
+FROM oven/bun:1.2.4 AS base
+
+COPY --from=node /usr/local/bin/node /usr/local/bin/node
+
+RUN node --version && bun --version
 
 FROM base AS builder
 WORKDIR /app
@@ -12,12 +13,14 @@ WORKDIR /app
 COPY package.json ./
 COPY bun.lock ./
 
-# Copy the web package.json and packages
+# Copy workspace manifests and packages
+COPY apps/api/package.json ./apps/api/package.json
+COPY apps/docs/package.json ./apps/docs/package.json
 COPY apps/web/package.json ./apps/web/package.json
 COPY packages ./packages
 
 # Install dependencies
-RUN bun install
+RUN bun install --frozen-lockfile
 
 # Copy app source
 COPY . .
@@ -43,7 +46,7 @@ ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 # Build the web app
 RUN cd apps/web && bun run build
 
-FROM base AS runner
+FROM node:22-bookworm-slim AS runner
 WORKDIR /app
 
 # Don't run production as root
@@ -61,5 +64,4 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-# Use the working path but with Bun instead of Node
-CMD ["bun", "apps/web/server.js"]
+CMD ["node", "apps/web/server.js"]

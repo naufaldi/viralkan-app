@@ -6,6 +6,7 @@ on:
       - main
 
 permissions:
+  contents: read
   packages: write
 
 jobs:
@@ -143,48 +144,60 @@ jobs:
               exit 1
             fi
 
+            COMPOSE="docker compose -f docker-compose.prod.yml --env-file .env.production"
+
+            # Ensure external 'edge' network exists (used by caddy reverse proxy)
+            docker network create edge || true
+
             # Prepare deployment
             echo "🚀 Preparing deployment..."
-            docker-compose -f docker-compose.prod.yml --env-file .env.production down || true
 
             # Start only the DB so we can run migrations against it
-            docker-compose -f docker-compose.prod.yml --env-file .env.production up -d db
+            $COMPOSE up -d db
 
             # Wait for Postgres to be ready
             echo "⏳ Waiting for Postgres to be ready..."
             for i in $(seq 1 30); do
-              docker-compose -f docker-compose.prod.yml --env-file .env.production exec -T db pg_isready -U postgres &>/dev/null && { echo "✅ Postgres is ready"; break; }
+              $COMPOSE exec -T db pg_isready -U postgres &>/dev/null && { echo "✅ Postgres is ready"; break; }
               [ $i -eq 30 ] && echo "❌ Postgres failed to start" && exit 1
               echo "Waiting for Postgres... attempt $i/30"
               sleep 2
             done
 
             # Ensure PostGIS extension exists (best-effort)
-            docker-compose -f docker-compose.prod.yml --env-file .env.production exec -T db psql -U postgres -d viralkan -c "CREATE EXTENSION IF NOT EXISTS postgis;" || echo "⚠️  Warning: couldn't create postgis extension"
+            $COMPOSE exec -T db psql -U postgres -d viralkan -c "CREATE EXTENSION IF NOT EXISTS postgis;" || echo "⚠️  Warning: couldn't create postgis extension"
 
             # Run database migrations (idempotent) every deploy
             echo "🔄 Running database migrations..."
-            docker run --rm --network viralkan-private --env-file .env.production ghcr.io/${{ github.repository }}/viralkan-api:${{ needs.commit-hash.outputs.commit_hash }} bun run db:migrate || {
+            docker run --rm \
+              --network viralkan-private \
+              --env-file .env.production \
+              -e DATABASE_URL="postgresql://postgres:${DB_PASSWORD}@db:5432/viralkan" \
+              ghcr.io/${{ github.repository }}/viralkan-api:${{ needs.commit-hash.outputs.commit_hash }} \
+              bun run db:migrate || {
               echo "❌ Migrations failed" >&2
-              docker-compose -f docker-compose.prod.yml --env-file .env.production logs --tail=100 db
+              $COMPOSE logs --tail=100 db
               exit 1
             }
 
-            # Ensure external 'edge' network exists (used by caddy reverse proxy)
-            docker network create edge || true
-
             # Bring up remaining services
             echo "🌐 Starting API and Web services..."
-            docker-compose -f docker-compose.prod.yml --env-file .env.production up -d
+            $COMPOSE up -d
 
             # Wait for API to be healthy
             echo "⏳ Waiting for API to be ready..."
+            api_container="$($COMPOSE ps -q api)"
             for i in $(seq 1 30); do
-              curl -s http://localhost:3000/health &>/dev/null && { echo "✅ API is healthy"; break; }
-              [ $i -eq 30 ] && echo "⚠️  API health check timed out (may still be starting)"
+              api_status="$(docker inspect -f '{{.State.Health.Status}}' "$api_container" 2>/dev/null || true)"
+              [ "$api_status" = "healthy" ] && { echo "✅ API container is healthy"; break; }
+              [ $i -eq 30 ] && echo "❌ API health check timed out" && $COMPOSE logs --tail=100 api && exit 1
               echo "Waiting for API... attempt $i/30"
               sleep 2
             done
+
+            echo "🔎 Verifying public routes through Caddy..."
+            curl -fsS https://viral-api.faldi.xyz/ >/dev/null
+            curl -fsSI https://viral.faldi.xyz/ >/dev/null
 
             # Clean up old images
             echo "🧹 Cleaning up old Docker images..."
