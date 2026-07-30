@@ -127,7 +127,7 @@ services:
   web:
     image: your-app
     labels:
-      caddy: dev.faldi.xyz # Your domain
+      caddy: app.example.com # Your domain
       caddy.reverse_proxy: "{{upstreams 3000}}"
     networks:
       - edge
@@ -165,7 +165,7 @@ services:
   web:
     image: guestbook-app
     labels:
-      caddy: dev.faldi.xyz
+      caddy: app.example.com
       caddy.reverse_proxy: "{{upstreams 8080}}"
       com.centurylinklabs.watchtower.enable: "true"
     networks:
@@ -254,7 +254,7 @@ labels:
 # Debug commands
 docker network inspect edge
 docker logs edge-proxy-caddy-1
-curl -H "Host: dev.faldi.xyz" http://localhost
+curl -H "Host: app.example.com" http://localhost
 ```
 
 #### 3. TLS Certificate Issues
@@ -295,8 +295,8 @@ docker ps --format 'table {{.Names}}\t{{.Ports}}'
 docker network inspect edge
 
 # HTTP testing
-curl -I https://dev.faldi.xyz
-curl -I https://image.faldi.xyz
+curl -I https://app.example.com
+curl -I https://assets.example.com
 
 # Caddy configuration
 docker exec edge-proxy-caddy-1 caddy config

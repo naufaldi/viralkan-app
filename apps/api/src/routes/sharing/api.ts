@@ -33,7 +33,7 @@ export const sharingRouter = new OpenAPIHono<Env>();
 sharingRouter.use(
   "*",
   cors({
-    origin: ["http://localhost:3000", "https://viral.faldi.xyz"],
+    origin: ["http://localhost:3000", "https://viral.naufaldi.com"],
     credentials: true,
     allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization"],

@@ -89,7 +89,7 @@ DB_PASSWORD=your_strong_password_here
 DATABASE_URL=postgresql://postgres:${DB_PASSWORD}@db:5432/viralkan
 
 # Domain & SSL
-DOMAIN=viral.faldi.xyz
+DOMAIN=viral.naufaldi.com
 ACME_EMAIL=naufaldi.rafif@gmail.com
 
 # GitHub Container Registry
@@ -107,7 +107,7 @@ NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
 NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_bucket.appspot.com
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
 NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
-NEXT_PUBLIC_API_URL=https://viral.faldi.xyz/api
+NEXT_PUBLIC_API_URL=https://viral.naufaldi.com/api
 
 # Cloudflare R2
 R2_ACCESS_KEY_ID=your_r2_access_key
@@ -200,10 +200,10 @@ docker-compose -f docker-compose.prod.yml --env-file .env.production ps
 docker-compose -f docker-compose.prod.yml --env-file .env.production exec db pg_isready -U postgres
 
 # Test API health
-curl -I https://viral.faldi.xyz/api/health
+curl -I https://viral.naufaldi.com/api/health
 
 # Test web application
-curl -I https://viral.faldi.xyz
+curl -I https://viral.naufaldi.com
 ```
 
 ## 🔄 Step 6: Updates and Maintenance

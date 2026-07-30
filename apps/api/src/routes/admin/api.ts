@@ -44,7 +44,7 @@ export const adminRouter = new OpenAPIHono<Env>();
 adminRouter.use(
   "*",
   cors({
-    origin: ["http://localhost:3000", "https://viral.faldi.xyz"],
+    origin: ["http://localhost:3000", "https://viral.naufaldi.com"],
     credentials: true,
     allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization"],

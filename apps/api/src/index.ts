@@ -36,7 +36,7 @@ app.use(
     origin: [
       "http://localhost:3000",
       "http://localhost:5173",
-      "https://viral.faldi.xyz",
+      "https://viral.naufaldi.com",
     ],
     allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization"],
@@ -74,7 +74,7 @@ app.doc("/openapi", {
       "API for reporting road damage and infrastructure issues in Indonesia",
     contact: {
       name: "Viralkan Team",
-      url: "https://viral.faldi.xyz",
+      url: "https://viral.naufaldi.com",
     },
     license: {
       name: "MIT",
@@ -85,7 +85,7 @@ app.doc("/openapi", {
     {
       url:
         env.NODE_ENV === "production"
-          ? "https://viral-api.faldi.xyz"
+          ? "https://viral-api.naufaldi.com"
           : `http://localhost:${env.PORT}`,
       description:
         env.NODE_ENV === "production"
@@ -156,7 +156,7 @@ app.onError((err, c) => {
 
 const baseUrl =
   env.NODE_ENV === "production"
-    ? "https://viral-api.faldi.xyz"
+    ? "https://viral-api.naufaldi.com"
     : `http://localhost:${env.PORT}`;
 
 const port = env.PORT || 3000;

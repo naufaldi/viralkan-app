@@ -10,7 +10,7 @@ export const administrativeRouter = new OpenAPIHono();
 administrativeRouter.use(
   "*",
   cors({
-    origin: ["http://localhost:3000", "https://viral.faldi.xyz"],
+    origin: ["http://localhost:3000", "https://viral.naufaldi.com"],
     credentials: true,
     allowMethods: ["GET", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization"],

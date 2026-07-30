@@ -6,7 +6,7 @@ const CSP = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: https:",
   "font-src 'self'",
-  "connect-src 'self' https://viral-api.faldi.xyz",
+  "connect-src 'self' https://viral-api.naufaldi.com",
   "frame-ancestors 'none'",
 ].join("; ");
 

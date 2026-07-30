@@ -196,7 +196,7 @@ R2_PUBLIC_URL="https://pub-xxxxx.r2.dev"
 ### Production
 
 ```bash
-R2_PUBLIC_URL="https://cdn.faldi.xyz"
+R2_PUBLIC_URL="https://pub-xxxxx.r2.dev"
 ```
 
 ## API Endpoints
@@ -212,7 +212,7 @@ R2_PUBLIC_URL="https://cdn.faldi.xyz"
 
 ```json
 {
-  "imageUrl": "https://cdn.faldi.xyz/123/uuid_timestamp_image.jpg",
+  "imageUrl": "https://pub-xxxxx.r2.dev/123/uuid_timestamp_image.jpg",
   "imageKey": "123/uuid_timestamp_image.jpg"
 }
 ```

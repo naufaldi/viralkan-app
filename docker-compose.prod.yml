@@ -20,7 +20,7 @@ services:
   api:
     image: ghcr.io/${GITHUB_REPOSITORY}/viralkan-api:${IMAGE_TAG:-latest}
     labels:
-      caddy: viral-api.faldi.xyz
+      caddy: viral-api.naufaldi.com
       caddy.reverse_proxy: "{{upstreams 3000}}"
       com.centurylinklabs.watchtower.enable: "true"
     environment:
@@ -63,7 +63,7 @@ services:
   web:
     image: ghcr.io/${GITHUB_REPOSITORY}/viralkan-web:${IMAGE_TAG:-latest}
     labels:
-      caddy: viral.faldi.xyz
+      caddy: viral.naufaldi.com
       caddy.reverse_proxy: "{{upstreams 3000}}"
       com.centurylinklabs.watchtower.enable: "true"
     environment:

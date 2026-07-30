@@ -94,7 +94,7 @@ check_service_health "api"
 check_service_health "db"
 
 # Test response times (replace with your actual domain)
-DOMAIN=${DOMAIN:-"viral.faldi.xyz"}
+DOMAIN=${DOMAIN:-"viral.naufaldi.com"}
 test_response_time "https://$DOMAIN" "Website"
 test_response_time "https://$DOMAIN/api/health" "API Health"
 

@@ -35,7 +35,7 @@ const getUserIdFromContext = (c: { get?: (key: string) => unknown }) =>
 reportsRouter.use(
   "*",
   cors({
-    origin: ["http://localhost:3000", "https://viral.faldi.xyz"],
+    origin: ["http://localhost:3000", "https://viral.naufaldi.com"],
     credentials: true,
     allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization"],
