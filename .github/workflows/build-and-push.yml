@@ -203,8 +203,8 @@ jobs:
             done
 
             echo "🔎 Verifying public routes through Caddy..."
-            curl -fsS https://viral-api.faldi.xyz/ >/dev/null
-            curl -fsSI https://viral.faldi.xyz/ >/dev/null
+            curl -fsS https://viral-api.naufaldi.com/ >/dev/null
+            curl -fsSI https://viral.naufaldi.com/ >/dev/null
 
             # Clean up old images
             echo "🧹 Cleaning up old Docker images..."
