@@ -37,6 +37,13 @@ if (workflow.includes("NEXT_PUBLIC_API_URL=https://viral-api.faldi.xyz")) {
   failures.push("workflow still contains the retired viral-api.faldi.xyz build URL");
 }
 
+if (
+  workflow.includes("https://viral-api.faldi.xyz") ||
+  workflow.includes("https://viral.faldi.xyz")
+) {
+  failures.push("workflow still probes a retired faldi.xyz production route");
+}
+
 if (!compose.includes("caddy: viral.naufaldi.com")) {
   failures.push("web Caddy label must use viral.naufaldi.com");
 }
