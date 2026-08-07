@@ -7,6 +7,7 @@
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types",
+    "test:production-config": "bun scripts/verify-production-config.ts",
     "db:migrate": "cd apps/api && bun run db:migrate",
     "db:reset": "cd apps/api && bun run db:reset",
     "prepare": "husky"
