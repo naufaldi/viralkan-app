@@ -7,6 +7,7 @@
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types",
+    "test:production-config": "bun scripts/verify-production-config.ts",
     "db:migrate": "cd apps/api && bun run db:migrate",
     "db:reset": "cd apps/api && bun run db:reset",
     "prepare": "husky"
@@ -30,7 +31,7 @@
   ],
   "dependencies": {
     "@hono/zod-openapi": "^1.1.0",
-    "next": "16.0.7",
+    "next": "16.2.11",
     "prettier-plugin-tailwindcss": "^0.6.14",
     "react": "19.2.1",
     "react-dom": "19.2.1",
