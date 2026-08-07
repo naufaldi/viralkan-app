@@ -56,9 +56,14 @@ if (!compose.includes("caddy: viral-api.naufaldi.com")) {
 
 if (
   !webService.includes("healthcheck:") ||
-  !webService.includes("http://localhost:3000/")
+  !webService.includes('"node"') ||
+  !webService.includes("http://127.0.0.1:3000/")
 ) {
-  failures.push("web service must have a localhost HTTP healthcheck");
+  failures.push("web service must have a Node-based localhost HTTP healthcheck");
+}
+
+if (webService.includes('"wget"')) {
+  failures.push("web healthcheck cannot depend on wget in the runner image");
 }
 
 if (failures.length > 0) {
