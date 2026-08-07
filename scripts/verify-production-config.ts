@@ -13,6 +13,7 @@ const readManifest = (path: string): PackageManifest =>
 
 const rootPackage = readManifest("package.json");
 const webPackage = readManifest("apps/web/package.json");
+const docsPackage = readManifest("apps/docs/package.json");
 const workflow = readFileSync(
   resolve(root, ".github/workflows/build-and-push.yml"),
   "utf8",
@@ -23,6 +24,7 @@ const webService = compose.match(/\n  web:\n([\s\S]*?)(?=\nvolumes:)/)?.[1] ?? "
 for (const [name, manifest] of [
   ["root", rootPackage],
   ["web", webPackage],
+  ["docs", docsPackage],
 ] as const) {
   if (manifest.dependencies?.next !== "16.2.11") {
     failures.push(`${name} Next.js must be pinned to 16.2.11`);
